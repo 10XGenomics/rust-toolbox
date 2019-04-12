@@ -1,0 +1,16 @@
+[package]
+name = "pretty_trace"
+version = "0.1.0"
+authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
+
+[dependencies]
+backtrace = "*"
+chashmap = "*"
+failure = "*"
+io_utils = { path = "../io_utils" }
+lazy_static = "*"
+libc = "*"
+nix = "*"
+stats = { path = "../stats" }
+string_utils = { path = "../string_utils" }
+vec_utils = { path = "../vec_utils" }

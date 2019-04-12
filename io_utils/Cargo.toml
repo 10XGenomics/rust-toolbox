@@ -1,0 +1,12 @@
+[package]
+name = "io_utils"
+version = "0.1.0"
+authors = []
+
+[dependencies]
+bincode = "1.0.1"
+flate2 = "*"
+lz4 = "*"
+serde = "*"
+string_utils = { path = "../string_utils" }
+vec_utils = { path = "../vec_utils" }

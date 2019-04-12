@@ -1,0 +1,7 @@
+[package]
+name = "string_utils"
+version = "0.1.0"
+authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
+
+[dependencies]
+vec_utils = { path = "../vec_utils" }
