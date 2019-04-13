@@ -737,6 +737,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
         "::panicking::",
         "::lang_start",
         "rust_maybe_catch_panic",
+        "rust_panic",
         "libc_start_main",
         "::force_pretty_trace::",
         "::thread::",
@@ -748,6 +749,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
         "rust_begin_unwind",
         "start_thread",
         "__clone",
+        "call_once",
         "<unknown>",
     ];
     let mut btlines2 = Vec::<Vec<u8>>::new();
