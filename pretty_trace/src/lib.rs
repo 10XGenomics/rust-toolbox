@@ -1,142 +1,150 @@
 // Copyright (c) 2018 10X Genomics, Inc. All rights reserved.
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-// INTRODUCTION
+// TOP LEVEL DOCUEMENTATION
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-// Tracebacks from rust are remarkably complete: they nearly always (or perhaps
-// always) extend from the 'broken' code line all the way to the main program.
-// We may take this for granted but it is not always the case in other languages,
-// including C++.
-//
-// However, there are a few issues.  The first is that you need to turn 'debug'
-// on, by adding the lines
-// [profile.release]
-// debug = true
-// to your top-level Cargo.toml.  The computational performance hit for running
-// with debug on appears to be small.
-//
-// The other two issues are that you have to set the environment variable
-// RUST_BACKTRACE to 1, or you get no traceback at all, and the tracebacks can be
-// unnecessarily long and difficult to read.
-//
-// The latter two issues are addressed by this crate, which makes tracebacks
-// automatic and as succinct as possible, in some cases about ten times shorter
-// than what you would otherwise get.  We also provide other functionality
-// for working with tracebacks, as described below.
-
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-// WHAT THIS CODE CAN DO
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-
-// The following functionality is supported:
-//
-// 1. Catch panics and emit an abbreviated, cleaned up traceback.
-//
-//    Full tracebacks in rust can be very long, so this provides a quick view.
-//    And rust default behavior is to not provide tracebacks at all.
-//
-// 2. Provide a full traceback if you want that instead or in addition to the
-//    shortened traceback.
-//
-//    The abbreviation code might "mess up", so this feature could be useful.
-//
-// 3. Catch Ctrl-C and convert to panic, and thence as above.  Note that this will
-//    only trace the master thread, so if you have parallelization, you probably
-//    need to turn that off first.  If you press Ctrl-C twice in rapid succession,
-//    you won't get a traceback.
-//
-//    One use case of this is to find an infinite loop bug.
-//
-// 4. Read thread status from a user-defined structure and report that with the
-//    traceback so you can see not only "where you are in your code" but also
-//    "where you are in your data".
-//
-//    This can be very useful for reproducing bugs.
-//
-// 5. Collect a random sample of pretty tracebacks by interrupting the code
-//    repeatedly.
-//
-//    This can be highly useful for profiling.
-//
-// Based in part on C++ code developed at the Whitehead Institute Center for Genome
-// Research / Broad Institute starting in 2000, and included in
-// https://github.com/CompRD/BroadCRD.
-
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-// HOW TO USE IT
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-
-// ALL: use force_pretty_trace::*;
-
-// USE CASE #1.  Force a pretty and abbreviated traceback upon panic.  Just put
-// this at the beginning of your main program:
-//
-//     force_pretty_trace();
-//
-// This will also cause traceback upon Ctrl-C interrupts.
-
-// USE CASE #2.  Same as #1, but you want to see a full traceback instead.  Just
-// set the environment variable RUST_FULL_TRACE.  Alternatively, to get both, use
-//
-//     force_pretty_trace_with_log( &log_file_name );
-//
-// will get you a shortened traceback on stderr, and a full traceback in the
-// given file.
-//
-// USE CASE #3.  Same as above, but also dump the short log to a file descriptor.
-//
-//     force_pretty_trace_with_log_plus( &log_file_name, fd );
-//
-// USE CASE #4.  Also pass a map that assigns a message to each thread.  You can
-// use this to assign a "status" to each thread, and that status will get printed
-// upon panic.
-//
-// To use this, put the following code at the beginning of your main:
-//
-//     let box_thread_message = Box::new( CHashMap::<ThreadId,String>::new() );
-//     let thread_message: &'static CHashMap<ThreadId,String>
-//         = Box::leak(box_thread_message);
-//     let haps = Happening::new();
-//     force_pretty_trace_fancy( String::new(), -1 as i32, &thread_message, &haps );
-//
-// and put the following in a place that will get executed once by each thread:
-//
-//     thread_message.insert( thread::current().id(),
-//         <message that describes what the thread is doing> );
-
-// USE CASE #5.  Collect a random sample of pretty tracebacks.  For this you may
-// specify strings A,...,Z that will be grepped for in the traceback.  This is
-// because you may only be interested in where in "your" code execution is
-// occurring.
-//
-//     let whitelist = "<A|...|Z>";
-//     let hcount = <number of tracebacks to gather>;
-//     let mut haps = Happening::new();
-//     haps.initialize( &whitelist, hcount );
-//     force_pretty_trace_with_happening( &haps );
-//
-// And this will also sort and uniqify with counting.  It will terminate when it
-// has obtained haps counts.  It won't work if your program doesn't run long
-// enough.
-
-// Use cases can also be combined -- see force_pretty_trace_fancy below.
-
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-// ISSUES
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-
-// ◼ 1. The code parses the output of a formatted stack trace, rather then
-// ◼    generating output directly from a formal stack trace structure.  This
-// ◼    makes it vulnerable to changes in how rust formats the stack trace.
-// ◼
-// ◼ 2. There is an ugly blacklist of strings that is also fragile.
-// ◼
-// ◼ 3. Something weird might happen if the stack trace has length more than ten.
-// ◼    This should be tested.
-// ◼
-// ◼ 4. The code catches Ctrl-C interrupts, but does not catch out-of-memory
-// ◼    events.  It should.
+//! # Introduction
+//!
+//! Tracebacks from rust are remarkably complete: they essentially always
+//! extend from the 'broken' code line all the way to the main program.
+//! We may take this for granted but it is not always the case in other languages,
+//! including C++.
+//!
+//! However, there are a few issues.  The first is that you need to turn 'debug'
+//! on, by adding the lines
+//! <pre>
+//! [profile.release]
+//! debug = true</pre>
+//! to your top-level Cargo.toml.  The computational performance hit for running
+//! with debug on appears to be small.  So this is not really an issue, but rather
+//! just something that you need to remember to do.
+//! <br><br>
+//! The other two issues are that you have to set the environment variable
+//! RUST_BACKTRACE to 1, or you get no traceback at all, and the tracebacks can be
+//! unnecessarily long and difficult to read.
+//! <br><br>
+//! The latter two issues are addressed by this crate, which makes tracebacks
+//! automatic and as succinct as possible, in some cases about 
+//! <font color="red"> ten times 
+//! shorter</font> than what you would otherwise get.  We also provide other
+//! functionality for working with tracebacks, as described below.  This includes
+//! the capability of <font color="red"> trivially profiling code</font>.
+//!
+//! # What this code can do
+//! The following functionality is supported:
+//!
+//! 1. Catch panics and emit an abbreviated, cleaned up traceback.
+//!
+//!    Full tracebacks in rust can be very long, so this provides a quick view.
+//!    And rust default behavior is to not provide tracebacks at all.
+//!
+//! 2. Provide a full traceback if you want that instead or in addition to the
+//!    shortened traceback.
+//!
+//!    The abbreviation code might "mess up", so this feature could be useful.
+//!
+//! 3. Catch Ctrl-C and convert to panic, and thence as above.  Note that this will
+//!    only trace the master thread, so if you have parallelization, you probably
+//!    need to turn that off first.  If you press Ctrl-C twice in rapid succession,
+//!    you won't get a traceback.
+//!
+//!    One use case of this is to find an infinite loop bug.
+//!
+//! 4. Read thread status from a user-defined structure and report that with the
+//!    traceback so you can see not only "where you are in your code" but also
+//!    "where you are in your data".
+//!
+//!    This can be very useful for reproducing bugs.
+//!
+//! 5. Collect a random sample of pretty tracebacks by interrupting the code
+//!    repeatedly.
+//!
+//!    This can be highly useful for profiling.
+//!
+//! This code was developed at 10x Genomics, and is based in part on C++ code 
+//! developed at the Whitehead Institute Center for Genome
+//! Research / Broad Institute starting in 2000, and included in
+//! https://github.com/CompRD/BroadCRD.
+//!
+//! # How to use it
+//!
+//! ALL: 
+//! <pre>use force_pretty_trace::*;</pre>
+//!
+//! <b>USE CASE #1.</b>  Force a pretty and abbreviated traceback upon panic and
+//! upon Ctrl-C interrupts.
+//!
+//! Just put this at the beginning of your main program:
+//!
+//! <pre>
+//!    force_pretty_trace();
+//!</pre>
+//!
+//! <b>USE CASE #2.</b>  Same as #1, but you want to see a full traceback instead.  
+//! Just set the environment variable RUST_FULL_TRACE.  Alternatively, to get both, 
+//! use
+//!<pre>   force_pretty_trace_with_log( &log_file_name );</pre>
+//!
+//! which will get you a shortened traceback on stderr, and a full traceback in the
+//! given file.
+//!
+//! <b>USE CASE #3.</b>  Same as above, but also dump the short log to a file 
+//! descriptor.
+//!
+//! <pre>
+//!   force_pretty_trace_with_log_plus( &log_file_name, fd );</pre>
+//!
+//! <b>USE CASE #4.</b>  Also pass a map that assigns a message to each thread.  You
+//! can use this to assign a "status" to each thread, and that status will get
+//! printed upon panic.
+//!
+//! To use this, put the following code at the beginning of your main:
+//!
+//!<pre>
+//!   let thread_message = new_thread_message();
+//!   force_pretty_trace_with_message( &thread_message );</pre>
+//!
+//! and put the following in a place that will get executed once by each thread:
+//!
+//! <pre>
+//!   thread_message.insert( thread::current().id(),
+//!       "message that describes what the thread is doing" );</pre>
+//!
+//! <b> USE CASE #5.</b> Collect a random sample of pretty tracebacks at a rate of
+//! approximately one per second.  For this you 
+//! may specify strings A,...,Z that will be grepped for in the traceback.  This is
+//! useful because you may only be interested in where your code is executing in 
+//! particular crates that you're working on.
+//!
+//! <pre>
+//!   let whitelist = "A|...|Z";
+//!   let hcount = number of tracebacks to gather;
+//!   let mut haps = Happening::new_initialize( &whitelist, hcount );
+//!   force_pretty_trace_with_happening( &haps );</pre>
+//!
+//! And this will also sort and uniqify with counting.  It will terminate when it
+//! has obtained haps counts.  It won't work if your program doesn't run long
+//! enough.
+//!
+//! Use cases can also be combined -- see force_pretty_trace_fancy below.
+//!
+//! # Issues, buggy things and missing features
+//!
+//! ◼ The code parses the output of a formatted stack trace, rather then
+//!   generating output directly from a formal stack trace structure.  This
+//!   makes it vulnerable to changes in how rust formats the stack trace.
+//!
+//! ◼ There is an ugly blacklist of strings that is also fragile.
+//!
+//! ◼ Something weird might happen if the stack trace has length more than
+//!   ten.  This should be tested.
+//!
+//! ◼ The code catches Ctrl-C interrupts, but does not catch out-of-memory
+//!   events.  It should.
+//!
+//! ◼ The "happening" mode doesn't work if your program exits before obtaining the
+//!   requested number of stack traces.
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // EXTERNAL DEPENDENCIES
@@ -266,7 +274,7 @@ lazy_static! {
 // dangerous operations.  The code works by comparing to a hardcoded list of
 // names, and it is hard to believe that this works, but it appears to do so.
 
-pub fn test_in_allocator() -> bool {
+fn test_in_allocator() -> bool {
     // eprintln!( "\nTESTING FOR ALLOCATOR" );
     let mut in_alloc = false;
     // The following lock line (copied from the Backtrace crate) doesn't
@@ -679,7 +687,7 @@ pub fn force_pretty_trace_fancy(
 // PRETTIFY TRACEBACK
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-pub fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool) -> String {
+fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool) -> String {
     // Parse the backtrace into lines.
 
     let bt: Vec<u8> = format!("{:?}", backtrace).into_bytes();
