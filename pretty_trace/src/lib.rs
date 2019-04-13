@@ -31,6 +31,11 @@
 //! functionality for working with tracebacks, as described below.  This includes
 //! the capability of <font color="red"> trivially profiling code</font>.
 //!
+//! # Example of a standard stack trace versus pretty_trace output
+//! <div>
+//! <img src="../../../long_vs_short_traceback.png"/>
+//! </div>
+//!
 //! # What this code can do
 //! The following functionality is supported:
 //!
