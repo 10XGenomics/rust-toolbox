@@ -1,0 +1,8 @@
+#!/bin/csh
+
+foreach p (io_utils pretty_trace stats string_utils vec_utils)
+    cd $p
+    cargo build --release
+    if ( $status != 0 ) exit 1
+    cd ..
+end
