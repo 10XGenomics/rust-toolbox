@@ -12,7 +12,7 @@ use superslice::Ext;
 
 // Return the number of positions at which two vectors of equal length differ.
 
-pub fn distance<T: Eq>(x1: &Vec<T>, x2: &Vec<T>) -> usize {
+pub fn distance<T: Eq>(x1: &[T], x2: &[T]) -> usize {
     assert_eq!(x1.len(), x2.len());
     let mut dist = 0;
     for i in 0..x1.len() {
