@@ -115,10 +115,12 @@
 //!
 //! ◼ Pretty traces containing more than ten items may not be correctly handled.
 //!
-//! ◼ Out-of-memory events could be converted to panics, then traced.
+//! ◼ Ideally out-of-memory events would be caught and converted to panics so
+//!   we could trace them, but we don't.
 //!
 //! ◼ Profile mode only sees the main thread.  This seems intrinsic to the 
-//!   approach
+//!   approach.  So you may need to modify your code to run single-threaded to
+//!   effective use this mode.
 //!
 //! ◼ Profile mode yields no output if your program exits before obtaining the
 //!   requested number of stack traces.
@@ -195,14 +197,15 @@ pub struct PrettyTrace {
     pub whitelist: Option<Vec<String>>,
 }
 
-/// Normal usage of PrettyTrace is 
+/// Normal usage of PrettyTrace is to call
 /// ```
 /// PrettyTrace::new().<set some things>.run();
 /// ```
+/// once near the begining of your main program.
 
 impl PrettyTrace {
 
-    /// Initialize a PrettyTrace object.
+    /// Initialize a <code>PrettyTrace</code> object.
 
     pub fn new() -> PrettyTrace {
         PrettyTrace {
@@ -215,7 +218,7 @@ impl PrettyTrace {
         }
     }
 
-    /// Cause a PrettyTrace object to do something.
+    /// Cause a <code>PrettyTrace</code> object to do something.
 
     pub fn run( &mut self ) {
         let mut fd = -1 as i32;
@@ -245,8 +248,13 @@ impl PrettyTrace {
         }
     }
 
-    /// Define file, that in the event that a traceback is triggered by a
-    /// panic or Ctrl-C, will be used to dump a full traceback to.
+    /// Define a file, that in the event that a traceback is triggered by a
+    /// panic or Ctrl-C, will be used to dump a full traceback to.  The 
+    /// <i>raison d'etre</i> for this is that an abbreviated pretty traceback might
+    /// in some cases elide useful information.
+    ///
+    /// You can also force <code>PrettyTrace</code> to emit full tracebacks by
+    /// setting the environment variable <code>RUST_FULL_TRACE</code>.
 
     pub fn full_file( &mut self, full_file: &str ) {
         self.full_file = Some( full_file.to_string() );
@@ -260,7 +268,22 @@ impl PrettyTrace {
     }
 
     /// Define a message object that will be used by threads to store their status.
-    /// This is printed if a traceback is triggered by a panic or Ctrl-C.
+    /// This is printed if a traceback is triggered by a panic or Ctrl-C, and where
+    /// code is traversing data in a loop, can be used to determine not only where
+    /// execution is in the code, but also in the data.
+
+    /// # Example
+    /// ```
+    /// use std::thread;
+    /// fn main() {
+    ///     let message = new_thread_message();
+    ///     PrettyTrace::new().message(&message).run();
+    ///     ...
+    ///     // do this whenever thread status changes enough to care
+    ///     message.insert( thread::current().id(), "here is what I'm doing now" );
+    ///     ...
+    /// }
+    /// ```
 
     pub fn message( &mut self, message: &'static CHashMap<ThreadId, String> ) {
         self.message = Some(message);
@@ -279,7 +302,11 @@ impl PrettyTrace {
         self.count = Some(count);
     }
 
-    /// Define the whitelist for profile mode.
+    /// Define the whitelist for profile mode.  It is a list of strings that
+    /// profile traces are matched against.  Only traces matching at least one of 
+    /// the strings are shown.  This allows tracebacks to be focused on a fixed set 
+    /// of crates that you're trying to optimize.  Setting this option can greatly 
+    /// increase the utility of profile mode.
 
     pub fn whitelist( &mut self, whitelist: &Vec<&str> ) {
         let mut x = Vec::<String>::new();
@@ -460,6 +487,8 @@ extern "C" fn handler(sig: i32) {
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // CORE TRACEBACK FUNCTION
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+/// See <code>PrettyTrace</code> documentation for how this is used.
 
 pub fn new_thread_message() -> &'static CHashMap<ThreadId, String> {
     let box_thread_message = Box::new(CHashMap::<ThreadId, String>::new());
