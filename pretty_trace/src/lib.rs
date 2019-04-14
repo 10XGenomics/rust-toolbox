@@ -52,15 +52,16 @@
 //! <img src="../../../pretty_trace/images/happening.png"/>
 //! </div>
 //!
-//! # A brief guide to how to use pretty trace
+//! # A brief guide for using pretty trace
 //!
 //! First make sure that you have rust debug on, by adding these lines
 //! <pre>
 //! [profile.release]
 //! debug = true</pre>
-//! to your top-level Cargo.toml.  We recommend always doing this, regardless of
+//! to your top-level <code>Cargo.toml</code>.  We recommend always doing this, 
+//! regardless of
 //! whether you use this crate.  The computational performance hit appears to be
-//! small.  Then when you run, do <code>cargo build --release</code>.
+//! small.  Then compile with <code>cargo build --release</code>.
 //!
 //! <br> Now to access pretty trace, put this in your <code>Cargo.toml</code>
 //! <pre>
@@ -77,8 +78,7 @@
 //!     PrettyTrace::new().run();
 //! </pre>
 //! at the beginning of your main program.  And you're good to go!  Any panic
-//! or Ctrl-C will cause a pretty traceback to be generated.  Two Ctrl-Cs in
-//! rapid succession elide the traceback.
+//! or Ctrl-C will cause a pretty traceback to be generated.  
 //!
 //! <br> To instead profile, e.g. for 100 events, do this
 //! <pre>
@@ -98,10 +98,11 @@
 //!
 //! # FAQ
 //!
-//! <b>1. Could the pretty traceback lose important information?</b>
+//! <b>1. Could a pretty traceback lose important information?</b>
 //! <br><br>Possibly.  For this reason we provide the capability of dumping a full
 //! traceback to a file (as 'insurance') and also an environment variable to 
-//! force full tracebacks.<br><br>
+//! force full tracebacks.  However we have not seen examples where important
+//! information is lost.<br><br>
 //! <b>2. Can the pretty traceback itself be saved to a separate file?</b>
 //! <br><br>Yes this capability is provided.<br><br>
 //! <b>3. Can the traceback on Ctrl-C be elided?</b>
@@ -112,19 +113,19 @@
 //! ◼ The code parses the output of a formatted stack trace, rather then
 //!   generating output directly from a formal stack trace structure (which it
 //!   should do).  This
-//!   makes it vulnerable to changes in how rust formats the stack trace.
+//!   makes it vulnerable to changes stack trace formatting.
 //!
-//! ◼ There is an ugly blacklist of strings that is also fragile.  This may
+//! ◼ There is an ugly blacklist of strings that is fragile.  This may
 //!   be an intrinsic feature of the approach.
 //!
-//! ◼ Pretty traces containing more than ten items may not be correctly handled.
+//! ◼ Pretty traces containing more than ten items may be incorrectly handled.
 //!
 //! ◼ Ideally out-of-memory events would be caught and converted to panics so
 //!   we could trace them, but we don't.
 //!
 //! ◼ Profile mode only sees the main thread.  This seems intrinsic to the 
 //!   approach.  So you may need to modify your code to run single-threaded to
-//!   effective use this mode.
+//!   effectively use this mode.
 //!
 //! ◼ Profile mode yields no output if your program exits before obtaining the
 //!   requested number of stack traces.
@@ -201,7 +202,7 @@ pub struct PrettyTrace {
     pub whitelist: Option<Vec<String>>,
 }
 
-/// Normal usage of PrettyTrace is to call
+/// Normal usage of `PrettyTrace` is to call
 /// ```
 /// PrettyTrace::new().<set some things>.run();
 /// ```
