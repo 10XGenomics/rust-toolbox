@@ -275,7 +275,7 @@ impl PrettyTrace {
     /// Define a message object that will be used by threads to store their status.
     /// This is printed if a traceback is triggered by a panic or Ctrl-C, and where
     /// code is traversing data in a loop, can be used to determine not only where
-    /// execution is in the code, but also in the data.
+    /// execution is in the code, but also where it is in the data.
 
     /// # Example
     /// ```
@@ -294,14 +294,14 @@ impl PrettyTrace {
         self.message = Some(message);
     }
 
-    /// Turn on profile mode.  If you use this, be sure to also set count
-    /// and probably whitelist too.
+    /// Turn on profile mode.  If you use this, be sure to also call `count`
+    /// and probably `whitelist` too.
 
     pub fn profile( &mut self ) {
         self.profile = true;
     }
 
-    /// Define the event count for profile mode.
+    /// Define the number of tracebacks to be gathered in profile mode.
 
     pub fn count( &mut self, count: usize ) {
         self.count = Some(count);
