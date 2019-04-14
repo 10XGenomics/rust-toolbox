@@ -160,10 +160,16 @@ use std::{
     env,
     fs::{remove_file, File},
     io::{BufRead, BufReader, BufWriter, Write},
+    ops::Deref,
     os::unix::io::FromRawFd,
+    panic,
+    process,
+    str::from_utf8,
+    sync::Mutex,
+    thread,
+    thread::ThreadId,
+    time,
 };
-use std::{ops::Deref, panic, process, str::from_utf8};
-use std::{sync::Mutex, thread, thread::ThreadId, time};
 use string_utils::*;
 use vec_utils::*;
 
@@ -189,11 +195,14 @@ pub struct PrettyTrace {
     pub whitelist: Option<Vec<String>>,
 }
 
+/// Normal usage of PrettyTrace is 
+/// ```
+/// PrettyTrace::new().<set some things>.run();
+/// ```
+
 impl PrettyTrace {
 
     /// Initialize a PrettyTrace object.
-    /// Normal usage of PrettyTrace is 
-    /// <br>PrettyTrace::new().\<set some things\>.run();
 
     pub fn new() -> PrettyTrace {
         PrettyTrace {
@@ -286,7 +295,8 @@ impl PrettyTrace {
 // HAPPENING STRUCTURE
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-// Data structure for control of happening handling.
+// Data structure for control of happening handling.  This could probably be
+// elided now.
 
 struct Happening {
     pub on: bool,               // turned on?
