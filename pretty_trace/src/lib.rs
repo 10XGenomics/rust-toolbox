@@ -112,8 +112,7 @@
 //!
 //! ◼ The code parses the output of a formatted stack trace, rather then
 //!   generating output directly from a formal stack trace structure (which it
-//!   should do).  This
-//!   makes it vulnerable to changes stack trace formatting.
+//!   should do).  This makes it vulnerable to changes in stack trace formatting.
 //!
 //! ◼ There is an ugly blacklist of strings that is fragile.  This may
 //!   be an intrinsic feature of the approach.
