@@ -7,21 +7,22 @@
 //! # Pretty tracebacks
 //!
 //! Stack traces (or "tracebacks") are a fundamental vehicle for describing
-//! what code is doing at a given instant.  Tracebacks from rust are remarkably 
-//! complete: they essentially always extend from the 'broken' code line all the 
-//! way to the main program.  We may take this for granted but it is not always the 
-//! case in other languages, including C++.
+//! what code is doing at a given instant.   A beautiful thing about rust 
+//! is that crashes nearly always yield tracebacks, and those 
+//! tracebacks nearly always extend all the way from the 'broken' 
+//! code line all the way to the main program.  We may take these properties 
+//! for granted but in general neither is true for other languages, including C++.
 //!
 //! However, as in other languages, native rust tracebacks are verbose.  A major 
 //! goal of this crate is to provide succinct and readable "pretty" tracebacks, in 
 //! place of the native tracebacks.  These pretty traces can be
 //! <font color="red"> ten times shorter</font> than native tracebacks.  In 
-//! addition, unlike native tracebacks, once invoked from code, pretty traces do 
-//! not require an environment variable to be set.
+//! addition, unlike native tracebacks, pretty traces are obtained without setting
+//! an environment variable.
 //!
 //! # Example of native versus pretty trace output
 //! <div>
-//! <img src="../../../images/long_vs_short_traceback.png"/>
+//! <img src="../../../pretty_trace/images/long_vs_short_traceback.png"/>
 //! </div>
 //!
 //! # Profiling
@@ -34,18 +35,21 @@
 //!
 //! The idea is very simple: if it is possible to significantly speed up your code, 
 //! this should be directly visible from a modest sample of tracebacks chosen at
-//! random.  And this can be invoked for any main program by adding a simple 
-//! command-line option to it that causes it to enter a special 'profile' mode, 
-//! gathering tracebacks and then terminating.  For example this might be
-//! HAPS=100 to profile 100 events.  It is up to you how to set this up, but this
-//! crate makes it trivial to do so. <font color="red">With about one minute's work,
+//! random.  And these tracebacks can be generated for any main program by adding a 
+//! simple command-line option to it that causes it to enter a special 'profile'
+//! mode, gathering tracebacks and then terminating.  
+//!
+//! For example this might be
+//! <code>PROF=100</code> to profile 100 events.  It's your choice how to specify
+//! this command-line option, but this crate makes it trivial to do so. 
+//! <font color="red">With about one minute's work,
 //! you can make it possible to profile your code with essentially zero work, 
 //! whenever you like.</font>
 //!
 //! # Example of pretty trace profiling output
 //!
 //! <div>
-//! <img src="../../../images/happening.png"/ height=480 width=400>
+//! <img src="../../../pretty_trace/images/happening.png"/ height=480 width=400>
 //! </div>
 //!
 //! # A brief guide to how to use pretty trace
@@ -571,7 +575,7 @@ fn force_pretty_trace_fancy(
                     make_freq(&traces, &mut freq);
                     let mut report = String::new();
                     report += &format!(
-                        "\nHAPPENING REPORT\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n",
+                        "\nPRETTY TRACE PROFILE\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n",
                         percent_ratio(tracebacks, interrupts),
                         traces.len()
                     );
