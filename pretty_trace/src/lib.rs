@@ -229,6 +229,94 @@ pub fn force_pretty_trace_fancy(
 */
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// PRETTY TRACE STRUCTURE
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+pub struct PrettyTrace {
+    // filename to dump full traceback to upon panic or Ctrl-C
+    pub full_file: Option<String>,
+    // file descriptor to dump second copy of traceback to upon panic or Ctrl-C
+    pub fd: Option<i32>,
+    // thread message
+    pub message: Option<&'static CHashMap<ThreadId, String>>,
+    // is profile mode on?
+    pub profile: bool,
+    // count for profile mode
+    pub count: Option<usize>,
+    // whitelist for profile mode
+    pub whitelist: Option<Vec<String>>,
+}
+
+impl PrettyTrace {
+
+    /// Initialize a PrettyTrace object.
+    /// Normal usage of PrettyTrace is PrettyTrace::new().<set some things>.run();
+
+    pub fn new() -> PrettyTrace {
+        PrettyTrace {
+            full_file: None,
+            fd: None,
+            profile: false,
+            message: None,
+            count: None,
+            whitelist: None,
+        }
+    }
+
+    /// Cause a PrettyTrace object to do something.
+    /// Normal usage of PrettyTrace is PrettyTrace::new().<set some things>.run();
+
+    pub fn run( &mut self ) {
+        // NOT YET IMPLEMENTED
+    }
+
+    /// Define file, that in the event that a traceback is triggered by a
+    /// panic or Ctrl-C, will be used to dump a full traceback to.
+
+    pub fn full_file( &mut self, full_file: &str ) {
+        self.full_file = Some( full_file.to_string() );
+    }
+
+    /// Define a file descriptor, that in the event a traceback is triggered by a
+    /// panic or Ctrl-C, will be used to dump a second copy of the traceback to.
+
+    pub fn fd( &mut self, fd: i32 ) {
+        self.fd = Some(fd);
+    }
+
+    /// Define a message object that will be used by threads to store their status.
+    /// This is printed if a traceback is triggered by a panic or Ctrl-C.
+
+    pub fn message( &mut self, message: &'static CHashMap<ThreadId, String> ) {
+        self.message = Some(message);
+    }
+
+    /// Turn on profile mode.  If you use this, be sure to also set count
+    /// and probably whitelist too.
+
+    pub fn profile( &mut self ) {
+        self.profile = true;
+    }
+
+    /// Define the event count for profile mode.
+
+    pub fn count( &mut self, count: usize ) {
+        self.count = Some(count);
+    }
+
+    /// Define the whitelist for profile mode.
+
+    pub fn whitelist( &mut self, whitelist: &Vec<&str> ) {
+        let mut x = Vec::<String>::new();
+        for i in 0..whitelist.len() {
+            x.push( whitelist[i].to_string() );
+        }
+        self.whitelist = Some(x);
+    }
+
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // HAPPENING STRUCTURE
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
