@@ -261,15 +261,17 @@ impl PrettyTrace {
     /// You can also force <code>PrettyTrace</code> to emit full tracebacks by
     /// setting the environment variable <code>RUST_FULL_TRACE</code>.
 
-    pub fn full_file( &mut self, full_file: &str ) {
+    pub fn full_file( &mut self, full_file: &str ) -> &mut PrettyTrace {
         self.full_file = Some( full_file.to_string() );
+        self
     }
 
     /// Define a file descriptor, that in the event a traceback is triggered by a
     /// panic or Ctrl-C, will be used to dump a second copy of the traceback to.
 
-    pub fn fd( &mut self, fd: i32 ) {
+    pub fn fd( &mut self, fd: i32 ) -> &mut PrettyTrace{
         self.fd = Some(fd);
+        self
     }
 
     /// Define a message object that will be used by threads to store their status.
@@ -290,21 +292,24 @@ impl PrettyTrace {
     /// }
     /// ```
 
-    pub fn message( &mut self, message: &'static CHashMap<ThreadId, String> ) {
+    pub fn message( &mut self, message: &'static CHashMap<ThreadId, String> ) -> &mut PrettyTrace {
         self.message = Some(message);
+        self
     }
 
     /// Turn on profile mode.  If you use this, be sure to also call `count`
     /// and probably `whitelist` too.
 
-    pub fn profile( &mut self ) {
+    pub fn profile( &mut self ) -> &mut PrettyTrace {
         self.profile = true;
+        self
     }
 
     /// Define the number of tracebacks to be gathered in profile mode.
 
-    pub fn count( &mut self, count: usize ) {
+    pub fn count( &mut self, count: usize ) -> &mut PrettyTrace {
         self.count = Some(count);
+        self
     }
 
     /// Define the whitelist for profile mode.  It is a list of strings that
@@ -313,12 +318,13 @@ impl PrettyTrace {
     /// of crates that you're trying to optimize.  Setting this option can greatly 
     /// increase the utility of profile mode.
 
-    pub fn whitelist( &mut self, whitelist: &Vec<&str> ) {
+    pub fn whitelist( &mut self, whitelist: &Vec<&str> ) -> &mut PrettyTrace {
         let mut x = Vec::<String>::new();
         for i in 0..whitelist.len() {
             x.push( whitelist[i].to_string() );
         }
         self.whitelist = Some(x);
+        self
     }
 
 }
