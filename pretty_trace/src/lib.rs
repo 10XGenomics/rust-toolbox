@@ -31,7 +31,7 @@
 //! functionality for working with tracebacks, as described below.  This includes
 //! the capability of <font color="red"> trivially profiling code</font>.
 //!
-//! # Example of a standard stack trace versus pretty_trace output
+//! # Example of standard versus pretty trace output
 //! <div>
 //! <img src="../../../long_vs_short_traceback.png"/>
 //! </div>
@@ -74,7 +74,7 @@
 //!
 //! # How to use it
 //!
-//! ALL: 
+//! <b>ALL:</b>
 //! <pre>use force_pretty_trace::*;</pre>
 //!
 //! <b>USE CASE #1.</b>  Force a pretty and abbreviated traceback upon panic and
@@ -83,7 +83,7 @@
 //! Just put this at the beginning of your main program:
 //!
 //! <pre>
-//!    force_pretty_trace();
+//!   force_pretty_trace();
 //!</pre>
 //!
 //! <b>USE CASE #2.</b>  Same as #1, but you want to see a full traceback instead.  
@@ -116,8 +116,9 @@
 //!   thread_message.insert( thread::current().id(),
 //!       "message that describes what the thread is doing" );</pre>
 //!
-//! <b> USE CASE #5.</b> Collect a random sample of pretty tracebacks at a rate of
-//! approximately one per second.  For this you 
+//! <b> USE CASE #5.</b> Happening mode.  Collect and collate a fixed-size random 
+//! sample of pretty tracebacks at a rate of approximately one per second, then
+//! exit.  For this you 
 //! may specify strings A,...,Z that will be grepped for in the traceback.  This is
 //! useful because you may only be interested in where your code is executing in 
 //! particular crates that you're working on.
@@ -128,28 +129,33 @@
 //!   let mut haps = Happening::new_initialize( &whitelist, hcount );
 //!   force_pretty_trace_with_happening( &haps );</pre>
 //!
-//! And this will also sort and uniqify with counting.  It will terminate when it
-//! has obtained haps counts.  It won't work if your program doesn't run long
-//! enough.
-//!
 //! Use cases can also be combined -- see force_pretty_trace_fancy below.
+//!
+//! # Example of happening mode output
+//!
+//! <div>
+//! <img src="../../../happening.png"/ height=600 width=500>
+//! </div>
 //!
 //! # Issues, buggy things and missing features
 //!
 //! ◼ The code parses the output of a formatted stack trace, rather then
-//!   generating output directly from a formal stack trace structure.  This
+//!   generating output directly from a formal stack trace structure (which it
+//!   should do).  This
 //!   makes it vulnerable to changes in how rust formats the stack trace.
 //!
 //! ◼ There is an ugly blacklist of strings that is also fragile.
 //!
-//! ◼ Something weird might happen if the stack trace has length more than
-//!   ten.  This should be tested.
+//! ◼ Pretty traces containing more than ten items may not be correctly handled.
 //!
 //! ◼ The code catches Ctrl-C interrupts, but does not catch out-of-memory
 //!   events.  It should.
 //!
-//! ◼ The "happening" mode doesn't work if your program exits before obtaining the
+//! ◼ Happening mode doesn't work if your program exits before obtaining the
 //!   requested number of stack traces.
+//!
+//! ◼ Happening mode does not yield a stack trace if the code is executing inside
+//!   the allocator.  In our test cases this is around 15% of the time.
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // EXTERNAL DEPENDENCIES
