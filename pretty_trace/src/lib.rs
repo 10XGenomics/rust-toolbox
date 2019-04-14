@@ -168,43 +168,6 @@ use string_utils::*;
 use vec_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-// USER INTERFACE
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-
-pub fn force_pretty_trace() {
-    let tm = new_thread_message();
-    force_pretty_trace_fancy(String::new(), -1 as i32, &tm, &Happening::new());
-}
-
-pub fn force_pretty_trace_with_log(log_file_name: String) {
-    let tm = new_thread_message();
-    force_pretty_trace_fancy(log_file_name, -1 as i32, &tm, &Happening::new());
-}
-
-pub fn force_pretty_trace_with_log_plus(log_file_name: String, fd: i32) {
-    let tm = new_thread_message();
-    force_pretty_trace_fancy(log_file_name, fd, &tm, &Happening::new());
-}
-
-pub fn force_pretty_trace_with_happening(happening: &Happening) {
-    let tm = new_thread_message();
-    force_pretty_trace_fancy(String::new(), -1 as i32, &tm, happening);
-}
-
-pub fn force_pretty_trace_with_message(thread_message: &'static CHashMap<ThreadId, String>) {
-    force_pretty_trace_fancy(String::new(), -1 as i32, &thread_message, &Happening::new());
-}
-
-/*
-
-pub fn force_pretty_trace_fancy(
-
-    log_file_name: String, fd: i32,
-    thread_message: &'static CHashMap<ThreadId,String>, happening: &Happening );
-
-*/
-
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // PRETTY TRACE STRUCTURE
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
@@ -325,7 +288,7 @@ impl PrettyTrace {
 
 // Data structure for control of happening handling.
 
-pub struct Happening {
+struct Happening {
     pub on: bool,               // turned on?
     pub whitelist: Vec<String>, // tracebacks are grepped for these
     pub hcount: usize,          // number of tracebacks to gather
@@ -348,12 +311,6 @@ impl Happening {
         self.on = true;
         self.whitelist = whitelist.clone();
         self.hcount = hcount;
-    }
-
-    pub fn new_initialize(whitelist: &Vec<String>, hcount: usize) -> Happening {
-        let mut haps = Happening::new();
-        haps.initialize(&whitelist.clone(), hcount);
-        haps
     }
 }
 
@@ -500,7 +457,7 @@ pub fn new_thread_message() -> &'static CHashMap<ThreadId, String> {
     thread_message
 }
 
-pub fn force_pretty_trace_fancy(
+fn force_pretty_trace_fancy(
     log_file_name: String,
     fd: i32,
     thread_message: &'static CHashMap<ThreadId, String>,
