@@ -29,7 +29,7 @@
 //! Profline is a fundamental tool for optimizing code.
 //! Standard profiling tools including perf are powerful, however they
 //! can be challenging to use.  This crate provides a profiling capability that
-//! is <font color="red" completely trivial to invoke and interpret, and yields a 
+//! is <font color="red"> completely trivial to invoke and interpret, and yields a 
 //! tiny file as output</font>.
 //!
 //! The idea is very simple: if it is possible to significantly speed up your code, 
@@ -38,7 +38,9 @@
 //! command-line option to it that causes it to enter a special 'profile' mode, 
 //! gathering tracebacks and then terminating.  For example this might be
 //! HAPS=100 to profile 100 events.  It is up to you how to set this up, but this
-//! crate makes it trivial to do so.
+//! crate makes it trivial to do so. <font color="red">With about one minute's work,
+//! you can make it possible to profile your code with essentially zero work, 
+//! whenever you like.</font>
 //!
 //! # Example of pretty trace profiling output
 //!
@@ -54,11 +56,11 @@
 //! debug = true</pre>
 //! to your top-level Cargo.toml.  We recommend always doing this, regardless of
 //! whether you use this crate.  The computational performance hit appears to be
-//! small.  Then when you run, do cargo build --release.
+//! small.  Then when you run, do <code>cargo build --release</code>.
 //!
-//! <br> Now to access pretty trace, put this in your Cargo.toml
+//! <br> Now to access pretty trace, put this in your <code>Cargo.toml</code>
 //! <pre>
-//! pretty_trace = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
+//! pretty_trace = {git = "https://github.com/10XGenomics/rust-toolbox.git"}
 //! </pre>
 //! and this
 //! <pre>
@@ -80,34 +82,51 @@
 //! </pre>
 //!
 //! Several other useful features are described below.  This include the capability
-//! of forcing a full traceback, of dumping auxiliary copies of tracebacks,
 //! of tracing to know where you are in your data (and not just your code), and
 //! for focusing profiling on a key set of crates that you're optimizing. 
+//!
+//! # Credit
 //!
 //! This code was developed at 10x Genomics, and is based in part on C++ code 
 //! developed at the Whitehead Institute Center for Genome
 //! Research / Broad Institute starting in 2000, and included in
 //! <https://github.com/CompRD/BroadCRD>.
 //!
-//! # Issues, buggy things and missing features
+//! # FAQ
+//!
+//! <b>1. Could the pretty traceback lose important information?</b>
+//! <br><br>Possibly.  For this reason we provide the capability of dumping a full
+//! traceback to a file (as 'insurance') and also an environment variable to 
+//! force full tracebacks.<br><br>
+//! <b>2. Can the pretty traceback itself be saved to a separate file?</b>
+//! <br><br>Yes this capability is provided.<br><br>
+//! <b>3. Can the traceback on Ctrl-C be elided?</b>
+//! <br><br>Ctrl-C twice in rapid succession to do this.
+//!
+//! # Full disclosure
 //!
 //! ◼ The code parses the output of a formatted stack trace, rather then
 //!   generating output directly from a formal stack trace structure (which it
 //!   should do).  This
 //!   makes it vulnerable to changes in how rust formats the stack trace.
 //!
-//! ◼ There is an ugly blacklist of strings that is also fragile.  However this may
+//! ◼ There is an ugly blacklist of strings that is also fragile.  This may
 //!   be an intrinsic feature of the approach.
 //!
 //! ◼ Pretty traces containing more than ten items may not be correctly handled.
 //!
 //! ◼ Out-of-memory events could be converted to panics, then traced.
 //!
-//! ◼ Happening mode yields no output if your program exits before obtaining the
+//! ◼ Profile mode only sees the main thread.  This seems intrinsic to the 
+//!   approach
+//!
+//! ◼ Profile mode yields no output if your program exits before obtaining the
 //!   requested number of stack traces.
 //!
-//! ◼ Happening mode does not yield a stack trace if the code is executing inside
+//! ◼ Profile mode does not yield a stack trace if the code is executing inside
 //!   the allocator.  In our test cases this is around 15% of the time.
+//!
+//! ◼ This is a preliminary version, which likely has bugs.
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // EXTERNAL DEPENDENCIES
@@ -133,11 +152,11 @@ use io_utils::*;
 use libc::{kill, SIGINT, SIGKILL, SIGUSR1};
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
 use stats::*;
-use std::io::{BufRead, BufReader, BufWriter, Write};
-use std::os::unix::io::FromRawFd;
 use std::{
     env,
     fs::{remove_file, File},
+    io::{BufRead, BufReader, BufWriter, Write},
+    os::unix::io::FromRawFd,
 };
 use std::{ops::Deref, panic, process, str::from_utf8};
 use std::{sync::Mutex, thread, thread::ThreadId, time};
