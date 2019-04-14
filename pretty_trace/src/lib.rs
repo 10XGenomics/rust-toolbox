@@ -49,7 +49,7 @@
 //! # Example of pretty trace profiling output
 //!
 //! <div>
-//! <img src="../../../pretty_trace/images/happening.png"/ height=480 width=400>
+//! <img src="../../../pretty_trace/images/happening.png"/>
 //! </div>
 //!
 //! # A brief guide to how to use pretty trace
