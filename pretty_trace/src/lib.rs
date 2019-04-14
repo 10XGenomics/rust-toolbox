@@ -4,138 +4,90 @@
 // TOP LEVEL DOCUEMENTATION
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-//! # Introduction
+//! # Pretty tracebacks
 //!
-//! Tracebacks from rust are remarkably complete: they essentially always
-//! extend from the 'broken' code line all the way to the main program.
-//! We may take this for granted but it is not always the case in other languages,
-//! including C++.
+//! Stack traces (or "tracebacks") are a fundamental vehicle for describing
+//! what code is doing at a given instant.  Tracebacks from rust are remarkably 
+//! complete: they essentially always extend from the 'broken' code line all the 
+//! way to the main program.  We may take this for granted but it is not always the 
+//! case in other languages, including C++.
 //!
-//! However, there are a few issues.  The first is that you need to turn 'debug'
-//! on, by adding the lines
-//! <pre>
-//! [profile.release]
-//! debug = true</pre>
-//! to your top-level Cargo.toml.  The computational performance hit for running
-//! with debug on appears to be small.  So this is not really an issue, but rather
-//! just something that you need to remember to do.
-//! <br><br>
-//! The other two issues are that you have to set the environment variable
-//! RUST_BACKTRACE to 1, or you get no traceback at all, and the tracebacks can be
-//! unnecessarily long and difficult to read.
-//! <br><br>
-//! The latter two issues are addressed by this crate, which makes tracebacks
-//! automatic and as succinct as possible, in some cases about 
-//! <font color="red"> ten times 
-//! shorter</font> than what you would otherwise get.  We also provide other
-//! functionality for working with tracebacks, as described below.  This includes
-//! the capability of <font color="red"> trivially profiling code</font>.
+//! However, as in other languages, native rust tracebacks are verbose.  A major 
+//! goal of this crate is to provide succinct and readable "pretty" tracebacks, in 
+//! place of the native tracebacks.  These pretty traces can be
+//! <font color="red"> ten times shorter</font> than native tracebacks.  In 
+//! addition, unlike native tracebacks, once invoked from code, pretty traces do 
+//! not require an environment variable to be set.
 //!
-//! # Example of standard versus pretty trace output
+//! # Example of native versus pretty trace output
 //! <div>
 //! <img src="../../../images/long_vs_short_traceback.png"/>
 //! </div>
 //!
-//! # What this code can do
-//! The following functionality is supported:
+//! # Profiling
 //!
-//! 1. Catch panics and emit an abbreviated, cleaned up traceback.
+//! Profline is a fundamental tool for optimizing code.
+//! Standard profiling tools including perf are powerful, however they
+//! can be challenging to use.  This crate provides a profiling capability that
+//! is <font color="red" completely trivial to invoke and interpret, and yields a 
+//! tiny file as output</font>.
 //!
-//!    Full tracebacks in rust can be very long, so this provides a quick view.
-//!    And rust default behavior is to not provide tracebacks at all.
+//! The idea is very simple: if it is possible to significantly speed up your code, 
+//! this should be directly visible from a modest sample of tracebacks chosen at
+//! random.  And this can be invoked for any main program by adding a simple 
+//! command-line option to it that causes it to enter a special 'profile' mode, 
+//! gathering tracebacks and then terminating.  For example this might be
+//! HAPS=100 to profile 100 events.  It is up to you how to set this up, but this
+//! crate makes it trivial to do so.
 //!
-//! 2. Provide a full traceback if you want that instead or in addition to the
-//!    shortened traceback.
+//! # Example of pretty trace profiling output
 //!
-//!    The abbreviation code might "mess up", so this feature could be useful.
+//! <div>
+//! <img src="../../../images/happening.png"/ height=480 width=400>
+//! </div>
 //!
-//! 3. Catch Ctrl-C and convert to panic, and thence as above.  Note that this will
-//!    only trace the master thread, so if you have parallelization, you probably
-//!    need to turn that off first.  If you press Ctrl-C twice in rapid succession,
-//!    you won't get a traceback.
+//! # A brief guide to how to use pretty trace
 //!
-//!    One use case of this is to find an infinite loop bug.
+//! First make sure that you have rust debug on, by adding these lines
+//! <pre>
+//! [profile.release]
+//! debug = true</pre>
+//! to your top-level Cargo.toml.  We recommend always doing this, regardless of
+//! whether you use this crate.  The computational performance hit appears to be
+//! small.  Then when you run, do cargo build --release.
 //!
-//! 4. Read thread status from a user-defined structure and report that with the
-//!    traceback so you can see not only "where you are in your code" but also
-//!    "where you are in your data".
+//! <br> Now to access pretty trace, put this in your Cargo.toml
+//! <pre>
+//! pretty_trace = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
+//! </pre>
+//! and this
+//! <pre>
+//! use pretty_trace::*;
+//! </pre>
+//! in your main program.
 //!
-//!    This can be very useful for reproducing bugs.
+//! <br> Next to turn on pretty traces, it is enough to insert this
+//! <pre>
+//!     PrettyTrace::new().run();
+//! </pre>
+//! at the beginning of your main program.  And you're good to go!  Any panic
+//! or Ctrl-C will cause a pretty traceback to be generated.  Two Ctrl-Cs in
+//! rapid succession elide the traceback.
 //!
-//! 5. Collect a random sample of pretty tracebacks by interrupting the code
-//!    repeatedly.
+//! <br> To instead profile, e.g. for 100 events, do this
+//! <pre>
+//!     PrettyTrace::new().profile().count(100).run();
+//! </pre>
 //!
-//!    This can be highly useful for profiling.
+//! Several other useful features are described below.  This include the capability
+//! of forcing a full traceback, of dumping auxiliary copies of tracebacks,
+//! of tracing to know where you are in your data (and not just your code), and
+//! for focusing profiling on a key set of crates that you're optimizing. 
 //!
 //! This code was developed at 10x Genomics, and is based in part on C++ code 
 //! developed at the Whitehead Institute Center for Genome
 //! Research / Broad Institute starting in 2000, and included in
 //! <https://github.com/CompRD/BroadCRD>.
-//!
-//! # How to use it
-//!
-//! <b>ALL:</b>
-//! <pre>use force_pretty_trace::*;</pre>
-//!
-//! <b>USE CASE #1.</b>  Force a pretty and abbreviated traceback upon panic and
-//! upon Ctrl-C interrupts.
-//!
-//! Just put this at the beginning of your main program:
-//!
-//! <pre>
-//!   force_pretty_trace();
-//!</pre>
-//!
-//! <b>USE CASE #2.</b>  Same as #1, but you want to see a full traceback instead.  
-//! Just set the environment variable RUST_FULL_TRACE.  Alternatively, to get both, 
-//! use
-//!<pre>   force_pretty_trace_with_log( &log_file_name );</pre>
-//!
-//! which will get you a shortened traceback on stderr, and a full traceback in the
-//! given file.
-//!
-//! <b>USE CASE #3.</b>  Same as above, but also dump the short log to a file 
-//! descriptor.
-//!
-//! <pre>
-//!   force_pretty_trace_with_log_plus( &log_file_name, fd );</pre>
-//!
-//! <b>USE CASE #4.</b>  Also pass a map that assigns a message to each thread.  You
-//! can use this to assign a "status" to each thread, and that status will get
-//! printed upon panic.
-//!
-//! To use this, put the following code at the beginning of your main:
-//!
-//!<pre>
-//!   let thread_message = new_thread_message();
-//!   force_pretty_trace_with_message( &thread_message );</pre>
-//!
-//! and put the following in a place that will get executed once by each thread:
-//!
-//! <pre>
-//!   thread_message.insert( thread::current().id(),
-//!       "message that describes what the thread is doing" );</pre>
-//!
-//! <b> USE CASE #5.</b> Happening mode.  Collect and collate a fixed-size random 
-//! sample of pretty tracebacks at a rate of approximately one per second, then
-//! exit.  For this you 
-//! may specify strings A,...,Z that will be grepped for in the traceback.  This is
-//! useful because you may only be interested in where your code is executing in 
-//! particular crates that you're working on.
-//!
-//! <pre>
-//!   let whitelist = "A|...|Z";
-//!   let hcount = number of tracebacks to gather;
-//!   let mut haps = Happening::new_initialize( &whitelist, hcount );
-//!   force_pretty_trace_with_happening( &haps );</pre>
-//!
-//! Use cases can also be combined -- see force_pretty_trace_fancy below.
-//!
-//! # Example of happening mode output
-//!
-//! <div>
-//! <img src="../../../images/happening.png"/ height=600 width=500>
-//! </div>
 //!
 //! # Issues, buggy things and missing features
 //!
@@ -144,7 +96,8 @@
 //!   should do).  This
 //!   makes it vulnerable to changes in how rust formats the stack trace.
 //!
-//! ◼ There is an ugly blacklist of strings that is also fragile.
+//! ◼ There is an ugly blacklist of strings that is also fragile.  However this may
+//!   be an intrinsic feature of the approach.
 //!
 //! ◼ Pretty traces containing more than ten items may not be correctly handled.
 //!
