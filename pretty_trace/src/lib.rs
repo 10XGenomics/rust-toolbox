@@ -33,7 +33,7 @@
 //!
 //! # Example of standard versus pretty trace output
 //! <div>
-//! <img src="../../../long_vs_short_traceback.png"/>
+//! <img src="../../../images/long_vs_short_traceback.png"/>
 //! </div>
 //!
 //! # What this code can do
@@ -70,7 +70,7 @@
 //! This code was developed at 10x Genomics, and is based in part on C++ code 
 //! developed at the Whitehead Institute Center for Genome
 //! Research / Broad Institute starting in 2000, and included in
-//! https://github.com/CompRD/BroadCRD.
+//! <https://github.com/CompRD/BroadCRD>.
 //!
 //! # How to use it
 //!
@@ -134,7 +134,7 @@
 //! # Example of happening mode output
 //!
 //! <div>
-//! <img src="../../../happening.png"/ height=600 width=500>
+//! <img src="../../../images/happening.png"/ height=600 width=500>
 //! </div>
 //!
 //! # Issues, buggy things and missing features
@@ -148,10 +148,9 @@
 //!
 //! ◼ Pretty traces containing more than ten items may not be correctly handled.
 //!
-//! ◼ The code catches Ctrl-C interrupts, but does not catch out-of-memory
-//!   events.  It should.
+//! ◼ Out-of-memory events could be converted to panics, then traced.
 //!
-//! ◼ Happening mode doesn't work if your program exits before obtaining the
+//! ◼ Happening mode yields no output if your program exits before obtaining the
 //!   requested number of stack traces.
 //!
 //! ◼ Happening mode does not yield a stack trace if the code is executing inside
