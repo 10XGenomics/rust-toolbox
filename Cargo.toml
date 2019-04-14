@@ -1,0 +1,12 @@
+[workspace]
+
+members = [
+    "io_utils",
+    "pretty_trace",
+    "stats",
+    "string_utils",
+    "vec_utils",
+]
+
+[profile.release]
+debug = true
