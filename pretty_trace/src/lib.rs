@@ -127,6 +127,10 @@
 //!   the allocator.  In our test cases this is around 15% of the time.
 //!
 //! ◼ This is a preliminary version, which likely has bugs.
+//!
+//! # More
+//!
+//! See the documentation for <code>PrettyTrace</code>, linked to below.
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // EXTERNAL DEPENDENCIES
@@ -204,6 +208,9 @@ pub fn force_pretty_trace_fancy(
 // PRETTY TRACE STRUCTURE
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
+/// A `PrettyTrace` is the working structure for this crate.  See also the top-level
+/// crate documentation.
+
 pub struct PrettyTrace {
     // filename to dump full traceback to upon panic or Ctrl-C
     pub full_file: Option<String>,
@@ -222,7 +229,8 @@ pub struct PrettyTrace {
 impl PrettyTrace {
 
     /// Initialize a PrettyTrace object.
-    /// Normal usage of PrettyTrace is PrettyTrace::new().<set some things>.run();
+    /// Normal usage of PrettyTrace is 
+    /// <br>PrettyTrace::new().\<set some things\>.run();
 
     pub fn new() -> PrettyTrace {
         PrettyTrace {
@@ -236,10 +244,33 @@ impl PrettyTrace {
     }
 
     /// Cause a PrettyTrace object to do something.
-    /// Normal usage of PrettyTrace is PrettyTrace::new().<set some things>.run();
 
     pub fn run( &mut self ) {
-        // NOT YET IMPLEMENTED
+        let mut fd = -1 as i32;
+        if self.fd.is_some() { fd = self.fd.unwrap() as i32; }
+        let mut haps = Happening::new();
+        if self.profile { 
+            if self.count.is_none() {
+                eprintln!( "PrettyTrace: run() was called after profile() \
+                    without setting count.\n\
+                    Please call count(...) and try again." );
+                std::process::exit(1);
+            }
+            if self.whitelist.is_none() {
+                self.whitelist = Some( Vec::<String>::new() );
+            }
+            haps.initialize( 
+                &self.whitelist.clone().unwrap(), self.count.unwrap() ); 
+        }
+        if self.message.is_some() {
+            force_pretty_trace_fancy( 
+                self.full_file.clone().unwrap(), fd, &self.message.unwrap(), &haps );
+        }
+        else {
+            let tm = new_thread_message();
+            force_pretty_trace_fancy( 
+                self.full_file.clone().unwrap(), fd, &tm, &haps );
+        }
     }
 
     /// Define file, that in the event that a traceback is triggered by a
@@ -311,20 +342,17 @@ impl Happening {
 
     // EXAMPLE: set whitelist to a or b or c, hcount to 250
     // let mut happening = Happening::new();
-    // happening.initialize( &"a|b|c", 250 );
+    // happening.initialize( &vec![ "a", "b", "c" ], 250 );
 
-    pub fn initialize(&mut self, whitelist: &str, hcount: usize) {
+    pub fn initialize(&mut self, whitelist: &Vec<String>, hcount: usize) {
         self.on = true;
-        let x = whitelist.split('|').collect::<Vec<&str>>();
-        for i in 0..x.len() {
-            self.whitelist.push(x[i].to_string());
-        }
+        self.whitelist = whitelist.clone();
         self.hcount = hcount;
     }
 
-    pub fn new_initialize(whitelist: &str, hcount: usize) -> Happening {
+    pub fn new_initialize(whitelist: &Vec<String>, hcount: usize) -> Happening {
         let mut haps = Happening::new();
-        haps.initialize(whitelist, hcount);
+        haps.initialize(&whitelist.clone(), hcount);
         haps
     }
 }
