@@ -5,7 +5,6 @@ authors = []
 
 [dependencies]
 bincode = "1.0.1"
-flate2 = "*"
 lz4 = "*"
 serde = "*"
 string_utils = { path = "../string_utils" }
