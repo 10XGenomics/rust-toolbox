@@ -207,9 +207,9 @@ pub struct PrettyTrace {
 }
 
 /// Normal usage of `PrettyTrace` is to call
-/// ```
-/// PrettyTrace::new().<set some things>.on();
-/// ```
+/// <pre>
+/// PrettyTrace::new().&lt set some things >.on();
+/// </pre>
 /// once near the begining of your main program.
 
 impl PrettyTrace {
