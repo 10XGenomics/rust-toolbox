@@ -330,6 +330,15 @@ impl PrettyTrace {
     /// of crates that you're trying to optimize.  Setting this option can greatly 
     /// increase the utility of profile mode.
 
+    /// # Example
+    /// ```
+    ///    PrettyTrace::new()
+    ///        .profile()
+    ///        .count(100)
+    ///        .whitelist( &vec![ "gerbilizer", "creampuff" ] )
+    ///        .run();
+    /// ```
+
     pub fn whitelist( &mut self, whitelist: &Vec<&str> ) -> &mut PrettyTrace {
         let mut x = Vec::<String>::new();
         for i in 0..whitelist.len() {
