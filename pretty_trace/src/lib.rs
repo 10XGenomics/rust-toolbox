@@ -52,10 +52,11 @@
 //! <img src="../../../pretty_trace/images/happening.png"/>
 //! </div>
 //!
-//! This shows the first part of the profiling output.  Note that 81.3% is the
-//! fraction of attempted stack traces that were successful.  Most fails would be
-//! due to cases where the stack trace would have 'walked' into the allocator.
-//! See "Full disclosure" below.
+//! Pretty trace profiling reveals exactly what the code was doing at 100 random
+//! instances; the first 19 of 100 collated tracebacks are shown here.  More were
+//! attempted: of attempted tracebacks, 81.3% were successful.  Most fails are
+//! due to cases where the stack trace would have 'walked' into the allocator, as 
+//! discussed at "Full Disclosure" below.
 //!
 //! # A brief guide for using pretty trace
 //!
