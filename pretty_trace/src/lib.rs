@@ -284,7 +284,7 @@ impl PrettyTrace {
     /// execution is in the code, but also where it is in the data.
 
     /// # Example
-    /// ```
+    /// <pre>
     /// use std::thread;
     /// fn main() {
     ///     let message = new_thread_message();
@@ -294,7 +294,7 @@ impl PrettyTrace {
     ///     message.insert( thread::current().id(), "here is what I'm doing now" );
     ///     ...
     /// }
-    /// ```
+    /// </pre>
 
     pub fn message(&mut self, message: &'static CHashMap<ThreadId, String>) -> &mut PrettyTrace {
         self.message = Some(message);
@@ -317,12 +317,12 @@ impl PrettyTrace {
     /// increase the utility of profile mode.
 
     /// # Example
-    /// ```
+    /// <pre>
     ///    PrettyTrace::new()
     ///        .profile(100)
     ///        .whitelist( &vec![ "gerbilizer", "creampuff" ] )
     ///        .on();
-    /// ```
+    /// </pre>
 
     pub fn whitelist(&mut self, whitelist: &Vec<&str>) -> &mut PrettyTrace {
         let mut x = Vec::<String>::new();
