@@ -81,14 +81,14 @@
 //!
 //! <br> Next to turn on pretty traces, it is enough to insert this
 //! <pre>
-//!     PrettyTrace::new().run();
+//!     PrettyTrace::new().on();
 //! </pre>
 //! at the beginning of your main program.  And you're good to go!  Any panic
 //! or Ctrl-C will cause a pretty traceback to be generated.  
 //!
 //! <br> To instead profile, e.g. for 100 events, do this
 //! <pre>
-//!     PrettyTrace::new().profile().count(100).run();
+//!     PrettyTrace::new().profile(100).on();
 //! </pre>
 //!
 //! Several other useful features are described below.  This include the capability
@@ -208,7 +208,7 @@ pub struct PrettyTrace {
 
 /// Normal usage of `PrettyTrace` is to call
 /// ```
-/// PrettyTrace::new().<set some things>.run();
+/// PrettyTrace::new().<set some things>.on();
 /// ```
 /// once near the begining of your main program.
 
@@ -232,21 +232,13 @@ impl PrettyTrace {
     /// traceback, cause <code>Ctrl-C</code> interrupts to convert to panics,
     /// and perform profiling, if <code>profile()</code> has been called.
 
-    pub fn run(&mut self) {
+    pub fn on(&mut self) {
         let mut fd = -1 as i32;
         if self.fd.is_some() {
             fd = self.fd.unwrap() as i32;
         }
         let mut haps = Happening::new();
         if self.profile {
-            if self.count.is_none() {
-                eprintln!(
-                    "PrettyTrace: run() was called after profile() \
-                     without setting count.\n\
-                     Please call count(...) and try again."
-                );
-                std::process::exit(1);
-            }
             if self.whitelist.is_none() {
                 self.whitelist = Some(Vec::<String>::new());
             }
@@ -296,7 +288,7 @@ impl PrettyTrace {
     /// use std::thread;
     /// fn main() {
     ///     let message = new_thread_message();
-    ///     PrettyTrace::new().message(&message).run();
+    ///     PrettyTrace::new().message(&message).on();
     ///     ...
     ///     // do this whenever thread status changes enough to care
     ///     message.insert( thread::current().id(), "here is what I'm doing now" );
@@ -309,17 +301,11 @@ impl PrettyTrace {
         self
     }
 
-    /// Turn on profile mode.  If you use this, be sure to also call `count`
-    /// and probably `whitelist` too.
+    /// Request that a profile consisting of `count` traces be generated.
+    /// If you use this, consider calling `whitelist` too.
 
-    pub fn profile(&mut self) -> &mut PrettyTrace {
+    pub fn profile(&mut self, count: usize) -> &mut PrettyTrace {
         self.profile = true;
-        self
-    }
-
-    /// Define the number of tracebacks to be gathered in profile mode.
-
-    pub fn count(&mut self, count: usize) -> &mut PrettyTrace {
         self.count = Some(count);
         self
     }
@@ -333,10 +319,9 @@ impl PrettyTrace {
     /// # Example
     /// ```
     ///    PrettyTrace::new()
-    ///        .profile()
-    ///        .count(100)
+    ///        .profile(100)
     ///        .whitelist( &vec![ "gerbilizer", "creampuff" ] )
-    ///        .run();
+    ///        .on();
     /// ```
 
     pub fn whitelist(&mut self, whitelist: &Vec<&str>) -> &mut PrettyTrace {
