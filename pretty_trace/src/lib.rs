@@ -22,7 +22,7 @@
 //!
 //! # Example of native versus pretty trace output
 //! <div>
-//! <img src="../../../pretty_trace/images/long_vs_short_traceback.png"/>
+//! <img src="../../pretty_trace/images/long_vs_short_traceback.png"/>
 //! </div>
 //!
 //! # Profiling
@@ -49,7 +49,7 @@
 //! # Example of pretty trace profiling output
 //!
 //! <div>
-//! <img src="../../../pretty_trace/images/happening.png"/>
+//! <img src="../../pretty_trace/images/happening.png"/>
 //! </div>
 //!
 //! Pretty trace profiling reveals exactly what the code was doing at 100 random
