@@ -4,4 +4,4 @@ version = "0.1.0"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 
 [dependencies]
-superslice = "0.1.0"
+superslice = "1.0.0"
