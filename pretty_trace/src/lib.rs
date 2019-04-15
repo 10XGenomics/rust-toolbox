@@ -52,6 +52,11 @@
 //! <img src="../../../pretty_trace/images/happening.png"/>
 //! </div>
 //!
+//! This shows the first part of the profiling output.  Note that 81.3% is the
+//! fraction of attempted stack traces that were successful.  Most fails would be
+//! due to cases where the stack trace would have 'walked' into the allocator.
+//! See "Full disclosure" below.
+//!
 //! # A brief guide for using pretty trace
 //!
 //! First make sure that you have rust debug on, by adding these lines
@@ -209,7 +214,8 @@ pub struct PrettyTrace {
 
 impl PrettyTrace {
 
-    /// Initialize a <code>PrettyTrace</code> object.
+    /// Initialize a <code>PrettyTrace</code> object.  This does nothing
+    /// in and of itself.
 
     pub fn new() -> PrettyTrace {
         PrettyTrace {
@@ -222,7 +228,10 @@ impl PrettyTrace {
         }
     }
 
-    /// Cause a <code>PrettyTrace</code> object to do something.
+    /// Cause a <code>PrettyTrace</code> object to do something: change the 
+    /// behavior of response to <code>panic!</code> to produce a prettified 
+    /// traceback, cause <code>Ctrl-C</code> interrupts to convert to panics,
+    /// and perform profiling, if <code>profile()</code> has been called.
 
     pub fn run( &mut self ) {
         let mut fd = -1 as i32;
