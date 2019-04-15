@@ -1,0 +1,4 @@
+language: rust
+
+# Cache cargo symbols for faster build
+cache: cargo
