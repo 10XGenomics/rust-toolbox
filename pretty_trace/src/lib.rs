@@ -241,14 +241,17 @@ impl PrettyTrace {
             haps.initialize( 
                 &self.whitelist.clone().unwrap(), self.count.unwrap() ); 
         }
+
+        let mut full_file = String::new();
+        if self.full_file.is_some() {
+            full_file = self.full_file.clone().unwrap();
+        }
         if self.message.is_some() {
-            force_pretty_trace_fancy( 
-                self.full_file.clone().unwrap(), fd, &self.message.unwrap(), &haps );
+            force_pretty_trace_fancy( full_file, fd, &self.message.unwrap(), &haps );
         }
         else {
             let tm = new_thread_message();
-            force_pretty_trace_fancy( 
-                self.full_file.clone().unwrap(), fd, &tm, &haps );
+            force_pretty_trace_fancy( full_file, fd, &tm, &haps );
         }
     }
 
