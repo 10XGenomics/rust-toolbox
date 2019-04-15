@@ -255,7 +255,7 @@ impl PrettyTrace {
     /// Define a file, that in the event that a traceback is triggered by a
     /// panic or Ctrl-C, will be used to dump a full traceback to.  The 
     /// <i>raison d'etre</i> for this is that an abbreviated pretty traceback might
-    /// in some cases elide useful information.
+    /// in some cases elide useful information (although this has not been observed).
     ///
     /// You can also force <code>PrettyTrace</code> to emit full tracebacks by
     /// setting the environment variable <code>RUST_FULL_TRACE</code>.
