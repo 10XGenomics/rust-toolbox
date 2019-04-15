@@ -12,12 +12,7 @@ use bincode::{deserialize_from, serialize_into};
 use serde::{de::DeserializeOwned, Serialize};
 use std::ffi::OsStr;
 use std::fs;
-use std::{
-    fmt::Debug,
-    fs::File,
-    io::prelude::*,
-    path::Path,
-};
+use std::{fmt::Debug, fs::File, io::prelude::*, path::Path};
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // GET CONTENTS OF DIRECTORY

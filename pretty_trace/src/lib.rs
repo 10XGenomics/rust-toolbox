@@ -7,16 +7,16 @@
 //! # Pretty tracebacks
 //!
 //! Stack traces (or "tracebacks") are a fundamental vehicle for describing
-//! what code is doing at a given instant.   A beautiful thing about rust 
-//! is that crashes nearly always yield tracebacks, and those 
-//! tracebacks nearly always extend all the way from the 'broken' 
-//! code line all the way to the main program.  We may take these properties 
+//! what code is doing at a given instant.   A beautiful thing about rust
+//! is that crashes nearly always yield tracebacks, and those
+//! tracebacks nearly always extend all the way from the 'broken'
+//! code line all the way to the main program.  We may take these properties
 //! for granted but in general neither is true for other languages, including C++.
 //!
-//! However, as in other languages, native rust tracebacks are verbose.  A major 
-//! goal of this crate is to provide succinct and readable "pretty" tracebacks, in 
+//! However, as in other languages, native rust tracebacks are verbose.  A major
+//! goal of this crate is to provide succinct and readable "pretty" tracebacks, in
 //! place of the native tracebacks.  These pretty traces can be
-//! <font color="red"> ten times shorter</font> than native tracebacks.  In 
+//! <font color="red"> ten times shorter</font> than native tracebacks.  In
 //! addition, unlike native tracebacks, pretty traces are obtained without setting
 //! an environment variable.
 //!
@@ -30,20 +30,20 @@
 //! Profline is a fundamental tool for optimizing code.
 //! Standard profiling tools including perf are powerful, however they
 //! can be challenging to use.  This crate provides a profiling capability that
-//! is <font color="red"> completely trivial to invoke and interpret, and yields a 
+//! is <font color="red"> completely trivial to invoke and interpret, and yields a
 //! tiny file as output</font>.
 //!
-//! The idea is very simple: if it is possible to significantly speed up your code, 
+//! The idea is very simple: if it is possible to significantly speed up your code,
 //! this should be directly visible from a modest sample of tracebacks chosen at
-//! random.  And these tracebacks can be generated for any main program by adding a 
+//! random.  And these tracebacks can be generated for any main program by adding a
 //! simple command-line option to it that causes it to enter a special 'profile'
 //! mode, gathering tracebacks and then terminating.  
 //!
 //! For example this might be
 //! <code>PROF=100</code> to profile 100 events.  It's your choice how to specify
-//! this command-line option, but this crate makes it trivial to do so. 
+//! this command-line option, but this crate makes it trivial to do so.
 //! <font color="red">With about one minute's work,
-//! you can make it possible to profile your code with essentially zero work, 
+//! you can make it possible to profile your code with essentially zero work,
 //! whenever you like.</font>
 //!
 //! # Example of pretty trace profiling output
@@ -55,7 +55,7 @@
 //! Pretty trace profiling reveals exactly what the code was doing at 100 random
 //! instances; the first 19 of 100 collated tracebacks are shown here.  More were
 //! attempted: of attempted tracebacks, 81.3% were successful.  Most fails are
-//! due to cases where the stack trace would have 'walked' into the allocator, as 
+//! due to cases where the stack trace would have 'walked' into the allocator, as
 //! discussed at "Full Disclosure" below.
 //!
 //! # A brief guide for using pretty trace
@@ -64,7 +64,7 @@
 //! <pre>
 //! [profile.release]
 //! debug = true</pre>
-//! to your top-level <code>Cargo.toml</code>.  We recommend always doing this, 
+//! to your top-level <code>Cargo.toml</code>.  We recommend always doing this,
 //! regardless of
 //! whether you use this crate.  The computational performance hit appears to be
 //! small.  Then compile with <code>cargo build --release</code>.
@@ -93,11 +93,11 @@
 //!
 //! Several other useful features are described below.  This include the capability
 //! of tracing to know where you are in your data (and not just your code), and
-//! for focusing profiling on a key set of crates that you're optimizing. 
+//! for focusing profiling on a key set of crates that you're optimizing.
 //!
 //! # Credit
 //!
-//! This code was developed at 10x Genomics, and is based in part on C++ code 
+//! This code was developed at 10x Genomics, and is based in part on C++ code
 //! developed at the Whitehead Institute Center for Genome
 //! Research / Broad Institute starting in 2000, and included in
 //! <https://github.com/CompRD/BroadCRD>.
@@ -106,7 +106,7 @@
 //!
 //! <b>1. Could a pretty traceback lose important information?</b>
 //! <br><br>Possibly.  For this reason we provide the capability of dumping a full
-//! traceback to a file (as 'insurance') and also an environment variable to 
+//! traceback to a file (as 'insurance') and also an environment variable to
 //! force full tracebacks.  However we have not seen examples where important
 //! information is lost.<br><br>
 //! <b>2. Can the pretty traceback itself be saved to a separate file?</b>
@@ -128,7 +128,7 @@
 //! ◼ Ideally out-of-memory events would be caught and converted to panics so
 //!   we could trace them, but we don't.
 //!
-//! ◼ Profile mode only sees the main thread.  This seems intrinsic to the 
+//! ◼ Profile mode only sees the main thread.  This seems intrinsic to the
 //!   approach.  So you may need to modify your code to run single-threaded to
 //!   effectively use this mode.
 //!
@@ -174,8 +174,7 @@ use std::{
     io::{BufRead, BufReader, BufWriter, Write},
     ops::Deref,
     os::unix::io::FromRawFd,
-    panic,
-    process,
+    panic, process,
     str::from_utf8,
     sync::Mutex,
     thread,
@@ -214,7 +213,6 @@ pub struct PrettyTrace {
 /// once near the begining of your main program.
 
 impl PrettyTrace {
-
     /// Initialize a <code>PrettyTrace</code> object.  This does nothing
     /// in and of itself.
 
@@ -229,27 +227,30 @@ impl PrettyTrace {
         }
     }
 
-    /// Cause a <code>PrettyTrace</code> object to do something: change the 
-    /// behavior of response to <code>panic!</code> to produce a prettified 
+    /// Cause a <code>PrettyTrace</code> object to do something: change the
+    /// behavior of response to <code>panic!</code> to produce a prettified
     /// traceback, cause <code>Ctrl-C</code> interrupts to convert to panics,
     /// and perform profiling, if <code>profile()</code> has been called.
 
-    pub fn run( &mut self ) {
+    pub fn run(&mut self) {
         let mut fd = -1 as i32;
-        if self.fd.is_some() { fd = self.fd.unwrap() as i32; }
+        if self.fd.is_some() {
+            fd = self.fd.unwrap() as i32;
+        }
         let mut haps = Happening::new();
-        if self.profile { 
+        if self.profile {
             if self.count.is_none() {
-                eprintln!( "PrettyTrace: run() was called after profile() \
-                    without setting count.\n\
-                    Please call count(...) and try again." );
+                eprintln!(
+                    "PrettyTrace: run() was called after profile() \
+                     without setting count.\n\
+                     Please call count(...) and try again."
+                );
                 std::process::exit(1);
             }
             if self.whitelist.is_none() {
-                self.whitelist = Some( Vec::<String>::new() );
+                self.whitelist = Some(Vec::<String>::new());
             }
-            haps.initialize( 
-                &self.whitelist.clone().unwrap(), self.count.unwrap() ); 
+            haps.initialize(&self.whitelist.clone().unwrap(), self.count.unwrap());
         }
 
         let mut full_file = String::new();
@@ -257,31 +258,30 @@ impl PrettyTrace {
             full_file = self.full_file.clone().unwrap();
         }
         if self.message.is_some() {
-            force_pretty_trace_fancy( full_file, fd, &self.message.unwrap(), &haps );
-        }
-        else {
+            force_pretty_trace_fancy(full_file, fd, &self.message.unwrap(), &haps);
+        } else {
             let tm = new_thread_message();
-            force_pretty_trace_fancy( full_file, fd, &tm, &haps );
+            force_pretty_trace_fancy(full_file, fd, &tm, &haps);
         }
     }
 
     /// Define a file, that in the event that a traceback is triggered by a
-    /// panic or Ctrl-C, will be used to dump a full traceback to.  The 
+    /// panic or Ctrl-C, will be used to dump a full traceback to.  The
     /// <i>raison d'etre</i> for this is that an abbreviated pretty traceback might
     /// in some cases elide useful information (although this has not been observed).
     ///
     /// You can also force <code>PrettyTrace</code> to emit full tracebacks by
     /// setting the environment variable <code>RUST_FULL_TRACE</code>.
 
-    pub fn full_file( &mut self, full_file: &str ) -> &mut PrettyTrace {
-        self.full_file = Some( full_file.to_string() );
+    pub fn full_file(&mut self, full_file: &str) -> &mut PrettyTrace {
+        self.full_file = Some(full_file.to_string());
         self
     }
 
     /// Define a file descriptor, that in the event a traceback is triggered by a
     /// panic or Ctrl-C, will be used to dump a second copy of the traceback to.
 
-    pub fn fd( &mut self, fd: i32 ) -> &mut PrettyTrace{
+    pub fn fd(&mut self, fd: i32) -> &mut PrettyTrace {
         self.fd = Some(fd);
         self
     }
@@ -304,7 +304,7 @@ impl PrettyTrace {
     /// }
     /// ```
 
-    pub fn message( &mut self, message: &'static CHashMap<ThreadId, String> ) -> &mut PrettyTrace {
+    pub fn message(&mut self, message: &'static CHashMap<ThreadId, String>) -> &mut PrettyTrace {
         self.message = Some(message);
         self
     }
@@ -312,22 +312,22 @@ impl PrettyTrace {
     /// Turn on profile mode.  If you use this, be sure to also call `count`
     /// and probably `whitelist` too.
 
-    pub fn profile( &mut self ) -> &mut PrettyTrace {
+    pub fn profile(&mut self) -> &mut PrettyTrace {
         self.profile = true;
         self
     }
 
     /// Define the number of tracebacks to be gathered in profile mode.
 
-    pub fn count( &mut self, count: usize ) -> &mut PrettyTrace {
+    pub fn count(&mut self, count: usize) -> &mut PrettyTrace {
         self.count = Some(count);
         self
     }
 
     /// Define the whitelist for profile mode.  It is a list of strings that
-    /// profile traces are matched against.  Only traces matching at least one of 
-    /// the strings are shown.  This allows tracebacks to be focused on a fixed set 
-    /// of crates that you're trying to optimize.  Setting this option can greatly 
+    /// profile traces are matched against.  Only traces matching at least one of
+    /// the strings are shown.  This allows tracebacks to be focused on a fixed set
+    /// of crates that you're trying to optimize.  Setting this option can greatly
     /// increase the utility of profile mode.
 
     /// # Example
@@ -339,15 +339,14 @@ impl PrettyTrace {
     ///        .run();
     /// ```
 
-    pub fn whitelist( &mut self, whitelist: &Vec<&str> ) -> &mut PrettyTrace {
+    pub fn whitelist(&mut self, whitelist: &Vec<&str>) -> &mut PrettyTrace {
         let mut x = Vec::<String>::new();
         for i in 0..whitelist.len() {
-            x.push( whitelist[i].to_string() );
+            x.push(whitelist[i].to_string());
         }
         self.whitelist = Some(x);
         self
     }
-
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
