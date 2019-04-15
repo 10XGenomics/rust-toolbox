@@ -117,6 +117,7 @@ pub fn open_maybe_compressed<P: AsRef<Path>>(filename: P) -> Box<Read> {
 // read_maybe_unzipped( f, lines ): The filename f should have the form x.gz.
 // If that exists, load it into lines.  Otherwise try to load x.
 
+/*
 pub fn read_maybe_unzipped(f: &String, lines: &mut Vec<String>) {
     lines.clear();
     if path_exists(&f) {
@@ -137,6 +138,7 @@ pub fn read_maybe_unzipped(f: &String, lines: &mut Vec<String>) {
         }
     }
 }
+*/
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // CODE TO DO READS AND WRITES USING SERDE
