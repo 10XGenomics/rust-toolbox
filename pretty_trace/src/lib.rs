@@ -25,7 +25,7 @@
 //!
 //! # Profiling
 //!
-//! Profline is a fundamental tool for optimizing code.
+//! Profiling is a fundamental tool for optimizing code.
 //! Standard profiling tools including perf are powerful, however they
 //! can be challenging to use.  This crate provides a profiling capability that
 //! is <font color="red"> completely trivial to invoke and interpret, and yields a
@@ -78,8 +78,8 @@
 //! </font>
 //! </p>
 //!
-//! Pretty trace profiling reveals exactly what the code was doing at 100 random
-//! instances; the first 19 of 100 collated tracebacks are shown here.  More were
+//! Here pretty trace profiling reveals exactly what some code was doing at 100
+//! random instances; we show the first 19 of 100 collated tracebacks.  More were
 //! attempted: of attempted tracebacks, 81.3% were successful.  Most fails are
 //! due to cases where the stack trace would have 'walked' into the allocator, as
 //! discussed at "Full Disclosure" below.
