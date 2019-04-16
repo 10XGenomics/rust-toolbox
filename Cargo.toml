@@ -3,7 +3,7 @@
 members = [
     "io_utils",
     "pretty_trace",
-    "stats",
+    "stats_utils",
     "string_utils",
     "vec_utils",
 ]

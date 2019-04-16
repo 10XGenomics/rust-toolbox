@@ -184,7 +184,7 @@ extern crate io_utils;
 extern crate lazy_static;
 extern crate libc;
 extern crate nix;
-extern crate stats;
+extern crate stats_utils;
 extern crate string_utils;
 extern crate vec_utils;
 
@@ -195,7 +195,7 @@ use failure::Error;
 use io_utils::*;
 use libc::{kill, SIGINT, SIGKILL, SIGUSR1};
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
-use stats::*;
+use stats_utils::*;
 use std::{
     env,
     fs::{remove_file, File},
