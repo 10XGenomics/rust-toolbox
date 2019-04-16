@@ -48,9 +48,37 @@
 //!
 //! # Example of pretty trace profiling output
 //!
-//! <div>
-//! <img src="../../pretty_trace/images/happening.png"/>
-//! </div>
+//! <p style="line-height:1.0">
+//! <font size="2" face="courier">
+//! PRETTY TRACE PROFILE
+//! <br><br>TRACED = 81.3%
+//! <br><br>TOTAL = 100
+//! <br><br>[1] COUNT = 13
+//! <br>1: vdj_asm_tools::contigs::make_contigs
+//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/contigs.rs:494
+//! <br>2: vdj_asm_tools::process::process_barcode
+//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/process.rs:1388
+//! <br>3: vdj_asm_demo::process_project_core
+//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:202
+//! <br>4: vdj_asm_demo::main
+//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:890
+//! <br>&nbsp&nbsp vdj_asm_demo::main
+//! <br>   ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:854
+//! <br>
+//! <br>[2] COUNT = 6
+//! <br>1: tenkit2::hyper::Hyper::build_from_reads
+//! <br>&nbsp&nbsp ◼ tenkit2/src/hyper.rs:325
+//! <br>2: vdj_asm_tools::process::process_barcode
+//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/process.rs:851
+//! <br>3: vdj_asm_demo::process_project_core
+//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:202
+//! <br>4: vdj_asm_demo::main
+//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:890
+//! <br>&nbsp&nbsp vdj_asm_demo::main
+//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:854
+//! <br>...
+//! </font>
+//! </p>
 //!
 //! Pretty trace profiling reveals exactly what the code was doing at 100 random
 //! instances; the first 19 of 100 collated tracebacks are shown here.  More were
