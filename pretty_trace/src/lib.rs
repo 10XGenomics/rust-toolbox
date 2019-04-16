@@ -22,7 +22,7 @@
 //!
 //! # Example of native versus pretty trace output
 //! <div>
-//! <img src="../../pretty_trace/images/long_vs_short_traceback.png"/>
+//! <img src="../../pretty_trace/images/long_vs_short_traceback.jpg"/>
 //! </div>
 //!
 //! # Profiling
