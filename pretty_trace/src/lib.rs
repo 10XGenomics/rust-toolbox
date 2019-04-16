@@ -21,9 +21,7 @@
 //! an environment variable.
 //!
 //! # Example of native versus pretty trace output
-//! <div>
-//! <img src="../../pretty_trace/images/long_vs_short_traceback.jpg"/>
-//! </div>
+//! ![native vs pretty trace output](https://raw.githubusercontent.com/10XGenomics/rust-toolbox/master/pretty_trace/images/long_vs_short_traceback.jpg)
 //!
 //! # Profiling
 //!
