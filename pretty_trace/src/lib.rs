@@ -63,7 +63,7 @@
 //! <br>4: vdj_asm_demo::main
 //! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:890
 //! <br>&nbsp&nbsp vdj_asm_demo::main
-//! <br>   ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:854
+//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:854
 //! <br>
 //! <br>[2] COUNT = 6
 //! <br>1: tenkit2::hyper::Hyper::build_from_reads
