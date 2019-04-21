@@ -95,7 +95,8 @@
 //! to your top-level <code>Cargo.toml</code>.  We recommend always doing this,
 //! regardless of
 //! whether you use this crate.  The computational performance hit appears to be
-//! small.  Then compile with <code>cargo build --release</code>.
+//! small (although you will get larger executable files).  Using `debug = 1`
+//! does not work.  Then compile with <code>cargo build --release</code>.
 //!
 //! <br> Now to access pretty trace, put this in your <code>Cargo.toml</code>
 //! <pre>
