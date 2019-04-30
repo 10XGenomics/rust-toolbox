@@ -114,7 +114,7 @@
 //!     PrettyTrace::new().on();
 //! </pre>
 //! at the beginning of your main program.  And you're good to go!  Any panic
-//! or Ctrl-C will cause a pretty traceback to be generated.  
+//! will cause a pretty traceback to be generated.  
 //!
 //! <br> To instead profile, e.g. for 100 events, do this
 //! <pre>
@@ -141,8 +141,13 @@
 //! information is lost.<br><br>
 //! <b>2. Can the pretty traceback itself be saved to a separate file?</b>
 //! <br><br>Yes this capability is provided.<br><br>
-//! <b>3. Can the traceback on Ctrl-C be elided?</b>
-//! <br><br>Ctrl-C twice in rapid succession to do this.
+//! <b>3. Can I get a traceback on Ctrl-C?</b>
+//! <br><br>Yes, if you do this
+//! <pre>
+//!     PrettyTrace::new().ctrlc().on();
+//! </pre>
+//! then any Ctrl-C will be converted into a panic, and then you'll get a trackback.
+//!  If you Ctrl-C twice in rapid succession, the traceback will be elided.
 //!
 //! # Full disclosure
 //!
@@ -222,9 +227,9 @@ use vec_utils::*;
 /// crate documentation.
 
 pub struct PrettyTrace {
-    // filename to dump full traceback to upon panic or Ctrl-C
+    // filename to dump full traceback to upon panic
     pub full_file: Option<String>,
-    // file descriptor to dump second copy of traceback to upon panic or Ctrl-C
+    // file descriptor to dump second copy of traceback to upon panic
     pub fd: Option<i32>,
     // thread message
     pub message: Option<&'static CHashMap<ThreadId, String>>,
@@ -234,6 +239,8 @@ pub struct PrettyTrace {
     pub count: Option<usize>,
     // whitelist for profile mode
     pub whitelist: Option<Vec<String>>,
+    // convert Ctrl-Cs to panics
+    pub ctrlc: bool,
 }
 
 /// Normal usage of `PrettyTrace` is to call
@@ -254,13 +261,13 @@ impl PrettyTrace {
             message: None,
             count: None,
             whitelist: None,
+            ctrlc: false,
         }
     }
 
     /// Cause a <code>PrettyTrace</code> object to do something: change the
     /// behavior of response to <code>panic!</code> to produce a prettified
-    /// traceback, cause <code>Ctrl-C</code> interrupts to convert to panics,
-    /// and perform profiling, if <code>profile()</code> has been called.
+    /// traceback and perform profiling, if <code>profile()</code> has been called.
 
     pub fn on(&mut self) {
         let mut fd = -1 as i32;
@@ -280,15 +287,24 @@ impl PrettyTrace {
             full_file = self.full_file.clone().unwrap();
         }
         if self.message.is_some() {
-            force_pretty_trace_fancy(full_file, fd, &self.message.unwrap(), &haps);
+            force_pretty_trace_fancy(
+                full_file, fd, &self.message.unwrap(), &haps, self.ctrlc);
         } else {
             let tm = new_thread_message();
-            force_pretty_trace_fancy(full_file, fd, &tm, &haps);
+            force_pretty_trace_fancy(full_file, fd, &tm, &haps, self.ctrlc);
         }
     }
 
+    /// Cause a <code>Ctrl-C</code> interrupt to be turned into a panic, and thence
+    /// produce a traceback for the main thread.  This does not allow you to see
+    /// what other threads are doing.
+
+    pub fn ctrlc(&mut self) {
+        self.ctrlc = true;
+    }
+
     /// Define a file, that in the event that a traceback is triggered by a
-    /// panic or Ctrl-C, will be used to dump a full traceback to.  The
+    /// panic, will be used to dump a full traceback to.  The
     /// <i>raison d'etre</i> for this is that an abbreviated pretty traceback might
     /// in some cases elide useful information (although this has not been observed).
     ///
@@ -301,7 +317,7 @@ impl PrettyTrace {
     }
 
     /// Define a file descriptor, that in the event a traceback is triggered by a
-    /// panic or Ctrl-C, will be used to dump a second copy of the traceback to.
+    /// panic, will be used to dump a second copy of the traceback to.
 
     pub fn fd(&mut self, fd: i32) -> &mut PrettyTrace {
         self.fd = Some(fd);
@@ -309,7 +325,7 @@ impl PrettyTrace {
     }
 
     /// Define a message object that will be used by threads to store their status.
-    /// This is printed if a traceback is triggered by a panic or Ctrl-C, and where
+    /// This is printed if a traceback is triggered by a panic, and where
     /// code is traversing data in a loop, can be used to determine not only where
     /// execution is in the code, but also where it is in the data.
 
@@ -450,14 +466,15 @@ fn test_in_allocator() -> bool {
 
 // Redirect SIGINT and SIGUSR1 interrupts to the function "handler".
 
-fn install_signal_handler(happening: bool) -> Result<(), Error> {
+fn install_signal_handler(happening: bool, ctrlc: bool) -> Result<(), Error> {
     if happening {
         let handler = SigHandler::Handler(handler);
         let action = SigAction::new(handler, SaFlags::SA_RESTART, SigSet::empty());
         unsafe {
             sigaction(Signal::SIGUSR1, &action)?;
         }
-    } else {
+    }
+    if ctrlc {
         let handler = SigHandler::Handler(handler);
         let action = SigAction::new(handler, SaFlags::SA_RESTART, SigSet::empty());
         unsafe {
@@ -547,6 +564,7 @@ fn force_pretty_trace_fancy(
     fd: i32,
     thread_message: &'static CHashMap<ThreadId, String>,
     happening: &Happening,
+    ctrlc: bool,
 ) {
     // Launch happening thread, which imits SIGUSR1 interrupts.  Usually, it will
     // hang after some number of iterations, and at that point we kill ourself,
@@ -633,7 +651,7 @@ fn force_pretty_trace_fancy(
 
     // Set up to catch SIGNINT and SIGUSR1 interrupts.
 
-    let _ = install_signal_handler(happening.on);
+    let _ = install_signal_handler( happening.on, ctrlc );
 
     // Setup panic hook. If we panic, this code gets run.
 
