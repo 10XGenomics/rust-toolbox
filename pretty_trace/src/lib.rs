@@ -495,7 +495,7 @@ extern "C" fn handler(sig: i32) {
                 std::process::exit(0);
             }
             HEARD_CTRLC += 1;
-            thread::sleep(time::Duration::from_millis(400));
+            thread::sleep(time::Duration::from_millis(1000));
             if HEARD_CTRLC > 1 {
                 std::process::exit(0);
             }
