@@ -95,7 +95,7 @@
 //! to your top-level <code>Cargo.toml</code>.  We recommend always doing this,
 //! regardless of
 //! whether you use this crate.  The computational performance hit appears to be
-//! small (although you will get larger executable files).  Using 
+//! small (although you will get larger executable files).  Using
 //! <code>debug = 1</code>
 //! does not work.  Then compile with <code>cargo build --release</code>.
 //!
@@ -287,8 +287,7 @@ impl PrettyTrace {
             full_file = self.full_file.clone().unwrap();
         }
         if self.message.is_some() {
-            force_pretty_trace_fancy(
-                full_file, fd, &self.message.unwrap(), &haps, self.ctrlc);
+            force_pretty_trace_fancy(full_file, fd, &self.message.unwrap(), &haps, self.ctrlc);
         } else {
             let tm = new_thread_message();
             force_pretty_trace_fancy(full_file, fd, &tm, &haps, self.ctrlc);
@@ -652,7 +651,7 @@ fn force_pretty_trace_fancy(
 
     // Set up to catch SIGNINT and SIGUSR1 interrupts.
 
-    let _ = install_signal_handler( happening.on, ctrlc );
+    let _ = install_signal_handler(happening.on, ctrlc);
 
     // Setup panic hook. If we panic, this code gets run.
 
