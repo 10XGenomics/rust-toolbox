@@ -491,6 +491,7 @@ extern "C" fn handler(sig: i32) {
     if sig == SIGINT {
         unsafe {
             if HEARD_CTRLC > 0 {
+                HEARD_CTRLC += 1;
                 std::process::exit(0);
             }
             HEARD_CTRLC += 1;
