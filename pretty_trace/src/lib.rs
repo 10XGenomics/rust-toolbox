@@ -299,8 +299,9 @@ impl PrettyTrace {
     /// produce a traceback for the main thread.  This does not allow you to see
     /// what other threads are doing.
 
-    pub fn ctrlc(&mut self) {
+    pub fn ctrlc(&mut self) -> &mut PrettyTrace {
         self.ctrlc = true;
+        self
     }
 
     /// Define a file, that in the event that a traceback is triggered by a
