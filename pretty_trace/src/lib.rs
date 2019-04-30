@@ -147,7 +147,6 @@
 //!     PrettyTrace::new().ctrlc().on();
 //! </pre>
 //! then any Ctrl-C will be converted into a panic, and then you'll get a trackback.
-//!  If you Ctrl-C twice in rapid succession, the traceback will be elided.
 //!
 //! # Full disclosure
 //!
@@ -296,7 +295,8 @@ impl PrettyTrace {
 
     /// Cause a <code>Ctrl-C</code> interrupt to be turned into a panic, and thence
     /// produce a traceback for the main thread.  This does not allow you to see
-    /// what other threads are doing.
+    /// what other threads are doing.  If you <code>Ctrl-C</code> twice in rapid
+    /// succession, you may elide the traceback, but this is inconsistent.
 
     pub fn ctrlc(&mut self) -> &mut PrettyTrace {
         self.ctrlc = true;
