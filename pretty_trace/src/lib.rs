@@ -854,6 +854,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
         if bt[i] == b'\n' {
             // Replace long constructs of the form /rustc/......./src/
             //                                  by /rustc/<stuff>/src/.
+            // and some similar things.
 
             let x = stringme(&line);
             let mut x2 = x.clone();
@@ -868,6 +869,14 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
             if x.contains("/checkouts/") {
                 if x.after("/checkouts/").contains("/src/") {
                     let y = x.between("/checkouts/", "/src/");
+                    if y.len() > 10 {
+                        x2 = x2.replace(y, "<stuff>");
+                    }
+                }
+            }
+            if x.contains("/src/github.com-") {
+                if x.after("/src/github.com-").contains("/") {
+                    let y = x.between("/src/github.com-", "/");
                     if y.len() > 10 {
                         x2 = x2.replace(y, "<stuff>");
                     }
