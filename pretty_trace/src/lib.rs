@@ -157,8 +157,6 @@
 //! ◼ There is an ugly blacklist of strings that is fragile.  This may
 //!   be an intrinsic feature of the approach.
 //!
-//! ◼ Pretty traces containing more than ten items may be incorrectly handled.
-//!
 //! ◼ Ideally out-of-memory events would be caught and converted to panics so
 //!   we could trace them, but we don't.
 //!
@@ -456,7 +454,6 @@ fn test_in_allocator() -> bool {
         });
         !in_alloc
     });
-    // eprintln!( "returning from in_allocator" ); // XXXXXXXXXXXXXXXXXXXXXXXXXX
     in_alloc
 }
 
@@ -885,9 +882,75 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
         }
     }
 
-    // Format the backtrace to remove 'junk', and renumber the trace entries.
+    // Convert the traceback into a Vec<Vec<Vec<String>>>>.  The outer vector corresponds to the
+    // traceback block.  Within each block is a vector of traceback entries, and each entry is
+    // itself a vector of on or two lines.  It is two, except when there is no code line number.
+    // The initial blanks and block numbers are stripped off.
 
-    let filter = true;
+    let mut blocks = Vec::<Vec<Vec<Vec<u8>>>>::new();
+    let mut block = Vec::<Vec<Vec<u8>>>::new();
+    let mut blocklet = Vec::<Vec<u8>>::new();
+    for i in 0..btlines.len() {
+
+        // Ignore blank lines.
+
+        if btlines[i].len() == 0 {
+            continue;
+        }
+
+        // Determine if this line begins a block, i.e. looks like <blanks><number>:<...>.
+
+        let mut s = btlines[i].as_slice();
+        let mut j = 0;
+        while j < s.len() {
+            if s[j] != b' ' {
+                break;
+            }
+            j += 1;
+        }
+        while j < s.len() {
+            if !(s[j] as char).is_digit(10) {
+                break;
+            }
+            j += 1;
+        }
+        if j < s.len() && s[j] == b':' {
+            if block.len() > 0 {
+                if blocklet.len() > 0 {
+                    block.push( blocklet.clone() );
+                    blocklet.clear();
+                }
+                blocks.push( block.clone() );
+                block.clear();
+                s = &s[j+1 .. s.len() ];
+            }
+        }
+
+        // Proceed.
+
+        let mut j = 0;
+        while j < s.len() {
+            if s[j] != b' ' {
+                break;
+            }
+            j += 1;
+        }
+        s = &s[ j .. s.len() ];
+        blocklet.push( s.to_vec() );
+        if s.starts_with( b"at " ) {
+            block.push( blocklet.clone() );
+            blocklet.clear();
+        }
+    }
+    if blocklet.len() > 0 {
+        block.push( blocklet.clone() );
+    }
+    if block.len() > 0 {
+        blocks.push( block.clone() );
+    }
+    
+    // Define the blacklist.
+
     let blacklist = vec![
         "pretty_trace",
         "::libunwind::",
@@ -910,217 +973,167 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
         "__clone",
         "call_once",
         "<unknown>",
+        "/panic.rs",
+        "/panicking.rs",
+        "catch_unwind",
+        "lang_start_internal",
+        "libstd/rt.rs",
     ];
-    let mut btlines2 = Vec::<Vec<u8>>::new();
-    if !filter {
-        btlines2 = btlines.clone();
-    } else {
-        let mut i = 1;
-        let mut count = 1;
-        while i < btlines.len() {
-            let mut j = i + 1;
-            while j < btlines.len() {
-                let linex = btlines[j].clone();
-                if linex.len() >= 5 && linex[4] == b':' {
-                    break;
-                }
-                j += 1;
-            }
 
-            // Now btlines[i..j] is a block in the trace.  If the first line contains a blacklisted
-            // string, we ignore the entire block.
+    // Remove certain 'unwanted' blocklets.
 
-            let linex = btlines[i].clone();
-            let s = strme(&linex);
-            let mut junk = false;
-            for b in blacklist.iter() {
-                if s.contains(b) {
-                    junk = true;
+    for i in 0..blocks.len() {
+        let mut to_delete = vec![ false; blocks[i].len() ];
+        for j in 0..blocks[i].len() {
+
+            // Blocklet may not contain a blacklisted string.
+
+            'outer1: for k in 0..blocks[i][j].len() {
+                let s = strme(&blocks[i][j][k]);
+                for b in blacklist.iter() {
+                    if s.contains(b) {
+                        // CRAZY EXEMPTION BECAUSE OF HOW TEST IS NAMED!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        if s.contains( "pretty_trace_tests" ) { // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            continue; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        } // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        to_delete[j] = true;
+                        break 'outer1;
+                    }
                 }
             }
 
-            // If a whitelist is provided, require that at least one of the strings appears in
-            // the block.  Otherwise the entire block is deleted.
+            // Blocklet must contain a whitelisted string (if whitelist provided).
 
-            if whitelist.len() > 0 {
+            if !to_delete[j] && whitelist.len() > 0 {
                 let mut good = false;
-                for k in i..j {
-                    let linex = btlines[k].clone();
-                    let s = strme(&linex);
+                'outer2: for k in 0..blocks[i][j].len() {
+                    let s = strme(&blocks[i][j][k]);
                     for b in whitelist.iter() {
                         if s.contains(b) {
                             good = true;
+                            break 'outer2;
                         }
                     }
                 }
-                if !good {
-                    junk = true;
+                if !good { 
+                    to_delete[j] = true; 
                 }
             }
 
-            // Delete in certain cases where main occurs.
+            // Don't allow blockets of length one that end with "- main".
+
+            let s = strme(&blocks[i][j][0]);
+            if !to_delete[j] && blocks[i][j].len() == 1 && s.ends_with( "- main" ) {
+                to_delete[j] = true;
+            }
+
+            // Don't allow blocklets whose first line has the form ... main(...).
 
             if s.contains(" main (") {
                 if s.after(" main (").contains(")") {
                     if !s.between(" main (", ")").contains("(") {
-                        junk = true;
+                        to_delete[j] = true;
                     }
                 }
             }
 
-            // Final test to see if we're keeping the block.
+        }
+        erase_if( &mut blocks[i], &to_delete );
+    }
 
-            if !junk && !(j - i == 1 && s.ends_with("- main")) {
-
-                // Now we edit the block.
-
-                let lineno = format!("{c:>width$}", c = count, width = 4);
-                let linenox = lineno.as_bytes();
-                for l in 0..4 {
-                    btlines[i][l] = linenox[l];
-                }
-                count += 1;
-
-                // The trace block has been accepted.  Now decide which lines
-                // in the block to keep.  These are pushed onto btlines2.
-
-                let mut k = i;
-                let mut printed = false;
-                while k < j {
-                    let linex = btlines[k].clone();
-                    let s = strme(&linex);
-                    let linex2 = btlines[k + 1].clone();
-                    let s2 = strme(&linex2);
-                    let mut good = true;
-                    if whitelist.len() > 0 {
-                        good = false;
-                        for b in whitelist.iter() {
-                            if s.contains(b) {
-                                good = true;
-                            }
-                        }
-                    }
-                    if good
-                        && !s2.contains(".rs:0")
-                        && ((!s.contains(" - <") && !s.contains("rayon::iter")) || k == i)
-                    {
-                        // Add back traceback entry number if needed.  Doesn't work
-                        // if 10 or more.
-
-                        if k > i && !printed {
-                            if btlines[k].len() >= 5 && count < 10 {
-                                btlines[k][3] = b'0' + count - 1;
-                                btlines[k][4] = b':';
-                            }
-                        }
-                        printed = true;
-                        if s.contains("::") {
-                            let cc = s.rfind("::").unwrap();
-                            btlines2.push(btlines[k][0..cc].to_vec());
-                        } else {
-                            btlines2.push(btlines[k].clone());
-                        }
-                        if k + 1 < j {
-                            btlines2.push(btlines[k + 1].clone());
-                        }
-                    }
-                    k += 2;
-                }
-                btlines2.push(Vec::<u8>::new());
-            }
-            i = j;
+    // Remove any block that has length zero.
+        
+    let mut to_delete = vec![ false; blocks.len() ];
+    for i in 0..blocks.len() {
+        if blocks[i].len() == 0 {
+            to_delete[i] = true;
         }
     }
+    erase_if( &mut blocks, &to_delete );
+
+    // stuff from earlier version, not addressing now
+
+    // !s2.contains(".rs:0")
+    // ((!s.contains(" - <") && !s.contains("rayon::iter")) || k == i)
+
+    // if s.contains("::{{closure}}") {
+    //     s = s.rev_before("::{{closure}}");
+    // }
 
     // Contract paths that look like " .../.../src/...".
 
     let src = b"/src/".to_vec();
-    for i in 0..btlines2.len() {
-        let mut x = Vec::<u8>::new();
-        let mut y = btlines2[i].clone();
-        for j in 0..y.len() {
-            if contains_at(&y, &src, j) {
-                for k in (0..j).rev() {
-                    if y[k] != b'/' {
-                        continue;
-                    }
-                    for l in (0..k).rev() {
-                        if y[l] == b' ' {
-                            for m in 0..l + 1 {
-                                x.push(y[m]);
+    for i in 0..blocks.len() {
+        for j in 0..blocks[i].len() {
+            if blocks[i][j].len() == 2 {
+                let mut x = Vec::<u8>::new();
+                let mut y = blocks[i][j][1].clone();
+                for j in 0..y.len() {
+                    if contains_at(&y, &src, j) {
+                        for k in (0..j).rev() {
+                            if y[k] != b'/' {
+                                continue;
                             }
-                            for m in k + 1..y.len() {
-                                x.push(y[m]);
+                            for l in (0..k).rev() {
+                                if y[l] == b' ' {
+                                    for m in 0..l + 1 {
+                                        x.push(y[m]);
+                                    }
+                                    for m in k + 1..y.len() {
+                                        x.push(y[m]);
+                                    }
+                                    break;
+                                }
+                                if x.len() > 0 {
+                                    break;
+                                }
                             }
-                            break;
-                        }
-                        if x.len() > 0 {
-                            break;
+                            if x.len() > 0 {
+                                break;
+                            }
                         }
                     }
                     if x.len() > 0 {
                         break;
                     }
                 }
-            }
-            if x.len() > 0 {
-                break;
-            }
-        }
-        if x.len() > 0 {
-            btlines2[i] = x;
-        }
-    }
-
-    // Make the lines prettier.
-
-    let mut btlines3 = Vec::<Vec<u8>>::new();
-    for i in 0..btlines2.len() {
-        let linex = btlines2[i].clone();
-        let s = strme(&linex);
-        let mut x = Vec::<u8>::new();
-        let init = 8;
-        if s.len() < init {
-            btlines3.push(linex.clone());
-        } else {
-            for j in 0..init {
-                x.push(linex[j]);
-            }
-            let mut start = init;
-            // if linex.len() >= 5 && linex[4] == b':' && s.contains( " - " ) {
-            if s.contains(" - ") {
-                start = s.find(" - ").unwrap() + 1;
-            } else if s.contains(" at ") {
-                start = s.find(" at ").unwrap() + 1;
-            }
-            for j in start..s.len() {
-                x.push(linex[j]);
-            }
-
-            // Delete three leading blanks, then save line.
-
-            let x2 = x.clone();
-            if String::from_utf8(x2).unwrap().starts_with("        at") {
-                let mut y = x[10..x.len()].to_vec();
-                x = "   ◼".as_bytes().to_vec();
-                x.append(&mut y);
-            } else {
-                if x.len() > 3 {
-                    x = x[3..x.len()].to_vec();
+                if x.len() > 0 {
+                    blocks[i][j][1] = y;
                 }
             }
-            btlines3.push(x);
         }
     }
+
+    // Emit prettified output.
+
     let mut all_out = String::new();
-    for i in 0..btlines3.len() {
-        let x = &btlines3[i];
-        let mut s = strme(&x);
-        if s.contains("::{{closure}}") {
-            s = s.rev_before("::{{closure}}");
+    for i in 0..blocks.len() {
+        let num = format!( "{}: ", i+1 );
+        let sub = stringme( &vec![ b' '; num.len() ].as_slice() );
+        for j in 0..blocks[i].len() {
+            for k in 0..blocks[i][j].len() {
+                if j == 0 && k == 0 { 
+                    all_out += &num;
+                }
+                else {
+                    all_out += &sub;
+                }
+                if k > 0 {
+                    all_out += "◼ ";
+                }
+                let mut s = stringme(&blocks[i][j][k]);
+                if k == 0 {
+                    if s.contains( "::" ) {
+                        let cc = s.rfind("::").unwrap();
+                        s.truncate(cc);
+                    }
+                }
+                all_out += &s;
+                all_out += "\n";
+            }
         }
-        if x.len() > 0 || !pack {
-            all_out += &format!("{}\n", s);
+        if !pack {
+            all_out += "\n";
         }
     }
     all_out
