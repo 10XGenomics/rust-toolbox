@@ -1,0 +1,11 @@
+[package]
+name = "pretty_trace_tests"
+version = "0.1.0"
+authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
+
+[dependencies]
+libc = "0.2.51"
+nix = "0.13.0"
+pretty_trace = { path = "../pretty_trace" }
+string_utils = { path = "../string_utils" }
+rayon = "1.0.2"
