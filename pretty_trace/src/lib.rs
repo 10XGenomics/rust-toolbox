@@ -927,7 +927,8 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                 j += 1;
             }
 
-            // Now btlines[i..j] is a block in the trace.
+            // Now btlines[i..j] is a block in the trace.  If the first line contains a blacklisted
+            // string, we ignore the entire block.
 
             let linex = btlines[i].clone();
             let s = strme(&linex);
@@ -937,6 +938,10 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                     junk = true;
                 }
             }
+
+            // If a whitelist is provided, require that at least one of the strings appears in
+            // the block.  Otherwise the entire block is deleted.
+
             if whitelist.len() > 0 {
                 let mut good = false;
                 for k in i..j {
@@ -952,6 +957,9 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                     junk = true;
                 }
             }
+
+            // Delete in certain cases where main occurs.
+
             if s.contains(" main (") {
                 if s.after(" main (").contains(")") {
                     if !s.between(" main (", ")").contains("(") {
@@ -959,7 +967,13 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                     }
                 }
             }
+
+            // Final test to see if we're keeping the block.
+
             if !junk && !(j - i == 1 && s.ends_with("- main")) {
+
+                // Now we edit the block.
+
                 let lineno = format!("{c:>width$}", c = count, width = 4);
                 let linenox = lineno.as_bytes();
                 for l in 0..4 {
