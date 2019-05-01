@@ -1128,6 +1128,9 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                         s.truncate(cc);
                     }
                 }
+                if s.ends_with("::{{closure}}") {
+                    s = s.rev_before("::{{closure}}").to_string();
+                }
                 all_out += &s;
                 all_out += "\n";
             }
