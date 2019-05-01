@@ -731,6 +731,7 @@ fn force_pretty_trace_fancy(
                 //                                  by /rustc/<stuff>/src/.
 
                 let mut x2 = loc.to_owned();
+                let mut x2_orig = x2.clone();
                 if loc.contains("/rustc/") {
                     if loc.after("/rustc/").contains("/src/") {
                         let y = loc.between("/rustc/", "/src/");
@@ -752,7 +753,7 @@ fn force_pretty_trace_fancy(
 
                 let mut pre = format!("{}:{}", x2, location.line());
                 let mut prex = format!("\n\n0: ◼ {}", pre);
-                if all_out.contains(&pre) || pre.contains("pretty_trace") {
+                if all_out.contains(&pre) || x2_orig.contains("pretty_trace") {
                     prex = "".to_string();
                 }
 
