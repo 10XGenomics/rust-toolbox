@@ -498,8 +498,12 @@ static mut HEARD_CTRLC: usize = 0;
 static mut PROCESSING_SIGUSR1: bool = false;
 
 extern "C" fn handler(sig: i32) {
-    io::stdout().write(b"entering signal handler\n").unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    io::stdout().flush().unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        io::stdout().write(b"entering signal handler1\n").unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        io::stdout().flush().unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    if *CTRLC_DEBUG.lock().unwrap() {
+        io::stdout().write(b"entering signal handler2\n").unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        io::stdout().flush().unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    }
     if sig == SIGINT {
         if *CTRLC_DEBUG.lock().unwrap() {
             unsafe {
@@ -514,7 +518,9 @@ extern "C" fn handler(sig: i32) {
             }
             HEARD_CTRLC += 1;
             thread::sleep(time::Duration::from_millis(1000));
-            eprintln!( "done sleeping" ); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+            if *CTRLC_DEBUG.lock().unwrap() {
+                eprintln!( "done sleeping" );
+            }
             if HEARD_CTRLC > 1 {
                 std::process::exit(0);
             }
