@@ -286,7 +286,13 @@ impl PrettyTrace {
         }
         if self.message.is_some() {
             force_pretty_trace_fancy(
-                full_file, fd, &self.message.unwrap(), &haps, self.ctrlc, self.ctrlc_debug);
+                full_file,
+                fd,
+                &self.message.unwrap(),
+                &haps,
+                self.ctrlc,
+                self.ctrlc_debug,
+            );
         } else {
             let tm = new_thread_message();
             force_pretty_trace_fancy(full_file, fd, &tm, &haps, self.ctrlc, self.ctrlc_debug);
@@ -501,8 +507,8 @@ extern "C" fn handler(sig: i32) {
     if sig == SIGINT {
         if *CTRLC_DEBUG.lock().unwrap() {
             unsafe {
-                eprint!( "\ncaught Ctrl-C" );
-                eprintln!( " #{}", HEARD_CTRLC+1 );
+                eprint!("\ncaught Ctrl-C");
+                eprintln!(" #{}", HEARD_CTRLC + 1);
             }
         }
         unsafe {
@@ -513,7 +519,7 @@ extern "C" fn handler(sig: i32) {
             HEARD_CTRLC += 1;
             thread::sleep(time::Duration::from_millis(1000));
             if *CTRLC_DEBUG.lock().unwrap() {
-                eprintln!( "done sleeping" );
+                eprintln!("done sleeping");
             }
             if HEARD_CTRLC > 1 {
                 std::process::exit(0);
@@ -905,7 +911,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                 if x.after(srcgit).contains("/") {
                     let y = x.between(srcgit, "/");
                     if y.len() > 10 {
-                        x2 = x2.replace( &format!( "{}{}", srcgit, y ), "/<stuff>");
+                        x2 = x2.replace(&format!("{}{}", srcgit, y), "/<stuff>");
                     }
                 }
             }
@@ -928,7 +934,6 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
     let mut block = Vec::<Vec<Vec<u8>>>::new();
     let mut blocklet = Vec::<Vec<u8>>::new();
     for i in 0..btlines.len() {
-
         // Ignore blank lines.
 
         if btlines[i].len() == 0 {
@@ -954,12 +959,12 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
         if j < s.len() && s[j] == b':' {
             if block.len() > 0 {
                 if blocklet.len() > 0 {
-                    block.push( blocklet.clone() );
+                    block.push(blocklet.clone());
                     blocklet.clear();
                 }
-                blocks.push( block.clone() );
+                blocks.push(block.clone());
                 block.clear();
-                s = &s[j+1 .. s.len() ];
+                s = &s[j + 1..s.len()];
             }
         }
 
@@ -972,20 +977,20 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
             }
             j += 1;
         }
-        s = &s[ j .. s.len() ];
-        blocklet.push( s.to_vec() );
-        if s.starts_with( b"at " ) {
-            block.push( blocklet.clone() );
+        s = &s[j..s.len()];
+        blocklet.push(s.to_vec());
+        if s.starts_with(b"at ") {
+            block.push(blocklet.clone());
             blocklet.clear();
         }
     }
     if blocklet.len() > 0 {
-        block.push( blocklet.clone() );
+        block.push(blocklet.clone());
     }
     if block.len() > 0 {
-        blocks.push( block.clone() );
+        blocks.push(block.clone());
     }
-    
+
     // Define the blacklist.
 
     let blacklist = vec![
@@ -1020,9 +1025,8 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
     // Remove certain 'unwanted' blocklets.
 
     for i in 0..blocks.len() {
-        let mut to_delete = vec![ false; blocks[i].len() ];
+        let mut to_delete = vec![false; blocks[i].len()];
         for j in 0..blocks[i].len() {
-
             // Blocklet may not contain a blacklisted string.
 
             'outer1: for k in 0..blocks[i][j].len() {
@@ -1030,7 +1034,8 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                 for b in blacklist.iter() {
                     if s.contains(b) {
                         // CRAZY EXEMPTION BECAUSE OF HOW TEST IS NAMED!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        if s.contains( "pretty_trace_tests" ) { // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        if s.contains("pretty_trace_tests") {
+                            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                             continue; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                         } // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                         to_delete[j] = true;
@@ -1052,15 +1057,15 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                         }
                     }
                 }
-                if !good { 
-                    to_delete[j] = true; 
+                if !good {
+                    to_delete[j] = true;
                 }
             }
 
             // Don't allow blockets of length one that end with "- main".
 
             let s = strme(&blocks[i][j][0]);
-            if !to_delete[j] && blocks[i][j].len() == 1 && s.ends_with( "- main" ) {
+            if !to_delete[j] && blocks[i][j].len() == 1 && s.ends_with("- main") {
                 to_delete[j] = true;
             }
 
@@ -1073,20 +1078,19 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                     }
                 }
             }
-
         }
-        erase_if( &mut blocks[i], &to_delete );
+        erase_if(&mut blocks[i], &to_delete);
     }
 
     // Remove any block that has length zero.
-        
-    let mut to_delete = vec![ false; blocks.len() ];
+
+    let mut to_delete = vec![false; blocks.len()];
     for i in 0..blocks.len() {
         if blocks[i].len() == 0 {
             to_delete[i] = true;
         }
     }
-    erase_if( &mut blocks, &to_delete );
+    erase_if(&mut blocks, &to_delete);
 
     // stuff from earlier version, not addressing now
 
@@ -1145,14 +1149,13 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
 
     let mut all_out = String::new();
     for i in 0..blocks.len() {
-        let num = format!( "{}: ", i+1 );
-        let sub = stringme( &vec![ b' '; num.len() ].as_slice() );
+        let num = format!("{}: ", i + 1);
+        let sub = stringme(&vec![b' '; num.len()].as_slice());
         for j in 0..blocks[i].len() {
             for k in 0..blocks[i][j].len() {
-                if j == 0 && k == 0 { 
+                if j == 0 && k == 0 {
                     all_out += &num;
-                }
-                else {
+                } else {
                     all_out += &sub;
                 }
                 if k > 0 {
@@ -1160,7 +1163,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                 }
                 let mut s = stringme(&blocks[i][j][k]);
                 if k == 0 {
-                    if s.contains( "::" ) {
+                    if s.contains("::") {
                         let cc = s.rfind("::").unwrap();
                         s.truncate(cc);
                     }
