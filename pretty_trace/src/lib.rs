@@ -514,6 +514,7 @@ extern "C" fn handler(sig: i32) {
             }
             HEARD_CTRLC += 1;
             thread::sleep(time::Duration::from_millis(1000));
+            eprintln!( "done sleeping" ); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             if HEARD_CTRLC > 1 {
                 std::process::exit(0);
             }
