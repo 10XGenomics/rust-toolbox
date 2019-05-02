@@ -237,6 +237,7 @@ pub struct PrettyTrace {
     pub whitelist: Option<Vec<String>>,
     // convert Ctrl-Cs to panics
     pub ctrlc: bool,
+    pub ctrlc_debug: bool,
 }
 
 /// Normal usage of `PrettyTrace` is to call
@@ -258,6 +259,7 @@ impl PrettyTrace {
             count: None,
             whitelist: None,
             ctrlc: false,
+            ctrlc_debug: false,
         }
     }
 
@@ -283,10 +285,11 @@ impl PrettyTrace {
             full_file = self.full_file.clone().unwrap();
         }
         if self.message.is_some() {
-            force_pretty_trace_fancy(full_file, fd, &self.message.unwrap(), &haps, self.ctrlc);
+            force_pretty_trace_fancy(
+                full_file, fd, &self.message.unwrap(), &haps, self.ctrlc, self.ctrlc_debug);
         } else {
             let tm = new_thread_message();
-            force_pretty_trace_fancy(full_file, fd, &tm, &haps, self.ctrlc);
+            force_pretty_trace_fancy(full_file, fd, &tm, &haps, self.ctrlc, self.ctrlc_debug);
         }
     }
 
@@ -297,6 +300,15 @@ impl PrettyTrace {
 
     pub fn ctrlc(&mut self) -> &mut PrettyTrace {
         self.ctrlc = true;
+        self
+    }
+
+    /// Same as <code>ctrlc</code>, but generates some debugging information.  For development
+    /// purposes.
+
+    pub fn ctrlc_debug(&mut self) -> &mut PrettyTrace {
+        self.ctrlc = true;
+        self.ctrlc_debug = true;
         self
     }
 
@@ -412,6 +424,7 @@ impl Happening {
 
 lazy_static! {
     static ref HAPPENING: Mutex<Happening> = Mutex::new(Happening::new());
+    static ref CTRLC_DEBUG: Mutex<bool> = Mutex::new(false);
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -485,6 +498,11 @@ static mut PROCESSING_SIGUSR1: bool = false;
 
 extern "C" fn handler(sig: i32) {
     if sig == SIGINT {
+        if *CTRLC_DEBUG.lock().unwrap() {
+            unsafe {
+                eprintln!( "\ncaught Ctrl-C #{}", HEARD_CTRLC+1 );
+            }
+        }
         unsafe {
             if HEARD_CTRLC > 0 {
                 HEARD_CTRLC += 1;
@@ -562,6 +580,7 @@ fn force_pretty_trace_fancy(
     thread_message: &'static CHashMap<ThreadId, String>,
     happening: &Happening,
     ctrlc: bool,
+    ctrlc_debug: bool,
 ) {
     // Launch happening thread, which imits SIGUSR1 interrupts.  Usually, it will
     // hang after some number of iterations, and at that point we kill ourself,
@@ -649,6 +668,9 @@ fn force_pretty_trace_fancy(
     // Set up to catch SIGNINT and SIGUSR1 interrupts.
 
     let _ = install_signal_handler(happening.on, ctrlc);
+    if ctrlc_debug {
+        *CTRLC_DEBUG.lock().unwrap() = true;
+    }
 
     // Setup panic hook. If we panic, this code gets run.
 
