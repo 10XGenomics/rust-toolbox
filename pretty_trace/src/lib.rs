@@ -900,7 +900,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                 if x.after(srcgit).contains("/") {
                     let y = x.between(srcgit, "/");
                     if y.len() > 10 {
-                        x2 = x2.replace( &format!( "{}{}", srcgit, y ), "<stuff>");
+                        x2 = x2.replace( &format!( "{}{}", srcgit, y ), "/<stuff>");
                     }
                 }
             }
