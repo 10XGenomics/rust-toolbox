@@ -92,12 +92,11 @@
 //! <pre>
 //! [profile.release]
 //! debug = true</pre>
-//! to your top-level <code>Cargo.toml</code>.  We recommend always doing this,
-//! regardless of
-//! whether you use this crate.  The computational performance hit appears to be
-//! small (although you will get larger executable files).  Using
-//! <code>debug = 1</code>
-//! does not work.  Then compile with <code>cargo build --release</code>.
+//! to your top-level <code>Cargo.toml</code>.  This adds debugging info to executables, thus
+//! enabling meaningful tracebacks (whether or not you use <code>pretty_trace</code).  It will
+//! increase the size of executables.  It might also increase run time, but probably not by much.  
+//! Using <code>debug = 1</code> does not work with <code>pretty_trace</code>.  
+//! Then compile with <code>cargo build --release</code>.
 //!
 //! <br> Now to access pretty trace, put this in your <code>Cargo.toml</code>
 //! <pre>
