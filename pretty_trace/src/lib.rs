@@ -874,7 +874,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                     }
                 }
             }
-            let srcgit = "/src/github-com-";
+            let srcgit = "/src/github.com-";
             if x.contains(srcgit) {
                 if x.after(srcgit).contains("/") {
                     let y = x.between(srcgit, "/");
