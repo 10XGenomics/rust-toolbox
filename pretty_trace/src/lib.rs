@@ -202,7 +202,6 @@ use stats_utils::*;
 use std::{
     env,
     fs::{remove_file, File},
-    io,
     io::{BufRead, BufReader, BufWriter, Write},
     ops::Deref,
     os::unix::io::FromRawFd,
@@ -297,7 +296,8 @@ impl PrettyTrace {
     /// Cause a <code>Ctrl-C</code> interrupt to be turned into a panic, and thence
     /// produce a traceback for the main thread.  This does not allow you to see
     /// what other threads are doing.  If you <code>Ctrl-C</code> twice in rapid
-    /// succession, you may elide the traceback, but this is inconsistent.
+    /// succession, you may elide the traceback, but this is unreliable.  Occasionally single
+    /// interrupts are also incorrectly handled.
 
     pub fn ctrlc(&mut self) -> &mut PrettyTrace {
         self.ctrlc = true;
@@ -498,12 +498,6 @@ static mut HEARD_CTRLC: usize = 0;
 static mut PROCESSING_SIGUSR1: bool = false;
 
 extern "C" fn handler(sig: i32) {
-        io::stdout().write(b"entering signal handler1\n").unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-        io::stdout().flush().unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    if *CTRLC_DEBUG.lock().unwrap() {
-        io::stdout().write(b"entering signal handler2\n").unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-        io::stdout().flush().unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    }
     if sig == SIGINT {
         if *CTRLC_DEBUG.lock().unwrap() {
             unsafe {
