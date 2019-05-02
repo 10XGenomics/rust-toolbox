@@ -500,7 +500,8 @@ extern "C" fn handler(sig: i32) {
     if sig == SIGINT {
         if *CTRLC_DEBUG.lock().unwrap() {
             unsafe {
-                eprintln!( "\ncaught Ctrl-C #{}", HEARD_CTRLC+1 );
+                eprint!( "\ncaught Ctrl-C" );
+                eprintln!( " #{}", HEARD_CTRLC+1 );
             }
         }
         unsafe {
