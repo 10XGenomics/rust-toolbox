@@ -714,22 +714,22 @@ fn force_pretty_trace_fancy(
                         None => "Box<Any>",
                     },
                 };
-                let msg = match info.location() {
+                let msg2 = match info.location() {
                     Some(location) => format!(
-                        "thread '{}' panicked at '{}': {}:{}",
+                        "thread '{}' panicked at {}:{}",
                         thread,
-                        msg,
                         location.file(),
                         location.line()
                     ),
-                    None => format!("thread '{}' panicked at '{}'", thread, msg),
+                    None => format!("thread '{}' panicked ", thread),
                 };
                 eprintln!(
                     "\nRUST PROGRAM PANIC\n\n(Full traceback.  \
                      Rerun with env var RUST_FULL_TRACE unset to \
-                     see short traceback.)\n\n{}{}\n\n{}\n",
+                     see short traceback.)\n\n{}{}\n\n{}\n\n{}\n",
                     tm,
                     &msg,
+                    &msg2,
                     from_utf8(&bt).unwrap()
                 );
                 std::process::exit(1);
