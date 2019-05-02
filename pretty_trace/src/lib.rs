@@ -202,6 +202,7 @@ use stats_utils::*;
 use std::{
     env,
     fs::{remove_file, File},
+    io,
     io::{BufRead, BufReader, BufWriter, Write},
     ops::Deref,
     os::unix::io::FromRawFd,
@@ -497,6 +498,8 @@ static mut HEARD_CTRLC: usize = 0;
 static mut PROCESSING_SIGUSR1: bool = false;
 
 extern "C" fn handler(sig: i32) {
+    io::stdout().write(b"entering signal handler\n").unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    io::stdout().flush().unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     if sig == SIGINT {
         if *CTRLC_DEBUG.lock().unwrap() {
             unsafe {
