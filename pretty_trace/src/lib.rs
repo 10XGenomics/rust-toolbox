@@ -874,11 +874,12 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                     }
                 }
             }
-            if x.contains("/src/github.com-") {
-                if x.after("/src/github.com-").contains("/") {
-                    let y = x.between("/src/github.com-", "/");
+            let srcgit = "/src/github-com-";
+            if x.contains(srcgit) {
+                if x.after(srcgit).contains("/") {
+                    let y = x.between(srcgit, "/");
                     if y.len() > 10 {
-                        x2 = x2.replace(y, "<stuff>");
+                        x2 = x2.replace( &format!( "{}{}", srcgit, y ), "<stuff>");
                     }
                 }
             }
