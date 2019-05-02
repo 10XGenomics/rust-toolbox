@@ -93,7 +93,7 @@
 //! [profile.release]
 //! debug = true</pre>
 //! to your top-level <code>Cargo.toml</code>.  This adds debugging info to executables, thus
-//! enabling meaningful tracebacks (whether or not you use <code>pretty_trace</code).  It will
+//! enabling meaningful tracebacks (whether or not you use <code>pretty_trace</code>).  It will
 //! increase the size of executables.  It might also increase run time, but probably not by much.  
 //! Using <code>debug = 1</code> does not work with <code>pretty_trace</code>.  
 //! Then compile with <code>cargo build --release</code>.
