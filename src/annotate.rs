@@ -2006,7 +2006,7 @@ pub fn print_cdr3(tig: &DnaStringSlice, log: &mut Vec<u8>) {
 // sequence should live, or a null slice.  This uses some empirically determined
 // bounds.
 //
-// ◼ This seems very unlikely to be optimal.  The value of LOw_RELV_CDR3 was
+// ◼ This seems very unlikely to be optimal.  The value of LOW_RELV_CDR3 was
 // ◼ lowered to make BCR work, which suggests that measuring relative to the end
 // ◼ of the V segment is not right.
 
