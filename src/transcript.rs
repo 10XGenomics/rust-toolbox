@@ -214,6 +214,16 @@ pub fn junction_supp(
 ) {
     let mut jseq = DnaString::new();
     junction_seq(&tig, refdata, &ann, &mut jseq);
+    junction_supp_core( reads, x, umi_id, &jseq, jsupp );
+}
+
+pub fn junction_supp_core(
+    reads: &Vec<DnaString>,
+    x: &Hyper,
+    umi_id: &Vec<i32>,
+    jseq: &DnaString,
+    jsupp: &mut (i32, i32),
+) {
     let mut ids = Vec::<i32>::new();
     // ◼ What we're doing here is converting a Vec<u32> into a Vec<i32>.
     // ◼ There should be a function to do that.
