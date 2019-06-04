@@ -271,6 +271,8 @@ pub fn annotate_seq_core(
     perf.sort();
 
     // Merge perfect matches.  We track the positions on b of mismatches.
+    // semi = {(t, off, pos on b, len, positions on b of mismatches)}
+    // where off = pos on ref - pos on b
 
     let mut semi = Vec::<(i32, i32, i32, i32, Vec<i32>)>::new();
     let mut i = 0;
@@ -380,6 +382,62 @@ pub fn annotate_seq_core(
     for i in 0..semi.len() {
         semi[i].4.sort();
     }
+
+    // Add some 40-mers with the same offset having <= 6 mismatches.
+    // semi = {(t, off, pos on b, len, positions on b of mismatches)}
+    // where off = pos on ref - pos on b
+    //
+    // Note that implementation is asymmetric: we don't look to the right of p2, not for
+    // any particularly good reason.
+    // 
+    // This was added to get the heavy chain V segment of the mouse A20 cell line to be annotated.
+    // This is dubious because the cell line is ~30 years old and of uncertain ancestry.  Thus
+    // we're not sure if it arose from supported mouse strains or if the V segment might have
+    // been corrupted during the growth of the cell line.  The A20 heavy chain V differs by 20%
+    // from the reference.
+
+    let mut i = 0;
+    while i < semi.len() {
+        let mut j = i + 1;
+        let t = semi[i].0;
+        let off = semi[i].1;
+        while j < semi.len() {
+            if semi[j].0 != t || semi[j].1 != off {
+                break;
+            }
+            j += 1;
+        }
+        const L : i32 = 40;
+        const MAX_DIFFS : usize = 6;
+        let p1 = off + semi[i].2;
+        // let p2 = off + semi[j-1].2 + semi[j-1].3;
+        if -off >= 0 && p1 - off <= b.len() as i32 {
+            for p in 0..p1-L {
+                let l = p - off;
+                let mut diffs = 0;
+                for m in 0..L {
+                    if b.get((l+m) as usize) != refs[t as usize].get((p+m) as usize) {
+                        diffs += 1;
+                        if diffs > MAX_DIFFS {
+                            break;
+                        }
+                    }
+                }
+                if diffs <= MAX_DIFFS {
+                    let mut x = Vec::<i32>::new();
+                    for m in 0..L {
+                        if b.get((l+m) as usize) != refs[t as usize].get((p+m) as usize) {
+                            x.push(l+m);
+                        }
+                    }
+                    semi.push( ( t, off, p - off, L, x ) );
+                    break;
+                }
+            }
+        }
+        i = j;
+    }
+    semi.sort();
 
     // Allow extension over some mismatches on right if it gets us to the end on
     // the reference.  Ditto for left.
