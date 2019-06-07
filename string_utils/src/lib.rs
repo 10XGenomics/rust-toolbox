@@ -4,6 +4,7 @@
 
 extern crate vec_utils;
 
+use std::cmp::max;
 use vec_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -268,4 +269,32 @@ pub fn decimal_diffs(
         i1 = j1;
         i2 = j2;
     }
+}
+
+// Horizontal concatention.  Consider two vectors of strings, to be thought of as 
+// rows to be printed.  Create a new vector of strings that is the horizontal
+// concatenation of these rows, first padding the first vector with blanks on the
+// right to achieve equal length and then adding additional specified separation.
+
+pub fn hcat( col1: &Vec<String>, col2: &Vec<String>, sep: usize ) -> Vec<String> {
+    let mut cat = Vec::<String>::new();
+    let height = max( col1.len(), col2.len() );
+    let mut width1 = 0;
+    for i in 0..col1.len() {
+        width1 = max( width1, col1[i].len() + sep );
+    }
+    for i in 0..height {
+        let mut s = String::new();
+        if i < col1.len() {
+            s = col1[i].clone();
+        }
+        while s.len() < width1 {
+            s += " ";
+        }
+        if i < col2.len() {
+            s += &col2[i];
+        }
+        cat.push(s);
+    }
+    cat
 }
