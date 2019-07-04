@@ -17,8 +17,8 @@
 //! goal of this crate is to provide succinct and readable "pretty" tracebacks, in
 //! place of the native tracebacks.  These pretty traces can be
 //! <font color="red"> ten times shorter</font> than native tracebacks.  In
-//! addition, unlike native tracebacks, pretty traces are obtained without setting
-//! an environment variable.
+//! addition, unlike rust native tracebacks, pretty traces are obtained without 
+//! setting an environment variable.
 //!
 //! # Example of native versus pretty trace output
 // See discussion @ https://github.com/rust-lang/rust/issues/32104.
@@ -39,7 +39,7 @@
 //! simple command-line option to it that causes it to enter a special 'profile'
 //! mode, gathering tracebacks and then terminating.  
 //!
-//! For example this might be
+//! For example this command-line option might be
 //! <code>PROF=100</code> to profile 100 events.  It's your choice how to specify
 //! this command-line option, but this crate makes it trivial to do so.
 //! <font color="red">With about one minute's work,
@@ -157,7 +157,8 @@
 //!   be an intrinsic feature of the approach.
 //!
 //! ◼ Ideally out-of-memory events would be caught and converted to panics so
-//!   we could trace them, but we don't.
+//!   we could trace them, but we don't.  This is a general rust problem that no one
+//!   has figured out how to solve.
 //!
 //! ◼ Profile mode only sees the main thread.  This seems intrinsic to the
 //!   approach.  So you may need to modify your code to run single-threaded to
@@ -168,8 +169,6 @@
 //!
 //! ◼ Profile mode does not yield a stack trace if the code is executing inside
 //!   the allocator.  In our test cases this is around 15% of the time.
-//!
-//! ◼ This is a preliminary version, which likely has bugs.
 //!
 //! # More
 //!
@@ -244,7 +243,8 @@ pub struct PrettyTrace {
 /// <pre>
 /// PrettyTrace::new().&lt set some things >.on();
 /// </pre>
-/// once near the begining of your main program.
+/// once near the begining of your main program.  The 'things' are all the 
+/// functions shown below other than <code>new</code> and <code>on</code>.
 
 impl PrettyTrace {
     /// Initialize a <code>PrettyTrace</code> object.  This does nothing
