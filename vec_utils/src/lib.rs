@@ -76,7 +76,7 @@ pub fn contains<T: Eq>(x: &[T], y: &[T]) -> bool {
             return true;
         }
     }
-    return false;
+    false
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -143,7 +143,7 @@ pub fn meet<T: Ord>(x: &[T], y: &[T]) -> bool {
             return true;
         }
     }
-    return false;
+    false
 }
 
 // Find the intersection size of two sorted vectors.  If an element occurs
