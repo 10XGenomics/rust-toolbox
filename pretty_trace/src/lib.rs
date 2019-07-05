@@ -756,7 +756,7 @@ fn force_pretty_trace_fancy(
                 //                                  by /rustc/<stuff>/src/.
 
                 let mut x2 = loc.to_owned();
-                let mut x2_orig = x2.clone();
+                let x2_orig = x2.clone();
                 if loc.contains("/rustc/") && loc.after("/rustc/").contains("/src/") {
                     let y = loc.between("/rustc/", "/src/");
                         if y.len() > 10 {
@@ -772,7 +772,7 @@ fn force_pretty_trace_fancy(
 
                 // Format lead message.
 
-                let mut pre = format!("{}:{}", x2, location.line());
+                let pre = format!("{}:{}", x2, location.line());
                 let mut prex = format!("\n\n0: ◼ {}", pre);
                 if all_out.contains(&pre) || x2_orig.contains("pretty_trace") {
                     prex = "".to_string();
@@ -1090,7 +1090,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
         for j in 0..blocks[i].len() {
             if blocks[i][j].len() == 2 {
                 let mut x = Vec::<u8>::new();
-                let mut y = blocks[i][j][1].clone();
+                let y = blocks[i][j][1].clone();
                 for j in 0..y.len() {
                     if contains_at(&y, &src, j) {
                         for k in (0..j).rev() {
