@@ -6,7 +6,6 @@ members = [
     "stats_utils",
     "string_utils",
     "vec_utils",
-    "pretty_trace_tests",
 ]
 
 [profile.release]
