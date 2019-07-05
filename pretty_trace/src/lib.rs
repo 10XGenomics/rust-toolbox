@@ -222,6 +222,7 @@ use vec_utils::*;
 /// A `PrettyTrace` is the working structure for this crate.  See also the top-level
 /// crate documentation.
 
+#[derive(Default)]
 pub struct PrettyTrace {
     // filename to dump full traceback to upon panic
     pub full_file: Option<String>,
@@ -252,16 +253,7 @@ impl PrettyTrace {
     /// in and of itself.
 
     pub fn new() -> PrettyTrace {
-        PrettyTrace {
-            full_file: None,
-            fd: None,
-            profile: false,
-            message: None,
-            count: None,
-            whitelist: None,
-            ctrlc: false,
-            ctrlc_debug: false,
-        }
+        PrettyTrace::default()
     }
 
     /// Cause a <code>PrettyTrace</code> object to do something: change the
