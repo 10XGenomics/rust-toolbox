@@ -765,20 +765,16 @@ fn force_pretty_trace_fancy(
 
                 let mut x2 = loc.to_owned();
                 let mut x2_orig = x2.clone();
-                if loc.contains("/rustc/") {
-                    if loc.after("/rustc/").contains("/src/") {
-                        let y = loc.between("/rustc/", "/src/");
+                if loc.contains("/rustc/") && loc.after("/rustc/").contains("/src/") {
+                    let y = loc.between("/rustc/", "/src/");
                         if y.len() > 10 {
-                            x2 = x2.replace(y, "<stuff>");
-                        }
+                        x2 = x2.replace(y, "<stuff>");
                     }
                 }
-                if loc.contains("/checkouts/") {
-                    if loc.after("/checkouts/").contains("/src/") {
-                        let y = loc.between("/checkouts/", "/src/");
-                        if y.len() > 10 {
-                            x2 = x2.replace(y, "<stuff>");
-                        }
+                if loc.contains("/checkouts/") && loc.after("/checkouts/").contains("/src/") {
+                    let y = loc.between("/checkouts/", "/src/");
+                    if y.len() > 10 {
+                        x2 = x2.replace(y, "<stuff>");
                     }
                 }
 
@@ -891,29 +887,23 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
 
             let x = stringme(&line);
             let mut x2 = x.clone();
-            if x.contains("/rustc/") {
-                if x.after("/rustc/").contains("/src/") {
-                    let y = x.between("/rustc/", "/src/");
-                    if y.len() > 10 {
-                        x2 = x2.replace(y, "<stuff>");
-                    }
+            if x.contains("/rustc/") && x.after("/rustc/").contains("/src/") {
+                let y = x.between("/rustc/", "/src/");
+                if y.len() > 10 {
+                    x2 = x2.replace(y, "<stuff>");
                 }
             }
-            if x.contains("/checkouts/") {
-                if x.after("/checkouts/").contains("/src/") {
-                    let y = x.between("/checkouts/", "/src/");
-                    if y.len() > 10 {
-                        x2 = x2.replace(y, "<stuff>");
-                    }
+            if x.contains("/checkouts/") && x.after("/checkouts/").contains("/src/") {
+                let y = x.between("/checkouts/", "/src/");
+                if y.len() > 10 {
+                    x2 = x2.replace(y, "<stuff>");
                 }
             }
             let srcgit = "/src/github.com-";
-            if x.contains(srcgit) {
-                if x.after(srcgit).contains("/") {
-                    let y = x.between(srcgit, "/");
-                    if y.len() > 10 {
-                        x2 = x2.replace(&format!("{}{}", srcgit, y), "/<stuff>");
-                    }
+            if x.contains(srcgit) && x.after(srcgit).contains("/") {
+                let y = x.between(srcgit, "/");
+                if y.len() > 10 {
+                    x2 = x2.replace(&format!("{}{}", srcgit, y), "/<stuff>");
                 }
             }
             btlines.push(x2.as_bytes().to_vec());
@@ -957,16 +947,14 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
             }
             j += 1;
         }
-        if j < s.len() && s[j] == b':' {
-            if block.len() > 0 {
-                if blocklet.len() > 0 {
-                    block.push(blocklet.clone());
-                    blocklet.clear();
-                }
-                blocks.push(block.clone());
-                block.clear();
-                s = &s[j + 1..s.len()];
+        if j < s.len() && s[j] == b':' && block.len() > 0 {
+            if blocklet.len() > 0 {
+                block.push(blocklet.clone());
+                blocklet.clear();
             }
+            blocks.push(block.clone());
+            block.clear();
+            s = &s[j + 1..s.len()];
         }
 
         // Proceed.
@@ -1076,12 +1064,9 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
 
             // Don't allow blocklets whose first line has the form ... main(...).
 
-            if s.contains(" main (") {
-                if s.after(" main (").contains(")") {
-                    if !s.between(" main (", ")").contains("(") {
-                        to_delete[j] = true;
-                    }
-                }
+            let m = " main (";
+            if s.contains(&m) && s.after(&m).contains(")") && !s.between(&m, ")").contains("(") {
+                to_delete[j] = true;
             }
         }
         erase_if(&mut blocks[i], &to_delete);
@@ -1167,11 +1152,9 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                     all_out += "◼ ";
                 }
                 let mut s = stringme(&blocks[i][j][k]);
-                if k == 0 {
-                    if s.contains("::") {
-                        let cc = s.rfind("::").unwrap();
-                        s.truncate(cc);
-                    }
+                if k == 0 && s.contains("::") {
+                    let cc = s.rfind("::").unwrap();
+                    s.truncate(cc);
                 }
                 if s.ends_with("::{{closure}}") {
                     s = s.rev_before("::{{closure}}").to_string();
