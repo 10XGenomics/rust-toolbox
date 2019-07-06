@@ -416,9 +416,9 @@ impl Happening {
     // let mut happening = Happening::new();
     // happening.initialize( &vec![ "a", "b", "c" ], 250 );
 
-    pub fn initialize(&mut self, whitelist: &Vec<String>, hcount: usize) {
+    pub fn initialize(&mut self, whitelist: &[String], hcount: usize) {
         self.on = true;
-        self.whitelist = whitelist.clone();
+        self.whitelist = whitelist.to_owned();
         self.hcount = hcount;
     }
 }

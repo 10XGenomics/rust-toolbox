@@ -284,10 +284,11 @@ pub fn hcat( col1: &[String], col2: &[String], sep: usize ) -> Vec<String> {
         width1 = max( width1, x.len() + sep );
     }
     for i in 0..height {
-        let mut s = String::new();
-        if i < col1.len() {
-            s = col1[i].clone();
-        }
+        let mut s = if i < col1.len() {
+            col1[i].clone()
+        } else {
+            String::new()
+        };
         while s.len() < width1 {
             s += " ";
         }
