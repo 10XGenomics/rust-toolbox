@@ -12,14 +12,14 @@ pub fn n50(v: &Vec<i32>) -> i32 {
         return 0;
     }
     for n in v.iter() {
-        assert!(n > &0);
+        assert!(*n > 0);
     }
     let mut sum: i64 = 0;
     let mut half: i64 = 0;
     for n in v.iter() {
         sum += *n as i64;
     }
-    let mut vs = v.clone();
+    let mut vs = v.to_owned();
     vs.sort();
     for i in 0..vs.len() {
         half += vs[i] as i64;
@@ -38,14 +38,14 @@ pub fn n90(v: &Vec<i32>) -> i32 {
         return 0;
     }
     for n in v.iter() {
-        assert!(n > &0);
+        assert!(*n > 0);
     }
     let mut sum: i64 = 0;
     let mut part: i64 = 0;
     for n in v.iter() {
         sum += *n as i64;
     }
-    let mut vs = v.clone();
+    let mut vs = v.to_owned();
     vs.sort();
     for i in 0..vs.len() {
         part += vs[i] as i64;
@@ -63,12 +63,12 @@ pub fn n90(v: &Vec<i32>) -> i32 {
 
 pub fn mean(v: &[i32]) -> f64 {
     let sum1 = v.len() as f64;
-    let mut sum2 = 0 as f64;
+    let mut sum2 = 0_f64;
     for x in v.iter() {
         sum2 += *x as f64;
     }
-    if sum1 == 0 as f64 {
-        return 0 as f64;
+    if sum1 == 0_f64 {
+        return 0_f64;
     }
     sum2 / sum1
 }
@@ -78,14 +78,14 @@ pub fn mean(v: &[i32]) -> f64 {
 // ◼ Not sure what the right term for this is.  The word "length" is confusing.
 
 pub fn len_weighted_mean(v: &[i32]) -> f64 {
-    let mut sum1 = 0 as f64;
-    let mut sum2 = 0 as f64;
+    let mut sum1 = 0_f64;
+    let mut sum2 = 0_f64;
     for x in v.iter() {
         sum1 += *x as f64;
         sum2 += (*x as f64) * (*x as f64);
     }
-    if sum1 == 0 as f64 {
-        return 0 as f64;
+    if sum1 == 0_f64 {
+        return 0_f64;
     }
     sum2 / sum1
 }
@@ -94,16 +94,16 @@ pub fn len_weighted_mean(v: &[i32]) -> f64 {
 // Divides by n, not n-1.
 
 pub fn cv(v: &[f64]) -> f64 {
-    if v.len() == 0 {
-        return 0 as f64;
+    if v.is_empty() {
+        return 0_f64;
     }
     let n = v.len() as f64;
-    let mut mean = 0 as f64;
+    let mut mean = 0_f64;
     for i in 0..v.len() {
         mean += v[i];
     }
     mean /= n;
-    let mut x = 0 as f64;
+    let mut x = 0_f64;
     for i in 0..v.len() {
         x += (v[i] - mean) * (v[i] - mean);
     }
@@ -130,7 +130,7 @@ pub fn abs_diff_f64(a: f64, b: f64) -> f64 {
 // Compute percent ratio.
 
 pub fn percent_ratio(a: usize, b: usize) -> f64 {
-    100 as f64 * a as f64 / b as f64
+    100_f64 * a as f64 / b as f64
 }
 
 // Code to make a random vector.  This uses a hardcoded pseudo-random number
@@ -140,8 +140,8 @@ pub fn make_random_vec(x: &mut Vec<i64>, n: usize) {
     x.resize(n, 0);
     x[0] = 0;
     for i in 1..x.len() {
-        x[i] = 6364136223846793005i64
+        x[i] = 6_364_136_223_846_793_005i64
             .wrapping_mul(x[i - 1])
-            .wrapping_add(1442695040888963407);
+            .wrapping_add(1_442_695_040_888_963_407);
     }
 }

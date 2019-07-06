@@ -64,7 +64,7 @@ pub fn contains<T: Eq>(x: &[T], y: &[T]) -> bool {
     if y.len() > x.len() {
         return false;
     }
-    for i in 0..x.len() - y.len() + 1 {
+    for i in 0..=x.len() - y.len() {
         let mut matches = true;
         for j in 0..y.len() {
             if x[i + j] != y[j] {
