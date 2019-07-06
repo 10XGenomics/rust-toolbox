@@ -99,13 +99,13 @@ pub fn cv(v: &[f64]) -> f64 {
     }
     let n = v.len() as f64;
     let mut mean = 0_f64;
-    for i in 0..v.len() {
-        mean += v[i];
+    for x in v {
+        mean += x;
     }
     mean /= n;
     let mut x = 0_f64;
-    for i in 0..v.len() {
-        x += (v[i] - mean) * (v[i] - mean);
+    for y in v {
+        x += (y - mean) * (y - mean);
     }
     x = (x / n).sqrt();
     100.0 as f64 * x / mean
