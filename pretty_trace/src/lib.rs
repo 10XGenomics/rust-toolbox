@@ -1089,7 +1089,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
             if blocks[i][j].len() == 2 {
                 let mut x = Vec::<u8>::new();
                 let y = blocks[i][j][1].clone();
-                for j in 0..y.len() {
+                'outer: for j in 0..y.len() {
                     if contains_at(&y, &src, j) {
                         for k in (0..j).rev() {
                             if y[k] != b'/' {
@@ -1103,19 +1103,10 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
                                     for m in k + 1..y.len() {
                                         x.push(y[m]);
                                     }
-                                    break;
+                                    break 'outer;
                                 }
-                                if !x.is_empty() {
-                                    break;
-                                }
-                            }
-                            if !x.is_empty() {
-                                break;
                             }
                         }
-                    }
-                    if !x.is_empty() {
-                        break;
                     }
                 }
                 if !x.is_empty() {
