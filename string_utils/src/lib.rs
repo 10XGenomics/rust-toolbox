@@ -276,7 +276,7 @@ pub fn decimal_diffs(
 // concatenation of these rows, first padding the first vector with blanks on the
 // right to achieve equal length and then adding additional specified separation.
 
-pub fn hcat( col1: &Vec<String>, col2: &Vec<String>, sep: usize ) -> Vec<String> {
+pub fn hcat( col1: &[String], col2: &[String], sep: usize ) -> Vec<String> {
     let mut cat = Vec::<String>::new();
     let height = max( col1.len(), col2.len() );
     let mut width1 = 0;

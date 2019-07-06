@@ -382,8 +382,8 @@ impl PrettyTrace {
 
     pub fn whitelist(&mut self, whitelist: &[&str]) -> &mut PrettyTrace {
         let mut x = Vec::<String>::new();
-        for i in 0..whitelist.len() {
-            x.push(whitelist[i].to_string());
+        for y in whitelist {
+            x.push(y.to_string());
         }
         self.whitelist = Some(x);
         self
@@ -872,8 +872,8 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
     let bt: Vec<u8> = format!("{:?}", backtrace).into_bytes();
     let mut btlines = Vec::<Vec<u8>>::new();
     let mut line = Vec::<u8>::new();
-    for i in 0..bt.len() {
-        if bt[i] == b'\n' {
+    for z in bt {
+        if z == b'\n' {
             // Replace long constructs of the form /rustc/......./src/
             //                                  by /rustc/<stuff>/src/.
             // and some similar things.
@@ -905,7 +905,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
 
             line.clear();
         } else {
-            line.push(bt[i]);
+            line.push(z);
         }
     }
 

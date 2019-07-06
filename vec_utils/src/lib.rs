@@ -172,17 +172,16 @@ pub fn meet_size<T: Ord>(x: &[T], y: &[T]) -> usize {
 
 pub fn intersection<T: Ord + Clone>(x: &[T], y: &[T], z: &mut Vec<T>) {
     z.clear();
-    let mut i = 0;
-    let mut j = 0;
-    while i < x.len() && j < y.len() {
-        if x[i] < y[j] {
-            i += 1;
-        } else if y[j] < x[i] {
-            j += 1;
+    let (mut ix, mut iy) = (0, 0);
+    while ix < x.len() && iy < y.len() {
+        if x[ix] < y[iy] {
+            ix += 1;
+        } else if y[iy] < x[ix] {
+            iy += 1;
         } else {
-            z.push(x[i].clone());
-            i += 1;
-            j += 1;
+            z.push(x[ix].clone());
+            ix += 1;
+            iy += 1;
         }
     }
 }
