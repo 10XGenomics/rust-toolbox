@@ -448,21 +448,18 @@ fn test_in_allocator() -> bool {
     trace(|frame| {
         resolve(frame.ip() as *mut _, |symbol| {
             // eprintln!( "symbol name = {:?}", symbol.name() );
-            match symbol.name() {
-                Some(x) => {
-                    if x.as_str().unwrap() == "realloc"
-                        || x.as_str().unwrap() == "__GI___libc_malloc"
-                        || x.as_str().unwrap() == "malloc_consolidate"
-                        || x.as_str().unwrap() == "_int_free"
-                        || x.as_str().unwrap() == "calloc"
-                        || x.as_str().unwrap() == "_int_malloc"
-                    {
-                        // eprintln!( "in allocator" );
-                        in_alloc = true;
-                        // break;
-                    }
+            if let Some(x) = symbol.name() {
+                if x.as_str().unwrap() == "realloc"
+                    || x.as_str().unwrap() == "__GI___libc_malloc"
+                    || x.as_str().unwrap() == "malloc_consolidate"
+                    || x.as_str().unwrap() == "_int_free"
+                    || x.as_str().unwrap() == "calloc"
+                    || x.as_str().unwrap() == "_int_malloc"
+                {
+                    // eprintln!( "in allocator" );
+                    in_alloc = true;
+                    // break;
                 }
-                None => {}
             }
         });
         !in_alloc
@@ -774,11 +771,11 @@ fn force_pretty_trace_fancy(
                 // Format lead message.
 
                 let pre = format!("{}:{}", x2, location.line());
-                let mut prex = format!("\n\n0: ◼ {}", pre);
-                if all_out.contains(&pre) || x2_orig.contains("pretty_trace") {
-                    prex = "".to_string();
-                }
-
+                let prex = if all_out.contains(&pre) || x2_orig.contains("pretty_trace") {
+                    "".to_string()
+                } else {
+                    format!("\n\n0: ◼ {}", pre)
+                };
                 let mut long_msg = "Rerun with env var RUST_FULL_TRACE set to see full \
                                     traceback."
                     .to_string();
@@ -866,7 +863,7 @@ fn force_pretty_trace_fancy(
 // PRETTIFY TRACEBACK
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool) -> String {
+fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -> String {
     // Parse the backtrace into lines.
 
     let bt: Vec<u8> = format!("{:?}", backtrace).into_bytes();
@@ -893,7 +890,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                 }
             }
             let srcgit = "/src/github.com-";
-            if x.contains(srcgit) && x.after(srcgit).contains("/") {
+            if x.contains(srcgit) && x.after(srcgit).contains('/') {
                 let y = x.between(srcgit, "/");
                 if y.len() > 10 {
                     x2 = x2.replace(&format!("{}{}", srcgit, y), "/<stuff>");
@@ -920,7 +917,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
     for i in 0..btlines.len() {
         // Ignore blank lines.
 
-        if btlines[i].len() == 0 {
+        if btlines[i].is_empty() {
             continue;
         }
 
@@ -940,8 +937,8 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
             }
             j += 1;
         }
-        if j < s.len() && s[j] == b':' && block.len() > 0 {
-            if blocklet.len() > 0 {
+        if j < s.len() && s[j] == b':' && !block.is_empty() {
+            if !blocklet.is_empty() {
                 block.push(blocklet.clone());
                 blocklet.clear();
             }
@@ -969,7 +966,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
     if blocklet.len() > 0 {
         block.push(blocklet.clone());
     }
-    if block.len() > 0 {
+    if !block.is_empty() {
         blocks.push(block.clone());
     }
 
@@ -1032,7 +1029,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
 
             // Blocklet must contain a whitelisted string (if whitelist provided).
 
-            if !to_delete[j] && whitelist.len() > 0 {
+            if !to_delete[j] && !whitelist.is_empty() {
                 let mut good = false;
                 'outer2: for k in 0..blocks[i][j].len() {
                     let s = strme(&blocks[i][j][k]);
@@ -1065,11 +1062,11 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
         erase_if(&mut blocks[i], &to_delete);
     }
 
-    // Remove any block that has length zero.
+    // Remove any block having length zero.
 
     let mut to_delete = vec![false; blocks.len()];
     for i in 0..blocks.len() {
-        if blocks[i].len() == 0 {
+        if blocks[i].is_empty() {
             to_delete[i] = true;
         }
     }
@@ -1100,7 +1097,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                             }
                             for l in (0..k).rev() {
                                 if y[l] == b' ' {
-                                    for m in 0..l + 1 {
+                                    for m in 0..=l {
                                         x.push(y[m]);
                                     }
                                     for m in k + 1..y.len() {
@@ -1108,20 +1105,20 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &Vec<String>, pack: bool
                                     }
                                     break;
                                 }
-                                if x.len() > 0 {
+                                if !x.is_empty() {
                                     break;
                                 }
                             }
-                            if x.len() > 0 {
+                            if !x.is_empty() {
                                 break;
                             }
                         }
                     }
-                    if x.len() > 0 {
+                    if !x.is_empty() {
                         break;
                     }
                 }
-                if x.len() > 0 {
+                if !x.is_empty() {
                     blocks[i][j][1] = y;
                 }
             }
