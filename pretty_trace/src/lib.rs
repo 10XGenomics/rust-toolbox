@@ -261,10 +261,11 @@ impl PrettyTrace {
     /// traceback and perform profiling, if <code>profile()</code> has been called.
 
     pub fn on(&mut self) {
-        let mut fd = -1 as i32;
-        if self.fd.is_some() {
-            fd = self.fd.unwrap() as i32;
-        }
+        let fd = if self.fd.is_some() {
+            self.fd.unwrap() as i32
+        } else {
+            -1 as i32
+        };
         let mut haps = Happening::new();
         if self.profile {
             if self.whitelist.is_none() {
@@ -272,11 +273,11 @@ impl PrettyTrace {
             }
             haps.initialize(&self.whitelist.clone().unwrap(), self.count.unwrap());
         }
-
-        let mut full_file = String::new();
-        if self.full_file.is_some() {
-            full_file = self.full_file.clone().unwrap();
-        }
+        let full_file = if self.full_file.is_some() {
+            self.full_file.clone().unwrap()
+        } else {
+            String::new()
+        };
         if self.message.is_some() {
             force_pretty_trace_fancy(
                 full_file,
@@ -379,7 +380,7 @@ impl PrettyTrace {
     ///        .on();
     /// </pre>
 
-    pub fn whitelist(&mut self, whitelist: &Vec<&str>) -> &mut PrettyTrace {
+    pub fn whitelist(&mut self, whitelist: &[&str]) -> &mut PrettyTrace {
         let mut x = Vec::<String>::new();
         for i in 0..whitelist.len() {
             x.push(whitelist[i].to_string());
@@ -645,7 +646,7 @@ fn force_pretty_trace_fancy(
                     let s = line.unwrap();
                     trace += &format!("{}\n", s);
                 }
-                if trace.len() > 0 {
+                if !trace.is_empty() {
                     traces.push(trace);
                     tracebacks += 1;
                 }
@@ -781,7 +782,7 @@ fn force_pretty_trace_fancy(
                 let mut long_msg = "Rerun with env var RUST_FULL_TRACE set to see full \
                                     traceback."
                     .to_string();
-                if log_file_name.len() > 0 {
+                if !log_file_name.is_empty() {
                     long_msg = format!("Full traceback is at {}.", log_file_name);
                 }
                 format!(
@@ -816,7 +817,7 @@ fn force_pretty_trace_fancy(
 
         if log_file_name != "" {
             let f = File::create(&log_file_name);
-            if !f.is_ok() {
+            if f.is_err() {
                 eprintln!(
                     "\nDuring panic, attempt to create full log file \
                      named {} failed, giving up.\n",

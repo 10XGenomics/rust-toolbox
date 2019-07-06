@@ -226,8 +226,8 @@ pub fn decimal_diffs(
             diffs.clear();
             return;
         }
-        let d1 = (s1[i1] >= '0' as u8 && s1[i1] <= b'9' as u8) || s1[i1] == b'.';
-        let d2 = (s2[i2] >= '0' as u8 && s2[i2] <= b'9' as u8) || s2[i2] == b'.';
+        let d1 = (s1[i1] >= b'0' && s1[i1] <= b'9') || s1[i1] == b'.';
+        let d2 = (s2[i2] >= b'0' && s2[i2] <= b'9') || s2[i2] == b'.';
         if d1 != d2 || (!d1 && s1[i1] != s2[i2]) {
             diffs.clear();
             return;
@@ -280,8 +280,8 @@ pub fn hcat( col1: &Vec<String>, col2: &Vec<String>, sep: usize ) -> Vec<String>
     let mut cat = Vec::<String>::new();
     let height = max( col1.len(), col2.len() );
     let mut width1 = 0;
-    for i in 0..col1.len() {
-        width1 = max( width1, col1[i].len() + sep );
+    for x in col1 {
+        width1 = max( width1, x.len() + sep );
     }
     for i in 0..height {
         let mut s = String::new();

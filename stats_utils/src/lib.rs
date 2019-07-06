@@ -7,7 +7,7 @@ use std::f64;
 
 // Compute N50 of some numbers.
 
-pub fn n50(v: &Vec<i32>) -> i32 {
+pub fn n50(v: &[i32]) -> i32 {
     if v.is_empty() {
         return 0;
     }
@@ -33,7 +33,7 @@ pub fn n50(v: &Vec<i32>) -> i32 {
     0 // never executed
 }
 
-pub fn n90(v: &Vec<i32>) -> i32 {
+pub fn n90(v: &[i32]) -> i32 {
     if v.is_empty() {
         return 0;
     }
@@ -49,7 +49,7 @@ pub fn n90(v: &Vec<i32>) -> i32 {
     vs.sort();
     for i in 0..vs.len() {
         part += vs[i] as i64;
-        if part as f64 / sum as f64 == 0.9 as f64 && i < vs.len() - 1 {
+        if 10 * ( part as i64 ) == 9 * sum as i64 && i < vs.len() - 1 {
             return (vs[i] + vs[i + 1]) / 2;
         }
         if part as f64 / sum as f64 >= 0.9 as f64 {
