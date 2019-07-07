@@ -88,7 +88,7 @@
 //!
 //! # A brief guide for using pretty trace
 //!
-//! First make sure that you have rust debug on, by adding these lines
+//! First make sure that you have rust debug on: if you're using release mode, add these lines
 //! <pre>
 //! [profile.release]
 //! debug = true</pre>
