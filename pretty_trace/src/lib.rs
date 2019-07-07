@@ -4,7 +4,7 @@
 // TOP LEVEL DOCUEMENTATION
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-//! This crate provide tools for generating generating pretty tracebacks and for profiling.
+//! <b>This crate provide tools for generating pretty tracebacks and for profiling.</b>
 
 //! # Pretty tracebacks
 //!
@@ -158,7 +158,7 @@
 //!
 //! ◼ Ideally out-of-memory events would be caught and converted to panics so
 //!   we could trace them, but we don't.  This is a general rust problem that no one
-//!   has figured out how to solve.
+//!   has figured out how to solve.  See <a href="https://github.com/rust-lang/rust/issues/43596">issue 43596</a> and <a href="https://internals.rust-lang.org/t/could-we-support-unwinding-from-oom-at-least-for-collections/3673">internals 3673</a>.
 //!
 //! ◼ Profile mode only sees the main thread.  This seems intrinsic to the
 //!   approach.  So you may need to modify your code to run single-threaded to
