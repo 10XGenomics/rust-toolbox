@@ -367,6 +367,7 @@ pub fn next_diff12_4<T: Eq, U: Eq, V: Eq, W: Eq>(x: &[(T, U, V, W)], i: i32) -> 
     }
 }
 
+#[allow(clippy::type_complexity)]
 pub fn next_diff12_8<S: Eq, T: Eq, U: Eq, V: Eq, W: Eq, X: Eq, Y: Eq, Z: Eq>(
     x: &[(S, T, U, V, W, X, Y, Z)],
     i: i32,
@@ -419,6 +420,7 @@ pub fn next_diff1_7<T: Eq, U: Eq, V: Eq, W: Eq, X: Eq, Y: Eq, Z: Eq>(
     }
 }
 
+#[allow(clippy::type_complexity)]
 pub fn next_diff1_8<S: Eq, T: Eq, U: Eq, V: Eq, W: Eq, X: Eq, Y: Eq, Z: Eq>(
     x: &[(S, T, U, V, W, X, Y, Z)],
     i: i32,
