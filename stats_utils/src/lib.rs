@@ -49,7 +49,7 @@ pub fn n90(v: &[i32]) -> i32 {
     vs.sort();
     for i in 0..vs.len() {
         part += i64::from(vs[i]);
-        if 10 * ( part as i64 ) == 9 * sum as i64 && i < vs.len() - 1 {
+        if 10 * (part as i64) == 9 * sum as i64 && i < vs.len() - 1 {
             return (vs[i] + vs[i + 1]) / 2;
         }
         if part as f64 / sum as f64 >= 0.9_f64 {

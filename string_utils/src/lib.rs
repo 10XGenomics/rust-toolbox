@@ -93,7 +93,12 @@ impl<'a> TextUtils<'a> for str {
 
     fn between(&'a self, t: &str, u: &str) -> &'a str {
         let a = self.after(t);
-        let r = a.find(u).unwrap_or_else(|| panic!("between( \"{}\", \"{}\", \"{}\" ) failed at second part", self, t, u));
+        let r = a.find(u).unwrap_or_else(|| {
+            panic!(
+                "between( \"{}\", \"{}\", \"{}\" ) failed at second part",
+                self, t, u
+            )
+        });
         &a[0..r]
     }
 
@@ -268,17 +273,17 @@ pub fn decimal_diffs(
     }
 }
 
-// Horizontal concatention.  Consider two vectors of strings, to be thought of as 
+// Horizontal concatention.  Consider two vectors of strings, to be thought of as
 // rows to be printed.  Create a new vector of strings that is the horizontal
 // concatenation of these rows, first padding the first vector with blanks on the
 // right to achieve equal length and then adding additional specified separation.
 
-pub fn hcat( col1: &[String], col2: &[String], sep: usize ) -> Vec<String> {
+pub fn hcat(col1: &[String], col2: &[String], sep: usize) -> Vec<String> {
     let mut cat = Vec::<String>::new();
-    let height = max( col1.len(), col2.len() );
+    let height = max(col1.len(), col2.len());
     let mut width1 = 0;
     for x in col1 {
-        width1 = max( width1, x.len() + sep );
+        width1 = max(width1, x.len() + sep);
     }
     for i in 0..height {
         let mut s = if i < col1.len() {

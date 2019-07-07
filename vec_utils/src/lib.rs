@@ -112,7 +112,7 @@ impl<'a, T> VecUtils<'a> for [T] {
 // Erase elements in a vector that are flagged by another vector.  Both vectors
 // must have the same length.
 
-#[allow(clippy::ptr_arg)] 
+#[allow(clippy::ptr_arg)]
 pub fn erase_if<T>(x: &mut Vec<T>, to_delete: &Vec<bool>) {
     let mut count = 0;
     #[allow(clippy::needless_range_loop)]
@@ -230,7 +230,7 @@ pub fn bin_member<T: Ord>(x: &[T], d: &T) -> bool {
 // Returns -1 if not present.
 
 pub fn position<T: Ord>(x: &[T], d: &T) -> i32 {
-    for (i,y) in x.iter().enumerate() {
+    for (i, y) in x.iter().enumerate() {
         if y == d {
             return i as i32;
         }

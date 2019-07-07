@@ -17,7 +17,7 @@
 //! goal of this crate is to provide succinct and readable "pretty" tracebacks, in
 //! place of the native tracebacks.  These pretty traces can be
 //! <font color="red"> ten times shorter</font> than native tracebacks.  In
-//! addition, unlike rust native tracebacks, pretty traces are obtained without 
+//! addition, unlike rust native tracebacks, pretty traces are obtained without
 //! setting an environment variable.
 //!
 //! # Example of native versus pretty trace output
@@ -207,9 +207,9 @@ use std::{
     os::unix::io::FromRawFd,
     panic, process,
     str::from_utf8,
-    sync::Mutex,
     sync::atomic::AtomicBool,
     sync::atomic::Ordering::SeqCst,
+    sync::Mutex,
     thread,
     thread::ThreadId,
     time,
@@ -247,7 +247,7 @@ pub struct PrettyTrace {
 /// <pre>
 /// PrettyTrace::new().&lt set some things >.on();
 /// </pre>
-/// once near the begining of your main program.  The 'things' are all the 
+/// once near the begining of your main program.  The 'things' are all the
 /// functions shown below other than <code>new</code> and <code>on</code>.
 
 impl PrettyTrace {
@@ -760,7 +760,7 @@ fn force_pretty_trace_fancy(
                 let x2_orig = x2.clone();
                 if loc.contains("/rustc/") && loc.after("/rustc/").contains("/src/") {
                     let y = loc.between("/rustc/", "/src/");
-                        if y.len() > 10 {
+                    if y.len() > 10 {
                         x2 = x2.replace(y, "<stuff>");
                     }
                 }
@@ -1018,7 +1018,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
                 }
             }
 
-            // Otherwise blocklet may not contain a blacklisted string.  
+            // Otherwise blocklet may not contain a blacklisted string.
 
             'outer1: for k in 0..x[j].len() {
                 let s = strme(&x[j][k]);
@@ -1100,10 +1100,10 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
                             }
                             for l in (0..k).rev() {
                                 if y[l] == b' ' {
-                                    for u in y.iter().take(l+1) {
+                                    for u in y.iter().take(l + 1) {
                                         x.push(*u);
                                     }
-                                    for u in y.iter().skip(k+1) {
+                                    for u in y.iter().skip(k + 1) {
                                         x.push(*u);
                                     }
                                     break 'outer;
@@ -1161,11 +1161,11 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
 #[cfg(test)]
 mod tests {
 
-    fn looper( results: &mut Vec<(usize,usize)> ) {
+    fn looper(results: &mut Vec<(usize, usize)>) {
         use rayon::prelude::*;
         results.par_iter_mut().for_each(|r| {
             for _ in 0..10_000 {
-                r.1 = r.1.wrapping_add(1).wrapping_add( r.0 * r.1 );
+                r.1 = r.1.wrapping_add(1).wrapping_add(r.0 * r.1);
             }
         });
     }
@@ -1183,43 +1183,44 @@ mod tests {
         use string_utils::*;
 
         // Create a pipe.
-    
+
         let pipefd = pipe().unwrap();
-    
+
         // Set up tracebacks with ctrlc and using the pipe.
-    
+
         PrettyTrace::new().ctrlc().fd(pipefd.1).on();
-    
+
         // Create stuff needed for computation we're going to interrupt.
-    
+
         let mut results = vec![(1 as usize, 0 as usize); 100_000_000];
-    
+
         // State what we're doing.
-    
-        let bar = "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓";
+
+        let bar =
+            "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓";
         println!("\n{}", bar);
         println!("DELIBERATELY PROVOKING A PANIC USING A CTRL-C");
         print!("{}", bar);
         std::io::stdout().flush().unwrap();
-    
+
         // Fork, and inside the fork, give separate execution paths for parent and child.
-    
+
         match fork() {
             // PARENT:
             Ok(ForkResult::Parent { child: _, .. }) => {
                 // Sleep to let the child finish, then read enough bytes from pipe
                 // so that we get the traceback.
-    
+
                 thread::sleep(time::Duration::from_millis(2000));
                 let mut buffer = [0; 2000];
                 unsafe {
                     let mut err_file = File::from_raw_fd(pipefd.0);
                     let _ = err_file.read(&mut buffer).unwrap();
                 }
-    
+
                 // Evaluate the traceback.  We check only whether the traceback
                 // points to the inner loop.
-    
+
                 println!("{}", bar);
                 println!("TESTING THE PANIC FOR CORRECTNESS");
                 println!("{}", bar);
@@ -1234,14 +1235,14 @@ mod tests {
                 if have_main {
                     println!("\ngood: found inner loop\n");
                 } else {
-                    assert!( 0 == 1, "FAIL: DID NOT FIND INNER LOOP" );
+                    assert!(0 == 1, "FAIL: DID NOT FIND INNER LOOP");
                 }
             }
-    
+
             // CHILD:
             Ok(ForkResult::Child) => {
                 // Spawn a thread to kill the child.
-    
+
                 thread::spawn(|| {
                     thread::sleep(time::Duration::from_millis(100));
                     let pid = std::process::id() as i32;
@@ -1249,9 +1250,9 @@ mod tests {
                         kill(pid, SIGINT);
                     }
                 });
-    
+
                 // Do the actual work that the ctrl-c is going to interrupt.
-    
+
                 looper(&mut results);
             }
             Err(_) => println!("Fork failed"),
