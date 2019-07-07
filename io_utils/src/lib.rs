@@ -19,7 +19,8 @@ use std::{fmt::Debug, fs::File, io::prelude::*, path::Path};
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 pub fn dir_list(d: &str) -> Vec<String> {
-    let x = fs::read_dir(&d).expect(&format!("failed to read directory {}", d));
+    let x = fs::read_dir(&d)
+        .unwrap_or_else(|_| panic!("failed to read directory {}", d));
     let mut y = Vec::<String>::new();
     for f in x {
         let s: String = f.unwrap().file_name().into_string().unwrap();
@@ -142,7 +143,7 @@ pub fn write_obj<T: Serialize, P: AsRef<Path> + Debug>(g: &T, filename: P) {
         Ok(f) => f,
     };
     let mut writer = std::io::BufWriter::new(f);
-    serialize_into(&mut writer, &g).expect(&format!("write_obj of file {:?} failed", filename))
+    serialize_into(&mut writer, &g).unwrap_or_else(|_| panic!("write_obj of file {:?} failed", filename))
 }
 
 pub fn read_obj<T: DeserializeOwned, P: AsRef<Path> + Debug>(filename: P) -> T {
@@ -151,7 +152,7 @@ pub fn read_obj<T: DeserializeOwned, P: AsRef<Path> + Debug>(filename: P) -> T {
         Ok(f) => f,
     };
     let mut reader = std::io::BufReader::new(f);
-    deserialize_from(&mut reader).expect(&format!("read_obj of file {:?} failed", filename))
+    deserialize_from(&mut reader).unwrap_or_else(|_| panic!("read_obj of file {:?} failed", filename))
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓

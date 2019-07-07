@@ -57,46 +57,43 @@ pub trait TextUtils<'a> {
 impl<'a> TextUtils<'a> for str {
     fn force_usize(&self) -> usize {
         self.parse::<usize>()
-            .expect(&format!("could not convert \"{}\" to usize", self))
+            .unwrap_or_else(|_| panic!("could not convert \"{}\" to usize", self))
     }
     fn force_i32(&self) -> i32 {
         self.parse::<i32>()
-            .expect(&format!("could not convert \"{}\" to i32", self))
+            .unwrap_or_else(|_| panic!("could not convert \"{}\" to i32", self))
     }
     fn force_i64(&self) -> i64 {
         self.parse::<i64>()
-            .expect(&format!("could not convert \"{}\" to i64", self))
+            .unwrap_or_else(|_| panic!("could not convert \"{}\" to i64", self))
     }
     fn force_u64(&self) -> u64 {
         self.parse::<u64>()
-            .expect(&format!("could not convert \"{}\" to u64", self))
+            .unwrap_or_else(|_| panic!("could not convert \"{}\" to u64", self))
     }
     fn force_f64(&self) -> f64 {
         self.parse::<f64>()
-            .expect(&format!("could not convert \"{}\" to f64", self))
+            .unwrap_or_else(|_| panic!("could not convert \"{}\" to f64", self))
     }
 
     fn before(&'a self, u: &str) -> &'a str {
         let r = self
             .find(u)
-            .expect(&format!("failed to find \"{}\" in \"{}\"", u, self));
+            .unwrap_or_else(|| panic!("failed to find \"{}\" in \"{}\"", u, self));
         &self[0..r]
     }
 
     fn after(&'a self, t: &str) -> &'a str {
         let l = self
             .find(t)
-            .expect(&format!("after failed to find \"{}\" in \"{}\"", t, self))
+            .unwrap_or_else(|| panic!("after failed to find \"{}\" in \"{}\"", t, self))
             + t.len();
         &self[l..self.len()]
     }
 
     fn between(&'a self, t: &str, u: &str) -> &'a str {
         let a = self.after(t);
-        let r = a.find(u).expect(&format!(
-            "between( \"{}\", \"{}\", \"{}\" ) failed at second part",
-            self, t, u
-        ));
+        let r = a.find(u).unwrap_or_else(|| panic!("between( \"{}\", \"{}\", \"{}\" ) failed at second part", self, t, u));
         &a[0..r]
     }
 
