@@ -17,12 +17,12 @@ pub fn n50(v: &[i32]) -> i32 {
     let mut sum: i64 = 0;
     let mut half: i64 = 0;
     for n in v.iter() {
-        sum += *n as i64;
+        sum += i64::from(*n);
     }
     let mut vs = v.to_owned();
     vs.sort();
     for i in 0..vs.len() {
-        half += vs[i] as i64;
+        half += i64::from(vs[i]);
         if 2 * half == sum && i < vs.len() - 1 {
             return (vs[i] + vs[i + 1]) / 2;
         }
@@ -43,16 +43,16 @@ pub fn n90(v: &[i32]) -> i32 {
     let mut sum: i64 = 0;
     let mut part: i64 = 0;
     for n in v.iter() {
-        sum += *n as i64;
+        sum += i64::from(*n);
     }
     let mut vs = v.to_owned();
     vs.sort();
     for i in 0..vs.len() {
-        part += vs[i] as i64;
+        part += i64::from(vs[i]);
         if 10 * ( part as i64 ) == 9 * sum as i64 && i < vs.len() - 1 {
             return (vs[i] + vs[i + 1]) / 2;
         }
-        if part as f64 / sum as f64 >= 0.9 as f64 {
+        if part as f64 / sum as f64 >= 0.9_f64 {
             return vs[i];
         }
     }
@@ -65,7 +65,7 @@ pub fn mean(v: &[i32]) -> f64 {
     let sum1 = v.len() as f64;
     let mut sum2 = 0_f64;
     for x in v.iter() {
-        sum2 += *x as f64;
+        sum2 += f64::from(*x);
     }
     if sum1 == 0_f64 {
         return 0_f64;
@@ -81,8 +81,8 @@ pub fn len_weighted_mean(v: &[i32]) -> f64 {
     let mut sum1 = 0_f64;
     let mut sum2 = 0_f64;
     for x in v.iter() {
-        sum1 += *x as f64;
-        sum2 += (*x as f64) * (*x as f64);
+        sum1 += f64::from(*x);
+        sum2 += f64::from(*x) * f64::from(*x);
     }
     if sum1 == 0_f64 {
         return 0_f64;
