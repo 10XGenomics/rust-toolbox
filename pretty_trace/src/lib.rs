@@ -4,6 +4,8 @@
 // TOP LEVEL DOCUEMENTATION
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
+//! This crate provide tools for generating generating pretty tracebacks and for profiling.
+
 //! # Pretty tracebacks
 //!
 //! Stack traces (or "tracebacks") are a fundamental vehicle for describing
