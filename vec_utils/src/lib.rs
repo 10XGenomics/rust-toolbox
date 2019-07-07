@@ -230,8 +230,8 @@ pub fn bin_member<T: Ord>(x: &[T], d: &T) -> bool {
 // Returns -1 if not present.
 
 pub fn position<T: Ord>(x: &[T], d: &T) -> i32 {
-    for i in 0..x.len() {
-        if x[i] == *d {
+    for (i,y) in x.iter().enumerate() {
+        if y == d {
             return i as i32;
         }
     }
