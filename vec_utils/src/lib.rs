@@ -112,8 +112,10 @@ impl<'a, T> VecUtils<'a> for [T] {
 // Erase elements in a vector that are flagged by another vector.  Both vectors
 // must have the same length.
 
+#[allow(clippy::ptr_arg)] 
 pub fn erase_if<T>(x: &mut Vec<T>, to_delete: &Vec<bool>) {
     let mut count = 0;
+    #[allow(clippy::needless_range_loop)]
     for j in 0..x.len() {
         if !to_delete[j] {
             if j != count {
