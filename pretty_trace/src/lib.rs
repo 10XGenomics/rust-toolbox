@@ -751,7 +751,7 @@ fn force_pretty_trace_fancy(
         };
         let msg = match info.location() {
             Some(location) => {
-                let loc = location.file().clone();
+                let loc = &(*location.file());
 
                 // Replace long constructs of the form /rustc/......./src/
                 //                                  by /rustc/<stuff>/src/.
@@ -865,6 +865,7 @@ fn force_pretty_trace_fancy(
 // PRETTIFY TRACEBACK
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
+#[allow(clippy::cognitive_complexity)]
 fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -> String {
     // Parse the backtrace into lines.
 
@@ -916,16 +917,16 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
     let mut blocks = Vec::<Vec<Vec<Vec<u8>>>>::new();
     let mut block = Vec::<Vec<Vec<u8>>>::new();
     let mut blocklet = Vec::<Vec<u8>>::new();
-    for i in 0..btlines.len() {
+    for x in btlines {
         // Ignore blank lines.
 
-        if btlines[i].is_empty() {
+        if x.is_empty() {
             continue;
         }
 
         // Determine if this line begins a block, i.e. looks like <blanks><number>:<...>.
 
-        let mut s = btlines[i].as_slice();
+        let mut s = x.as_slice();
         let mut j = 0;
         while j < s.len() {
             if s[j] != b' ' {
@@ -965,7 +966,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
             blocklet.clear();
         }
     }
-    if blocklet.len() > 0 {
+    if !blocklet.is_empty() {
         block.push(blocklet.clone());
     }
     if !block.is_empty() {
@@ -1005,13 +1006,13 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
 
     // Remove certain 'unwanted' blocklets.
 
-    for i in 0..blocks.len() {
-        let mut to_delete = vec![false; blocks[i].len()];
-        'block: for j in 0..blocks[i].len() {
+    for mut x in blocks.iter_mut() {
+        let mut to_delete = vec![false; x.len()];
+        'block: for j in 0..x.len() {
             // Ugly exemption to make a test work.
 
-            for k in 0..blocks[i][j].len() {
-                let s = strme(&blocks[i][j][k]);
+            for k in 0..x[j].len() {
+                let s = strme(&x[j][k]);
                 if s.contains("pretty_trace::tests::looper") {
                     continue 'block;
                 }
@@ -1019,8 +1020,8 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
 
             // Otherwise blocklet may not contain a blacklisted string.  
 
-            'outer1: for k in 0..blocks[i][j].len() {
-                let s = strme(&blocks[i][j][k]);
+            'outer1: for k in 0..x[j].len() {
+                let s = strme(&x[j][k]);
                 for b in blacklist.iter() {
                     if s.contains(b) {
                         to_delete[j] = true;
@@ -1033,8 +1034,8 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
 
             if !to_delete[j] && !whitelist.is_empty() {
                 let mut good = false;
-                'outer2: for k in 0..blocks[i][j].len() {
-                    let s = strme(&blocks[i][j][k]);
+                'outer2: for k in 0..x[j].len() {
+                    let s = strme(&x[j][k]);
                     for b in whitelist.iter() {
                         if s.contains(b) {
                             good = true;
@@ -1049,19 +1050,19 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
 
             // Don't allow blockets of length one that end with "- main".
 
-            let s = strme(&blocks[i][j][0]);
-            if !to_delete[j] && blocks[i][j].len() == 1 && s.ends_with("- main") {
+            let s = strme(&x[j][0]);
+            if !to_delete[j] && x[j].len() == 1 && s.ends_with("- main") {
                 to_delete[j] = true;
             }
 
             // Don't allow blocklets whose first line has the form ... main(...).
 
             let m = " main (";
-            if s.contains(&m) && s.after(&m).contains(")") && !s.between(&m, ")").contains("(") {
+            if s.contains(&m) && s.after(&m).contains(')') && !s.between(&m, ")").contains('(') {
                 to_delete[j] = true;
             }
         }
-        erase_if(&mut blocks[i], &to_delete);
+        erase_if(&mut x, &to_delete);
     }
 
     // Remove any block having length zero.
@@ -1086,11 +1087,11 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
     // Contract paths that look like " .../.../src/...".
 
     let src = b"/src/".to_vec();
-    for i in 0..blocks.len() {
-        for j in 0..blocks[i].len() {
-            if blocks[i][j].len() == 2 {
+    for z in blocks.iter_mut() {
+        for j in 0..z.len() {
+            if z[j].len() == 2 {
                 let mut x = Vec::<u8>::new();
-                let y = blocks[i][j][1].clone();
+                let y = z[j][1].clone();
                 'outer: for j in 0..y.len() {
                     if contains_at(&y, &src, j) {
                         for k in (0..j).rev() {
@@ -1112,7 +1113,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
                     }
                 }
                 if !x.is_empty() {
-                    blocks[i][j][1] = y;
+                    z[j][1] = y;
                 }
             }
         }
