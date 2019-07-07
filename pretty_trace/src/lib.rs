@@ -1088,10 +1088,10 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
 
     let src = b"/src/".to_vec();
     for z in blocks.iter_mut() {
-        for j in 0..z.len() {
-            if z[j].len() == 2 {
+        for w in z.iter_mut() {
+            if w.len() == 2 {
                 let mut x = Vec::<u8>::new();
-                let y = z[j][1].clone();
+                let y = w[1].clone();
                 'outer: for j in 0..y.len() {
                     if contains_at(&y, &src, j) {
                         for k in (0..j).rev() {
@@ -1100,11 +1100,11 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
                             }
                             for l in (0..k).rev() {
                                 if y[l] == b' ' {
-                                    for m in 0..=l {
-                                        x.push(y[m]);
+                                    for u in y.iter().take(l+1) {
+                                        x.push(*u);
                                     }
-                                    for m in k + 1..y.len() {
-                                        x.push(y[m]);
+                                    for u in y.iter().skip(k+1) {
+                                        x.push(*u);
                                     }
                                     break 'outer;
                                 }
@@ -1113,7 +1113,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
                     }
                 }
                 if !x.is_empty() {
-                    z[j][1] = y;
+                    w[1] = y;
                 }
             }
         }
@@ -1122,11 +1122,11 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
     // Emit prettified output.
 
     let mut all_out = String::new();
-    for i in 0..blocks.len() {
+    for (i, x) in blocks.iter().enumerate() {
         let num = format!("{}: ", i + 1);
         let sub = stringme(&vec![b' '; num.len()].as_slice());
-        for j in 0..blocks[i].len() {
-            for k in 0..blocks[i][j].len() {
+        for (j, y) in x.iter().enumerate() {
+            for (k, z) in y.iter().enumerate() {
                 if j == 0 && k == 0 {
                     all_out += &num;
                 } else {
@@ -1135,7 +1135,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
                 if k > 0 {
                     all_out += "◼ ";
                 }
-                let mut s = stringme(&blocks[i][j][k]);
+                let mut s = stringme(&z);
                 if k == 0 && s.contains("::") {
                     let cc = s.rfind("::").unwrap();
                     s.truncate(cc);
