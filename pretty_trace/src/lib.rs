@@ -208,6 +208,8 @@ use std::{
     panic, process,
     str::from_utf8,
     sync::Mutex,
+    sync::atomic::AtomicBool,
+    sync::atomic::Ordering::SeqCst,
     thread,
     thread::ThreadId,
     time,
@@ -423,9 +425,10 @@ impl Happening {
     }
 }
 
+static CTRLC_DEBUG: AtomicBool = AtomicBool::new(false);
+
 lazy_static! {
     static ref HAPPENING: Mutex<Happening> = Mutex::new(Happening::new());
-    static ref CTRLC_DEBUG: Mutex<bool> = Mutex::new(false);
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -496,7 +499,7 @@ static mut PROCESSING_SIGUSR1: bool = false;
 
 extern "C" fn handler(sig: i32) {
     if sig == SIGINT {
-        if *CTRLC_DEBUG.lock().unwrap() {
+        if CTRLC_DEBUG.load(SeqCst) {
             unsafe {
                 eprint!("\ncaught Ctrl-C");
                 eprintln!(" #{}", HEARD_CTRLC + 1);
@@ -509,7 +512,7 @@ extern "C" fn handler(sig: i32) {
             }
             HEARD_CTRLC += 1;
             thread::sleep(time::Duration::from_millis(1000));
-            if *CTRLC_DEBUG.lock().unwrap() {
+            if CTRLC_DEBUG.load(SeqCst) {
                 eprintln!("done sleeping");
             }
             if HEARD_CTRLC > 1 {
@@ -671,7 +674,7 @@ fn force_pretty_trace_fancy(
 
     let _ = install_signal_handler(happening.on, ctrlc);
     if ctrlc_debug {
-        *CTRLC_DEBUG.lock().unwrap() = true;
+        CTRLC_DEBUG.store(true, SeqCst);
     }
 
     // Setup panic hook. If we panic, this code gets run.
