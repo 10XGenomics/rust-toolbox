@@ -660,8 +660,8 @@ fn force_pretty_trace_fancy(
                         percent_ratio(tracebacks, interrupts),
                         traces.len()
                     );
-                    for i in 0..freq.len() {
-                        report += &format!("[{}] COUNT = {}\n{}", i + 1, freq[i].0, freq[i].1);
+                    for (i, x) in freq.iter().enumerate() {
+                        report += &format!("[{}] COUNT = {}\n{}", i + 1, x.0, x.1);
                     }
                     print!("{}", report);
                     std::process::exit(0);
@@ -779,12 +779,11 @@ fn force_pretty_trace_fancy(
                 } else {
                     format!("\n\n0: ◼ {}", pre)
                 };
-                let mut long_msg = "Rerun with env var RUST_FULL_TRACE set to see full \
-                                    traceback."
-                    .to_string();
-                if !log_file_name.is_empty() {
-                    long_msg = format!("Full traceback is at {}.", log_file_name);
-                }
+                let long_msg = if log_file_name.is_empty() {
+                    "Rerun with env var RUST_FULL_TRACE set to see full traceback.".to_string()
+                } else {
+                    format!("Full traceback is at {}.", log_file_name)
+                };
                 format!(
                     "RUST PROGRAM PANIC\n\n(Shortened traceback.  \
                      {})\n\n{}{}{}",
