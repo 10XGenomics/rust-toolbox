@@ -10,7 +10,6 @@
 // ◼ code.
 
 use debruijn::{dna_string::*, kmer::*};
-use io_utils::*;
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use string_utils::*;
@@ -70,22 +69,31 @@ impl<'a> RefData {
     pub fn from_fasta(path: &String) -> Self {
         // TODO: Use impl AsRef<Path> instead of &String throughout
         let mut refdata = RefData::new();
+        let path_contents = fs::read_to_string(path).unwrap();
+        if path_contents.len() == 0 {
+            panic!("Reference file at {} has zero length.", path);
+        }
         make_vdj_ref_data_core(
             &mut refdata,
-            path,
-            false, // extended
+            &path_contents,
+            &String::new(),
             true,  // is_tcr
             true,  // is_bcr
+            None,
         );
         refdata
     }
 
     pub fn from_fasta_with_filter(path: &String, ids_to_use: &HashSet<i32>) -> Self {
         let mut refdata = RefData::new();
-        make_vdj_ref_data_core_core(
+        let path_contents = fs::read_to_string(path).unwrap();
+        if path_contents.len() == 0 {
+            panic!("Reference file at {} has zero length.", path);
+        }
+        make_vdj_ref_data_core(
             &mut refdata,
-            path,
-            false, // extended
+            &path_contents,
+            &String::new(),
             true,  // is_tcr
             true,  // is_bcr
             Some(ids_to_use),
@@ -124,23 +132,13 @@ pub fn vdj_ref_path(species: &String, imgt: bool) -> String {
     String::from("")
 }
 
-pub fn make_vdj_ref_data_core(
-    refdata: &mut RefData,
-    ref_fasta_path: &String,
-    extended: bool,
-    is_tcr: bool,
-    is_bcr: bool,
-) {
-    make_vdj_ref_data_core_core(refdata, ref_fasta_path, extended, is_tcr, is_bcr, None);
-}
-
 // ids_to_use_opt: Optional hashSet of ids. If specified only reference
 // entries with id in the HashSet is used to construct RefData
 
-pub fn make_vdj_ref_data_core_core(
+pub fn make_vdj_ref_data_core(
     refdata: &mut RefData,
-    ref_fasta_path: &String,
-    extended: bool,
+    ref_fasta: &String,
+    extended_ref_fasta: &String,
     is_tcr: bool,
     is_bcr: bool,
     ids_to_use_opt: Option<&HashSet<i32>>,
@@ -151,28 +149,11 @@ pub fn make_vdj_ref_data_core_core(
     let mut rheaders = &mut refdata.rheaders;
     let mut rkmers_plus = &mut refdata.rkmers_plus;
 
-    // Determine species
-    // ◼ Very bad.
-
-    let mut species: String = "unknown".to_string();
-    if ref_fasta_path.contains("GRCm") || ref_fasta_path.contains("mouse") {
-        species = "mouse".to_string();
-    }
-    if ref_fasta_path.contains("GRCh")
-        || ref_fasta_path.contains("IMGT_2")
-        || ref_fasta_path.contains("human")
-    {
-        species = "human".to_string();
-    }
-
     // Parse the fasta file.
 
     refs.clear();
     rheaders.clear();
-    read_fasta_into_vec_dna_string_plus_headers(&ref_fasta_path, &mut refs, &mut rheaders);
-    if fs::metadata(&ref_fasta_path).unwrap().len() == 0 {
-        panic!("Reference file at {} has zero length.", ref_fasta_path);
-    }
+    read_fasta_contents_into_vec_dna_string_plus_headers(&ref_fasta, &mut refs, &mut rheaders);
 
     // Filter by ids if requested.
 
@@ -271,22 +252,13 @@ pub fn make_vdj_ref_data_core_core(
 
     // Extend the reference.
 
-    if (species == "human" || species == "mouse")
-        && extended
-        && ref_fasta_path.ends_with("/regions.fa")
-    {
+    if *extended_ref_fasta != String::new() {
         let mut refs2 = Vec::<DnaString>::new();
         let mut rheaders2 = Vec::<String>::new();
-        let aux_ref = &format!(
-            "{}/supp_regions.fa",
-            ref_fasta_path.rev_before("/regions.fa")
-        );
-        if path_exists(&aux_ref) {
-            read_fasta_into_vec_dna_string_plus_headers(&aux_ref, &mut refs2, &mut rheaders2);
-            refs.append(&mut refs2);
-            rheaders.append(&mut rheaders2);
-            // ◼ Note not appending to refdata.name.  This may be a bug.
-        }
+        read_fasta_contents_into_vec_dna_string_plus_headers(extended_ref_fasta, &mut refs2, &mut rheaders2);
+        refs.append(&mut refs2);
+        rheaders.append(&mut rheaders2);
+        // ◼ Note not appending to refdata.name.  This may be a bug.
     }
 
     // Make lookup table for reference.
@@ -322,5 +294,19 @@ pub fn make_vdj_ref_data(
     is_bcr: bool,
 ) {
     let ref_fasta = vdj_ref_path(&species, imgt);
-    make_vdj_ref_data_core(refdata, &ref_fasta, extended, is_tcr, is_bcr);
+    let ext_ref_fasta = if extended && ref_fasta.ends_with("/regions.fa") {
+        format!( "{}/supp_regions.fa", ref_fasta.rev_before("/regions.fa") )
+    } else {
+        String::new()
+    };
+    let refx = fs::read_to_string(&ref_fasta).unwrap();
+    let ext_refx = if extended {
+        fs::read_to_string(&ext_ref_fasta).unwrap()
+    } else {
+        String::new()
+    };
+    if refx.len() == 0 {
+        panic!("Reference file at {} has zero length.", ref_fasta);
+    }
+    make_vdj_ref_data_core(refdata, &refx, &ext_refx, is_tcr, is_bcr, None);
 }

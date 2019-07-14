@@ -224,7 +224,7 @@ pub fn annotate_seq_core(
                 break;
             }
             let t = rkmers_plus[r as usize].1 as usize;
-            let mut p = rkmers_plus[r as usize].2 as usize;
+            let p = rkmers_plus[r as usize].2 as usize;
             if l > 0 && p > 0 && b.get(l - 1) == refs[t].get(p - 1) {
                 continue;
             }
@@ -448,7 +448,7 @@ pub fn annotate_seq_core(
         for i in 0..semi.len() {
             let t = semi[i].0;
             let off = semi[i].1;
-            let mut l = semi[i].2;
+            let l = semi[i].2;
             let mut len = semi[i].3;
             let mut mis = semi[i].4.clone();
             let mut mis_count = 0;
@@ -505,19 +505,19 @@ pub fn annotate_seq_core(
             continue;
         }
         let off1 = semi[i1].1;
-        let (mut l1, mut len1) = (semi[i1].2, semi[i1].3);
-        let mut mis1 = semi[i1].4.clone();
+        let (l1, len1) = (semi[i1].2, semi[i1].3);
+        let mis1 = semi[i1].4.clone();
         for i2 in 0..semi.len() {
             let t2 = semi[i2].0;
             let off2 = semi[i2].1;
             if t2 != t1 || off2 != off1 {
                 continue;
             }
-            let (mut l2, mut len2) = (semi[i2].2, semi[i2].3);
+            let (l2, len2) = (semi[i2].2, semi[i2].3);
             if l1 + len1 >= l2 {
                 continue;
             }
-            let mut mis2 = semi[i2].4.clone();
+            let mis2 = semi[i2].4.clone();
             let mut mis3 = Vec::<i32>::new();
             for l in l1 + len1..l2 {
                 if b.get(l as usize) != refs[t1 as usize].get((l + off1) as usize) {
@@ -908,6 +908,7 @@ pub fn annotate_seq_core(
                 }
                 if del.len() == 0 && ins.solo() {
                     let (l, p, n) = (ins[0].0, ins[0].1, ins[0].2);
+                    // ◼ This is buggy.  It fails if overflow detection is on.
                     if n != (p1 + len1 - p2) - (l1 + len1 - l2) {
                         continue;
                     }
