@@ -1275,6 +1275,9 @@ pub fn annotate_seq_core(
             if !refdata.is_v(t1) || !refdata.is_v(t2) {
                 continue;
             }
+            if t1 == t2 {
+                continue;
+            }
             let (len1, len2) = (annx[i1].1, annx[i2].1);
             let (p1, p2) = (annx[i1].3, annx[i2].3);
             if p1 > 0 {
