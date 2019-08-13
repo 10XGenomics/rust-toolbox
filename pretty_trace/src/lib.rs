@@ -172,6 +172,9 @@
 //!
 //! ◼ Using <code>debug = 1</code> in place of <code>debug = true</code> does not work.
 //!
+//! ◼ The code has only been tested under linux.  An example is provided of 
+//!   incorrect behavior under OS X.
+//!
 //! # More
 //!
 //! See the documentation for <code>PrettyTrace</code>, linked to below.
