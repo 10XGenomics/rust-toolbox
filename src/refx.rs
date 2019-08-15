@@ -18,7 +18,7 @@ use tenkit2::kmer_lookup::*;
 use vec_utils::*;
 
 pub fn human_ref() -> String {
-    fs::read_to_string(&"../vdj_ref/human/regions.fa").unwrap()
+    fs::read_to_string(&"vdj_ann/vdj_refs/human/regions.fa").unwrap()
 }
 
 // RefData: this is a packaging of reference data appropriate for VDJ analysis.
