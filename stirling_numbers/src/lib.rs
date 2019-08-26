@@ -25,15 +25,6 @@
 ///
 /// See wikipedia: https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind.
 
-/// The Stirling numbers satisfy the following recursion:
-///
-/// S(n,0) = delta(0,n)
-/// S(n,n) = 1
-/// S(n,k) = k * S(n-1,k) + S(n-1,k-1) if 1 <= k < n.
-
-/// sterling2_table: build a table of sterling numbers of the second kind S(n,k), for
-/// n <= n_max, using the recurrence relation.
-
 extern crate num_bigint;
 extern crate num_traits;
 extern crate num_rational;
@@ -42,6 +33,34 @@ extern crate rayon;
 extern crate vec_utils;
 
 use num_traits::{Zero, One, Num};
+
+/// sterling2_table: build a table of sterling numbers of the second kind S(n,k), for
+/// n <= n_max, using the recurrence relation.
+///
+/// S(n,0) = delta(0,n)
+/// S(n,n) = 1
+/// S(n,k) = k * S(n-1,k) + S(n-1,k-1) if 1 <= k < n.
+///
+/// Note: for T = f64, this works for n_max up to 219; for higher n_max you'll get infinite 
+/// values in some cases.  Can also be used for T = BigUint.
+
+pub fn sterling2_table<T: Num + Clone + From<u32>>( n_max: usize ) -> Vec<Vec<T>> {
+    let mut s = Vec::<Vec<T>>::new();
+    let zero: T = Zero::zero();
+    let one: T = One::one();
+    for n in 0..=n_max {
+        s.push( vec![zero.clone(); n+1] );
+    }
+    s[0][0] = one.clone();
+    for n in 1..=n_max {
+        s[n][0] = zero.clone();
+        for k in 1..n {
+            s[n][k] = T::from(k as u32) * s[n-1][k].clone() + s[n-1][k-1].clone();
+        }
+        s[n][n] = one.clone();
+    }
+    s
+}
 
 /// Stirling ratios: The Stirling numbers have the asymptotic approximation k^n / k!.
 /// The ratio SR(n,k) := S(n,k) / ( k^n / k! )
@@ -86,27 +105,6 @@ pub fn sterling2_ratio_table_f64( n_max: usize ) -> Vec<Vec<f64>> {
         for j in 1..=n {
             s[n][n] *= j as f64 / n as f64;
         }
-    }
-    s
-}
-
-/// Note: for T = f64, this works for n_max up to 219; for higher n_max you'll get infinite 
-/// values in some cases.  Can also be used for T = BigUint.
-
-pub fn sterling2_table<T: Num + Clone + From<u32>>( n_max: usize ) -> Vec<Vec<T>> {
-    let mut s = Vec::<Vec<T>>::new();
-    let zero: T = Zero::zero();
-    let one: T = One::one();
-    for n in 0..=n_max {
-        s.push( vec![zero.clone(); n+1] );
-    }
-    s[0][0] = one.clone();
-    for n in 1..=n_max {
-        s[n][0] = zero.clone();
-        for k in 1..n {
-            s[n][k] = T::from(k as u32) * s[n-1][k].clone() + s[n-1][k-1].clone();
-        }
-        s[n][n] = one.clone();
     }
     s
 }
