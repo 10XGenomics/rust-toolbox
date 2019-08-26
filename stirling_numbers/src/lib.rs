@@ -1,9 +1,24 @@
 // Copyright (c) 2019 10X Genomics, Inc. All rights reserved.
 
 // TO DO
-// 1. Formalize tests.
-// 2. Fully document.
-// 3. Post to crates.io.
+// 1. Fully document.
+// 2. Post to crates.io.
+
+///! # Stirling numbers of the second kind and friends
+///!
+///! For integers 0 <= k <= n, the Stirling number of the second kind S(n,k) is the number
+///! of partitions of a set of size n.
+///!
+///! See wikipedia: https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind.
+///!
+///! This crate includes functions for computing:
+///! * a table of S(n,k) by recursion;
+///! * S(n,k) divided by the asympotic approximation k^n / k!, which is
+///!   numerically better behaved than S(n,k);
+///! * the probability of selecting at most m distinct elements in x random draws with 
+///!   replacement from a set of size n.
+///!
+///! Other related functions might be added here.
 
 /// For integers 0 <= k <= n, the Stirling number of the second kind S(n,k) is the number
 /// of partitions of a set of size n.
