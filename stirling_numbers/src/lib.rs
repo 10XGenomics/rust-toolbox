@@ -21,8 +21,8 @@
 //!
 //! <p>
 //!
-//! * the probability of selecting at most <code>m</code> distinct elements in 
-//!   <code>x</code> random draws with 
+//! * the probability of selecting at most <code>m</code> distinct elements in
+//!   <code>x</code> random draws with
 //!   replacement from a set of size <code>n</code>.
 //!
 //! Other related functions might be added here.
@@ -44,11 +44,11 @@ use num_traits::{Num, One, Zero};
 /// S(n,n) = 1
 /// S(n,k) = k * S(n-1,k) + S(n-1,k-1) if 1 ≤ k < n.
 /// </pre>
-/// Note: for <code>T = f64</code>, this works for <code>n_max</code> up to 219; for higher 
-/// <code>n_max</code> you'll get 
+/// Note: for <code>T = f64</code>, this works for <code>n_max</code> up to 219; for higher
+/// <code>n_max</code> you'll get
 /// infinite values in some cases.  Can also be used for <code>T = BigUint</code>.
 
-pub fn stirling2_table<T: Num + Clone + From<u32>>( n_max: usize ) -> Vec<Vec<T>> {
+pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> {
     let mut s = Vec::<Vec<T>>::new();
     let zero: T = Zero::zero();
     let one: T = One::one();
@@ -119,8 +119,8 @@ pub fn sterling2_ratio_table_f64(n_max: usize) -> Vec<Vec<f64>> {
     s
 }
 
-/// The probability of selecting exactly <code>m</code> distinct elements in <code>x</code> 
-/// random draws with replacement from a set of size <code>n</code> is 
+/// The probability of selecting exactly <code>m</code> distinct elements in <code>x</code>
+/// random draws with replacement from a set of size <code>n</code> is
 /// <code>
 /// Z(m,x,n) = S(x,m) * ( n * ... * (n-m+1) ) / n^x
 /// </code>
@@ -131,7 +131,7 @@ pub fn sterling2_ratio_table_f64(n_max: usize) -> Vec<Vec<f64>> {
 /// In terms of Stirling ratios <code>SR</code>,
 /// <br><code>Z(m,x,n) = SR(x,m) * (m/n)^x * choose(n,m)</code>.
 /// <br><br>
-/// The probability of selecting at most <code>m</code> distinct elements in <code>x</code> 
+/// The probability of selecting at most <code>m</code> distinct elements in <code>x</code>
 /// random draws with replacement from a set of size <code>n</code> is:
 /// <code>
 /// <br>sum( SR(x,u) * (u/n)^x * choose(n,u), u = 0..=m )<br>
@@ -140,7 +140,7 @@ pub fn sterling2_ratio_table_f64(n_max: usize) -> Vec<Vec<f64>> {
 /// <br>
 /// which is computed below, using a precomputed Stirling ratio table.
 /// <br><br>
-/// Complexity: <code>O( (x-m) * x )</code>.  If one wants to speed this up, probably one can do 
+/// Complexity: <code>O( (x-m) * x )</code>.  If one wants to speed this up, probably one can do
 /// it by truncating the sum, without significantly affecting accuracy.
 /// <br><br>
 /// Tests: we test one value for this by simulation.
