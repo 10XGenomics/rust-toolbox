@@ -12,18 +12,18 @@
 //!
 //! This crate includes functions for computing:
 //!
-//! * a table of <code>S(n,k)</code> by recursion;
+//! * a table of <code>S(n,k)</code>, computed by recursion;
 //!
 //! <p>
 //!
-//! * <code>S(n,k)</code> divided by the asympotic approximation <code>k^n / k!</code>, which is
-//!   numerically better behaved than <code>S(n,k)</code>;
+//! * a table of <code>S(n,k)</code> divided by the asympotic approximation <code>k^n / k!</code>, 
+//!   which is numerically better behaved than <code>S(n,k)</code>;
 //!
 //! <p>
 //!
 //! * the probability of selecting at most <code>m</code> distinct elements in 
 //!   <code>x</code> random draws with 
-//!   replacement from a set of size <code>n</code>.
+//!   replacement from a set of size <code>n</code>, which is computed using Stirling numbers.
 //!
 //! Other related functions might be added here.
 
