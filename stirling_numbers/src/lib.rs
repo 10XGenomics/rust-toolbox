@@ -88,7 +88,7 @@ pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> 
 /// <br>
 /// We don't have a reference for this.
 
-pub fn sterling2_ratio_table_f64(n_max: usize) -> Vec<Vec<f64>> {
+pub fn stirling2_ratio_table_f64(n_max: usize) -> Vec<Vec<f64>> {
     let mut s = Vec::<Vec<f64>>::new();
     for n in 0..=n_max {
         s.push(vec![0.0; n + 1]);
@@ -239,11 +239,11 @@ mod tests {
     // Test stirling stuff.
 
     #[test]
-    fn test_sterling_stuff() {
-        // Test sterling2_table.
+    fn test_stirling_stuff() {
+        // Test stirling2_table.
 
         let n_max = 3000;
-        let s2 = sterling2_table::<f64>(n_max);
+        let s2 = stirling2_table::<f64>(n_max);
         assert_eq!(s2[10][5], 42525.0);
 
         // Verify that Stirling ratios for n = 700 are accurate to six digits.  This is not
