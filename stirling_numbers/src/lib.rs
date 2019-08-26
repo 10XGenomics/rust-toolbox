@@ -145,7 +145,7 @@ pub fn stirling2_ratio_table_f64(n_max: usize) -> Vec<Vec<f64>> {
 /// <br><br>
 /// Tests: we test one value for this by simulation.
 
-pub fn prob_at_most_m_distinct_in_sample_of_x_from_n(
+pub fn p_at_most_m_distinct_in_sample_of_x_from_n(
     m: usize,
     x: usize,
     n: usize,
@@ -178,7 +178,7 @@ mod tests {
 
     // Helper functions.
 
-    fn simulate_prob_at_most_m_distinct_in_sample_of_x_from_n(
+    fn simulate_p_at_most_m_distinct_in_sample_of_x_from_n(
         m: usize,
         x: usize,
         n: usize,
@@ -277,8 +277,8 @@ mod tests {
         let m = 27;
         let x = 30;
         let n = 2500;
-        let p1 = prob_at_most_m_distinct_in_sample_of_x_from_n(m, x, n, &sr);
-        let p2 = simulate_prob_at_most_m_distinct_in_sample_of_x_from_n(m, x, n, 100_000_000);
+        let p1 = p_at_most_m_distinct_in_sample_of_x_from_n(m, x, n, &sr);
+        let p2 = simulate_p_at_most_m_distinct_in_sample_of_x_from_n(m, x, n, 100_000_000);
         assert_eq!(format!("{:.7}", p1), "0.0005953");
         assert_eq!(format!("{:.7}", p2), "0.0005936");
     }
