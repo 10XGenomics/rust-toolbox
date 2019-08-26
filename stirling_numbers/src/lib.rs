@@ -19,26 +19,14 @@
 /// sterling2_table: build a table of sterling numbers of the second kind S(n,k), for
 /// n <= n_max, using the recurrence relation.
 
-// need 
-// num-bigint = "0.2.2"
-// num-traits = "0.2.8"
-// num-rational = "0.2.2"
-
-extern crate io_utils;
-extern crate rand;
-extern crate rayon;
-extern crate string_utils;
-extern crate vec_utils;
-
 extern crate num_bigint;
 extern crate num_traits;
 extern crate num_rational;
+extern crate rand;
+extern crate rayon;
+extern crate vec_utils;
 
-use num_bigint::{BigInt,BigUint,ToBigUint};
-use num_rational::Ratio;
 use num_traits::{Zero, One, Num};
-
-use vec_utils::*;
 
 /// Stirling ratios: The Stirling numbers have the asymptotic approximation k^n / k!.
 /// The ratio SR(n,k) := S(n,k) / ( k^n / k! )
@@ -153,8 +141,11 @@ mod tests {
 
     use super::*;
 
+    use num_bigint::{BigInt,BigUint,ToBigUint};
+    use num_rational::Ratio;
     use rand::{Rng, SeedableRng, StdRng};
     use rayon::iter::{IntoParallelRefIterator,ParallelIterator};
+    use vec_utils::*;
 
     // Helper functions.
 
