@@ -162,6 +162,9 @@ pub fn p_at_most_m_distinct_in_sample_of_x_from_n(
         }
         p -= z;
     }
+    if p < 0.0 {
+        p = 0.0;
+    }
     p
 }
 
