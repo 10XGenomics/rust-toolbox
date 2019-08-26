@@ -4,26 +4,29 @@
 // 1. Fully document.
 // 2. Post to crates.io.
 
-///! # Stirling numbers of the second kind and friends
-///!
-///! For integers 0 <= k <= n, the Stirling number of the second kind S(n,k) is the number
-///! of partitions of a set of size n.
-///!
-///! See wikipedia: https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind.
-///!
-///! This crate includes functions for computing:
-///! * a table of S(n,k) by recursion;
-///! * S(n,k) divided by the asympotic approximation k^n / k!, which is
-///!   numerically better behaved than S(n,k);
-///! * the probability of selecting at most m distinct elements in x random draws with
-///!   replacement from a set of size n.
-///!
-///! Other related functions might be added here.
+//! # Stirling numbers of the second kind and friends
+//!
+//! For integers <code>0 ≤ k ≤ n</code>, the Stirling number of the second kind <code>S(n,k)</code>
+//! is the number of partitions of a set of size <code>n</code>.
+//! See <a href="https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind">wikipedia</a>.
+//!
+//! This crate includes functions for computing:
+//!
+//! * a table of <code>S(n,k)</code> by recursion;
+//!
+//! <p>
+//!
+//! * <code>S(n,k)</code> divided by the asympotic approximation <code>k^n / k!</code>, which is
+//!   numerically better behaved than <code>S(n,k)</code>;
+//!
+//! <p>
+//!
+//! * the probability of selecting at most <code>m</code> distinct elements in 
+//!   <code>x</code> random draws with 
+//!   replacement from a set of size <code>n</code>.
+//!
+//! Other related functions might be added here.
 
-/// For integers 0 <= k <= n, the Stirling number of the second kind S(n,k) is the number
-/// of partitions of a set of size n.
-///
-/// See wikipedia: https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind.
 extern crate num_bigint;
 extern crate num_rational;
 extern crate num_traits;
@@ -33,17 +36,19 @@ extern crate vec_utils;
 
 use num_traits::{Num, One, Zero};
 
-/// sterling2_table: build a table of sterling numbers of the second kind S(n,k), for
-/// n <= n_max, using the recurrence relation.
-///
+/// <br>
+/// Build a table of stirling numbers of the second kind <code>S(n,k)</code>, for
+/// <code>n ≤ n_max</code>, using the recurrence relation:
+/// <pre>
 /// S(n,0) = delta(0,n)
 /// S(n,n) = 1
-/// S(n,k) = k * S(n-1,k) + S(n-1,k-1) if 1 <= k < n.
-///
-/// Note: for T = f64, this works for n_max up to 219; for higher n_max you'll get infinite
-/// values in some cases.  Can also be used for T = BigUint.
+/// S(n,k) = k * S(n-1,k) + S(n-1,k-1) if 1 ≤ k < n.
+/// </pre>
+/// Note: for <code>T = f64</code>, this works for <code>n_max</code> up to 219; for higher 
+/// <code>n_max</code> you'll get 
+/// infinite values in some cases.  Can also be used for <code>T = BigUint</code>.
 
-pub fn sterling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> {
+pub fn stirling2_table<T: Num + Clone + From<u32>>( n_max: usize ) -> Vec<Vec<T>> {
     let mut s = Vec::<Vec<T>>::new();
     let zero: T = Zero::zero();
     let one: T = One::one();
@@ -61,20 +66,26 @@ pub fn sterling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> 
     s
 }
 
-/// Stirling ratios: The Stirling numbers have the asymptotic approximation k^n / k!.
-/// The ratio SR(n,k) := S(n,k) / ( k^n / k! )
-/// with the special case definition SR(0,0) = 1
-/// satisfies the following recursion:
-///
+/// <br>
+/// Compute a table of Stirling ratios, explained below.
+/// First, the Stirling numbers have the asymptotic approximation <code>k^n / k!</code>.
+/// The ratio <code>SR(n,k) := S(n,k) / ( k^n / k! )</code>
+/// with the special case definition <code>SR(0,0) = 1</code>
+/// satisfies the recursion:
+/// <br>
+/// <pre>
 /// SR(n,0) = delta(0,n)
 /// SR(n,n) = n! / n^n
-/// SR(n,k) = SR(n-1,k) + SR(n-1,k-1) * ((k-1)/k))^(n-1) if 1 <= k < n.
-///
+/// SR(n,k) = SR(n-1,k) + SR(n-1,k-1) * ((k-1)/k))^(n-1)
+///           if 1 ≤ k < n.
+/// </pre>
 /// The utility of these ratios is that their numerical behavior is better than the Stirling
 /// numbers themselves: the table can be computed up to much larger n without going infinite.
 /// The ratios also work more naturally with some applications e.g. in
-/// prob_at_most_m_distinct_in_sample_of_x_from_n.
-///
+/// <code>
+/// p_at_most_m_distinct_in_sample_of_x_from_n.
+/// </code>
+/// <br>
 /// We don't have a reference for this.
 
 pub fn sterling2_ratio_table_f64(n_max: usize) -> Vec<Vec<f64>> {
@@ -108,28 +119,30 @@ pub fn sterling2_ratio_table_f64(n_max: usize) -> Vec<Vec<f64>> {
     s
 }
 
-/// The probability of selecting exactly m distinct elements in x random draws with replacement
-/// from a set of size n = Z(m,x,n) = S(x,m) * ( n * ... * (n-m+1) ) / n^x
-/// where S(x,m) is the Sterling number of the second kind.
-///
-/// See https://math.stackexchange.com/questions/32800/probability-distribution-of-coverage-of-a-set-after-x-independently-randomly.
-///
-/// Thus Z(m,x,n) = SR(x,m) * (m/n)^x * choose(n,m).
-///
-/// The probability of selecting <= m distinct elements in x random draws with replacement from
-/// a set of size n is:
-///
-/// sum( SR(x,u) * (u/n)^x * choose(n,u), u = 0..=m )
-///
+/// The probability of selecting exactly <code>m</code> distinct elements in <code>x</code> 
+/// random draws with replacement from a set of size <code>n</code> is 
+/// <code>
+/// Z(m,x,n) = S(x,m) * ( n * ... * (n-m+1) ) / n^x
+/// </code>
+/// where <code>S(x,m)</code> is the Stirling number of the second kind.
+/// <br>
+/// See <a href="https://math.stackexchange.com/questions/32800/probability-distribution-of-coverage-of-a-set-after-x-independently-randomly">stack exchange question 32800</a>.
+/// <br><br>
+/// In terms of Stirling ratios <code>SR</code>,
+/// <br><code>Z(m,x,n) = SR(x,m) * (m/n)^x * choose(n,m)</code>.
+/// <br><br>
+/// The probability of selecting at most <code>m</code> distinct elements in <code>x</code> 
+/// random draws with replacement from a set of size <code>n</code> is:
+/// <code>
+/// <br>sum( SR(x,u) * (u/n)^x * choose(n,u), u = 0..=m )<br>
 /// = 1 - sum( SR(x,u) * (u/n)^x * choose(n,u), u = m+1..=x ).
-///
-/// which is computed below, using a precomputed Sterling ratio table.
-///
-/// Complexity: O( (x-m) * x ).
-///
-/// If one wants to speed this up, probably one can do it by truncating the sum, without
-/// significantly affecting accuracy.
-///
+/// </code>
+/// <br>
+/// which is computed below, using a precomputed Stirling ratio table.
+/// <br><br>
+/// Complexity: <code>O( (x-m) * x )</code>.  If one wants to speed this up, probably one can do 
+/// it by truncating the sum, without significantly affecting accuracy.
+/// <br><br>
 /// Tests: we test one value for this by simulation.
 
 pub fn prob_at_most_m_distinct_in_sample_of_x_from_n(
@@ -223,7 +236,7 @@ mod tests {
         }
     }
 
-    // Test sterling stuff.
+    // Test stirling stuff.
 
     #[test]
     fn test_sterling_stuff() {
@@ -237,9 +250,9 @@ mod tests {
         // true for n = 750.
 
         let n_max = 2500;
-        let sr = sterling2_ratio_table_f64(n_max);
+        let sr = stirling2_ratio_table_f64(n_max);
         let n = 700;
-        let sbig = sterling2_table::<BigUint>(n);
+        let sbig = stirling2_table::<BigUint>(n);
         for k in 1..=n {
             let mut kf = 1.to_biguint().unwrap(); // compute k!
             for j in 1..=k {
@@ -259,7 +272,7 @@ mod tests {
             assert_equal_to_six_digits(&x1, &x2);
         }
 
-        // Validate one value for fn prob_at_most_m_unique_in_sample_of_x_from_n.
+        // Validate one value for fn p_at_most_m_unique_in_sample_of_x_from_n.
 
         let m = 27;
         let x = 30;
