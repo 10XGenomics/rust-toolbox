@@ -1166,6 +1166,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
 #[cfg(test)]
 mod tests {
 
+    #[inline(never)]
     fn looper(results: &mut Vec<(usize, usize)>) {
         use rayon::prelude::*;
         results.par_iter_mut().for_each(|r| {
