@@ -7,7 +7,7 @@
 //! # Stirling numbers of the second kind and friends
 //!
 //! For integers <code>0 ≤ k ≤ n</code>, the Stirling number of the second kind <code>S(n,k)</code>
-//! is the number of partitions of a set of size <code>n</code>.
+//! is the number of <code>k</code>-element partitions of a set of size <code>n</code>.
 //! See <a href="https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind">wikipedia</a>.
 //!
 //! This crate consists of a few functions related to these Stirling numbers.
@@ -123,17 +123,13 @@ pub fn stirling2_ratio_table<T: Num + Clone + MulAssign + From<u32>>(n_max: usiz
 /// replacement from a set of size <code>n</code>.
 /// <br>&nbsp;
 ///
-/// This probability is
-/// <code>
-/// Z(m,x,n) = S(x,m) * ( n * ... * (n-m+1) ) / n^x
-/// </code>
+/// This probability is <code>Z(m,x,n) = S(x,m) * ( n * ... * (n-m+1) ) / n^x</code>
 /// where <code>S(x,m)</code> is the Stirling number of the second kind.
-/// <br>
-/// See <a href="https://math.stackexchange.com/questions/32800/probability-distribution-of-coverage-of-a-set-after-x-independently-randomly">stack exchange question 32800</a>.
+/// Reference: <a href="https://math.stackexchange.com/questions/32800/probability-distribution-of-coverage-of-a-set-after-x-independently-randomly">stack exchange question 32800</a>.
 /// <br><br>
 /// In terms of Stirling ratios <code>SR</code>,
-/// <br><code>Z(m,x,n) = SR(x,m) * (m/n)^x * choose(n,m)</code>.
-/// <br><br>
+/// <code>Z(m,x,n) = SR(x,m) * (m/n)^x * choose(n,m)</code>.
+///
 /// The probability of selecting at most <code>m</code> distinct elements in <code>x</code>
 /// random draws with replacement from a set of size <code>n</code> is:
 /// <code>
@@ -143,10 +139,11 @@ pub fn stirling2_ratio_table<T: Num + Clone + MulAssign + From<u32>>(n_max: usiz
 /// <br>
 /// which is computed below, using a precomputed Stirling ratio table.
 /// <br><br>
-/// Complexity: <code>O( (x-m) * x )</code>.  If one wants to speed this up, probably one can do
-/// it by truncating the sum, without significantly affecting accuracy.
+/// <b>Complexity.  </b> <code>O( (x-m) * x )</code>.  If one wants to speed this up, probably one 
+/// can do it by truncating the sum, without significantly affecting accuracy.
 /// <br><br>
-/// <b>Testing and accuracy.</b> We test one value for this by simulation.  For
+/// <b>Testing and accuracy.</b> For <code>T = f64</code>, we test one value for this by 
+/// simulation.  For
 /// <code>m = 27</code>, <code>x = 30</code>, <code>n = 2500</code>, the function computes
 /// <code>0.0005953<code> (rounded), versus <code>0.0005936</code> (rounded) for simulation
 /// using a sample of size <code>100,000,000</code>.
