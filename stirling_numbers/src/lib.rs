@@ -237,22 +237,11 @@ mod tests {
     // Rational to an f64.  There is in fact a pull request to create such a function,
     // last touched 7/7/19: https://github.com/rust-num/num-rational/pull/52.
 
-    fn assert_equal_to_12_digits(x1: &BigUint, x2: &BigUint) {
-        let n = 1_000_000_000_000_usize;
-        let y1 = x1.clone() * n.to_biguint().unwrap();
-        let y1x2 = y1 / x2.clone();
-
-        if y1x2 != n.to_biguint().unwrap()
-            && y1x2 != (n - 1).to_biguint().unwrap()
-            && y1x2 != (n + 1).to_biguint().unwrap()
-        {
-            eprintln!("x1 != x2 to 12 digits, y1x2 = {}", y1x2);
-            assert!(0 == 1);
+    fn assert_equal_to_d_digits(x1: &BigUint, x2: &BigUint, d: usize) {
+        let mut n = 1 as usize;
+        for _ in 0..d {
+            n *= 10;
         }
-    }
-
-    fn assert_equal_to_14_digits(x1: &BigUint, x2: &BigUint) {
-        let n = 100_000_000_000_000_usize;
         let y1 = x1.clone() * n.to_biguint().unwrap();
         let y1x2 = y1 / x2.clone();
 
@@ -260,7 +249,7 @@ mod tests {
             && y1x2 != (n - 1).to_biguint().unwrap()
             && y1x2 != (n + 1).to_biguint().unwrap()
         {
-            eprintln!("x1 != x2 to 14 digits, y1x2 = {}", y1x2);
+            eprintln!("x1 != x2 to {} digits, y1x2 = {}", y1x2, d);
             assert!(0 == 1);
         }
     }
@@ -293,7 +282,7 @@ mod tests {
             );
             let x1 = sbig[n][k].clone() * rden;
             let x2 = rnum;
-            assert_equal_to_14_digits(&x1, &x2);
+            assert_equal_to_d_digits(&x1, &x2, 14);
         }
 
         // Verify that Stirling ratios for n = 722 are accurate to 12 digits.  This is not
@@ -318,7 +307,7 @@ mod tests {
             );
             let x1 = sbig[n][k].clone() * kf * rden;
             let x2 = kn * rnum;
-            assert_equal_to_12_digits(&x1, &x2);
+            assert_equal_to_d_digits(&x1, &x2, 12);
         }
 
         // Validate one value for fn p_at_most_m_unique_in_sample_of_x_from_n.
