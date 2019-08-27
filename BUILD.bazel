@@ -10,7 +10,10 @@ exports_files(
 
 filegroup(
     name = "srcs",
-    srcs = glob(["src/*.rs"]),
+    srcs = glob([
+        "src/*.rs",
+        "vdj_refs/human/*.fa",
+    ]),
     visibility = ["//lib/rust:__pkg__"],
 )
 
