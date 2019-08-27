@@ -80,7 +80,7 @@ pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> 
 /// <br><br>
 /// We don't have a reference for this material.
 
-pub fn stirling2_ratio_table_f64(n_max: usize) -> Vec<Vec<f64>> {
+pub fn stirling2_ratio_table(n_max: usize) -> Vec<Vec<f64>> {
     let mut s = Vec::<Vec<f64>>::new();
     for n in 0..=n_max {
         s.push(vec![0.0; n + 1]);
@@ -284,7 +284,7 @@ mod tests {
         // true for n = 750.
 
         let n_max = 2500;
-        let sr = stirling2_ratio_table_f64(n_max);
+        let sr = stirling2_ratio_table(n_max);
         for k in 1..=n {
             let mut kf = 1.to_biguint().unwrap(); // compute k!
             for j in 1..=k {
