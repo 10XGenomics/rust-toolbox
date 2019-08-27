@@ -130,9 +130,9 @@ pub fn stirling2_ratio_table<T: Num + Clone + MulAssign + From<u32>>(n_max: usiz
 /// <b>Method.</b>  The probability of selecting <i>exactly</i> <code>m</code> distinct elements is
 /// <br><code>Z(m,x,n) = S(x,m) * ( n * ... * (n-m+1) ) / n^x</code>
 /// <br>where <code>S(x,m)</code> is the Stirling number of the second kind.
-/// Reference: 
+/// Reference:
 /// <a href="https://math.stackexchange.com/questions/32800/probability-distribution-of-coverage-of-a-set-after-x-independently-randomly">stack exchange question 32800</a>
-/// on the "probability distribution of coverage of a set after x independently randomly selected 
+/// on the "probability distribution of coverage of a set after x independently randomly selected
 /// members of the set".
 ///
 /// In terms of Stirling ratios <code>SR</code>,
