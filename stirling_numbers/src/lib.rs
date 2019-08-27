@@ -131,7 +131,7 @@ pub fn stirling2_ratio_table<T: Num + Clone + MulAssign + From<u32>>(n_max: usiz
 /// replacement from a set of size <code>n</code>.
 /// <br>&nbsp;
 ///
-/// <b>Method.</b>  The probability of computing <i>exactly</i> <code>m</code> distinct elements is 
+/// <b>Method.</b>  The probability of computing <i>exactly</i> <code>m</code> distinct elements is
 /// <code>Z(m,x,n) = S(x,m) * ( n * ... * (n-m+1) ) / n^x</code>
 /// where <code>S(x,m)</code> is the Stirling number of the second kind.
 /// Reference: <a href="https://math.stackexchange.com/questions/32800/probability-distribution-of-coverage-of-a-set-after-x-independently-randomly">stack exchange question 32800</a>.
