@@ -20,6 +20,13 @@ extern crate rayon;
 extern crate vec_utils;
 
 use num_traits::{Num, One, Zero};
+use std::ops::MulAssign;
+
+use std::time::Instant;
+pub fn elapsed(start: &Instant) -> f64 {
+    let d = start.elapsed();
+    d.as_secs() as f64 + d.subsec_nanos() as f64 / 1e9
+}
 
 /// Build a table of Stirling numbers of the second kind.
 /// <br>&nbsp;
@@ -80,32 +87,34 @@ pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> 
 /// <br><br>
 /// We don't have a reference for this material.
 
-pub fn stirling2_ratio_table(n_max: usize) -> Vec<Vec<f64>> {
-    let mut s = Vec::<Vec<f64>>::new();
+pub fn stirling2_ratio_table<T: Num + Clone + MulAssign + From<u32>>(n_max: usize) -> Vec<Vec<T>> {
+    let mut s = Vec::<Vec<T>>::new();
+    let zero: T = Zero::zero();
+    let one: T = One::one();
     for n in 0..=n_max {
-        s.push(vec![0.0; n + 1]);
+        s.push(vec![zero.clone(); n + 1]);
     }
-    s[0][0] = 1.0;
-    let mut z = Vec::<f64>::new();
+    s[0][0] = one.clone();
+    let mut z = Vec::<T>::new();
     for n in 1..=n_max {
-        s[n][0] = 0.0;
+        s[n][0] = zero.clone();
         for k in 1..n - 1 {
-            z[k - 1] *= (k - 1) as f64 / k as f64;
+            z[k - 1] *= T::from( (k-1) as u32 ) / T::from(k as u32);
         }
         if n >= 2 {
-            let mut u = 1.0;
+            let mut u = one.clone();
             for _ in 0..n - 1 {
-                u *= (n - 2) as f64 / (n - 1) as f64;
+                u *= T::from( (n-2) as u32 ) / T::from( (n-1) as u32 );
             }
             z.push(u);
         }
         for k in 1..n {
-            let x = z[k - 1]; // = ((k-1)/k)^(n-1)
-            s[n][k] = s[n - 1][k] + s[n - 1][k - 1] * x;
+            let x = z[k - 1].clone(); // = ((k-1)/k)^(n-1)
+            s[n][k] = s[n - 1][k].clone() + s[n - 1][k - 1].clone() * x;
         }
-        s[n][n] = 1.0; // now set to n! / n^n
+        s[n][n] = one.clone(); // now set to n! / n^n
         for j in 1..=n {
-            s[n][n] *= j as f64 / n as f64;
+            s[n][n] *= T::from(j as u32) / T::from(n as u32);
         }
     }
     s
@@ -284,7 +293,7 @@ mod tests {
         // true for n = 750.
 
         let n_max = 2500;
-        let sr = stirling2_ratio_table(n_max);
+        let sr = stirling2_ratio_table::<f64>(n_max);
         for k in 1..=n {
             let mut kf = 1.to_biguint().unwrap(); // compute k!
             for j in 1..=k {
