@@ -266,6 +266,9 @@ impl PrettyTrace {
     /// Cause a <code>PrettyTrace</code> object to do something: change the
     /// behavior of response to <code>panic!</code> to produce a prettified
     /// traceback and perform profiling, if <code>profile()</code> has been called.
+    /// Calling of <code>on</code> is mandatory.  It must be called exactly once
+    /// at the end of a chain of operations on a <code>PrettyTrace</code> object.
+    /// But this is not enforced.
 
     pub fn on(&mut self) {
         let fd = if self.fd.is_some() {
