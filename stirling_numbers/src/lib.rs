@@ -10,22 +10,7 @@
 //! is the number of partitions of a set of size <code>n</code>.
 //! See <a href="https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind">wikipedia</a>.
 //!
-//! This crate includes functions for computing:
-//!
-//! * a table of <code>S(n,k)</code>, computed by recursion;
-//!
-//! <p>
-//!
-//! * a table of <code>S(n,k)</code> divided by the asympotic approximation <code>k^n / k!</code>, 
-//!   which is useful because the quotient is numerically better behaved than <code>S(n,k)</code>;
-//!
-//! <p>
-//!
-//! * the probability of selecting at most <code>m</code> distinct elements in 
-//!   <code>x</code> random draws with 
-//!   replacement from a set of size <code>n</code>, which is computed using Stirling numbers.
-//!
-//! Other related functions might be added here.
+//! This crate consists of a few functions related to these Stirling numbers.
 
 extern crate num_bigint;
 extern crate num_rational;
@@ -36,7 +21,9 @@ extern crate vec_utils;
 
 use num_traits::{Num, One, Zero};
 
-/// <br>
+/// Build a table of Stirling numbers of the second kind.
+/// <br>&nbsp;
+///
 /// Build a table of stirling numbers of the second kind <code>S(n,k)</code>, for
 /// <code>n ≤ n_max</code>, using the recurrence relation:
 /// <pre>
@@ -46,7 +33,7 @@ use num_traits::{Num, One, Zero};
 /// </pre>
 /// Reasonable choices for <code>T</code> are <code>f64</code> and <code>BigUint</code>, which
 /// are exact integers.
-/// <br>
+/// <br><br>
 /// Testing and accuracy.  For <code>T = f64</code> and <code>n_max = 219</code>, by comparing
 /// with exact values, we verify that the table entries are accurate to 14 decimal places 
 /// (assuming that the exact values are correct).  For <code>n_max = 220</code>, some table 
@@ -70,12 +57,13 @@ pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> 
     s
 }
 
-/// <br>
-/// Compute a table of Stirling ratios, explained below.
-/// First, the Stirling numbers have the asymptotic approximation <code>k^n / k!</code>.
+/// Compute a table of "Stirling ratios", Stirling numbers divided by the asympotic approximation 
+/// <code>k^n / k!</code>, which is useful because the ratios are numerically better behaved than 
+/// the Stirling numbers themselves.
+/// <br>&nbsp;
+///
 /// The ratio <code>SR(n,k) := S(n,k) / ( k^n / k! )</code>
-/// with the special case definition <code>SR(0,0) = 1</code>
-/// satisfies the recursion:
+/// with the special case definition <code>SR(0,0) = 1</code> satisfies the recursion:
 /// <br>
 /// <pre>
 /// SR(n,0) = delta(0,n)
@@ -84,13 +72,13 @@ pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> 
 ///           if 1 ≤ k < n.
 /// </pre>
 /// The utility of these ratios is that their numerical behavior is better than the Stirling
-/// numbers themselves: the table can be computed up to much larger n without going infinite.
-/// The ratios also work more naturally with some applications e.g. in
+/// numbers themselves: the table can be computed up to much larger <code>n</code> without going 
+/// infinite.  The ratios also work more naturally with some applications e.g. in
 /// <code>
 /// p_at_most_m_distinct_in_sample_of_x_from_n.
 /// </code>
-/// <br>
-/// We don't have a reference for this.
+/// <br><br>
+/// We don't have a reference for this material.
 
 pub fn stirling2_ratio_table_f64(n_max: usize) -> Vec<Vec<f64>> {
     let mut s = Vec::<Vec<f64>>::new();
@@ -123,8 +111,12 @@ pub fn stirling2_ratio_table_f64(n_max: usize) -> Vec<Vec<f64>> {
     s
 }
 
-/// The probability of selecting exactly <code>m</code> distinct elements in <code>x</code>
-/// random draws with replacement from a set of size <code>n</code> is
+/// Compute the probability of selecting at most <code>m</code> distinct elements in 
+/// <code>x</code> random draws with 
+/// replacement from a set of size <code>n</code>.
+/// <br>&nbsp;
+///
+/// This probability is
 /// <code>
 /// Z(m,x,n) = S(x,m) * ( n * ... * (n-m+1) ) / n^x
 /// </code>
