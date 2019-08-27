@@ -183,84 +183,14 @@ pub fn p_at_most_m_distinct_in_sample_of_x_from_n(
 #[cfg(test)]
 mod tests {
 
-    use super::*;
-
-    use num_bigint::{BigInt, BigUint, ToBigUint};
-    use num_rational::Ratio;
-    use rand::{Rng, SeedableRng, StdRng};
-    use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-    use vec_utils::*;
-
-    // Helper functions.
-
-    fn simulate_p_at_most_m_distinct_in_sample_of_x_from_n(
-        m: usize,
-        x: usize,
-        n: usize,
-        count: usize,
-    ) -> f64 {
-        let group = 1000;
-        assert!(count % group == 0);
-        let mut rng: StdRng = SeedableRng::from_seed([0 as u8; 32]);
-        let mut seeds = Vec::<[u8; 32]>::new();
-        for _ in 0..group {
-            let mut x = [0 as u8; 32];
-            for j in 0..x.len() {
-                x[j] = rng.gen_range(0, 255);
-            }
-            seeds.push(x);
-        }
-        let goods: Vec<_> = seeds
-            .par_iter()
-            .map(|seed| {
-                let mut rng: StdRng = SeedableRng::from_seed(*seed);
-                let mut goods = 0;
-                for _ in 0..count / group {
-                    let mut sample = Vec::<usize>::new();
-                    for _ in 0..x {
-                        sample.push(rng.gen_range(0, n));
-                    }
-                    unique_sort(&mut sample);
-                    if sample.len() <= m {
-                        goods += 1;
-                    }
-                }
-                goods
-            })
-            .collect();
-        goods.iter().sum::<usize>() as f64 / count as f64
-    }
-
-    // Check that the ratio of two big integers equals 1, up to some number of digits.
-    //
-    // Note that a cleaner way to do this would be via a function that rounded a BigInt
-    // Rational to an f64.  There is in fact a pull request to create such a function,
-    // last touched 7/7/19: https://github.com/rust-num/num-rational/pull/52.
-
-    fn assert_equal_to_d_digits(x1: &BigUint, x2: &BigUint, d: usize) {
-        let mut n = 1 as usize;
-        for _ in 0..d {
-            n *= 10;
-        }
-        let y1 = x1.clone() * n.to_biguint().unwrap();
-        let y1x2 = y1 / x2.clone();
-
-        if y1x2 != n.to_biguint().unwrap()
-            && y1x2 != (n - 1).to_biguint().unwrap()
-            && y1x2 != (n + 1).to_biguint().unwrap()
-        {
-            eprintln!("x1 != x2 to {} digits, y1x2 = {}", y1x2, d);
-            assert!(0 == 1);
-        }
-    }
-
     // Test stirling stuff.  Works with "cargo test --release".  We don't allow
     // "cargo test" because it is insanely slow.
 
     #[cfg(debug_assertions)]
     #[test]
     fn test_vdj_stirling_stuff_fail() {
-        println!( "\n\"cargo test\" deliberately fails here because without running in release mode," );
+        println!( 
+            "\n\"cargo test\" deliberately fails here because without running in release mode," );
         println!( "the test would be too slow.\n" );
         assert!( 0 == 1 );
     }
@@ -268,7 +198,79 @@ mod tests {
     #[cfg(not(debug_assertions))]
     #[test]
     fn test_stirling_stuff() {
+
+        use num_bigint::{BigInt, BigUint, ToBigUint};
+        use num_rational::Ratio;
+        use rand::{Rng, SeedableRng, StdRng};
+        use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+        use vec_utils::*;
+
+        use super::*;
+
+        // Helper functions.
+    
+        fn simulate_p_at_most_m_distinct_in_sample_of_x_from_n(
+            m: usize,
+            x: usize,
+            n: usize,
+            count: usize,
+        ) -> f64 {
+            let group = 1000;
+            assert!(count % group == 0);
+            let mut rng: StdRng = SeedableRng::from_seed([0 as u8; 32]);
+            let mut seeds = Vec::<[u8; 32]>::new();
+            for _ in 0..group {
+                let mut x = [0 as u8; 32];
+                for j in 0..x.len() {
+                    x[j] = rng.gen_range(0, 255);
+                }
+                seeds.push(x);
+            }
+            let goods: Vec<_> = seeds
+                .par_iter()
+                .map(|seed| {
+                    let mut rng: StdRng = SeedableRng::from_seed(*seed);
+                    let mut goods = 0;
+                    for _ in 0..count / group {
+                        let mut sample = Vec::<usize>::new();
+                        for _ in 0..x {
+                            sample.push(rng.gen_range(0, n));
+                        }
+                        unique_sort(&mut sample);
+                        if sample.len() <= m {
+                            goods += 1;
+                        }
+                    }
+                    goods
+                })
+                .collect();
+            goods.iter().sum::<usize>() as f64 / count as f64
+        }
+
         //
+        // Check that the ratio of two big integers equals 1, up to some number of digits.
+        //
+        // Note that a cleaner way to do this would be via a function that rounded a BigInt
+        // Rational to an f64.  There is in fact a pull request to create such a function,
+        // last touched 7/7/19: https://github.com/rust-num/num-rational/pull/52.
+    
+        fn assert_equal_to_d_digits(x1: &BigUint, x2: &BigUint, d: usize) {
+            let mut n = 1 as usize;
+            for _ in 0..d {
+                n *= 10;
+            }
+            let y1 = x1.clone() * n.to_biguint().unwrap();
+            let y1x2 = y1 / x2.clone();
+    
+            if y1x2 != n.to_biguint().unwrap()
+                && y1x2 != (n - 1).to_biguint().unwrap()
+                && y1x2 != (n + 1).to_biguint().unwrap()
+            {
+                eprintln!("x1 != x2 to {} digits, y1x2 = {}", y1x2, d);
+                assert!(0 == 1);
+            }
+        }
+
         // Test one value in stirling2_table<f64> versus value in wikipedia.
 
         let n_max = 3000;
