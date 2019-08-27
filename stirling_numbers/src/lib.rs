@@ -44,9 +44,13 @@ use num_traits::{Num, One, Zero};
 /// S(n,n) = 1
 /// S(n,k) = k * S(n-1,k) + S(n-1,k-1) if 1 ≤ k < n.
 /// </pre>
-/// Note: for <code>T = f64</code>, this works for <code>n_max</code> up to 219; for higher
-/// <code>n_max</code> you'll get
-/// infinite values in some cases.  Can also be used for <code>T = BigUint</code>.
+/// Reasonable choices for <code>T</code> are <code>f64</code> and <code>BigUint</code>, which
+/// are exact integers.
+/// <br>
+/// Testing and accuracy.  For <code>T = f64</code> and <code>n_max = 219</code>, by comparing
+/// with exact values, we verify that the table entries are accurate to 14 decimal places 
+/// (assuming that the exact values are correct).  For <code>n_max = 220</code>, some table 
+///  entries are infinite.  We also check one table entry versus wikipedia.
 
 pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> {
     let mut s = Vec::<Vec<T>>::new();
@@ -239,6 +243,20 @@ mod tests {
         }
     }
 
+    fn assert_equal_to_14_digits(x1: &BigUint, x2: &BigUint) {
+        let n = 100_000_000_000_000_usize;
+        let y1 = x1.clone() * n.to_biguint().unwrap();
+        let y1x2 = y1 / x2.clone();
+
+        if y1x2 != n.to_biguint().unwrap()
+            && y1x2 != (n - 1).to_biguint().unwrap()
+            && y1x2 != (n + 1).to_biguint().unwrap()
+        {
+            eprintln!("x1 != x2 to 14 digits, y1x2 = {}", y1x2);
+            assert!(0 == 1);
+        }
+    }
+
     // Test stirling stuff.
 
     #[test]
@@ -255,7 +273,8 @@ mod tests {
         let n = 700;
         let sbig = stirling2_table::<BigUint>(n);
 
-        // Test accuracy of stirling2_table entries.
+        // Test accuracy of stirling2_table entries.  For n = 219, the values are accurate to
+        // 14 decimal places.
 
         let n = 219;
         for k in 1..=n {
@@ -266,7 +285,7 @@ mod tests {
             );
             let x1 = sbig[n][k].clone() * rden;
             let x2 = rnum;
-            assert_equal_to_six_digits(&x1, &x2);
+            assert_equal_to_14_digits(&x1, &x2);
         }
 
         // Verify that Stirling ratios for n = 700 are accurate to six digits.  This is not
