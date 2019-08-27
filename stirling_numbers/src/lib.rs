@@ -17,7 +17,7 @@
 //! <p>
 //!
 //! * a table of <code>S(n,k)</code> divided by the asympotic approximation <code>k^n / k!</code>, 
-//!   which is numerically better behaved than <code>S(n,k)</code>;
+//!   which is useful because the quotient is numerically better behaved than <code>S(n,k)</code>;
 //!
 //! <p>
 //!
