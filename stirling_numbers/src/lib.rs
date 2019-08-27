@@ -41,10 +41,11 @@ pub fn elapsed(start: &Instant) -> f64 {
 /// Reasonable choices for <code>T</code> are <code>f64</code> and <code>BigUint</code>, which
 /// are exact integers.
 /// <br><br>
-/// Testing and accuracy.  For <code>T = f64</code> and <code>n_max = 219</code>, by comparing
-/// with exact values, we verify that the table entries are accurate to 14 decimal places 
+/// <b>Testing and accuracy.</b>  For <code>T = f64</code> and <code>n_max = 219</code>, by 
+/// comparing with exact values, we verify that the table entries are accurate to 14 decimal places 
 /// (assuming that the exact values are correct).  For <code>n_max = 220</code>, some table 
-///  entries are infinite.  We also check one table entry versus wikipedia.
+/// entries are infinite.  We also check one table entry versus wikipedia, so that the test is
+/// not just checking internal consistency.
 
 pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> {
     let mut s = Vec::<Vec<T>>::new();
@@ -86,6 +87,9 @@ pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> 
 /// </code>
 /// <br><br>
 /// We don't have a reference for this material.
+/// 
+/// <b>Testing and accuracy.</b>  Tested using <code>f64</code>.  For <code>n_max = 722</code>, the
+/// values are accurate to 12 digits; this fails for <code>723</code>.
 
 pub fn stirling2_ratio_table<T: Num + Clone + MulAssign + From<u32>>(n_max: usize) -> Vec<Vec<T>> {
     let mut s = Vec::<Vec<T>>::new();
@@ -148,7 +152,10 @@ pub fn stirling2_ratio_table<T: Num + Clone + MulAssign + From<u32>>(n_max: usiz
 /// Complexity: <code>O( (x-m) * x )</code>.  If one wants to speed this up, probably one can do
 /// it by truncating the sum, without significantly affecting accuracy.
 /// <br><br>
-/// Tests: we test one value for this by simulation.
+/// <b>Testing and accuracy.</b> We test one value for this by simulation.  For
+/// <code>m = 27</code>, <code>x = 30</code>, <code>n = 2500</code>, the function computes
+/// <code>0.0005953<code> (rounded), versus <code>0.0005936</code> (rounded) for simulation
+/// using a sample of size <code>100,000,000</code>.
 
 pub fn p_at_most_m_distinct_in_sample_of_x_from_n(
     m: usize,
@@ -224,14 +231,14 @@ mod tests {
         goods.iter().sum::<usize>() as f64 / count as f64
     }
 
-    // Check that the ratio of two big integers equals 1, up to six digits.
+    // Check that the ratio of two big integers equals 1, up to some number of digits.
     //
     // Note that a cleaner way to do this would be via a function that rounded a BigInt
     // Rational to an f64.  There is in fact a pull request to create such a function,
     // last touched 7/7/19: https://github.com/rust-num/num-rational/pull/52.
 
-    fn assert_equal_to_six_digits(x1: &BigUint, x2: &BigUint) {
-        let n = 1_000_000;
+    fn assert_equal_to_12_digits(x1: &BigUint, x2: &BigUint) {
+        let n = 1_000_000_000_000_usize;
         let y1 = x1.clone() * n.to_biguint().unwrap();
         let y1x2 = y1 / x2.clone();
 
@@ -239,7 +246,7 @@ mod tests {
             && y1x2 != (n - 1).to_biguint().unwrap()
             && y1x2 != (n + 1).to_biguint().unwrap()
         {
-            eprintln!("x1 != x2 to six digits, y1x2 = {}", y1x2);
+            eprintln!("x1 != x2 to 12 digits, y1x2 = {}", y1x2);
             assert!(0 == 1);
         }
     }
@@ -271,8 +278,8 @@ mod tests {
 
         // Compute exact stirling2_table entries.
 
-        let n = 700;
-        let sbig = stirling2_table::<BigUint>(n);
+        let nb = 722;
+        let sbig = stirling2_table::<BigUint>(nb);
 
         // Test accuracy of stirling2_table entries.  For n = 219, the values are accurate to
         // 14 decimal places.
@@ -289,10 +296,11 @@ mod tests {
             assert_equal_to_14_digits(&x1, &x2);
         }
 
-        // Verify that Stirling ratios for n = 700 are accurate to six digits.  This is not
-        // true for n = 750.
+        // Verify that Stirling ratios for n = 722 are accurate to 12 digits.  This is not
+        // true for n = 723.
 
         let n_max = 2500;
+        let n = nb;
         let sr = stirling2_ratio_table::<f64>(n_max);
         for k in 1..=n {
             let mut kf = 1.to_biguint().unwrap(); // compute k!
@@ -310,7 +318,7 @@ mod tests {
             );
             let x1 = sbig[n][k].clone() * kf * rden;
             let x2 = kn * rnum;
-            assert_equal_to_six_digits(&x1, &x2);
+            assert_equal_to_12_digits(&x1, &x2);
         }
 
         // Validate one value for fn p_at_most_m_unique_in_sample_of_x_from_n.
