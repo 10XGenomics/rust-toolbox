@@ -243,19 +243,37 @@ mod tests {
 
     #[test]
     fn test_stirling_stuff() {
-        // Test stirling2_table.
+        //
+        // Test one value in stirling2_table<f64> versus value in wikipedia.
 
         let n_max = 3000;
         let s2 = stirling2_table::<f64>(n_max);
         assert_eq!(s2[10][5], 42525.0);
+
+        // Compute exact stirling2_table entries.
+
+        let n = 700;
+        let sbig = stirling2_table::<BigUint>(n);
+
+        // Test accuracy of stirling2_table entries.
+
+        let n = 219;
+        for k in 1..=n {
+            let r = Ratio::<BigInt>::from_float(s2[n][k]).unwrap();
+            let (rnum, rden) = (
+                r.numer().to_biguint().unwrap(),
+                r.denom().to_biguint().unwrap(),
+            );
+            let x1 = sbig[n][k].clone() * rden;
+            let x2 = rnum;
+            assert_equal_to_six_digits(&x1, &x2);
+        }
 
         // Verify that Stirling ratios for n = 700 are accurate to six digits.  This is not
         // true for n = 750.
 
         let n_max = 2500;
         let sr = stirling2_ratio_table_f64(n_max);
-        let n = 700;
-        let sbig = stirling2_table::<BigUint>(n);
         for k in 1..=n {
             let mut kf = 1.to_biguint().unwrap(); // compute k!
             for j in 1..=k {
