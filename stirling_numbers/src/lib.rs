@@ -1,9 +1,5 @@
 // Copyright (c) 2019 10X Genomics, Inc. All rights reserved.
 
-// TO DO
-// 1. Fully document.
-// 2. Post to crates.io.
-
 //! # Stirling numbers of the second kind and friends
 //!
 //! For integers <code>0 ≤ k ≤ n</code>, the Stirling number of the second kind <code>S(n,k)</code>
