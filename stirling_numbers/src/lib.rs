@@ -22,11 +22,11 @@ extern crate vec_utils;
 use num_traits::{Num, One, Zero};
 use std::ops::MulAssign;
 
-/// Build a table of Stirling numbers of the second kind.
+/// Build a table of Stirling numbers of the second kind <code>S(n,k)</code>, for
+/// <code>n ≤ n_max</code>. 
 /// <br>&nbsp;
 ///
-/// Build a table of stirling numbers of the second kind <code>S(n,k)</code>, for
-/// <code>n ≤ n_max</code>, using the recurrence relation:
+/// This uses the recurrence relation:
 /// <pre>
 /// S(n,0) = delta(0,n)
 /// S(n,n) = 1
@@ -34,7 +34,10 @@ use std::ops::MulAssign;
 /// </pre>
 /// Reasonable choices for <code>T</code> are <code>f64</code> and <code>BigUint</code>, which
 /// are exact integers.
-/// <br><br>
+///
+/// <b>Computational complexity.</b>  <code>O(n_max^2)</code> assuming that <code>T</code> 
+/// is a fixed-size type like <code>f64</code>.
+///
 /// <b>Testing and accuracy.</b>  For <code>T = f64</code> and <code>n_max = 219</code>, by
 /// comparing with exact values, we verify that the table entries are accurate to 14 decimal places
 /// (assuming that the exact values are correct).  For <code>n_max = 220</code>, some table
@@ -81,6 +84,9 @@ pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> 
 /// </code>
 /// <br><br>
 /// We don't have a reference for this material.
+///
+/// <b>Computational complexity.</b>  <code>O(n_max^2)</code> assuming that <code>T</code> 
+/// is a fixed-size type like <code>f64</code>.
 ///
 /// <b>Testing and accuracy.</b>  Tested using <code>f64</code>.  For <code>n_max = 722</code>, the
 /// values are accurate to 12 digits; this fails for <code>723</code>.
