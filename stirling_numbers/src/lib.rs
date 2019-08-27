@@ -254,8 +254,18 @@ mod tests {
         }
     }
 
-    // Test stirling stuff.
+    // Test stirling stuff.  Works with "cargo test --release".  We don't allow
+    // "cargo test" because it is insanely slow.
 
+    #[cfg(debug_assertions)]
+    #[test]
+    fn test_vdj_stirling_stuff_fail() {
+        println!( "\n\"cargo test\" deliberately fails here because without running in release mode," );
+        println!( "the test would be too slow.\n" );
+        assert!( 0 == 1 );
+    }
+
+    #[cfg(not(debug_assertions))]
     #[test]
     fn test_stirling_stuff() {
         //
