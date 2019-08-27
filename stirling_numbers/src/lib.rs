@@ -22,12 +22,6 @@ extern crate vec_utils;
 use num_traits::{Num, One, Zero};
 use std::ops::MulAssign;
 
-use std::time::Instant;
-pub fn elapsed(start: &Instant) -> f64 {
-    let d = start.elapsed();
-    d.as_secs() as f64 + d.subsec_nanos() as f64 / 1e9
-}
-
 /// Build a table of Stirling numbers of the second kind.
 /// <br>&nbsp;
 ///
@@ -157,11 +151,12 @@ pub fn stirling2_ratio_table<T: Num + Clone + MulAssign + From<u32>>(n_max: usiz
 /// <code>0.0005953<code> (rounded), versus <code>0.0005936</code> (rounded) for simulation
 /// using a sample of size <code>100,000,000</code>.
 
+#[allow(clippy::many_single_char_names)]
 pub fn p_at_most_m_distinct_in_sample_of_x_from_n(
     m: usize,
     x: usize,
     n: usize,
-    sr: &Vec<Vec<f64>>,
+    sr: &[Vec<f64>],
 ) -> f64 {
     let mut p = 1.0;
     for u in m + 1..=x {
