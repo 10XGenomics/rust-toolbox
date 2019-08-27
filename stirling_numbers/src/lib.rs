@@ -23,7 +23,7 @@ use num_traits::{Num, One, Zero};
 use std::ops::MulAssign;
 
 /// Build a table of Stirling numbers of the second kind <code>S(n,k)</code>, for
-/// <code>n ≤ n_max</code>. 
+/// <code>n ≤ n_max</code>.
 /// <br>&nbsp;
 ///
 /// This uses the recurrence relation:
@@ -35,7 +35,7 @@ use std::ops::MulAssign;
 /// Reasonable choices for <code>T</code> are <code>f64</code> and <code>BigUint</code>, which
 /// are exact integers.
 ///
-/// <b>Computational complexity.</b>  <code>O(n_max^2)</code> assuming that <code>T</code> 
+/// <b>Computational complexity.</b>  <code>O(n_max^2)</code> assuming that <code>T</code>
 /// is a fixed-size type like <code>f64</code>.
 ///
 /// <b>Testing and accuracy.</b>  For <code>T = f64</code> and <code>n_max = 219</code>, by
@@ -85,7 +85,7 @@ pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> 
 /// <br><br>
 /// We don't have a reference for this material.
 ///
-/// <b>Computational complexity.</b>  <code>O(n_max^2)</code> assuming that <code>T</code> 
+/// <b>Computational complexity.</b>  <code>O(n_max^2)</code> assuming that <code>T</code>
 /// is a fixed-size type like <code>f64</code>.
 ///
 /// <b>Testing and accuracy.</b>  Tested using <code>f64</code>.  For <code>n_max = 722</code>, the
@@ -145,10 +145,10 @@ pub fn stirling2_ratio_table<T: Num + Clone + MulAssign + From<u32>>(n_max: usiz
 /// <br>
 /// which is computed below, using a precomputed Stirling ratio table.
 /// <br><br>
-/// <b>Complexity.  </b> <code>O( (x-m) * x )</code>.  If one wants to speed this up, probably one 
+/// <b>Complexity.  </b> <code>O( (x-m) * x )</code>.  If one wants to speed this up, probably one
 /// can do it by truncating the sum, without significantly affecting accuracy.
 /// <br><br>
-/// <b>Testing and accuracy.</b> For <code>T = f64</code>, we test one value for this by 
+/// <b>Testing and accuracy.</b> For <code>T = f64</code>, we test one value for this by
 /// simulation.  For
 /// <code>m = 27</code>, <code>x = 30</code>, <code>n = 2500</code>, the function computes
 /// <code>0.0005953<code> (rounded), versus <code>0.0005936</code> (rounded) for simulation
