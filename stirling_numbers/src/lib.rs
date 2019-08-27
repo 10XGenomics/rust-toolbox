@@ -41,9 +41,9 @@ pub fn elapsed(start: &Instant) -> f64 {
 /// Reasonable choices for <code>T</code> are <code>f64</code> and <code>BigUint</code>, which
 /// are exact integers.
 /// <br><br>
-/// <b>Testing and accuracy.</b>  For <code>T = f64</code> and <code>n_max = 219</code>, by 
-/// comparing with exact values, we verify that the table entries are accurate to 14 decimal places 
-/// (assuming that the exact values are correct).  For <code>n_max = 220</code>, some table 
+/// <b>Testing and accuracy.</b>  For <code>T = f64</code> and <code>n_max = 219</code>, by
+/// comparing with exact values, we verify that the table entries are accurate to 14 decimal places
+/// (assuming that the exact values are correct).  For <code>n_max = 220</code>, some table
 /// entries are infinite.  We also check one table entry versus wikipedia, so that the test is
 /// not just checking internal consistency.
 
@@ -65,8 +65,8 @@ pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> 
     s
 }
 
-/// Compute a table of "Stirling ratios", Stirling numbers divided by the asympotic approximation 
-/// <code>k^n / k!</code>, which is useful because the ratios are numerically better behaved than 
+/// Compute a table of "Stirling ratios", Stirling numbers divided by the asympotic approximation
+/// <code>k^n / k!</code>, which is useful because the ratios are numerically better behaved than
 /// the Stirling numbers themselves.
 /// <br>&nbsp;
 ///
@@ -80,14 +80,14 @@ pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> 
 ///           if 1 ≤ k < n.
 /// </pre>
 /// The utility of these ratios is that their numerical behavior is better than the Stirling
-/// numbers themselves: the table can be computed up to much larger <code>n</code> without going 
+/// numbers themselves: the table can be computed up to much larger <code>n</code> without going
 /// infinite.  The ratios also work more naturally with some applications e.g. in
 /// <code>
 /// p_at_most_m_distinct_in_sample_of_x_from_n.
 /// </code>
 /// <br><br>
 /// We don't have a reference for this material.
-/// 
+///
 /// <b>Testing and accuracy.</b>  Tested using <code>f64</code>.  For <code>n_max = 722</code>, the
 /// values are accurate to 12 digits; this fails for <code>723</code>.
 
@@ -103,12 +103,12 @@ pub fn stirling2_ratio_table<T: Num + Clone + MulAssign + From<u32>>(n_max: usiz
     for n in 1..=n_max {
         s[n][0] = zero.clone();
         for k in 1..n - 1 {
-            z[k - 1] *= T::from( (k-1) as u32 ) / T::from(k as u32);
+            z[k - 1] *= T::from((k - 1) as u32) / T::from(k as u32);
         }
         if n >= 2 {
             let mut u = one.clone();
             for _ in 0..n - 1 {
-                u *= T::from( (n-2) as u32 ) / T::from( (n-1) as u32 );
+                u *= T::from((n - 2) as u32) / T::from((n - 1) as u32);
             }
             z.push(u);
         }
@@ -124,8 +124,8 @@ pub fn stirling2_ratio_table<T: Num + Clone + MulAssign + From<u32>>(n_max: usiz
     s
 }
 
-/// Compute the probability of selecting at most <code>m</code> distinct elements in 
-/// <code>x</code> random draws with 
+/// Compute the probability of selecting at most <code>m</code> distinct elements in
+/// <code>x</code> random draws with
 /// replacement from a set of size <code>n</code>.
 /// <br>&nbsp;
 ///
@@ -189,16 +189,16 @@ mod tests {
     #[cfg(debug_assertions)]
     #[test]
     fn test_vdj_stirling_stuff_fail() {
-        println!( 
-            "\n\"cargo test\" deliberately fails here because without running in release mode," );
-        println!( "the test would be too slow.\n" );
-        assert!( 0 == 1 );
+        println!(
+            "\n\"cargo test\" deliberately fails here because without running in release mode,"
+        );
+        println!("the test would be too slow.\n");
+        assert!(0 == 1);
     }
 
     #[cfg(not(debug_assertions))]
     #[test]
     fn test_stirling_stuff() {
-
         use num_bigint::{BigInt, BigUint, ToBigUint};
         use num_rational::Ratio;
         use rand::{Rng, SeedableRng, StdRng};
@@ -208,7 +208,7 @@ mod tests {
         use super::*;
 
         // Helper functions.
-    
+
         fn simulate_p_at_most_m_distinct_in_sample_of_x_from_n(
             m: usize,
             x: usize,
@@ -253,7 +253,7 @@ mod tests {
         // Note that a cleaner way to do this would be via a function that rounded a BigInt
         // Rational to an f64.  There is in fact a pull request to create such a function,
         // last touched 7/7/19: https://github.com/rust-num/num-rational/pull/52.
-    
+
         fn assert_equal_to_d_digits(x1: &BigUint, x2: &BigUint, d: usize) {
             let mut n = 1 as usize;
             for _ in 0..d {
@@ -261,7 +261,7 @@ mod tests {
             }
             let y1 = x1.clone() * n.to_biguint().unwrap();
             let y1x2 = y1 / x2.clone();
-    
+
             if y1x2 != n.to_biguint().unwrap()
                 && y1x2 != (n - 1).to_biguint().unwrap()
                 && y1x2 != (n + 1).to_biguint().unwrap()
