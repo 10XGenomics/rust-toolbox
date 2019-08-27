@@ -26,7 +26,7 @@ use std::ops::MulAssign;
 /// <code>n ≤ n_max</code>.
 /// <br>&nbsp;
 ///
-/// This uses the recurrence relation:
+/// <b>Method.</b>  Use the recurrence relation:
 /// <pre>
 /// S(n,0) = delta(0,n)
 /// S(n,n) = 1
@@ -67,8 +67,18 @@ pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> 
 /// the Stirling numbers themselves.
 /// <br>&nbsp;
 ///
-/// The ratio <code>SR(n,k) := S(n,k) / ( k^n / k! )</code>
-/// with the special case definition <code>SR(0,0) = 1</code> satisfies the recursion:
+/// <b>Motivation.</b>
+/// The utility of these ratios is that their numerical behavior is better than the Stirling
+/// numbers themselves: the table can be computed up to much larger <code>n</code> without turning
+/// to junk.  The ratios also work more naturally with some applications e.g. in
+/// <code>
+/// p_at_most_m_distinct_in_sample_of_x_from_n.
+/// </code>
+/// <br><br>
+/// We don't have a reference for this material.
+///
+/// <b>Method.</b>  The ratio <code>SR(n,k) := S(n,k) / ( k^n / k! )</code>
+/// with the special case definition <code>SR(0,0) = 1</code> satisfies the recurrence relation:
 /// <br>
 /// <pre>
 /// SR(n,0) = delta(0,n)
@@ -76,14 +86,6 @@ pub fn stirling2_table<T: Num + Clone + From<u32>>(n_max: usize) -> Vec<Vec<T>> 
 /// SR(n,k) = SR(n-1,k) + SR(n-1,k-1) * ((k-1)/k))^(n-1)
 ///           if 1 ≤ k < n.
 /// </pre>
-/// The utility of these ratios is that their numerical behavior is better than the Stirling
-/// numbers themselves: the table can be computed up to much larger <code>n</code> without going
-/// infinite.  The ratios also work more naturally with some applications e.g. in
-/// <code>
-/// p_at_most_m_distinct_in_sample_of_x_from_n.
-/// </code>
-/// <br><br>
-/// We don't have a reference for this material.
 ///
 /// <b>Computational complexity.</b>  <code>O(n_max^2)</code> assuming that <code>T</code>
 /// is a fixed-size type like <code>f64</code>.
@@ -129,14 +131,15 @@ pub fn stirling2_ratio_table<T: Num + Clone + MulAssign + From<u32>>(n_max: usiz
 /// replacement from a set of size <code>n</code>.
 /// <br>&nbsp;
 ///
-/// This probability is <code>Z(m,x,n) = S(x,m) * ( n * ... * (n-m+1) ) / n^x</code>
+/// <b>Method.</b>  The probability of computing <i>exactly</i> <code>m</code> distinct elements is 
+/// <code>Z(m,x,n) = S(x,m) * ( n * ... * (n-m+1) ) / n^x</code>
 /// where <code>S(x,m)</code> is the Stirling number of the second kind.
 /// Reference: <a href="https://math.stackexchange.com/questions/32800/probability-distribution-of-coverage-of-a-set-after-x-independently-randomly">stack exchange question 32800</a>.
 /// <br><br>
 /// In terms of Stirling ratios <code>SR</code>,
 /// <code>Z(m,x,n) = SR(x,m) * (m/n)^x * choose(n,m)</code>.
 ///
-/// The probability of selecting at most <code>m</code> distinct elements in <code>x</code>
+/// Thus the probability of selecting at most <code>m</code> distinct elements in <code>x</code>
 /// random draws with replacement from a set of size <code>n</code> is:
 /// <code>
 /// <br>sum( SR(x,u) * (u/n)^x * choose(n,u), u = 0..=m )<br>
@@ -151,7 +154,7 @@ pub fn stirling2_ratio_table<T: Num + Clone + MulAssign + From<u32>>(n_max: usiz
 /// <b>Testing and accuracy.</b> For <code>T = f64</code>, we test one value for this by
 /// simulation.  For
 /// <code>m = 27</code>, <code>x = 30</code>, <code>n = 2500</code>, the function computes
-/// <code>0.0005953<code> (rounded), versus <code>0.0005936</code> (rounded) for simulation
+/// <code>0.0005953</code> (rounded), versus <code>0.0005936</code> (rounded) for simulation
 /// using a sample of size <code>100,000,000</code>.
 
 #[allow(clippy::many_single_char_names)]
