@@ -262,6 +262,20 @@ pub fn bin_position1_3<S: Ord, T: Ord, U: Ord>(x: &[(S, T, U)], d: &S) -> i32 {
     }
 }
 
+pub fn bin_position1_4<S: Ord, T: Ord, U: Ord, V: Ord>(x: &[(S, T, U, V)], d: &S) -> i32 {
+    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c, ref _d)| &a) {
+        Ok(p) => p as i32,
+        Err(_e) => -1,
+    }
+}
+
+pub fn bin_position1_5<S: Ord, T: Ord, U: Ord, V: Ord, W: Ord>(x: &[(S, T, U, V, W)], d: &S) -> i32 {
+    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c, ref _d, ref _e)| &a) {
+        Ok(p) => p as i32,
+        Err(_e) => -1,
+    }
+}
+
 // Find lower/upper bounds.
 
 pub fn lower_bound<T: Ord>(x: &[T], d: &T) -> i64 {
