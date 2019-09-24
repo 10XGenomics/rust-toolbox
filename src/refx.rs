@@ -11,7 +11,6 @@
 
 use debruijn::{dna_string::*, kmer::*};
 use std::collections::{HashMap, HashSet};
-use std::fs;
 use string_utils::*;
 use tenkit2::io::*;
 use tenkit2::kmer_lookup::*;
@@ -73,7 +72,7 @@ impl<'a> RefData {
     pub fn from_fasta(path: &String) -> Self {
         // TODO: Use impl AsRef<Path> instead of &String throughout
         let mut refdata = RefData::new();
-        let path_contents = fs::read_to_string(path).unwrap();
+        let path_contents = read_to_string_safe(path);
         if path_contents.len() == 0 {
             panic!("Reference file at {} has zero length.", path);
         }
@@ -90,7 +89,7 @@ impl<'a> RefData {
 
     pub fn from_fasta_with_filter(path: &String, ids_to_use: &HashSet<i32>) -> Self {
         let mut refdata = RefData::new();
-        let path_contents = fs::read_to_string(path).unwrap();
+        let path_contents = read_to_string_safe(path);
         if path_contents.len() == 0 {
             panic!("Reference file at {} has zero length.", path);
         }
@@ -303,9 +302,9 @@ pub fn make_vdj_ref_data(
     } else {
         String::new()
     };
-    let refx = fs::read_to_string(&ref_fasta).unwrap();
+    let refx = read_to_string_safe(&ref_fasta);
     let ext_refx = if extended {
-        fs::read_to_string(&ext_ref_fasta).unwrap()
+        read_to_string_safe(&ext_ref_fasta)
     } else {
         String::new()
     };
