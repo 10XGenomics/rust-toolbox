@@ -115,7 +115,7 @@ pub fn vdj_ref_path(species: &String, imgt: bool) -> String {
     if !imgt && species == "human" {
         // ◼ temporary location
         return String::from(
-            "/mnt/park/compbio/jaffe/vdj_refs/human/\
+            "/mnt/park/compbio/david.jaffe/vdj_refs/human/\
              fasta/regions.fa",
         );
     }
@@ -128,7 +128,7 @@ pub fn vdj_ref_path(species: &String, imgt: bool) -> String {
     if !imgt && species == "mouse" {
         // ◼ temporary location
         return String::from(
-            "/mnt/park/compbio/jaffe/vdj_refs/mouse/\
+            "/mnt/park/compbio/david.jaffe/vdj_refs/mouse/\
              fasta/regions.fa",
         );
     }
