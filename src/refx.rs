@@ -20,6 +20,18 @@ pub fn human_ref() -> String {
     include_str!["../vdj_refs/human/regions.fa"].to_string()
 }
 
+pub fn human_supp_ref() -> String {
+    include_str!["../vdj_refs/human/supp_regions.fa"].to_string()
+}
+
+pub fn mouse_ref() -> String {
+    include_str!["../vdj_refs/mouse/regions.fa"].to_string()
+}
+
+pub fn mouse_supp_ref() -> String {
+    include_str!["../vdj_refs/mouse/supp_regions.fa"].to_string()
+}
+
 // RefData: this is a packaging of reference data appropriate for VDJ analysis.
 
 pub struct RefData {
