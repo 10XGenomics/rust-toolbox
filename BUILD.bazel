@@ -13,6 +13,7 @@ filegroup(
     srcs = glob([
         "src/*.rs",
         "vdj_refs/human/*.fa",
+        "vdj_refs/mouse/*.fa",
     ]),
     visibility = ["//lib/rust:__pkg__"],
 )
