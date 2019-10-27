@@ -2,6 +2,7 @@
 name = "pretty_trace"
 version = "0.1.0"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
+license = "MIT"
 
 [dependencies]
 backtrace = "0.3.15"

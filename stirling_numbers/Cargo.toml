@@ -2,6 +2,7 @@
 name = "stirling_numbers"
 version = "0.1.0"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
+license = "MIT"
 
 [dependencies]
 num-bigint = "0.2.2"
