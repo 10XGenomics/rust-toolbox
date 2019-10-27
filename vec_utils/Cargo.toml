@@ -3,6 +3,7 @@ name = "vec_utils"
 version = "0.1.0"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
+description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
 
 [dependencies]
 superslice = "1.0.0"

@@ -3,6 +3,7 @@ name = "pretty_trace"
 version = "0.1.0"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
+description = "Tools for generating pretty tracebacks and for profiling."
 
 [dependencies]
 backtrace = "0.3.15"

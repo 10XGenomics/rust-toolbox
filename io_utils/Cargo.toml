@@ -3,6 +3,7 @@ name = "io_utils"
 version = "0.1.0"
 authors = []
 license = "MIT"
+description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
 
 [dependencies]
 bincode = "1.1.3"
