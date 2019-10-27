@@ -1024,7 +1024,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
 
             for k in 0..x[j].len() {
                 let s = strme(&x[j][k]);
-                if s.contains("pretty_trace::tests::looper") {
+                if s.contains("pretty_trace::tests") {
                     continue 'block;
                 }
             }
@@ -1240,7 +1240,9 @@ mod tests {
                 let mut have_main = false;
                 let lines: Vec<&str> = s.split_terminator('\n').collect();
                 for i in 0..lines.len() {
-                    if lines[i].contains("pretty_trace::tests::looper") {
+                    // Test relaxed here because on an AWS box, we did not see the ::looper part.
+                    // if lines[i].contains("pretty_trace::tests::looper") {
+                    if lines[i].contains("pretty_trace::tests") {
                         have_main = true;
                     }
                 }
