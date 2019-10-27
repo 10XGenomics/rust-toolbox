@@ -1,5 +1,6 @@
-io_utils       file utilities
-pretty_trace   stack trace tools
-stats          statistics
-string_utils   string utilties
-vec_utils      vector utilities
+io_utils          file utilities (INTERNAL ONLY)
+pretty_trace      stack trace tools
+stats             statistics (INTERNAL ONLY)
+string_utils      string utilties (INTERNAL ONLY)
+stirling_numbers  some functions related to Stirling numbers of the second kind
+vec_utils         vector utilities (INTERNAL ONLY)
