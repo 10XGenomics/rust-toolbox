@@ -1,6 +1,8 @@
-If you test with "cargo test", the test will deliberately fail.
+1. If you test with "cargo test", the test will deliberately fail.
 
 Instead, please test with "cargo test --release".
 
 The reason for this is that there are tests that are too slow to run without
 release mode.
+
+2. The tests are only confirmed to work under linux.  They failed under OS X when tested.
