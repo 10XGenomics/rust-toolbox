@@ -687,7 +687,7 @@ fn force_pretty_trace_fancy(
 
     // Setup panic hook. If we panic, this code gets run.
 
-    panic::take_hook();
+    let _ = panic::take_hook();
     panic::set_hook(Box::new(move |info| {
         // Get backtrace.
 

@@ -95,10 +95,11 @@ pub fn open_lz4<P: AsRef<Path>>(filename: P) -> lz4::Decoder<File> {
     lz4::Decoder::new(f).expect("Failed to create lz4 decoder")
 }
 
-pub fn open_maybe_compressed<P: AsRef<Path>>(filename: P) -> Box<Read> {
+pub fn open_maybe_compressed<P: AsRef<Path>>(filename: P) -> Box<dyn Read> {
     match filename.as_ref().extension().and_then(OsStr::to_str) {
-        Some("lz4") => Box::new(open_lz4(filename)) as Box<Read>,
-        _ => Box::new(File::open(filename).expect("Failed to open file for reading")) as Box<Read>,
+        Some("lz4") => Box::new(open_lz4(filename)) as Box<dyn Read>,
+        _ => Box::new(File::open(filename).expect("Failed to open file for reading"))
+            as Box<dyn Read>,
     }
 }
 
