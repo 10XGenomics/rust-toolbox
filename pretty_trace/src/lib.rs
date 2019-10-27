@@ -149,16 +149,13 @@
 //!
 //! # Full disclosure
 //!
-//! ◼ The code parses the output of a formatted stack trace, rather then
-//!   generating output directly from a formal stack trace structure (which it
-//!   should do).  This makes it vulnerable to changes in stack trace formatting.
+//! ◼ The code has only been confirmed to work under linux.  The code has been
+//!   used under OS X, but tracebacks can be incomplete.  An example is provided
+//!   of this behavior.
 //!
-//! ◼ There is an ugly blacklist of strings that is fragile.  This may
-//!   be an intrinsic feature of the approach.
-//!
-//! ◼ Ideally out-of-memory events would be caught and converted to panics so
-//!   we could trace them, but we don't.  This is a general rust problem that no one
-//!   has figured out how to solve.  See <a href="https://github.com/rust-lang/rust/issues/43596">issue 43596</a> and <a href="https://internals.rust-lang.org/t/could-we-support-unwinding-from-oom-at-least-for-collections/3673">internals 3673</a>.
+//! ◼ The code will only work properly if you have set <code>debug = true</code>
+//!   in your top-level <code>Cargo.toml</code>.  Using <code>debug = 1</code> 
+//!   will not work.
 //!
 //! ◼ Profile mode only sees the main thread.  This seems intrinsic to the
 //!   approach.  So you may need to modify your code to run single-threaded to
@@ -170,10 +167,16 @@
 //! ◼ Profile mode does not yield a stack trace if the code is executing inside
 //!   the allocator.  In our test cases this is around 15% of the time.
 //!
-//! ◼ Using <code>debug = 1</code> in place of <code>debug = true</code> does not work.
+//! ◼ Ideally out-of-memory events would be caught and converted to panics so
+//!   we could trace them, but we don't.  This is a general rust problem that no one
+//!   has figured out how to solve.  See <a href="https://github.com/rust-lang/rust/issues/43596">issue 43596</a> and <a href="https://internals.rust-lang.org/t/could-we-support-unwinding-from-oom-at-least-for-collections/3673">internals 3673</a>.
 //!
-//! ◼ The code has only been tested under linux.  An example is provided of 
-//!   incorrect behavior under OS X.
+//! ◼ The code parses the output of a formatted stack trace, rather then
+//!   generating output directly from a formal stack trace structure (which it
+//!   should do).  This makes it vulnerable to changes in stack trace formatting.
+//!
+//! ◼ There is an ugly blacklist of strings that is fragile.  This may
+//!   be an intrinsic feature of the approach.
 //!
 //! # More
 //!
