@@ -1,6 +1,13 @@
 io_utils          file utilities (INTERNAL ONLY)
 pretty_trace      stack trace tools
-stats             statistics (INTERNAL ONLY)
+stats_utils       statistics (INTERNAL ONLY)
 string_utils      string utilties (INTERNAL ONLY)
 stirling_numbers  some functions related to Stirling numbers of the second kind
 vec_utils         vector utilities (INTERNAL ONLY)
+
+Dependency structure:
+
+vec_utils ==> string_utils ==> io_utils, pretty_trace
+          ==> stirling
+
+stats_utils
