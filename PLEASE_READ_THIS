@@ -1,0 +1,6 @@
+If you test with "cargo test", the test will deliberately fail.
+
+Instead, please test with "cargo test --release".
+
+The reason for this is that there are tests that are too slow to run without
+release mode.
