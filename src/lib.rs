@@ -1,3 +1,4 @@
+#![allow(clippy::all)]
 // Copyright (c) 2019 10x Genomics, Inc. All rights reserved.
 
 extern crate bio;
