@@ -5,4 +5,4 @@ authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
 
 [dependencies]
-vec_utils = { path = "../vec_utils" }
+vector_utils = { path = "../vector_utils" }

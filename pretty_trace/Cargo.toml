@@ -17,4 +17,4 @@ nix = "0.13.0"
 rayon = "1.0.2"
 stats_utils = { path = "../stats_utils" }
 string_utils = { path = "../string_utils" }
-vec_utils = { path = "../vec_utils" }
+vector_utils = { path = "../vector_utils" }

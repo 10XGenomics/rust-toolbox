@@ -13,7 +13,7 @@ extern crate num_rational;
 extern crate num_traits;
 extern crate rand;
 extern crate rayon;
-extern crate vec_utils;
+extern crate vector_utils;
 
 use num_traits::{Num, One, Zero};
 use std::ops::MulAssign;
@@ -203,7 +203,7 @@ mod tests {
         use num_rational::Ratio;
         use rand::{Rng, SeedableRng, StdRng};
         use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-        use vec_utils::*;
+        use vector_utils::*;
 
         use super::*;
 

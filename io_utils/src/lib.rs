@@ -5,8 +5,6 @@
 extern crate bincode;
 extern crate lz4;
 extern crate serde;
-extern crate string_utils;
-extern crate vec_utils;
 
 use bincode::{deserialize_from, serialize_into};
 use serde::{de::DeserializeOwned, Serialize};

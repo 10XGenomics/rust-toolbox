@@ -197,7 +197,7 @@ extern crate nix;
 extern crate rayon;
 extern crate stats_utils;
 extern crate string_utils;
-extern crate vec_utils;
+extern crate vector_utils;
 
 use backtrace::Backtrace;
 use backtrace::*;
@@ -223,7 +223,7 @@ use std::{
     time,
 };
 use string_utils::*;
-use vec_utils::*;
+use vector_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // PRETTY TRACE STRUCTURE

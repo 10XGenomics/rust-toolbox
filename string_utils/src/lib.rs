@@ -2,10 +2,10 @@
 
 // This file contains some miscellaneous string utilities.
 
-extern crate vec_utils;
+extern crate vector_utils;
 
 use std::cmp::max;
-use vec_utils::*;
+use vector_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // THINGS USED A LOT: SHORTHAND EXPRESSIONS FOR COMMON FUNCTIONALITY
