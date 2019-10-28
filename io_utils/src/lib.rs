@@ -93,6 +93,9 @@ pub fn open_lz4<P: AsRef<Path>>(filename: P) -> lz4::Decoder<File> {
     lz4::Decoder::new(f).expect("Failed to create lz4 decoder")
 }
 
+// If you accidentally pass a gzipped file to this it will succeed in opening the file,
+// but then when you try to run read_line, the read will return !is_ok().  This seems horrible.
+
 pub fn open_maybe_compressed<P: AsRef<Path>>(filename: P) -> Box<dyn Read> {
     match filename.as_ref().extension().and_then(OsStr::to_str) {
         Some("lz4") => Box::new(open_lz4(filename)) as Box<dyn Read>,
