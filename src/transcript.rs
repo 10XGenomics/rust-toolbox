@@ -9,7 +9,7 @@ use std::{cmp::max, io::prelude::*};
 use tenkit2::amino::*;
 use tenkit2::hyper::*;
 use tenkit2::kmer_lookup::*;
-use vec_utils::*;
+use vector_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // TEST FOR VALID VDJ SEQUENCE

@@ -13,4 +13,4 @@ serde_json = "*"
 stats_utils = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
 string_utils = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
 tenkit2 = { path = "../tenkit2" }
-vec_utils = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
+vector_utils = { git = "https://github.com/10XGenomics/rust-toolbox.git" }

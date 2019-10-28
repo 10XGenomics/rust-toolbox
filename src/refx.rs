@@ -14,7 +14,7 @@ use std::collections::{HashMap, HashSet};
 use string_utils::*;
 use tenkit2::io::*;
 use tenkit2::kmer_lookup::*;
-use vec_utils::*;
+use vector_utils::*;
 
 pub fn human_ref() -> String {
     include_str!["../vdj_refs/human/regions.fa"].to_string()
