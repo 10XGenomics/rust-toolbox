@@ -167,6 +167,13 @@
 //! ◼ Profile mode does not yield a stack trace if the code is executing inside
 //!   the allocator.  In our test cases this is around 15% of the time.
 //!
+//! ◼ Profile mode tests for whether it is inside the allocator by comparing to a fixed
+//!   list of symbols such as <code>_int_free</code>.  This list could be incomplete,
+//!   or could become incomplete.  When it is incomplete, typically what you'll see is that 
+//!   the profiling process is killed.  Generally what is missing from the list can be 
+//!   determined by setting <code>haps_debug()</code>, and looking at the trace right before 
+//!   the process was killed.  Under development, this was needed once over a one year period.
+//!
 //! ◼ Ideally out-of-memory events would be caught and converted to panics so
 //!   we could trace them, but we don't.  This is a general rust problem that no one
 //!   has figured out how to solve.  See <a href="https://github.com/rust-lang/rust/issues/43596">issue 43596</a> and <a href="https://internals.rust-lang.org/t/could-we-support-unwinding-from-oom-at-least-for-collections/3673">internals 3673</a>.
@@ -489,6 +496,7 @@ fn test_in_allocator() -> bool {
                     || x.as_str().unwrap() == "_int_free"
                     || x.as_str().unwrap() == "calloc"
                     || x.as_str().unwrap() == "_int_malloc"
+                    || x.as_str().unwrap().starts_with( "alloc::alloc" )
                 {
                     if verbose {
                         eprintln!( "in allocator" );
