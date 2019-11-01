@@ -249,6 +249,7 @@ pub struct PrettyTrace {
     // convert Ctrl-Cs to panics
     pub ctrlc: bool,
     pub ctrlc_debug: bool,
+    pub haps_debug: bool,
 }
 
 /// Normal usage of `PrettyTrace` is to call
@@ -299,10 +300,12 @@ impl PrettyTrace {
                 &haps,
                 self.ctrlc,
                 self.ctrlc_debug,
+                self.haps_debug,
             );
         } else {
             let tm = new_thread_message();
-            force_pretty_trace_fancy(full_file, fd, &tm, &haps, self.ctrlc, self.ctrlc_debug);
+            force_pretty_trace_fancy(full_file, fd, &tm, &haps, self.ctrlc, self.ctrlc_debug,
+                self.haps_debug);
         }
     }
 
@@ -323,6 +326,13 @@ impl PrettyTrace {
     pub fn ctrlc_debug(&mut self) -> &mut PrettyTrace {
         self.ctrlc = true;
         self.ctrlc_debug = true;
+        self
+    }
+    
+    /// Turn on some debugging for profiling.  For development purposes.
+
+    pub fn haps_debug(&mut self) -> &mut PrettyTrace {
+        self.haps_debug = true;
         self
     }
 
@@ -438,6 +448,8 @@ impl Happening {
 
 static CTRLC_DEBUG: AtomicBool = AtomicBool::new(false);
 
+static HAPS_DEBUG: AtomicBool = AtomicBool::new(false);
+
 lazy_static! {
     static ref HAPPENING: Mutex<Happening> = Mutex::new(Happening::new());
 }
@@ -454,14 +466,22 @@ lazy_static! {
 // names, and it is hard to believe that this works, but it appears to do so.
 
 fn test_in_allocator() -> bool {
-    // eprintln!( "\nTESTING FOR ALLOCATOR" );
+    let mut verbose =  false;
+    if HAPS_DEBUG.load(SeqCst) {
+        verbose = true;
+    }
+    if verbose {
+        eprintln!( "\nTESTING FOR ALLOCATOR" );
+    }
     let mut in_alloc = false;
     // The following lock line (copied from the Backtrace crate) doesn't
     // seem necessary here (and would require plumbing to compile anyway).
     // let _guard = ::lock::lock();
     trace(|frame| {
         resolve(frame.ip() as *mut _, |symbol| {
-            // eprintln!( "symbol name = {:?}", symbol.name() );
+            if verbose {
+                eprintln!( "symbol name = {:?}", symbol.name() );
+            }
             if let Some(x) = symbol.name() {
                 if x.as_str().unwrap() == "realloc"
                     || x.as_str().unwrap() == "__GI___libc_malloc"
@@ -470,7 +490,9 @@ fn test_in_allocator() -> bool {
                     || x.as_str().unwrap() == "calloc"
                     || x.as_str().unwrap() == "_int_malloc"
                 {
-                    // eprintln!( "in allocator" );
+                    if verbose {
+                        eprintln!( "in allocator" );
+                    }
                     in_alloc = true;
                     // break;
                 }
@@ -597,6 +619,7 @@ fn force_pretty_trace_fancy(
     happening: &Happening,
     ctrlc: bool,
     ctrlc_debug: bool,
+    haps_debug: bool,
 ) {
     // Launch happening thread, which imits SIGUSR1 interrupts.  Usually, it will
     // hang after some number of iterations, and at that point we kill ourself,
@@ -686,6 +709,9 @@ fn force_pretty_trace_fancy(
     let _ = install_signal_handler(happening.on, ctrlc);
     if ctrlc_debug {
         CTRLC_DEBUG.store(true, SeqCst);
+    }
+    if haps_debug {
+        HAPS_DEBUG.store(true, SeqCst);
     }
 
     // Setup panic hook. If we panic, this code gets run.
