@@ -491,11 +491,11 @@ fn test_in_allocator() -> bool {
             }
             if let Some(x) = symbol.name() {
                 if x.as_str().unwrap() == "realloc"
-                    || x.as_str().unwrap() == "__GI___libc_malloc"
                     || x.as_str().unwrap() == "malloc_consolidate"
                     || x.as_str().unwrap() == "_int_free"
                     || x.as_str().unwrap() == "calloc"
                     || x.as_str().unwrap().contains( "_malloc" )
+                    || x.as_str().unwrap().contains( "_realloc" )
                     || x.as_str().unwrap().starts_with( "alloc::alloc" )
                 {
                     if verbose {
