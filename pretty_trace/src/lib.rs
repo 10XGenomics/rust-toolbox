@@ -486,23 +486,40 @@ fn test_in_allocator() -> bool {
     // let _guard = ::lock::lock();
     trace(|frame| {
         resolve(frame.ip() as *mut _, |symbol| {
-            let symbol_name = format!( "{:?}", symbol.name() );
             if verbose {
-                eprintln!( "symbol name = {}", symbol_name );
+                eprintln!( "symbol name = {:?}", symbol.name() );
             }
-            if symbol_name == "realloc".to_string()
-                || symbol_name == "malloc_consolidate".to_string()
-                || symbol_name == "_int_free".to_string()
-                || symbol_name == "calloc".to_string()
-                || symbol_name == "__calloc".to_string()
-                || symbol_name.contains( "_malloc" )
-                || symbol_name.contains( "_realloc" )
-                || symbol_name.contains( "alloc::alloc" )
-            {
-                if verbose {
-                    eprintln!( "in allocator" );
-                }
+
+
+
+            if verbose && symbol.name().is_some() {
+                eprintln!( "at {}", symbol.name().unwrap().as_str().unwrap() );
+            }
+
+            if verbose && symbol.name().is_some() 
+                && symbol.name().unwrap().as_str().unwrap().contains( "alloc::alloc" ) {
+                eprintln!( "see alloc::alloc" );
                 in_alloc = true;
+            }
+
+
+
+            if let Some(x) = symbol.name() {
+                if x.as_str().unwrap() == "realloc"
+                    || x.as_str().unwrap() == "malloc_consolidate"
+                    || x.as_str().unwrap() == "_int_free"
+                    || x.as_str().unwrap() == "calloc"
+                    || x.as_str().unwrap() == "__calloc"
+                    || x.as_str().unwrap().contains( "_malloc" )
+                    || x.as_str().unwrap().contains( "_realloc" )
+                    || x.as_str().unwrap().contains( "alloc::alloc" )
+                {
+                    if verbose {
+                        eprintln!( "in allocator" );
+                    }
+                    in_alloc = true;
+                    // break;
+                }
             }
         });
         !in_alloc
