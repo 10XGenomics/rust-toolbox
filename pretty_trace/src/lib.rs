@@ -513,6 +513,8 @@ fn test_in_allocator() -> bool {
                     || x.as_str().unwrap().contains( "_malloc" )
                     || x.as_str().unwrap().contains( "_realloc" )
                     || x.as_str().unwrap().contains( "alloc::alloc" )
+                    // hideous additions for mac:
+                    || x.as_str().unwrap().contains( "alloc5alloc" )
                 {
                     if verbose {
                         eprintln!( "in allocator" );
