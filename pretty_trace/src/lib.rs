@@ -485,41 +485,37 @@ fn test_in_allocator() -> bool {
     // seem necessary here (and would require plumbing to compile anyway).
     // let _guard = ::lock::lock();
     trace(|frame| {
-        if verbose && in_alloc {
-            false
-        } else {
-            resolve(frame.ip() as *mut _, |symbol| {
-                if verbose && in_alloc {
-                    eprintln!( "should not be here" );
-                } else  {
-                    if verbose {
-                        eprintln!( "symbol name = {:?}", symbol.name() );
-                        if symbol.name().is_some() {
-                            eprintln!( "= {}", symbol.name().unwrap().as_str().unwrap() );
-                        }
-                    }
-                    if let Some(x) = symbol.name() {
-                        if x.as_str().unwrap() == "realloc"
-                            || x.as_str().unwrap() == "malloc_consolidate"
-                            || x.as_str().unwrap() == "_int_free"
-                            || x.as_str().unwrap() == "calloc"
-                            || x.as_str().unwrap() == "__calloc"
-                            || x.as_str().unwrap().contains( "_malloc" )
-                            || x.as_str().unwrap().contains( "_realloc" )
-                            || x.as_str().unwrap().contains( "alloc::alloc" )
-                            // hideous additions reflecting funny encoding:
-                            || x.as_str().unwrap().contains( "alloc5alloc" )
-                        {
-                            if verbose {
-                                eprintln!( "in allocator" );
-                            }
-                        in_alloc = true;
-                        }
-                    }
+        resolve(frame.ip() as *mut _, |symbol| {
+            if verbose && in_alloc {
+                eprintln!( "should not be here" );
+            }
+            if verbose {
+                eprintln!( "symbol name = {:?}", symbol.name() );
+                if symbol.name().is_some() {
+                    eprintln!( "= {}", symbol.name().unwrap().as_str().unwrap() );
                 }
-            });
-            !in_alloc
-        }
+            }
+            if let Some(x) = symbol.name() {
+                if x.as_str().unwrap() == "realloc"
+                    || x.as_str().unwrap() == "malloc_consolidate"
+                    || x.as_str().unwrap() == "_int_free"
+                    || x.as_str().unwrap() == "calloc"
+                    || x.as_str().unwrap() == "__calloc"
+                    || x.as_str().unwrap().contains( "_malloc" )
+                    || x.as_str().unwrap().contains( "_realloc" )
+                    || x.as_str().unwrap().contains( "alloc::alloc" )
+                    // hideous additions reflecting funny encoding:
+                    || x.as_str().unwrap().contains( "alloc5alloc" )
+                {
+                    if verbose {
+                        eprintln!( "in allocator" );
+                    }
+                    in_alloc = true;
+                    // break;
+                }
+            }
+        });
+        !in_alloc
     });
     in_alloc
 }
