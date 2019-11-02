@@ -489,7 +489,8 @@ fn test_in_allocator() -> bool {
             if verbose {
                 eprintln!( "symbol name = {:?}", symbol.name() );
             }
-            if verbose && symbol.name().unwrap().as_str().unwrap().contains( "alloc::alloc" ) {
+            if verbose && symbol.name().is_some() 
+                && symbol.name().unwrap().as_str().unwrap().contains( "alloc::alloc" ) {
                 eprintln!( "see alloc::alloc" );
                 in_alloc = true;
             }
