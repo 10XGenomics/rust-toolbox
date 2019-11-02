@@ -486,24 +486,15 @@ fn test_in_allocator() -> bool {
     // let _guard = ::lock::lock();
     trace(|frame| {
         resolve(frame.ip() as *mut _, |symbol| {
+            if verbose && in_alloc {
+                eprintln!( "should not be here" );
+            }
             if verbose {
                 eprintln!( "symbol name = {:?}", symbol.name() );
+                if symbol.name().is_some() {
+                    eprintln!( "= {}", symbol.name().unwrap().as_str().unwrap() );
+                }
             }
-
-
-
-            if verbose && symbol.name().is_some() {
-                eprintln!( "at {}", symbol.name().unwrap().as_str().unwrap() );
-            }
-
-            if verbose && symbol.name().is_some() 
-                && symbol.name().unwrap().as_str().unwrap().contains( "alloc::alloc" ) {
-                eprintln!( "see alloc::alloc" );
-                in_alloc = true;
-            }
-
-
-
             if let Some(x) = symbol.name() {
                 if x.as_str().unwrap() == "realloc"
                     || x.as_str().unwrap() == "malloc_consolidate"
@@ -513,7 +504,7 @@ fn test_in_allocator() -> bool {
                     || x.as_str().unwrap().contains( "_malloc" )
                     || x.as_str().unwrap().contains( "_realloc" )
                     || x.as_str().unwrap().contains( "alloc::alloc" )
-                    // hideous additions for mac:
+                    // hideous additions reflecting funny encoding:
                     || x.as_str().unwrap().contains( "alloc5alloc" )
                 {
                     if verbose {
