@@ -7,7 +7,7 @@ description = "Tools for generating pretty tracebacks and for profiling."
 homepage = "https://github.com/10XGenomics/rust-toolbox/tree/master/pretty_trace"
 
 [dependencies]
-backtrace = "0.3.15"
+backtrace = "0.3.40"
 chashmap = "2.2.2"
 failure = "0.1.5"
 io_utils = { path = "../io_utils" }
