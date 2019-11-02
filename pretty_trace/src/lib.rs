@@ -489,6 +489,10 @@ fn test_in_allocator() -> bool {
             if verbose {
                 eprintln!( "symbol name = {:?}", symbol.name() );
             }
+            if verbose && symbol.name().unwrap().as_str().unwrap().contains( "alloc::alloc" ) {
+                eprintln!( "see alloc::alloc" );
+                in_alloc = true;
+            }
             if let Some(x) = symbol.name() {
                 if x.as_str().unwrap() == "realloc"
                     || x.as_str().unwrap() == "malloc_consolidate"
