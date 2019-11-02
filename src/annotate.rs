@@ -389,7 +389,7 @@ pub fn annotate_seq_core(
     //
     // Note that implementation is asymmetric: we don't look to the right of p2, not for
     // any particularly good reason.
-    // 
+    //
     // This was added to get the heavy chain V segment of the mouse A20 cell line to be annotated.
     // This is dubious because the cell line is ~30 years old and of uncertain ancestry.  Thus
     // we're not sure if it arose from supported mouse strains or if the V segment might have
@@ -407,16 +407,16 @@ pub fn annotate_seq_core(
             }
             j += 1;
         }
-        const L : i32 = 40;
-        const MAX_DIFFS : usize = 6;
+        const L: i32 = 40;
+        const MAX_DIFFS: usize = 6;
         let p1 = off + semi[i].2;
         // let p2 = off + semi[j-1].2 + semi[j-1].3;
         if -off >= 0 && p1 - off <= b.len() as i32 {
-            for p in 0..p1-L {
+            for p in 0..p1 - L {
                 let l = p - off;
                 let mut diffs = 0;
                 for m in 0..L {
-                    if b.get((l+m) as usize) != refs[t as usize].get((p+m) as usize) {
+                    if b.get((l + m) as usize) != refs[t as usize].get((p + m) as usize) {
                         diffs += 1;
                         if diffs > MAX_DIFFS {
                             break;
@@ -426,11 +426,11 @@ pub fn annotate_seq_core(
                 if diffs <= MAX_DIFFS {
                     let mut x = Vec::<i32>::new();
                     for m in 0..L {
-                        if b.get((l+m) as usize) != refs[t as usize].get((p+m) as usize) {
-                            x.push(l+m);
+                        if b.get((l + m) as usize) != refs[t as usize].get((p + m) as usize) {
+                            x.push(l + m);
                         }
                     }
-                    semi.push( ( t, off, p - off, L, x ) );
+                    semi.push((t, off, p - off, L, x));
                     break;
                 }
             }
@@ -2327,10 +2327,10 @@ impl AnnotationUnit {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ContigAnnotation {
     // raw data for the contig
-    barcode: String,     // the barcode
-    contig_name: String, // name of the contig
-    sequence: String,    // nucleotide sequence for contig
-    quals: String,       // contig quality scores
+    pub barcode: String,     // the barcode
+    pub contig_name: String, // name of the contig
+    sequence: String,        // nucleotide sequence for contig
+    quals: String,           // contig quality scores
 
     // contig support
     read_count: usize, // number of reads assigned to contig
@@ -2358,10 +2358,10 @@ pub struct ContigAnnotation {
     info: HashMap<String, String>,           // {} initially, may be filled in later
 
     // state of the contig
-    high_confidence: bool,    // declared high confidence?
-    is_cell: bool,            // was the barcode declared a cell?
-    productive: Option<bool>, // productive?  (null means not full length)
-    filtered: bool,           // true and never changed (unused field)
+    high_confidence: bool,        // declared high confidence?
+    is_cell: bool,                // was the barcode declared a cell?
+    pub productive: Option<bool>, // productive?  (null means not full length)
+    filtered: bool,               // true and never changed (unused field)
 }
 
 impl ContigAnnotation {
