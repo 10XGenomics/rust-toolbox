@@ -497,7 +497,7 @@ fn test_in_allocator() -> bool {
                     || x.as_str().unwrap() == "__calloc"
                     || x.as_str().unwrap().contains( "_malloc" )
                     || x.as_str().unwrap().contains( "_realloc" )
-                    || x.as_str().unwrap().starts_with( "alloc::alloc" )
+                    || x.as_str().unwrap().contains( "alloc::alloc" )
                 {
                     if verbose {
                         eprintln!( "in allocator" );
