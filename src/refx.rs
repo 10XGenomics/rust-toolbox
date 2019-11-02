@@ -15,7 +15,7 @@ use std::fs;
 use string_utils::*;
 use tenkit2::io::*;
 use tenkit2::kmer_lookup::*;
-use vec_utils::*;
+use vector_utils::*;
 
 // RefData: this is a packaging of reference data appropriate for VDJ analysis.
 
