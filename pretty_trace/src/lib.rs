@@ -494,6 +494,7 @@ fn test_in_allocator() -> bool {
                     || x.as_str().unwrap() == "malloc_consolidate"
                     || x.as_str().unwrap() == "_int_free"
                     || x.as_str().unwrap() == "calloc"
+                    || x.as_str().unwrap() == "__calloc"
                     || x.as_str().unwrap().contains( "_malloc" )
                     || x.as_str().unwrap().contains( "_realloc" )
                     || x.as_str().unwrap().starts_with( "alloc::alloc" )
