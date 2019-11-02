@@ -487,6 +487,7 @@ fn test_in_allocator() -> bool {
     trace(|frame| {
         resolve(frame.ip() as *mut _, |symbol| {
             if verbose && in_alloc {
+                // For unknown reasons, this happens on a mac.
                 eprintln!( "should not be here" );
             }
             if verbose {
