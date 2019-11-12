@@ -12,4 +12,4 @@ num-rational = "0.2"
 num-traits = "0.2"
 rand = "0.5"
 rayon = "1.0.2"
-vector_utils = { path = "../vector_utils" }
+vector_utils = "0.1.0"
