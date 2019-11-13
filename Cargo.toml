@@ -6,11 +6,11 @@ authors = ["David Jaffe <david.jaffe@10xgenomics.com"]
 [dependencies]
 bio = "0.29.0"
 debruijn = { git = "https://github.com/10XGenomics/rust-debruijn.git" }
-io_utils = { git = "https://github.com/10XGenomics/rust-toolbox.git"  }
+io_utils = "0.1.0"
 itertools = "0.7.0"
 serde = "1.0.90"
 serde_json = "1.0.41"
-stats_utils = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
-string_utils = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
+stats_utils = "0.1.0"
+string_utils = "0.1.0"
 tenkit2 = { path = "../tenkit2" }
-vector_utils = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
+vector_utils = "0.1.0"
