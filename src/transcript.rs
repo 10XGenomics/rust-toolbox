@@ -142,9 +142,27 @@ pub fn is_valid(
                 }
             }
         }
+        let mut misordered = false;
+        for j1 in 0..ann.len() {
+            let t1 = ann[j1].2 as usize;
+            for j2 in j1+1..ann.len() {
+                let t2 = ann[j2].2 as usize;
+                if refdata.is_j(t1) && refdata.is_v(t2) {
+                    misordered = true;
+                } else if refdata.is_j(t1) && refdata.is_u(t2) {
+                    misordered = true;
+                } else if refdata.is_j(t1) && refdata.is_d(t2) {
+                    misordered = true;
+                } else if refdata.is_v(t1) && refdata.is_u(t2) {
+                    misordered = true;
+                } else if refdata.is_c(t1) && !refdata.is_c(t2) {
+                    misordered = true;
+                }
+            }
+        }
         let mut cdr3 = Vec::<(usize, Vec<u8>, usize, usize)>::new();
         get_cdr3_using_ann(&b, &refdata, &ann, &mut cdr3);
-        if full && !too_large && cdr3.len() > 0 {
+        if full && !too_large && !misordered && cdr3.len() > 0 {
             return true;
         }
     }
