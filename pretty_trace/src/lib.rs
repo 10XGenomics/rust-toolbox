@@ -862,11 +862,11 @@ fn force_pretty_trace_fancy(
                 };
                 format!(
                     "RUST PROGRAM PANIC\n\n(Shortened traceback.  \
-                     {})\n\n{}{}{}{}",
-                    long_msg, tm, msg, prex, em
+                     {})\n\n{}{}{}",
+                    long_msg, tm, msg, prex
                 )
             }
-            None => format!("RUST PROGRAM PANIC\n\n{}{}", msg, em),
+            None => format!("RUST PROGRAM PANIC\n\n{}", msg),
         };
         if msg.contains("Broken pipe") {
             std::process::exit(1);
@@ -877,6 +877,7 @@ fn force_pretty_trace_fancy(
 
         let mut out = format!("\n{}\n\n", &msg);
         out += &all_out;
+        out += &em;
         eprint!("{}", out);
 
         // Dump traceback to file descriptor.
