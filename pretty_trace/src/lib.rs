@@ -823,7 +823,7 @@ fn force_pretty_trace_fancy(
         };
         let mut em = String::new();
         if exit_message.is_some() {
-            em = format!( "\n{}\n", exit_message.as_ref().unwrap() );
+            em = format!( "{}\n\n", exit_message.as_ref().unwrap() );
         }
         let msg = match info.location() {
             Some(location) => {
