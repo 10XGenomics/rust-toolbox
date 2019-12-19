@@ -245,6 +245,8 @@ pub struct PrettyTrace {
     pub full_file: Option<String>,
     // file descriptor to dump second copy of traceback to upon panic
     pub fd: Option<i32>,
+    // exit message
+    pub exit_message: Option<String>,
     // thread message
     pub message: Option<&'static CHashMap<ThreadId, String>>,
     // is profile mode on?
@@ -303,6 +305,7 @@ impl PrettyTrace {
             force_pretty_trace_fancy(
                 full_file,
                 fd,
+                self.exit_message.clone(),
                 &self.message.unwrap(),
                 &haps,
                 self.ctrlc,
@@ -311,8 +314,8 @@ impl PrettyTrace {
             );
         } else {
             let tm = new_thread_message();
-            force_pretty_trace_fancy(full_file, fd, &tm, &haps, self.ctrlc, self.ctrlc_debug,
-                self.haps_debug);
+            force_pretty_trace_fancy(full_file, fd, self.exit_message.clone(), &tm, &haps, 
+                self.ctrlc, self.ctrlc_debug, self.haps_debug);
         }
     }
 
@@ -361,6 +364,19 @@ impl PrettyTrace {
 
     pub fn fd(&mut self, fd: i32) -> &mut PrettyTrace {
         self.fd = Some(fd);
+        self
+    }
+
+    /// Define a message that is to be omitted after a traceback and before exiting.
+
+    /// # Example
+    /// <pre>
+    /// fn main() {
+    ///     let message = "Dang it, you found a bug!  Please call us at (999) 123-4567.";
+    ///     PrettyTrace::new().exit_message(&message).on();
+
+    pub fn exit_message(&mut self, message: &str) -> &mut PrettyTrace {
+        self.exit_message = Some(message.to_string());
         self
     }
 
@@ -633,6 +649,7 @@ pub fn new_thread_message() -> &'static CHashMap<ThreadId, String> {
 fn force_pretty_trace_fancy(
     log_file_name: String,
     fd: i32,
+    exit_message: Option<String>,
     thread_message: &'static CHashMap<ThreadId, String>,
     happening: &Happening,
     ctrlc: bool,
@@ -900,12 +917,17 @@ fn force_pretty_trace_fancy(
                 ),
                 None => format!("thread '{}' panicked at '{}'", thread, msg),
             };
+            let mut em = String::new();
+            if exit_message.is_some() {
+                em = format!( "\n{}\n", exit_message.as_ref().unwrap() );
+            }
             log_file_writer
                 .write_fmt(format_args!(
-                    "\nRUST PROGRAM PANIC\n\n(Full traceback.)\n\n{}{}\n\n{}\n",
+                    "\nRUST PROGRAM PANIC\n\n(Full traceback.)\n\n{}{}\n\n{}\n{}",
                     tm,
                     &msg,
-                    from_utf8(&bt).unwrap()
+                    from_utf8(&bt).unwrap(),
+                    em
                 ))
                 .unwrap();
         }
