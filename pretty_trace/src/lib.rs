@@ -821,6 +821,10 @@ fn force_pretty_trace_fancy(
                 None => "Box<Any>",
             },
         };
+        let mut em = String::new();
+        if exit_message.is_some() {
+            em = format!( "\n{}\n", exit_message.as_ref().unwrap() );
+        }
         let msg = match info.location() {
             Some(location) => {
                 let loc = &(*location.file());
@@ -858,11 +862,11 @@ fn force_pretty_trace_fancy(
                 };
                 format!(
                     "RUST PROGRAM PANIC\n\n(Shortened traceback.  \
-                     {})\n\n{}{}{}",
-                    long_msg, tm, msg, prex
+                     {})\n\n{}{}{}{}",
+                    long_msg, tm, msg, prex, em
                 )
             }
-            None => format!("RUST PROGRAM PANIC\n\n{}", msg),
+            None => format!("RUST PROGRAM PANIC\n\n{}{}", msg, em),
         };
         if msg.contains("Broken pipe") {
             std::process::exit(1);
@@ -917,10 +921,6 @@ fn force_pretty_trace_fancy(
                 ),
                 None => format!("thread '{}' panicked at '{}'", thread, msg),
             };
-            let mut em = String::new();
-            if exit_message.is_some() {
-                em = format!( "\n{}\n", exit_message.as_ref().unwrap() );
-            }
             log_file_writer
                 .write_fmt(format_args!(
                     "\nRUST PROGRAM PANIC\n\n(Full traceback.)\n\n{}{}\n\n{}\n{}",
