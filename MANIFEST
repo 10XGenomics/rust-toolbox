@@ -1,11 +1,16 @@
-io_utils          file utilities (INTERNAL ONLY)
-pretty_trace      stack trace tools
-stats_utils       statistics (INTERNAL ONLY)
-string_utils      string utilties (INTERNAL ONLY)
-stirling_numbers  some functions related to Stirling numbers of the second kind
-vec_utils         vector utilities (INTERNAL ONLY)
 
-Dependency structure:
+CRATE             CONTENT            CRATES.IO        INTERNAL
+io_utils          file utilities     yes              yes
+pretty_trace      stack trace tools  yes              no
+stats_utils       statistics         yes              yes
+string_utils      string utilties    yes              yes
+stirling_numbers  Stirling numbers   yes              no
+vec_utils         vector utilities   yes              yes
+
+Crates labeled INTERNAL are publicly accessible but we discourage relying on their internals 
+because they may get changed a lot.
+
+DEPENDENCY STRUCTURE
 
 vec_utils ==> string_utils ==> io_utils, pretty_trace
           ==> stirling
