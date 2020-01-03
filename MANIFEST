@@ -1,9 +1,10 @@
 
 CRATE             CONTENT            CRATES.IO        INTERNAL
 io_utils          file utilities     yes              yes
+perf_stats        performance utils  no               yes
 pretty_trace      stack trace tools  yes              no
 stats_utils       statistics         yes              yes
-string_utils      string utilties    yes              yes
+string_utils      string utilities   yes              yes
 stirling_numbers  Stirling numbers   yes              no
 vec_utils         vector utilities   yes              yes
 
@@ -12,7 +13,9 @@ because they may get changed a lot.
 
 DEPENDENCY STRUCTURE
 
-vec_utils ==> string_utils ==> io_utils, pretty_trace
+vec_utils ==> string_utils ==> io_utils, pretty_trace, perf_stats
           ==> stirling
 
 stats_utils
+
+perf_stats

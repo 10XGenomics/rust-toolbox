@@ -2,6 +2,7 @@
 
 members = [
     "io_utils",
+    "perf_stats",
     "pretty_trace",
     "stats_utils",
     "stirling_numbers",
