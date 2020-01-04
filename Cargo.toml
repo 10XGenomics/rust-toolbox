@@ -10,6 +10,7 @@ members = [
     "stats_utils",
     "stirling_numbers",
     "string_utils",
+    "tables",
     "vector_utils",
 ]
 
