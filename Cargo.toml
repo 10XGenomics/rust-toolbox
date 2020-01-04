@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "equiv",
     "io_utils",
     "perf_stats",
     "pretty_trace",

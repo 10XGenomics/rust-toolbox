@@ -1,5 +1,6 @@
 
 CRATE             CONTENT            CRATES.IO        INTERNAL
+equiv             equiv relation     no               yes
 io_utils          file utilities     yes              yes
 perf_stats        performance utils  no               yes
 pretty_trace      stack trace tools  yes              no
@@ -19,3 +20,5 @@ vec_utils ==> string_utils ==> io_utils, pretty_trace, perf_stats
 stats_utils
 
 perf_stats
+
+equiv
