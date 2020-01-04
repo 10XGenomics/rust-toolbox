@@ -1,24 +1,15 @@
 
-CRATE             CONTENT            CRATES.IO        INTERNAL
-equiv             equiv relation     no               yes
-io_utils          file utilities     yes              yes
-perf_stats        performance utils  no               yes
-pretty_trace      stack trace tools  yes              no
-stats_utils       statistics         yes              yes
-string_utils      string utilities   yes              yes
-stirling_numbers  Stirling numbers   yes              no
-vec_utils         vector utilities   yes              yes
+CRATE                 CONTENT            CRATES.IO        INTERNAL
+binary_vec_io         binary vec i/o     no               yes
+equiv                 equiv relation     no               yes
+io_utils              file utilities     yes              yes
+mirror_sparse_matrix  sparse matrix      no               yes
+perf_stats            performance utils  no               yes
+pretty_trace          stack trace tools  yes              no
+stats_utils           statistics         yes              yes
+string_utils          string utilities   yes              yes
+stirling_numbers      Stirling numbers   yes              no
+vec_utils             vector utilities   yes              yes
 
 Crates labeled INTERNAL are publicly accessible but we discourage relying on their internals 
 because they may get changed a lot.
-
-DEPENDENCY STRUCTURE
-
-vec_utils ==> string_utils ==> io_utils, pretty_trace, perf_stats
-          ==> stirling
-
-stats_utils
-
-perf_stats
-
-equiv

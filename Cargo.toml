@@ -1,8 +1,10 @@
 [workspace]
 
 members = [
+    "binary_vec_io",
     "equiv",
     "io_utils",
+    # "mirror_sparse_matrix",
     "perf_stats",
     "pretty_trace",
     "stats_utils",
