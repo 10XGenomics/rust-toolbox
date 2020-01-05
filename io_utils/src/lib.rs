@@ -184,3 +184,37 @@ macro_rules! eprintme {
             eprintln!(concat!( $( stringify!($x), " = {}, ", )* ), $($x,)*);
         }
     }
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// GET METRIC VALUES
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+// Get the value of a metric from a json file or similar.  Returns a string.
+// Removes outer quotes if present.  Panics if file not found, and returns empty
+// string if the metric is not found.
+
+pub fn get_metric_value(f: &String, metric: &String) -> String {
+    let buf = open_for_read![&f];
+    for line in buf.lines() {
+        let s = line.unwrap();
+        let metric_string = format!("\"{}\": ", metric);
+        if s.contains(&metric_string) {
+            let mut t = s.after(&metric_string).to_string();
+            if t.ends_with(" ") {
+                t.pop();
+            }
+            if t.ends_with(",") {
+                t.pop();
+            }
+            if t.ends_with(".0") {
+                t.pop();
+                t.pop();
+            }
+            if t.starts_with("\"") && t.ends_with("\"") {
+                t = t[1..t.len() - 1].to_string();
+            }
+            return t.to_string();
+        }
+    }
+    "".to_string()
+}
