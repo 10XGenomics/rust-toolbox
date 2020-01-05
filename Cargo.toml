@@ -2,6 +2,7 @@
 
 members = [
     "amino",
+    "ansi_escape",
     "binary_vec_io",
     "equiv",
     "io_utils",
