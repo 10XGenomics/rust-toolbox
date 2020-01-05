@@ -3,14 +3,19 @@
 // This file contains miscellaneous utilities for input and output.
 
 extern crate bincode;
+extern crate flate2;
 extern crate lz4;
 extern crate serde;
+extern crate string_utils;
 
 use bincode::{deserialize_from, serialize_into};
+use flate2::read::MultiGzDecoder;
 use serde::{de::DeserializeOwned, Serialize};
 use std::ffi::OsStr;
 use std::fs;
 use std::{fmt::Debug, fs::File, io::prelude::*, path::Path};
+use std::io::{BufRead,BufReader};
+use string_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // GET CONTENTS OF DIRECTORY
@@ -111,7 +116,6 @@ pub fn open_maybe_compressed<P: AsRef<Path>>(filename: P) -> Box<dyn Read> {
 // read_maybe_unzipped( f, lines ): The filename f should have the form x.gz.
 // If that exists, load it into lines.  Otherwise try to load x.
 
-/*
 pub fn read_maybe_unzipped(f: &String, lines: &mut Vec<String>) {
     lines.clear();
     if path_exists(&f) {
@@ -132,7 +136,6 @@ pub fn read_maybe_unzipped(f: &String, lines: &mut Vec<String>) {
         }
     }
 }
-*/
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // CODE TO DO READS AND WRITES USING SERDE
