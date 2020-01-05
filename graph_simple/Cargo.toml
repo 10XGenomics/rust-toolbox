@@ -1,0 +1,10 @@
+[package]
+name = "graph_simple"
+version = "0.1.0"
+authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
+license = "MIT"
+description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
+
+[dependencies]
+petgraph = "0.4.13"
+vector_utils = "0.1.0"
