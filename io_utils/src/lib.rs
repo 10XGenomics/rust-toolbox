@@ -218,3 +218,79 @@ pub fn get_metric_value(f: &String, metric: &String) -> String {
     }
     "".to_string()
 }
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// CODE FOR STREAMING A JSON VECTOR
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+// Read an entry from a json file that represents a vector.  This is not completely
+// general as it depends on assumptions about the formatting of the file.
+//
+// To compare to and probably replace with:
+// https://martian-lang.github.io/martian-rust/doc/martian_filetypes/json_file/
+// index.html#lazy-readwrite-example
+
+pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> {
+    let mut line = String::new();
+    if !json.read_line(&mut line).is_ok() || line == "".to_string() || line == "[]".to_string() {
+        return None;
+    }
+    if line == "[\n".to_string() {
+        line.clear();
+        if !json.read_line(&mut line).is_ok() {
+            panic!("json read failure 1");
+        }
+    }
+    let mut entry = Vec::<u8>::new();
+    let (mut curlies, mut bracks, mut quotes) = (0 as isize, 0 as isize, 0 as isize);
+    let mut s = line.as_bytes().clone();
+    loop {
+        if (s == b"]" || s == b"]\n") && curlies == 0 && bracks == 0 && quotes % 2 == 0 {
+            if entry.len() > 0 {
+                return Some(entry);
+            } else {
+                return None;
+            }
+        }
+        let mut cpos = -1 as isize;
+        for i in (0..s.len() - 1).rev() {
+            if s[i] == b',' {
+                cpos = i as isize;
+                break;
+            }
+            if s[i] != b' ' {
+                break;
+            }
+        }
+        let mut escaped = false;
+        for i in 0..s.len() {
+            if !escaped && s[i] == b'"' {
+                quotes += 1;
+            } else if !escaped && quotes % 2 == 0 {
+                match s[i] {
+                    b'{' => curlies += 1,
+                    b'}' => curlies -= 1,
+                    b'[' => bracks += 1,
+                    b']' => bracks -= 1,
+                    b',' => {
+                        if i as isize == cpos && curlies == 0 && bracks == 0 && quotes % 2 == 0 {
+                            return Some(entry);
+                        }
+                    }
+                    _ => {}
+                };
+            }
+            if s[i] == b'\\' && !escaped {
+                escaped = true;
+            } else {
+                escaped = false;
+            }
+            entry.push(s[i]);
+        }
+        line.clear();
+        if !json.read_line(&mut line).is_ok() {
+            panic!("json read failure 2");
+        }
+        s = line.as_bytes().clone();
+    }
+}
