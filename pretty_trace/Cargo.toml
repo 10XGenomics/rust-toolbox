@@ -5,7 +5,7 @@ authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "Tools for generating pretty tracebacks and for profiling."
 homepage = "https://github.com/10XGenomics/rust-toolbox/tree/master/pretty_trace"
-keywords = ["stack trace", "traceback", "profiling"]
+keywords = ["stack", "trace", "traceback", "profiling"]
 
 [dependencies]
 backtrace = "0.3.40"
