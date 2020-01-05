@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com"]
 
 [dependencies]
+amino = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
 bio = "0.29.0"
 debruijn = { git = "https://github.com/10XGenomics/rust-debruijn.git" }
 io_utils = "0.1.0"

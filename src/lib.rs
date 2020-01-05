@@ -1,6 +1,8 @@
-#![allow(clippy::all)]
 // Copyright (c) 2019 10x Genomics, Inc. All rights reserved.
 
+#![allow(clippy::all)]
+
+extern crate amino;
 extern crate bio;
 extern crate debruijn;
 #[macro_use]

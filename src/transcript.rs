@@ -2,11 +2,11 @@
 
 // Code that analyzes transcripts.
 
+use amino::*;
 use annotate::*;
 use debruijn::{dna_string::*, kmer::*, *};
 use refx::*;
 use std::{cmp::max, io::prelude::*};
-use tenkit2::amino::*;
 use tenkit2::hyper::*;
 use tenkit2::kmer_lookup::*;
 use vector_utils::*;
