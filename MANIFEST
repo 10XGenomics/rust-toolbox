@@ -1,5 +1,6 @@
 
 CRATE                 CONTENT               CRATES.IO        INTERNAL
+amino                 amino acid stuff      no               yes
 binary_vec_io         binary vec i/o        no               yes
 equiv                 equiv relation        no               yes
 io_utils              file utilities        yes              yes

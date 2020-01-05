@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "amino",
     "binary_vec_io",
     "equiv",
     "io_utils",
