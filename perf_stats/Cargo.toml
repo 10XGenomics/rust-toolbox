@@ -6,7 +6,7 @@ license = "MIT"
 description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
 
 [dependencies]
-io_utils = "0.1.0"
+io_utils = "0.2.3"
 libc = "0.2.51"
 string_utils = "0.1.0"
 users = "0.9.1"

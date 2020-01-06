@@ -6,6 +6,7 @@ binary_vec_io         binary vec i/o        no               yes
 equiv                 equiv relation        no               yes
 graph_simple          generic digraph funs  no               yes
 io_utils              file utilities        yes              yes
+load_feature_bc       load 10x gex matrix   no               yes
 marsoc                10x internal utils    no               yes
 mirror_sparse_matrix  sparse matrix         no               yes
 perf_stats            performance utils     no               yes
