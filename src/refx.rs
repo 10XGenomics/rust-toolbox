@@ -308,20 +308,30 @@ pub fn make_vdj_ref_data(
     is_tcr: bool,
     is_bcr: bool,
 ) {
-    let ref_fasta = vdj_ref_path(&species, imgt);
-    let ext_ref_fasta = if extended && ref_fasta.ends_with("/regions.fa") {
-        format!( "{}/supp_regions.fa", ref_fasta.rev_before("/regions.fa") )
-    } else {
-        String::new()
-    };
-    let refx = read_to_string_safe(&ref_fasta);
-    let ext_refx = if extended {
-        read_to_string_safe(&ext_ref_fasta)
-    } else {
-        String::new()
-    };
+    let mut refx = String::new();
+    let mut ext_refx = String::new();
+    if !imgt && species == "human" {
+        refx = human_ref();
+        if extended {
+            ext_refx = human_supp_ref();
+        }
+    }
+    if !imgt && species == "mouse" {
+        refx = mouse_ref();
+        if extended {
+            ext_refx = mouse_supp_ref();
+        }
+    }
+    if imgt && species == "human" {
+        refx = read_to_string_safe( "/mnt/opt/refdata_cellranger/vdj/\
+            vdj_IMGT_20170916-2.1.0/fasta/regions.fa" );
+    }
+    if imgt && species == "mouse" {
+        refx = read_to_string_safe( "/mnt/opt/refdata_cellranger/vdj/\
+            vdj_IMGT_mouse_20180723-2.2.0/fasta/regions.fa" );
+    }
     if refx.len() == 0 {
-        panic!("Reference file at {} has zero length.", ref_fasta);
+        panic!("Reference file has zero length.");
     }
     make_vdj_ref_data_core(refdata, &refx, &ext_refx, is_tcr, is_bcr, None);
 }
