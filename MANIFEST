@@ -5,6 +5,7 @@ amino                 amino acid stuff        no               yes
 ansi_escape           ansi escape seqs        no               yes
 binary_vec_io         binary vec i/o          no               yes
 equiv                 equiv relation          no               yes
+fasta                 fasta functions         no               yes
 graph_simple          generic digraph funs    no               yes
 hyper                 HyperBasevector struct  no               yes
 io_utils              file utilities          yes              yes
