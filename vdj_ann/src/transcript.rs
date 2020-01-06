@@ -5,10 +5,10 @@
 use amino::*;
 use annotate::*;
 use debruijn::{dna_string::*, kmer::*, *};
+use hyper::*;
+use kmer_lookup::*;
 use refx::*;
 use std::{cmp::max, io::prelude::*};
-use tenkit2::hyper::*;
-use tenkit2::kmer_lookup::*;
 use vector_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓

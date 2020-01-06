@@ -3,6 +3,7 @@
 // This file contains code to annotate a contig, in the sense of finding alignments
 // to VDJ reference contigs.  Also to find CDR3 sequences.  And some related things.
 
+use align_tools::*;
 use amino::*;
 use bio::alignment::AlignmentOperation::*;
 use debruijn::{dna_string::*, kmer::*, *};
@@ -17,7 +18,6 @@ use std::{
     io::{BufWriter, Write},
 };
 use string_utils::*;
-use tenkit2::align_tools::*;
 use transcript::*;
 use vector_utils::*;
 
