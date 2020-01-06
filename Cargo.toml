@@ -6,6 +6,7 @@ members = [
     "binary_vec_io",
     "equiv",
     "graph_simple",
+    # "hyper",
     "io_utils",
     "load_feature_bc",
     "marsoc",
