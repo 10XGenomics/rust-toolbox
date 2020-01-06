@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "align_tools",
     "amino",
     "ansi_escape",
     "binary_vec_io",
