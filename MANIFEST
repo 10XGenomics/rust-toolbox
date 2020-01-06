@@ -7,6 +7,7 @@ equiv                 equiv relation          no               yes
 graph_simple          generic digraph funs    no               yes
 hyper                 HyperBasevector struct  no               yes
 io_utils              file utilities          yes              yes
+kmer_lookup           kmer lookup             no               yes
 load_feature_bc       load 10x gex matrix     no               yes
 marsoc                10x internal utils      no               yes
 mirror_sparse_matrix  sparse matrix           no               yes

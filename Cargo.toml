@@ -8,6 +8,7 @@ members = [
     "graph_simple",
     # "hyper",
     "io_utils",
+    "kmer_lookup",
     "load_feature_bc",
     "marsoc",
     "mirror_sparse_matrix",
