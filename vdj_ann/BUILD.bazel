@@ -1,0 +1,28 @@
+load(
+    "@tenx_bazel_rules//rules:cargo.bzl",
+    "cargo_library",
+)
+
+exports_files(
+    ["Cargo.toml"],
+    visibility = ["//lib/rust:__pkg__"],
+)
+
+filegroup(
+    name = "srcs",
+    srcs = glob([
+        "src/*.rs",
+        "vdj_refs/human/*.fa",
+        "vdj_refs/mouse/*.fa",
+    ]),
+    visibility = ["//lib/rust:__pkg__"],
+)
+
+cargo_library(
+    name = "vdj_ann",
+    srcs = [
+        "//lib/rust:srcs",
+    ],
+    cargo_deps = "//lib/rust",
+    visibility = ["//visibility:public"],
+)
