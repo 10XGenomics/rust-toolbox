@@ -117,36 +117,6 @@ impl<'a> RefData {
     }
 }
 
-pub fn vdj_ref_path(species: &String, imgt: bool) -> String {
-    if imgt && species == "human" {
-        return String::from(
-            "/mnt/opt/refdata_cellranger/vdj/\
-             vdj_IMGT_20170916-2.1.0/fasta/regions.fa",
-        );
-    }
-    if !imgt && species == "human" {
-        // ◼ temporary location
-        return String::from(
-            "/mnt/park/compbio/david.jaffe/vdj_refs/human/\
-             fasta/regions.fa",
-        );
-    }
-    if imgt && species == "mouse" {
-        return String::from(
-            "/mnt/opt/refdata_cellranger/vdj/\
-             vdj_IMGT_mouse_20180723-2.2.0/fasta/regions.fa",
-        );
-    }
-    if !imgt && species == "mouse" {
-        // ◼ temporary location
-        return String::from(
-            "/mnt/park/compbio/david.jaffe/vdj_refs/mouse/\
-             fasta/regions.fa",
-        );
-    }
-    String::from("")
-}
-
 // ids_to_use_opt: Optional hashSet of ids. If specified only reference
 // entries with id in the HashSet is used to construct RefData
 
