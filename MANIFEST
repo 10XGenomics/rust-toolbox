@@ -15,6 +15,7 @@ stats_utils           statistics            yes              yes
 string_utils          string utilities      yes              yes
 stirling_numbers      stirling numbers      yes              no
 tables                table print printing  no               yes
+vdj_ann               vdj annotation        no               yes
 vec_utils             vector utilities      yes              yes
 
 Crates labeled INTERNAL are publicly accessible but we discourage relying on their internals 

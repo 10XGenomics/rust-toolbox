@@ -13,5 +13,4 @@ serde = "1.0.90"
 serde_json = "1.0.41"
 stats_utils = "0.1.0"
 string_utils = "0.1.0"
-tenkit2 = { path = "../tenkit2" }
 vector_utils = "0.1.0"

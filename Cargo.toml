@@ -16,6 +16,7 @@ members = [
     "stirling_numbers",
     "string_utils",
     "tables",
+    # "vdj_ann",
     "vector_utils",
 ]
 

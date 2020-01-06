@@ -12,7 +12,6 @@ extern crate serde;
 extern crate serde_json;
 extern crate stats_utils;
 extern crate string_utils;
-extern crate tenkit2;
 extern crate vector_utils;
 
 // Modules introducing macros need to come before the modules that use them.
