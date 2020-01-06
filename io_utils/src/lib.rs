@@ -294,3 +294,12 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> 
         s = line.as_bytes().clone();
     }
 }
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// READ FILE TO STRING AND PRINT FILE NAME IF IT DOESN'T EXIST
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+pub fn read_to_string_safe<P: AsRef<Path>>(path: P) -> String {
+    fs::read_to_string(&path).expect(&format!("Could not open file \"{}\".",
+        path.as_ref().to_str().unwrap()))
+}
