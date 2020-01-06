@@ -10,10 +10,11 @@
 // ◼ code.
 
 use debruijn::{dna_string::*, kmer::*};
+use fasta::*;
+use io_utils::*;
 use kmer_lookup::*;
 use std::collections::{HashMap, HashSet};
 use string_utils::*;
-use tenkit2::io::*;
 use vector_utils::*;
 
 pub fn human_ref() -> String {

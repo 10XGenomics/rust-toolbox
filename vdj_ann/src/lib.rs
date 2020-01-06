@@ -2,11 +2,15 @@
 
 #![allow(clippy::all)]
 
+extern crate align_tools;
 extern crate amino;
 extern crate bio;
 extern crate debruijn;
+extern crate fasta;
+extern crate hyper;
 #[macro_use]
 extern crate io_utils;
+extern crate kmer_lookup;
 extern crate itertools;
 extern crate serde;
 extern crate serde_json;
