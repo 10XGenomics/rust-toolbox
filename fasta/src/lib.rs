@@ -101,3 +101,28 @@ pub fn read_fasta_contents_into_vec_dna_string_plus_headers(
     }
     dv.push(DnaString::from_dna_string(&last));
 }
+
+// This APPENDS.
+
+pub fn read_fasta_headers( f: &String, headers: &mut Vec<String> ) {
+    let fin = open_for_read![&f];
+    let mut last: String = String::new();
+    let mut first = true;
+    for line in fin.lines() {
+        let s = line.unwrap();
+        if first {
+            if !s.starts_with(">") {
+                panic!("fasta format failure reading {}", f);
+            }
+            first = false;
+            headers.push(s.get(1..).unwrap().to_string());
+        } else {
+            if s.starts_with(">") {
+                last.clear();
+                headers.push(s.get(1..).unwrap().to_string());
+            } else {
+                last += &s;
+            }
+        }
+    }
+}
