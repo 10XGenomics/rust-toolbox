@@ -259,6 +259,7 @@ pub struct PrettyTrace {
     pub ctrlc: bool,
     pub ctrlc_debug: bool,
     pub haps_debug: bool,
+    pub noexit: bool,
 }
 
 /// Normal usage of `PrettyTrace` is to call
@@ -311,11 +312,12 @@ impl PrettyTrace {
                 self.ctrlc,
                 self.ctrlc_debug,
                 self.haps_debug,
+                self.noexit,
             );
         } else {
             let tm = new_thread_message();
             force_pretty_trace_fancy(full_file, fd, self.exit_message.clone(), &tm, &haps, 
-                self.ctrlc, self.ctrlc_debug, self.haps_debug);
+                self.ctrlc, self.ctrlc_debug, self.haps_debug, self.noexit);
         }
     }
 
@@ -343,6 +345,15 @@ impl PrettyTrace {
 
     pub fn haps_debug(&mut self) -> &mut PrettyTrace {
         self.haps_debug = true;
+        self
+    }
+
+    /// Turn off call to <code>std::process::exit(1)</code>, which is normally triggered after
+    /// printing a traceback (on panic).  This could be useful if you want to run a bunch of
+    /// tests, some of which fail, but you want to see the outcome of all of them.
+
+    pub fn noexit(&mut self) -> &mut PrettyTrace {
+        self.noexit = true;
         self
     }
 
@@ -655,6 +666,7 @@ fn force_pretty_trace_fancy(
     ctrlc: bool,
     ctrlc_debug: bool,
     haps_debug: bool,
+    noexit: bool,
 ) {
     // Launch happening thread, which imits SIGUSR1 interrupts.  Usually, it will
     // hang after some number of iterations, and at that point we kill ourself,
@@ -935,7 +947,9 @@ fn force_pretty_trace_fancy(
 
         // Exit.
 
-        std::process::exit(1);
+        if !noexit {
+            std::process::exit(1);
+        }
     }));
 }
 
