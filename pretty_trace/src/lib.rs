@@ -534,6 +534,8 @@ fn test_in_allocator() -> bool {
                     || x.as_str().unwrap().contains( "alloc::alloc" )
                     // hideous additions reflecting funny encoding:
                     || x.as_str().unwrap().contains( "alloc5alloc" )
+                    // added because this causes crashes
+                    || x.as_str().unwrap().starts_with("pthread_cond_wait")
                 {
                     if verbose {
                         eprintln!( "in allocator" );
