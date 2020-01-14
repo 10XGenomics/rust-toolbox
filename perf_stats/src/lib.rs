@@ -5,10 +5,9 @@
 extern crate io_utils;
 extern crate libc;
 extern crate string_utils;
-extern crate users;
 
 use io_utils::*;
-use libc::{c_long, rusage, suseconds_t, time_t, timeval, RLIMIT_NPROC, RUSAGE_SELF};
+use libc::{c_long, getuid, rusage, suseconds_t, time_t, timeval, RLIMIT_NPROC, RUSAGE_SELF};
 use libc::{rlimit, setrlimit};
 use std::{
     cmp::min,
@@ -18,7 +17,6 @@ use std::{
     time::Instant,
 };
 use string_utils::*;
-use users::*;
 
 // Find elapsed time.  Usage example:
 //    let t = Instant::now( );
@@ -214,7 +212,7 @@ pub fn mem_usage_gb() -> f64 {
 // and the command, which is folder.
 
 pub fn ps_me() {
-    let uid = get_current_uid() as i64;
+    let uid = unsafe { getuid() } as i64;
     println!(
         "\nPROCESSES HAVING THE SAME OWNER (UID={}) AS THIS PROCESS = {}\n",
         uid,

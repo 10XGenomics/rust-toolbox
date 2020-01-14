@@ -9,4 +9,3 @@ description = "Some tools that are 'internal' for now because they are insuffici
 io_utils = "0.2.3"
 libc = "0.2.51"
 string_utils = "0.1.0"
-users = "0.9.1"
