@@ -6,7 +6,7 @@
 // s  code  content                   ideal color
 // 0  75  = rgb(95,175,255)  close to (86,180,233)  bold + light blue
 // 1  166 = rgb(215,95,0)    close to (213,94,0)    bold + vermillion
-// 2  178 = rgb(215,175,0)   close to (230,159,0)   orange
+// 2  178 = rgb(215,175,0)   close to (230,159,0)   bold + orange
 // 3  25  = rgb(0,95,175)    close to (0,114,178)   bold + blue
 // 4  175 = rgb(215,135,175) close to (204,121,167) bold + reddish purple
 // 5  36  = rgb(0,175,135)   close to (0,158,115)   bluish green
@@ -24,7 +24,7 @@ pub fn print_color(s: usize, log: &mut Vec<u8>) {
     } else if s == 1 {
         log.append(&mut b"[01m[38;5;166m".to_vec());
     } else if s == 2 {
-        log.append(&mut b"[38;5;178m".to_vec());
+        log.append(&mut b"[01m[38;5;178m".to_vec());
     } else if s == 3 {
         log.append(&mut b"[01m[38;5;25m".to_vec());
     } else if s == 4 {
