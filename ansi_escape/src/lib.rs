@@ -59,3 +59,7 @@ pub fn emit_eight_bit_color_escape(log: &mut Vec<u8>, c: usize) {
     log.append( &mut format!("{}", c).as_bytes().to_vec() );
     log.push( b'm' );
 }
+
+pub fn emit_disable_alternate_screen_buffer_escape(log: &mut Vec<u8>) {
+    log.append( &mut b"?1049l".to_vec() );
+}
