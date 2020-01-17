@@ -61,5 +61,5 @@ pub fn emit_eight_bit_color_escape(log: &mut Vec<u8>, c: usize) {
 }
 
 pub fn emit_disable_alternate_screen_buffer_escape(log: &mut Vec<u8>) {
-    log.append( &mut b"?1049l".to_vec() );
+    log.append( &mut b"[?1049l".to_vec() );
 }
