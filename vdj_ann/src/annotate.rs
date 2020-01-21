@@ -2329,7 +2329,7 @@ pub struct ContigAnnotation {
     // raw data for the contig
     pub barcode: String,     // the barcode
     pub contig_name: String, // name of the contig
-    sequence: String,        // nucleotide sequence for contig
+    pub sequence: String,        // nucleotide sequence for contig
     quals: String,           // contig quality scores
 
     // contig support
