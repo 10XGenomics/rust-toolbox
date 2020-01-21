@@ -2358,10 +2358,10 @@ pub struct ContigAnnotation {
     info: HashMap<String, String>,           // {} initially, may be filled in later
 
     // state of the contig
-    high_confidence: bool,        // declared high confidence?
-    is_cell: bool,                // was the barcode declared a cell?
+    pub high_confidence: bool,        // declared high confidence?
+    pub is_cell: bool,                // was the barcode declared a cell?
     pub productive: Option<bool>, // productive?  (null means not full length)
-    filtered: bool,               // true and never changed (unused field)
+    pub filtered: bool,               // true and never changed (unused field)
 }
 
 impl ContigAnnotation {
