@@ -909,7 +909,7 @@ pub fn annotate_seq_core(
                 if del.len() == 0 && ins.solo() {
                     let (l, p, n) = (ins[0].0, ins[0].1, ins[0].2);
                     // ◼ This is buggy.  It fails if overflow detection is on.
-                    if n + (l1 + len1 - l2) != (p1 + len1 - p2) {
+                    if n + l1 + p2 != l2 + p1 {
                         continue;
                     }
                     len1 = l - l1;
