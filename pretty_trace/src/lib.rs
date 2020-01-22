@@ -348,10 +348,7 @@ impl PrettyTrace {
         self
     }
 
-    /// Turn off call to <code>std::process::exit(101)</code>, which is normally triggered after
-    /// printing a traceback (on panic).  This could be useful if you want to run a bunch of
-    /// tests, some of which fail, but you want to see the outcome of all of them.  Note that
-    /// <code>101</code> is the standard exit status for rust panics.
+    /// Deprecated and will be deleted later.  This no longer does anything.
 
     pub fn noexit(&mut self) -> &mut PrettyTrace {
         self.noexit = true;
@@ -669,7 +666,7 @@ fn force_pretty_trace_fancy(
     ctrlc: bool,
     ctrlc_debug: bool,
     haps_debug: bool,
-    noexit: bool,
+    _noexit: bool,
 ) {
     // Launch happening thread, which imits SIGUSR1 interrupts.  Usually, it will
     // hang after some number of iterations, and at that point we kill ourself,
@@ -948,11 +945,9 @@ fn force_pretty_trace_fancy(
                 .unwrap();
         }
 
-        // Exit.
+        // Exit.  One does not need to do anything here.  The exit status will be 101 even
+        // though one "falls off the end".  This is an empirical observation.
 
-        if !noexit {
-            std::process::exit(101);
-        }
     }));
 }
 
