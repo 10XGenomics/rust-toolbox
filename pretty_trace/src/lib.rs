@@ -348,9 +348,10 @@ impl PrettyTrace {
         self
     }
 
-    /// Turn off call to <code>std::process::exit(1)</code>, which is normally triggered after
+    /// Turn off call to <code>std::process::exit(101)</code>, which is normally triggered after
     /// printing a traceback (on panic).  This could be useful if you want to run a bunch of
-    /// tests, some of which fail, but you want to see the outcome of all of them.
+    /// tests, some of which fail, but you want to see the outcome of all of them.  Note that
+    /// <code>101</code> is the standard exit status for rust panics.
 
     pub fn noexit(&mut self) -> &mut PrettyTrace {
         self.noexit = true;
@@ -812,7 +813,7 @@ fn force_pretty_trace_fancy(
                     &msg2,
                     from_utf8(&bt).unwrap()
                 );
-                std::process::exit(1);
+                std::process::exit(101);
             }
         }
 
@@ -883,7 +884,7 @@ fn force_pretty_trace_fancy(
             None => format!("RUST PROGRAM PANIC\n\n{}", msg),
         };
         if msg.contains("Broken pipe") {
-            std::process::exit(1);
+            std::process::exit(101);
         }
 
         // Now print stuff.  Package as a single print line to prevent
@@ -913,7 +914,7 @@ fn force_pretty_trace_fancy(
                      named {} failed, giving up.\n",
                     log_file_name
                 );
-                std::process::exit(1);
+                std::process::exit(101);
             }
             let mut log_file_writer = BufWriter::new(f.unwrap());
             let bt: Vec<u8> = format!("{:?}", backtrace).into_bytes();
@@ -950,7 +951,7 @@ fn force_pretty_trace_fancy(
         // Exit.
 
         if !noexit {
-            std::process::exit(1);
+            std::process::exit(101);
         }
     }));
 }
