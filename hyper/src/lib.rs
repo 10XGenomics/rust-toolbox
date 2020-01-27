@@ -789,7 +789,7 @@ impl Hyper {
                     } else if *c == 'T' {
                         i = 3;
                     }
-                    k = 3 * k + i;
+                    k = k.wrapping_mul(3) + i;
                 }
                 if use_reads {
                     for i in 0..self.ids[e].len() {
@@ -816,7 +816,7 @@ impl Hyper {
                     } else if *c == 'T' {
                         i = 3;
                     }
-                    k = 5 * k + i;
+                    k = k.wrapping_mul(5) + i;
                 }
                 if use_reads {
                     for i in 0..self.ids[e].len() {
@@ -824,7 +824,7 @@ impl Hyper {
                         k += ((i + 1) * id as usize * id as usize) as u64;
                     }
                 }
-                r *= k;
+                r = r.wrapping_mul(k);
             }
             s += r;
         }
