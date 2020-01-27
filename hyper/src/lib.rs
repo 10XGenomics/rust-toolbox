@@ -797,9 +797,9 @@ impl Hyper {
                         k += ((i + 1) * id as usize * id as usize) as u64;
                     }
                 }
-                r *= k;
+                r = r.wrapping_mul(k);
             }
-            s += r;
+            s = s.wrapping_add(r);
             let n = self.h.g.n_from(v);
             let mut r: u64 = 1;
             for j in 0..n {
@@ -826,7 +826,7 @@ impl Hyper {
                 }
                 r = r.wrapping_mul(k);
             }
-            s += r;
+            s = s.wrapping_add(r);
         }
         s
     }
