@@ -8,13 +8,17 @@ align_tools = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
 amino = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
 bio = "0.29.0"
 debruijn = { git = "https://github.com/10XGenomics/rust-debruijn.git" }
+exons = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
 fasta = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
+flate2 = "1.0.12"
 hyper = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
 io_utils = "0.2.4"
 itertools = "0.7.0"
 kmer_lookup = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
+pretty_trace = "0.1.1"
 serde = "1.0.90"
 serde_json = "1.0.41"
+sha2 = "0.8.0"
 stats_utils = "0.1.0"
 string_utils = "0.1.0"
 vector_utils = "0.1.0"
