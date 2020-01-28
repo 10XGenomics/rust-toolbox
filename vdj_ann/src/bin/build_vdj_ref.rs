@@ -83,16 +83,18 @@
 // defined external files.
 
 extern crate debruijn;
+extern crate fasta;
 extern crate flate2;
 #[macro_use]
 extern crate io_utils;
 extern crate pretty_trace;
 extern crate sha2;
 extern crate string_utils;
-extern crate tenkit2;
+// extern crate tenkit2;
 extern crate vector_utils;
 
 use debruijn::{dna_string::*, *};
+use fasta::*;
 use flate2::read::MultiGzDecoder;
 use pretty_trace::*;
 use process::Command;
@@ -107,7 +109,7 @@ use std::{
     *,
 };
 use string_utils::*;
-use tenkit2::io::*;
+// use tenkit2::io::*;
 use vector_utils::*;
 
 fn header_from_gene(gene: &str, is_utr: bool, record: &mut usize, source: &str) -> String {

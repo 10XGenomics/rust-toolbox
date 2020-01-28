@@ -27,6 +27,7 @@
 //     > /mnt/park1/compbio/jaffe/vdj_refs/mouse/fasta/supp_regions.fa [TEMPORARY!]
 
 extern crate debruijn;
+extern crate exons;
 extern crate fasta;
 extern crate pretty_trace;
 extern crate string_utils;
@@ -36,7 +37,7 @@ extern crate string_utils;
 
 use debruijn::{dna_string::*, *};
 use fasta::*;
-use load_exons::*;
+use exons::*;
 use pretty_trace::*;
 use std::{collections::HashMap, env};
 use string_utils::TextUtils;
