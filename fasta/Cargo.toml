@@ -9,3 +9,4 @@ description = "Some tools that are 'internal' for now because they are insuffici
 debruijn = { git = "https://github.com/10XGenomics/rust-debruijn.git" }
 flate2 = "1.0.12"
 io_utils = "0.2.4"
+string_utils = "0.1.0"

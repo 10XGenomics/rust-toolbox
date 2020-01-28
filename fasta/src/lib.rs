@@ -5,6 +5,7 @@
 extern crate debruijn;
 extern crate flate2;
 extern crate io_utils;
+extern crate string_utils;
 
 use debruijn::dna_string::*;
 use flate2::read::MultiGzDecoder;
@@ -13,6 +14,8 @@ use std::{
     fs::File,
     io::{prelude::*, BufReader},
 };
+use std::process::Command;
+use string_utils::*;
 
 // This allows either a fasta file or a gzipped one.  This APPENDS to the
 // dv and headers vectors.
@@ -125,4 +128,28 @@ pub fn read_fasta_headers( f: &String, headers: &mut Vec<String> ) {
             }
         }
     }
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// LOAD GENBANK ACCESSION
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+pub fn load_genbank_accession(accession: &String, bases: &mut DnaString) {
+    let link = format!(
+        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/\
+         efetch.fcgi?db=nucleotide&amp;id={}&amp;rettype=fasta",
+        accession
+    );
+    let o = Command::new("csh")
+        .arg("-c")
+        .arg(format!("curl \"{}\"", link))
+        .output()
+        .expect("failed to execute curl command");
+    let fasta = String::from_utf8(o.stdout).unwrap();
+    let mut fasta = fasta.after("\n").to_string();
+    // ◼ The following assert should not be necessary: the DnaString constructor
+    // ◼ should gag if it gets nonsense input.
+    assert!(!fasta.contains("moved"));
+    fasta = fasta.replace("\n", "");
+    *bases = DnaString::from_dna_string(&fasta);
 }
