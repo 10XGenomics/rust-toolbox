@@ -6,6 +6,7 @@ members = [
     "ansi_escape",
     "binary_vec_io",
     "equiv",
+    "exons",
     "fasta",
     "graph_simple",
     "hyper",
