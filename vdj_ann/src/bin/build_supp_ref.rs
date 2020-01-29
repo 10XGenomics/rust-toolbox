@@ -18,13 +18,12 @@
 //
 // Pile of additional examples: to work through.
 //
-// USAGE:
+// USAGE (ASSUMING YOU ARE RUNNING FROM TOP LEVEL OF REPO):
 //
-// build_supp_ref HUMAN
-//     > /mnt/park1/compbio/jaffe/vdj_refs/human/fasta/supp_regions.fa [TEMPORARY!]
+// build_supp_ref HUMAN > vdj_ann/vdj_refs/human/supp_regions.fa
+// build_supp_ref MOUSE > vdj_ann/vdj_refs/mouse/supp_regions.fa
 //
-// build_supp_ref MOUSE
-//     > /mnt/park1/compbio/jaffe/vdj_refs/mouse/fasta/supp_regions.fa [TEMPORARY!]
+// And these also need to go into the references on /mnt/opt and possibly /mnt/test.
 
 extern crate debruijn;
 extern crate exons;
