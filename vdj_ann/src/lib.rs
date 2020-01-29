@@ -10,8 +10,8 @@ extern crate fasta;
 extern crate hyper;
 #[macro_use]
 extern crate io_utils;
-extern crate kmer_lookup;
 extern crate itertools;
+extern crate kmer_lookup;
 extern crate serde;
 extern crate serde_json;
 extern crate stats_utils;

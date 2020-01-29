@@ -145,7 +145,7 @@ pub fn is_valid(
         let mut misordered = false;
         for j1 in 0..ann.len() {
             let t1 = ann[j1].2 as usize;
-            for j2 in j1+1..ann.len() {
+            for j2 in j1 + 1..ann.len() {
                 let t2 = ann[j2].2 as usize;
                 if refdata.is_j(t1) && refdata.is_v(t2) {
                     misordered = true;
@@ -232,7 +232,7 @@ pub fn junction_supp(
 ) {
     let mut jseq = DnaString::new();
     junction_seq(&tig, refdata, &ann, &mut jseq);
-    junction_supp_core( reads, x, umi_id, &jseq, jsupp );
+    junction_supp_core(reads, x, umi_id, &jseq, jsupp);
 }
 
 pub fn junction_supp_core(

@@ -1240,10 +1240,14 @@ pub fn annotate_seq_core(
                 && err1 == err2
                 && t1 < t2
             {
-                if refdata.name[t1] == "TRBC1".to_string() && refdata.name[t2] == "TRBC2".to_string() {
+                if refdata.name[t1] == "TRBC1".to_string()
+                    && refdata.name[t2] == "TRBC2".to_string()
+                {
                     continue;
                 }
-                if refdata.name[t2] == "TRBC1".to_string() && refdata.name[t1] == "TRBC2".to_string() {
+                if refdata.name[t2] == "TRBC1".to_string()
+                    && refdata.name[t1] == "TRBC2".to_string()
+                {
                     continue;
                 }
                 win1 = true;
@@ -2337,8 +2341,8 @@ pub struct ContigAnnotation {
     // raw data for the contig
     pub barcode: String,     // the barcode
     pub contig_name: String, // name of the contig
-    pub sequence: String,        // nucleotide sequence for contig
-    pub quals: String,           // contig quality scores
+    pub sequence: String,    // nucleotide sequence for contig
+    pub quals: String,       // contig quality scores
 
     // contig support
     read_count: usize, // number of reads assigned to contig
@@ -2366,10 +2370,10 @@ pub struct ContigAnnotation {
     info: HashMap<String, String>,           // {} initially, may be filled in later
 
     // state of the contig
-    pub high_confidence: bool,        // declared high confidence?
-    pub is_cell: bool,                // was the barcode declared a cell?
+    pub high_confidence: bool,    // declared high confidence?
+    pub is_cell: bool,            // was the barcode declared a cell?
     pub productive: Option<bool>, // productive?  (null means not full length)
-    pub filtered: bool,               // true and never changed (unused field)
+    pub filtered: bool,           // true and never changed (unused field)
 }
 
 impl ContigAnnotation {

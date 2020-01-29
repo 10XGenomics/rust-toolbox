@@ -93,8 +93,8 @@ impl<'a> RefData {
             &mut refdata,
             &path_contents,
             &String::new(),
-            true,  // is_tcr
-            true,  // is_bcr
+            true, // is_tcr
+            true, // is_bcr
             None,
         );
         refdata
@@ -110,8 +110,8 @@ impl<'a> RefData {
             &mut refdata,
             &path_contents,
             &String::new(),
-            true,  // is_tcr
-            true,  // is_bcr
+            true, // is_tcr
+            true, // is_bcr
             Some(ids_to_use),
         );
         refdata
@@ -241,7 +241,11 @@ pub fn make_vdj_ref_data_core(
     if *extended_ref_fasta != String::new() {
         let mut refs2 = Vec::<DnaString>::new();
         let mut rheaders2 = Vec::<String>::new();
-        read_fasta_contents_into_vec_dna_string_plus_headers(extended_ref_fasta, &mut refs2, &mut rheaders2);
+        read_fasta_contents_into_vec_dna_string_plus_headers(
+            extended_ref_fasta,
+            &mut refs2,
+            &mut rheaders2,
+        );
         refs.append(&mut refs2);
         rheaders.append(&mut rheaders2);
         // ◼ Note not appending to refdata.name.  This may be a bug.
@@ -294,12 +298,16 @@ pub fn make_vdj_ref_data(
         }
     }
     if imgt && species == "human" {
-        refx = read_to_string_safe( "/mnt/opt/refdata_cellranger/vdj/\
-            vdj_IMGT_20170916-2.1.0/fasta/regions.fa" );
+        refx = read_to_string_safe(
+            "/mnt/opt/refdata_cellranger/vdj/\
+             vdj_IMGT_20170916-2.1.0/fasta/regions.fa",
+        );
     }
     if imgt && species == "mouse" {
-        refx = read_to_string_safe( "/mnt/opt/refdata_cellranger/vdj/\
-            vdj_IMGT_mouse_20180723-2.2.0/fasta/regions.fa" );
+        refx = read_to_string_safe(
+            "/mnt/opt/refdata_cellranger/vdj/\
+             vdj_IMGT_mouse_20180723-2.2.0/fasta/regions.fa",
+        );
     }
     if refx.len() == 0 {
         panic!("Reference file has zero length.");
