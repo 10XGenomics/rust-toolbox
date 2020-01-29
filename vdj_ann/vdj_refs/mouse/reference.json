@@ -1,0 +1,10 @@
+{
+    "fasta_hash": "fa41f07301a7535c2bfa5edf469ca7f1e85b5bd4a7e3fa4b8ac0cb08552fe04e",
+    "genomes": "vdj_GRCm38_alts_ensembl-3.1.0.gz",
+    "gtf_hash": "ab158c24eefe033c8f501bed57bde9f80da71f33a8945724af4d7be2ef2054ee",
+    "input_fasta_files": "release-94/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.toplevel.fa",
+    "input_gtf_files": "release-94/gtf/mus_musculus/Mus_musculus.GRCm38.94.gtf",
+    "mkref_version": "",
+    "type": "V(D)J Reference",
+    "version": "3.1.0"
+}

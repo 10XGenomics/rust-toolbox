@@ -23,11 +23,8 @@
 // 2. Create reference files:
 //    build_vdj_ref HUMAN
 //    build_vdj_ref MOUSE
+//    *** These must be run from the root of the repo! ***
 //    You don't need to do this unless you're changing this code.
-//    Writes to /mnt/park1/compbio/$USER/vdj_refs, treated as a temporary staging
-//    area.  At the moment this only works from terrestrial servers!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//
-//    You also need to update the files in cellranger/lib/rust/vdj_ann/vdj_refs!
 //
 //    These files get ultimately moved to:
 //    /mnt/opt/refdata_cellranger/vdj/
@@ -43,7 +40,7 @@
 //
 //    Experimental (assuming the right files have been downloaded from ensembl):
 //    build_vdj_ref BALBC
-//        > /mnt/park1/compbio/$USER/vdj_refs/balbc/fasta/regions.fa [TEMPORARY!]
+//    (won't work now because will try to write to a directory that doesn't exist)
 //    However, this works poorly.  Many genes are missing.  Here are a few examples:
 //
 //    gene            in whole-genome   in BALB/c data
@@ -413,9 +410,9 @@ fn main() {
         }
     }
 
-    // Define root output directory.  This is set for each user.
+    // Define root output directory.
 
-    let root = format!("/mnt/park1/compbio/{}/vdj_refs", env::var("USER").unwrap());
+    let root = format!("vdj_ann/vdj_refs");
     let mut out = open_for_write_new![&format!("{}/{}/fasta/regions.fa", root, species)];
 
     // Define release.  If this is ever changed, the effect on the fasta output
