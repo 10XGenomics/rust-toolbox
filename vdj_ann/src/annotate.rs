@@ -1229,7 +1229,9 @@ pub fn annotate_seq_core(
                 fwriteln!(log, "win1 = {}, win2 = {}", win1, win2);
             }
 
-            // Pick "randomly" in case of tie.
+            // Pick "randomly" in case of tie.  Unless we're comparing TRBC1 to TRBC2, and in
+            // that case, do nothing.  This is needed because of the handling below of these
+            // segments.
 
             if outside1 == 0.0
                 && outside2 == 0.0
@@ -1238,6 +1240,12 @@ pub fn annotate_seq_core(
                 && err1 == err2
                 && t1 < t2
             {
+                if refdata.name[t1] == "TRBC1".to_string() && refdata.name[t2] == "TRBC2".to_string() {
+                    continue;
+                }
+                if refdata.name[t2] == "TRBC1".to_string() && refdata.name[t1] == "TRBC2".to_string() {
+                    continue;
+                }
                 win1 = true;
             }
 
