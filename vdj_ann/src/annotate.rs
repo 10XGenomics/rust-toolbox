@@ -1487,6 +1487,19 @@ pub fn annotate_seq_core(
                     break;
                 }
             }
+
+            if mis1 == mis2 {
+                if refdata.name[t1] == "TRBC1".to_string()
+                    && refdata.name[t2] == "TRBC2".to_string()
+                {
+                    continue;
+                }
+                if refdata.name[t2] == "TRBC1".to_string()
+                    && refdata.name[t1] == "TRBC2".to_string()
+                {
+                    continue;
+                }
+            }
             if mis1 < mis2 || (mis1 == mis2 && t1 < t2) {
                 to_delete[i2] = true;
             }
