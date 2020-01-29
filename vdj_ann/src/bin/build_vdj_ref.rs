@@ -87,7 +87,6 @@ extern crate io_utils;
 extern crate pretty_trace;
 extern crate sha2;
 extern crate string_utils;
-// extern crate tenkit2;
 extern crate vector_utils;
 
 use debruijn::{dna_string::*, *};
@@ -106,7 +105,6 @@ use std::{
     *,
 };
 use string_utils::*;
-// use tenkit2::io::*;
 use vector_utils::*;
 
 fn header_from_gene(gene: &str, is_utr: bool, record: &mut usize, source: &str) -> String {
@@ -739,11 +737,11 @@ fn main() {
              GGTCTCCGGGTAAA",
         ));
 
-        // Remove extra first base from some constant regions.
-        // (NOW IT APPEARS THAT THIS WAS A MISTAKE.)
+        // Trim TRAJ49.
 
-        // left_trims.push(("TRBC1", 1));
-        // left_trims.push(("TRBC2", 1));
+        // Remove extra first base from some constant regions.
+
+        right_trims.push(("TRAJ49", 3));
 
     }
     if species == "balbc" {}
