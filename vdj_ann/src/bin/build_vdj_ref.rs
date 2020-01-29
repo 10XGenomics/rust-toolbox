@@ -740,9 +740,10 @@ fn main() {
         ));
 
         // Remove extra first base from some constant regions.
+        // (NOW IT APPEARS THAT THIS WAS A MISTAKE.)
 
-        left_trims.push(("TRBC1", 1));
-        left_trims.push(("TRBC2", 1));
+        // left_trims.push(("TRBC1", 1));
+        // left_trims.push(("TRBC2", 1));
 
     }
     if species == "balbc" {}
