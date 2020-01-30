@@ -702,7 +702,8 @@ pub fn annotate_seq_core(
                     if !(start < stop) {
                         continue;
                     }
-                    over += stop - start;
+                    over += stop;
+                    over -= start;
                     for x in annx[u1].4.iter() {
                         if *x >= start && *x < stop {
                             m1 += 1;
