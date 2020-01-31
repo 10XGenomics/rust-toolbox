@@ -674,7 +674,7 @@ pub fn annotate_seq_core(
                 tlen2 += annx[ts[k].1].1;
             }
             let (mut m1, mut m2) = (0, 0);
-            let mut over = 0;
+            let mut over = 0 as i64;
             let mut offsets1 = Vec::<i32>::new();
             let mut offsets2 = Vec::<i32>::new();
             for k1 in i1..j1 {
@@ -702,8 +702,8 @@ pub fn annotate_seq_core(
                     if !(start < stop) {
                         continue;
                     }
-                    over += stop;
-                    over -= start;
+                    over += stop as i64;
+                    over -= start as i64;
                     for x in annx[u1].4.iter() {
                         if *x >= start && *x < stop {
                             m1 += 1;
