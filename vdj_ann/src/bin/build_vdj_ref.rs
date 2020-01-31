@@ -739,9 +739,11 @@ fn main() {
 
         // Trim TRAJ49.
 
-        // Remove extra first base from some constant regions.
-
         right_trims.push(("TRAJ49", 3));
+
+        // Remove extra first base from a constant region.
+
+        left_trims.push(("IGLC2", 1));
 
     }
     if species == "balbc" {}
