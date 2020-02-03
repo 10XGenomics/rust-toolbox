@@ -418,14 +418,15 @@ fn main() {
     // Note that source2 depends on the cellranger version!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     let release = 94;
+    let version = "4.0.0";
     let source: String;
     let source2: String;
     if species == "human" {
         source = format!("GRCh38-release{}", release);
-        source2 = "vdj_GRCh38_alts_ensembl-4.0.0".to_string();
+        source2 = format!("vdj_GRCh38_alts_ensembl-{}", version);
     } else if species == "mouse" {
         source = format!("GRCm38-release{}", release);
-        source2 = "vdj_GRCm38_alts_ensembl-3.1.0".to_string();
+        source2 = format!("vdj_GRCm38_alts_ensembl-{}", version);
     } else {
         source = format!("BALB_cJ_v1.{}", release);
         source2 = source.clone();
@@ -874,7 +875,6 @@ fn main() {
 
     // Generate reference.json.  Note version number.
 
-    let version = "3.1.0";
     let mut json = open_for_write_new![&format!("{}/{}/reference.json", root, species)];
     fwriteln!(json, "{{");
     let mut sha256 = Sha256::new();
