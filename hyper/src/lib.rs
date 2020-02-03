@@ -794,7 +794,7 @@ impl Hyper {
                 if use_reads {
                     for i in 0..self.ids[e].len() {
                         let id = self.ids[e][i];
-                        k += ((i + 1) * id as usize * id as usize) as u64;
+                        k = k.wrapping_add(((i + 1) * id as usize * id as usize) as u64);
                     }
                 }
                 r = r.wrapping_mul(k);
