@@ -503,6 +503,7 @@ fn main() {
         left_trims.push(("TRBV20/OR9-2", 57));
         left_trims.push(("IGHA1", 1));
         left_trims.push(("IGHA2", 1));
+        left_trims.push(("IGHE", 1));
         left_trims.push(("IGHG1", 1));
         left_trims.push(("IGHG2", 1));
         left_trims.push(("IGHG4", 1));
