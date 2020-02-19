@@ -352,6 +352,9 @@ impl PrettyTrace {
     /// printing a traceback (on panic).  This could be useful if you want to run a bunch of
     /// tests, some of which fail, but you want to see the outcome of all of them.  Note that
     /// <code>101</code> is the standard exit status for rust panics.
+    ///
+    /// The downside of <code>noexit</code> is that you may get multiple tracebacks if your
+    /// code fails in a parallel loop.
 
     pub fn noexit(&mut self) -> &mut PrettyTrace {
         self.noexit = true;
@@ -948,7 +951,9 @@ fn force_pretty_trace_fancy(
                 .unwrap();
         }
 
-        // Exit.
+        // Exit.  Turning this off would seem to have no effect, but this is not the case
+        // in general.  If your code fails in a parallel loop, without the exit, you may
+        // be flooded with tracebacks, one per thread.
 
         if !noexit {
             std::process::exit(101);
