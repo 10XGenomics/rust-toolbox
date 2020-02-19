@@ -154,7 +154,7 @@
 //!   of this behavior.
 //!
 //! ◼ The code will only work properly if you have set <code>debug = true</code>
-//!   in your top-level <code>Cargo.toml</code>.  Using <code>debug = 1</code> 
+//!   in your top-level <code>Cargo.toml</code>.  Using <code>debug = 1</code>
 //!   will not work.
 //!
 //! ◼ Profile mode only sees the main thread.  This seems intrinsic to the
@@ -169,9 +169,9 @@
 //!
 //! ◼ Profile mode tests for whether it is inside the allocator by comparing to a fixed
 //!   list of symbols such as <code>_int_free</code>.  This list could be incomplete,
-//!   or could become incomplete.  When it is incomplete, typically what you'll see is that 
-//!   the profiling process is killed.  Generally what is missing from the list can be 
-//!   determined by setting <code>haps_debug()</code>, and looking at the trace right before 
+//!   or could become incomplete.  When it is incomplete, typically what you'll see is that
+//!   the profiling process is killed.  Generally what is missing from the list can be
+//!   determined by setting <code>haps_debug()</code>, and looking at the trace right before
 //!   the process was killed.  Under development, this was needed once over a one year period.
 //!
 //! ◼ Ideally out-of-memory events would be caught and converted to panics so
@@ -316,8 +316,17 @@ impl PrettyTrace {
             );
         } else {
             let tm = new_thread_message();
-            force_pretty_trace_fancy(full_file, fd, self.exit_message.clone(), &tm, &haps, 
-                self.ctrlc, self.ctrlc_debug, self.haps_debug, self.noexit);
+            force_pretty_trace_fancy(
+                full_file,
+                fd,
+                self.exit_message.clone(),
+                &tm,
+                &haps,
+                self.ctrlc,
+                self.ctrlc_debug,
+                self.haps_debug,
+                self.noexit,
+            );
         }
     }
 
@@ -340,7 +349,7 @@ impl PrettyTrace {
         self.ctrlc_debug = true;
         self
     }
-    
+
     /// Turn on some debugging for profiling.  For development purposes.
 
     pub fn haps_debug(&mut self) -> &mut PrettyTrace {
@@ -504,12 +513,12 @@ lazy_static! {
 // names, and it is hard to believe that this works, but it appears to do so.
 
 fn test_in_allocator() -> bool {
-    let mut verbose =  false;
+    let mut verbose = false;
     if HAPS_DEBUG.load(SeqCst) {
         verbose = true;
     }
     if verbose {
-        eprintln!( "\nTESTING FOR ALLOCATOR" );
+        eprintln!("\nTESTING FOR ALLOCATOR");
     }
     let mut in_alloc = false;
     // The following lock line (copied from the Backtrace crate) doesn't
@@ -519,12 +528,12 @@ fn test_in_allocator() -> bool {
         resolve(frame.ip() as *mut _, |symbol| {
             if verbose && in_alloc {
                 // For unknown reasons, this happens on a mac.
-                eprintln!( "should not be here" );
+                eprintln!("should not be here");
             }
             if verbose {
-                eprintln!( "symbol name = {:?}", symbol.name() );
+                eprintln!("symbol name = {:?}", symbol.name());
                 if symbol.name().is_some() {
-                    eprintln!( "= {}", symbol.name().unwrap().as_str().unwrap() );
+                    eprintln!("= {}", symbol.name().unwrap().as_str().unwrap());
                 }
             }
             if let Some(x) = symbol.name() {
@@ -542,7 +551,7 @@ fn test_in_allocator() -> bool {
                     || x.as_str().unwrap().starts_with("pthread_cond_wait")
                 {
                     if verbose {
-                        eprintln!( "in allocator" );
+                        eprintln!("in allocator");
                     }
                     in_alloc = true;
                     // break;
@@ -841,7 +850,7 @@ fn force_pretty_trace_fancy(
         };
         let mut em = String::new();
         if exit_message.is_some() {
-            em = format!( "{}\n\n", exit_message.as_ref().unwrap() );
+            em = format!("{}\n\n", exit_message.as_ref().unwrap());
         }
         let msg = match info.location() {
             Some(location) => {
@@ -891,9 +900,36 @@ fn force_pretty_trace_fancy(
         }
 
         // Now print stuff.  Package as a single print line to prevent
-        // interweaving if multiple threads panic.
+        // interweaving if multiple threads panic.  Also check for read permission on the
+        // executable.  Not having that would likely result in a truncated traceback.
 
         let mut out = format!("\n{}\n\n", &msg);
+        let ex = std::env::current_exe();
+        if ex.is_err() {
+            out += &format!(
+                "\nIt was not possible to get the path of your executable.\n\
+                 This may result in a defective traceback.\n\n"
+            );
+        } else {
+            let ex = ex.unwrap();
+            let ex = ex.to_str();
+            if ex.is_none() {
+                out += &format!(
+                    "\nThe path of your executable could not be converted into\n\
+                     a string.  This is weird and might result in a defective traceback.\n\n"
+                );
+            } else {
+                let ex = ex.unwrap();
+                let f = File::open(&ex);
+                if f.is_err() {
+                    out += &format!(
+                        "\nYour executable file could not be opened for reading.\n\
+                         This might be because it does not have read permission set for you.\n\
+                         This may result in a defective traceback.\n\n"
+                    );
+                }
+            }
+        }
         out += &all_out;
         out += &em;
         eprint!("{}", out);
@@ -1297,8 +1333,7 @@ mod tests {
 
         // State what we're doing.
 
-        let bar =
-            "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓";
+        let bar = "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓";
         println!("\n{}", bar);
         println!("DELIBERATELY PROVOKING A PANIC USING A CTRL-C");
         print!("{}", bar);
