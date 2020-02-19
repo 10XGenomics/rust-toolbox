@@ -907,25 +907,25 @@ fn force_pretty_trace_fancy(
         let ex = std::env::current_exe();
         if ex.is_err() {
             out += &format!(
-                "\nIt was not possible to get the path of your executable.\n\
-                 This may result in a defective traceback.\n\n"
+                "█ WARNING.  It was not possible to get the path of your executable.\n\
+                 █ This may result in a defective traceback.\n\n"
             );
         } else {
             let ex = ex.unwrap();
             let ex = ex.to_str();
             if ex.is_none() {
                 out += &format!(
-                    "\nThe path of your executable could not be converted into\n\
-                     a string.  This is weird and might result in a defective traceback.\n\n"
+                    "█ WARNING.  The path of your executable could not be converted into\n\
+                     █ a string.  This is weird and might result in a defective traceback.\n\n"
                 );
             } else {
                 let ex = ex.unwrap();
                 let f = File::open(&ex);
                 if f.is_err() {
                     out += &format!(
-                        "\nYour executable file could not be opened for reading.\n\
-                         This might be because it does not have read permission set for you.\n\
-                         This may result in a defective traceback.\n\n"
+                        "█ WARNING.  Your executable file could not be opened for reading.\n\
+                         █ This might be because it does not have read permission set for you.\n\
+                         █ This may result in a defective traceback.\n\n"
                     );
                 }
             }
