@@ -44,6 +44,10 @@ pub fn emit_blue_escape(log: &mut Vec<u8>) {
     log.append(&mut b"[38;5;12m".to_vec());
 }
 
+pub fn emit_green_escape(log: &mut Vec<u8>) {
+    log.append(&mut b"[01;32m".to_vec());
+}
+
 pub fn emit_bold_escape(log: &mut Vec<u8>) {
     log.append(&mut b"[01m".to_vec());
 }
