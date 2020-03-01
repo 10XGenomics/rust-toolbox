@@ -132,6 +132,10 @@ impl MirrorSparseMatrix {
         MirrorSparseMatrix { x: v }
     }
 
+    pub fn initialized(&self) -> bool {
+        !self.x.is_empty()
+    }
+
     fn header_size() -> usize {
         32  // text header
         + 4 // code version
