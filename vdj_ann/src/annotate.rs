@@ -1419,7 +1419,7 @@ pub fn annotate_seq_core(
             for m in start..=stop - (r.len() as i32) {
                 let mut mismatch = false;
                 for x in 0..r.len() {
-                    if r.get(x) != b.get((start + m) as usize) {
+                    if r.get(x) != b.get((start + x) as usize) {
                         mismatch = true;
                         break;
                     }
