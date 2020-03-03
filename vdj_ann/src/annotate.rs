@@ -1421,7 +1421,8 @@ pub fn annotate_seq_core(
             for m in start..=stop - (r.len() as i32) {
                 let mut mismatch = false;
                 for x in 0..r.len() {
-                    if r.get(x) != b.get((start + x as i32) as usize) {
+                    if r.get(x) != b.get((m + x as i32) as usize) {
+                        if *t == 30 && m == 559 { println!( "mismatch at {}, {}", x, start + x as i32 ); } // XXXXXXXXXXX
                         mismatch = true;
                         break;
                     }
