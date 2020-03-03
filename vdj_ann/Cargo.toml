@@ -13,7 +13,7 @@ fasta = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
 flate2 = "1.0.12"
 hyper = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
 io_utils = "0.2.4"
-itertools = "0.7.0"
+itertools = "0.8"
 kmer_lookup = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
 pretty_trace = "0.1.1"
 serde = "1.0.90"

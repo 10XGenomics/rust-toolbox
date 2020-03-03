@@ -7,5 +7,5 @@ description = "Some tools that are 'internal' for now because they are insuffici
 
 [dependencies]
 io_utils = "0.2.3"
-itertools = "0.7.0"
+itertools = "0.8"
 string_utils = "0.1.0"
