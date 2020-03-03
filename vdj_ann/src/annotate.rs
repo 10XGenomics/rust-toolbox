@@ -1414,7 +1414,9 @@ pub fn annotate_seq_core(
     if v && !d && j {
         let start = max(0, vstop - VJTRIM);
         let stop = min(b.len() as i32, jstart + VJTRIM);
+        printme!( start, stop ); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         'outer: for t in refdata.ds.iter() {
+            printme!(t); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             let r = &refdata.refs[*t];
             for m in start..=stop - (r.len() as i32) {
                 let mut mismatch = false;
@@ -1425,6 +1427,7 @@ pub fn annotate_seq_core(
                     }
                 }
                 if !mismatch {
+                    println!("match!"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
                     annx.push((m, r.len() as i32, *t as i32, 0, Vec::new()));
                     annx.sort();
                     break 'outer;
