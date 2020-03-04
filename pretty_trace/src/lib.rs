@@ -1341,7 +1341,11 @@ mod tests {
         // cargo test --release -- --nocapture
 
         let message = "Dang it, you found a bug!  Please call us at (999) 123-4567.";
-        PrettyTrace::new().exit_message(&message).ctrlc().fd(pipefd.1).on();
+        PrettyTrace::new()
+            .exit_message(&message)
+            .ctrlc()
+            .fd(pipefd.1)
+            .on();
         // PrettyTrace::new().ctrlc().fd(pipefd.1).on();
 
         // Create stuff needed for computation we're going to interrupt.
