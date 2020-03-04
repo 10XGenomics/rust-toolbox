@@ -13,8 +13,8 @@ use flate2::read::MultiGzDecoder;
 use serde::{de::DeserializeOwned, Serialize};
 use std::ffi::OsStr;
 use std::fs;
+use std::io::{BufRead, BufReader};
 use std::{fmt::Debug, fs::File, io::prelude::*, path::Path};
-use std::io::{BufRead,BufReader};
 use string_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -300,6 +300,8 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 pub fn read_to_string_safe<P: AsRef<Path>>(path: P) -> String {
-    fs::read_to_string(&path).expect(&format!("Could not open file \"{}\".",
-        path.as_ref().to_str().unwrap()))
+    fs::read_to_string(&path).expect(&format!(
+        "Could not open file \"{}\".",
+        path.as_ref().to_str().unwrap()
+    ))
 }

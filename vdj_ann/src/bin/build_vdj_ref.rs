@@ -746,7 +746,6 @@ fn main() {
         // Remove extra first base from a constant region.
 
         left_trims.push(("IGLC2", 1));
-
     }
     if species == "balbc" {}
 

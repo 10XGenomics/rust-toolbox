@@ -8,16 +8,14 @@ extern crate string_utils;
 
 use io_utils::*;
 use itertools::Itertools;
-use std::{
-    cmp::{min,max},
-};
+use std::cmp::{max, min};
 use string_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 // Package characters with ANSI escape codes that come before them.
 
-pub fn package_characters_with_escapes( c: &Vec<u8> ) -> Vec<Vec<u8>> {
+pub fn package_characters_with_escapes(c: &Vec<u8>) -> Vec<Vec<u8>> {
     let mut x = Vec::<Vec<u8>>::new();
     let mut escaped = false;
     let mut package = Vec::<u8>::new();
@@ -39,7 +37,7 @@ pub fn package_characters_with_escapes( c: &Vec<u8> ) -> Vec<Vec<u8>> {
     x
 }
 
-fn package_characters_with_escapes_char( c: &Vec<char> ) -> Vec<Vec<char>> {
+fn package_characters_with_escapes_char(c: &Vec<char>) -> Vec<Vec<char>> {
     let mut x = Vec::<Vec<char>>::new();
     let mut escaped = false;
     let mut package = Vec::<char>::new();
@@ -130,11 +128,11 @@ pub fn visible_width(s: &str) -> usize {
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-        
+
 // Print out a matrix, with given separation between columns.  Rows of the matrix
 // may contain arbitrary UTF-8 and some escape sequences.  Put the entire thing in a box, with
-// extra vertical bars.  The argument justify consists of symbols l and r, denoting 
-// left and right justification for given columns, respectively, and the symbol | to 
+// extra vertical bars.  The argument justify consists of symbols l and r, denoting
+// left and right justification for given columns, respectively, and the symbol | to
 // denote a vertical bar.
 //
 // There is no separation printed on the far left or far right.
@@ -144,7 +142,7 @@ pub fn visible_width(s: &str) -> usize {
 // Entries that begin with a backslash are reserved for future features.
 // Symbols other than l or r or | in "justify" are reserved for future features.
 //
-// An entry may be followed on the right by one more entries whose contents are 
+// An entry may be followed on the right by one more entries whose contents are
 // exactly "\ext".  In that case the entries are treated as multi-column.  Padding
 // is inserted as needed on the "right of the multicolumn".
 //
@@ -172,30 +170,33 @@ pub fn print_tabular_vbox(
     let mut count = 0 as isize;
     for i in 0..justify.len() {
         if justify[i] == b'|' {
-            assert!( count > 0 );
+            assert!(count > 0);
             if count >= ncols as isize {
-                eprintln!( "\nposition of | in justify string is illegal" );
-                eprintme!( count, ncols );
+                eprintln!("\nposition of | in justify string is illegal");
+                eprintme!(count, ncols);
             }
-            assert!( count < ncols as isize );
-            vert[ (count-1) as usize ] = true;
+            assert!(count < ncols as isize);
+            vert[(count - 1) as usize] = true;
         } else {
-            just.push( justify[i] );
+            just.push(justify[i]);
             count += 1;
         }
     }
     if just.len() != ncols {
-        eprintln!( "\nError.  Your table has {} columns but the number of \
-            l or r symbols in justify is {}.\nThese numbers should be equal.",
-            ncols, just.len() );
-        eprintln!( "justify = {}", strme(&justify) );
-        assert_eq!( just.len(), ncols );
+        eprintln!(
+            "\nError.  Your table has {} columns but the number of \
+             l or r symbols in justify is {}.\nThese numbers should be equal.",
+            ncols,
+            just.len()
+        );
+        eprintln!("justify = {}", strme(&justify));
+        assert_eq!(just.len(), ncols);
     }
     let mut maxcol = vec![0; ncols];
     let mut ext = vec![0; ncols];
     for i in 0..rrr.len() {
         for j in 0..rrr[i].len() {
-            if j < rrr[i].len() - 1 && rrr[i][j+1] == "\\ext".to_string() {
+            if j < rrr[i].len() - 1 && rrr[i][j + 1] == "\\ext".to_string() {
                 continue;
             }
             if rrr[i][j] == "\\ext".to_string() || rrr[i][j] == "\\hline".to_string() {
@@ -205,16 +206,18 @@ pub fn print_tabular_vbox(
         }
     }
     if debug_print {
-        println!( "maxcol = {}", maxcol.iter().format(",") );
+        println!("maxcol = {}", maxcol.iter().format(","));
     }
 
     // Add space according to ext entries.
 
     for i in 0..rrr.len() {
         for j in 0..rrr[i].len() {
-            if j < rrr[i].len() - 1 && rrr[i][j+1] == "\\ext".to_string()
-                && rrr[i][j] != "\\ext".to_string() {
-                let mut k = j+1;
+            if j < rrr[i].len() - 1
+                && rrr[i][j + 1] == "\\ext".to_string()
+                && rrr[i][j] != "\\ext".to_string()
+            {
+                let mut k = j + 1;
                 while k < rrr[i].len() {
                     if rrr[i][k] != "\\ext".to_string() {
                         break;
@@ -225,7 +228,7 @@ pub fn print_tabular_vbox(
                 let mut have = 0;
                 for l in j..k {
                     have += maxcol[l];
-                    if l < k-1 {
+                    if l < k - 1 {
                         have += sep;
                         if vert[l] {
                             have += sep + 1;
@@ -233,21 +236,26 @@ pub fn print_tabular_vbox(
                     }
                 }
                 if debug_print {
-                    println!( "row {} column {}, have = {}, need = {}", i, j, have, need );
+                    println!("row {} column {}, have = {}, need = {}", i, j, have, need);
                 }
                 if have > need {
                     if debug_print {
-                        println!( "adding {} spaces to right of row {} col {}", have-need, i, j );
+                        println!(
+                            "adding {} spaces to right of row {} col {}",
+                            have - need,
+                            i,
+                            j
+                        );
                     }
                     for _ in need..have {
                         rrr[i][j].push(' ');
                     }
                 } else if need > have {
-                    maxcol[k-1] += need - have;
+                    maxcol[k - 1] += need - have;
                     if debug_print {
-                        println!( "increasing maxcol[{}] to {}", k-1, maxcol[k-1] );
+                        println!("increasing maxcol[{}] to {}", k - 1, maxcol[k - 1]);
                     }
-                    ext[k-1] += need - have;
+                    ext[k - 1] += need - have;
                 }
                 let mut m = 0;
                 for u in 0..rrr.len() {
@@ -266,45 +274,44 @@ pub fn print_tabular_vbox(
 
     // Create top boundary of table.
 
-    log.push( '┌' );
+    log.push('┌');
     for i in 0..ncols {
         let mut n = maxcol[i];
-        if i < ncols-1 {
+        if i < ncols - 1 {
             n += sep;
         }
         for _ in 0..n {
-            log.push( '─' );
+            log.push('─');
         }
         if vert[i] {
-            log.push( '┬' );
+            log.push('┬');
             for _ in 0..sep {
-                log.push( '─' );
+                log.push('─');
             }
         }
     }
-    log.push( '┐' );
-    log.push( '\n' );
+    log.push('┐');
+    log.push('\n');
 
     // Go through the rows.
 
     for i in 0..nrows {
         if debug_print {
-            println!( "now row {} = {}", i, rrr[i].iter().format(",") );
-            println!( "0 - pushing │ onto row {}", i );
+            println!("now row {} = {}", i, rrr[i].iter().format(","));
+            println!("0 - pushing │ onto row {}", i);
         }
-        log.push( '│' );
+        log.push('│');
         for j in 0..min(ncols, rrr[i].len()) {
-
             // Pad entries according to justification.
 
             let mut x = String::new();
             if j >= rrr[i].len() {
                 for _ in 0..maxcol[j] {
-                    x.push( ' ' );
+                    x.push(' ');
                 }
             } else if rrr[i][j] == "\\hline".to_string() {
                 for _ in 0..maxcol[j] {
-                    x.push( '─' );
+                    x.push('─');
                 }
             } else {
                 let r = rrr[i][j].clone();
@@ -312,8 +319,8 @@ pub fn print_tabular_vbox(
                 let mut xlen = 0;
                 if r != "\\ext".to_string() {
                     if just[j] == b'r' {
-                        for _ in rlen..(maxcol[j]-ext[j]) {
-                            x.push( ' ' );
+                        for _ in rlen..(maxcol[j] - ext[j]) {
+                            x.push(' ');
                             xlen += 1;
                         }
                     }
@@ -322,14 +329,14 @@ pub fn print_tabular_vbox(
                         xlen += visible_width(&r);
                     }
                     if just[j] == b'r' {
-                        for _ in (maxcol[j]-ext[j])..maxcol[j] {
-                            x.push( ' ' );
+                        for _ in (maxcol[j] - ext[j])..maxcol[j] {
+                            x.push(' ');
                             xlen += 1;
                         }
                     }
                     if just[j] == b'l' {
                         for _ in xlen..maxcol[j] {
-                            x.push( ' ' );
+                            x.push(' ');
                         }
                     }
                 }
@@ -341,12 +348,12 @@ pub fn print_tabular_vbox(
             // Add separations and separators.
 
             let mut add_sep = true;
-            if j+1 < rrr[i].len() && rrr[i][j+1] == "\\ext".to_string() {
+            if j + 1 < rrr[i].len() && rrr[i][j + 1] == "\\ext".to_string() {
                 add_sep = false;
             }
             let mut jp = j;
-            while jp+1 < rrr[i].len() {
-                if rrr[i][jp+1] != "\\ext".to_string() {
+            while jp + 1 < rrr[i].len() {
+                if rrr[i][jp + 1] != "\\ext".to_string() {
                     break;
                 }
                 jp += 1;
@@ -354,61 +361,61 @@ pub fn print_tabular_vbox(
             if add_sep && jp < ncols - 1 {
                 if rrr[i][j] == "\\hline".to_string() {
                     for _ in 0..sep {
-                        log.push( '─' );
+                        log.push('─');
                     }
                 } else {
                     for _ in 0..sep {
-                        log.push( ' ' );
+                        log.push(' ');
                     }
                 }
             }
-            if vert[j] && rrr[i][j+1] != "\\ext" {
+            if vert[j] && rrr[i][j + 1] != "\\ext" {
                 if debug_print {
-                    println!( "1 - pushing │ onto row {}, j = {}", i, j );
+                    println!("1 - pushing │ onto row {}, j = {}", i, j);
                 }
-                log.push( '│' );
-                if rrr[i][j+1] == "\\hline".to_string() {
+                log.push('│');
+                if rrr[i][j + 1] == "\\hline".to_string() {
                     for _ in 0..sep {
-                        log.push( '─' );
+                        log.push('─');
                     }
                 } else {
                     for _ in 0..sep {
-                        log.push( ' ' );
+                        log.push(' ');
                     }
                 }
             }
         }
         if debug_print {
-            println!( "2 - pushing │ onto row {}", i );
+            println!("2 - pushing │ onto row {}", i);
         }
-        log.push( '│' );
-        log.push( '\n' );
+        log.push('│');
+        log.push('\n');
     }
-    log.push( '└' );
+    log.push('└');
     for i in 0..ncols {
         let mut n = maxcol[i];
-        if i < ncols-1 {
+        if i < ncols - 1 {
             n += sep;
         }
         for _ in 0..n {
-            log.push( '─' );
+            log.push('─');
         }
         if vert[i] {
-            if rrr[rrr.len()-1][i+1] != "\\ext" {
-                log.push( '┴' );
+            if rrr[rrr.len() - 1][i + 1] != "\\ext" {
+                log.push('┴');
             } else {
-                log.push( '─' );
+                log.push('─');
             }
             for _ in 0..sep {
-                log.push( '─' );
+                log.push('─');
             }
         }
     }
-    log.push( '┘' );
-    log.push( '\n' );
+    log.push('┘');
+    log.push('\n');
 
     // Convert into a super-character vec of matrices.  There is one vector entry per line.
-    // In each matrix, an entry is a super_character: a rust character, together with the escape 
+    // In each matrix, an entry is a super_character: a rust character, together with the escape
     // code characters that came before it.
 
     let mut mat = Vec::<Vec<Vec<char>>>::new();
@@ -426,10 +433,10 @@ pub fn print_tabular_vbox(
             }
         }
         if !z.is_empty() {
-           all.push(z);
+            all.push(z);
         }
         for i in 0..all.len() {
-            mat.push( package_characters_with_escapes_char(&all[i]) );
+            mat.push(package_characters_with_escapes_char(&all[i]));
         }
     }
 
@@ -437,17 +444,31 @@ pub fn print_tabular_vbox(
 
     for i in 0..mat.len() {
         for j in 0..mat[i].len() {
-            if j > 0 && mat[i][j-1] == vec!['─'] && mat[i][j] == vec!['│'] && j+1 < mat[i].len() 
-                && mat[i][j+1] == vec!['─'] && i+1 < mat.len() && j < mat[i+1].len()
-                && mat[i+1][j] != vec!['│'] {
+            if j > 0
+                && mat[i][j - 1] == vec!['─']
+                && mat[i][j] == vec!['│']
+                && j + 1 < mat[i].len()
+                && mat[i][j + 1] == vec!['─']
+                && i + 1 < mat.len()
+                && j < mat[i + 1].len()
+                && mat[i + 1][j] != vec!['│']
+            {
                 mat[i][j] = vec!['┴'];
-            } else if j > 0 && mat[i][j-1] == vec!['─'] && mat[i][j] == vec!['│'] 
-                && j+1 < mat[i].len() && mat[i][j+1] == vec!['─'] {
+            } else if j > 0
+                && mat[i][j - 1] == vec!['─']
+                && mat[i][j] == vec!['│']
+                && j + 1 < mat[i].len()
+                && mat[i][j + 1] == vec!['─']
+            {
                 mat[i][j] = vec!['┼'];
-            } else if mat[i][j] == vec!['│'] && j+1 < mat[i].len() && mat[i][j+1] == vec!['─'] {
+            } else if mat[i][j] == vec!['│'] && j + 1 < mat[i].len() && mat[i][j + 1] == vec!['─']
+            {
                 mat[i][j] = vec!['├'];
-            } else if j > 0 && mat[i][j-1] == vec!['─'] && mat[i][j] == vec!['│'] 
-                && ( j+1 == mat[i].len() || mat[i][j+1] != vec!['─'] ) {
+            } else if j > 0
+                && mat[i][j - 1] == vec!['─']
+                && mat[i][j] == vec!['│']
+                && (j + 1 == mat[i].len() || mat[i][j + 1] != vec!['─'])
+            {
                 mat[i][j] = vec!['┤'];
             }
         }
@@ -459,10 +480,10 @@ pub fn print_tabular_vbox(
     for i in 0..mat.len() {
         for j in 0..mat[i].len() {
             for k in 0..mat[i][j].len() {
-                log.push( mat[i][j][k] );
+                log.push(mat[i][j][k]);
             }
         }
-        log.push( '\n' );
+        log.push('\n');
     }
 
     // Finish.
@@ -486,26 +507,36 @@ mod tests {
 
     #[test]
     fn test_print_tabular_vbox() {
-
         // test 1
 
         let mut rows = Vec::<Vec<String>>::new();
-        let row = vec![ "omega".to_string(), 
-            "superduperfineexcellent".to_string(), "\\ext".to_string() ];
+        let row = vec![
+            "omega".to_string(),
+            "superduperfineexcellent".to_string(),
+            "\\ext".to_string(),
+        ];
         rows.push(row);
-        let row = vec![ "woof".to_string(), "snarl".to_string(), "octopus".to_string() ];
+        let row = vec![
+            "woof".to_string(),
+            "snarl".to_string(),
+            "octopus".to_string(),
+        ];
         rows.push(row);
-        let row = vec![ "a".to_string(), "b".to_string(), "c".to_string() ];
+        let row = vec!["a".to_string(), "b".to_string(), "c".to_string()];
         rows.push(row);
-        let row = vec![ "hiccup".to_string(), "tomatillo".to_string(), "ddd".to_string() ];
+        let row = vec![
+            "hiccup".to_string(),
+            "tomatillo".to_string(),
+            "ddd".to_string(),
+        ];
         rows.push(row);
         let mut log = String::new();
         let mut justify = Vec::<u8>::new();
-        justify.push( b'r' );
-        justify.push( b'|' );
-        justify.push( b'l' );
-        justify.push( b'l' );
-        print_tabular_vbox( &mut log, &rows, 2, &justify, false );
+        justify.push(b'r');
+        justify.push(b'|');
+        justify.push(b'l');
+        justify.push(b'l');
+        print_tabular_vbox(&mut log, &rows, 2, &justify, false);
         let answer = "┌────────┬─────────────────────────┐\n\
                       │ omega  │  superduperfineexcellent│\n\
                       │  woof  │  snarl      octopus     │\n\
@@ -513,9 +544,9 @@ mod tests {
                       │hiccup  │  tomatillo  ddd         │\n\
                       └────────┴─────────────────────────┘\n";
         if log != answer {
-            println!( "\ntest 1 failed" );
-            println!( "\nyour answer:\n{}", log );
-            println!( "correct answer:\n{}", answer );
+            println!("\ntest 1 failed");
+            println!("\nyour answer:\n{}", log);
+            println!("correct answer:\n{}", answer);
         }
         if log != answer {
             panic!();
@@ -524,31 +555,30 @@ mod tests {
         // test 2
 
         let mut rows = Vec::<Vec<String>>::new();
-        let row = vec![ "pencil".to_string(), "pusher".to_string() ];
+        let row = vec!["pencil".to_string(), "pusher".to_string()];
         rows.push(row);
-        let row = vec![ "\\hline".to_string(), "\\hline".to_string() ];
+        let row = vec!["\\hline".to_string(), "\\hline".to_string()];
         rows.push(row);
-        let row = vec![ "fabulous pumpkins".to_string(), "\\ext".to_string() ];
+        let row = vec!["fabulous pumpkins".to_string(), "\\ext".to_string()];
         rows.push(row);
         let mut log = String::new();
         let mut justify = Vec::<u8>::new();
-        justify.push( b'l' );
-        justify.push( b'|' );
-        justify.push( b'l' );
-        print_tabular_vbox( &mut log, &rows, 2, &justify, false );
+        justify.push(b'l');
+        justify.push(b'|');
+        justify.push(b'l');
+        print_tabular_vbox(&mut log, &rows, 2, &justify, false);
         let answer = "┌────────┬────────┐\n\
                       │pencil  │  pusher│\n\
                       ├────────┴────────┤\n\
                       │fabulous pumpkins│\n\
                       └─────────────────┘\n";
         if log != answer {
-            println!( "\ntest 2 failed" );
-            println!( "\nyour answer:\n{}", log );
-            println!( "correct answer:\n{}", answer );
+            println!("\ntest 2 failed");
+            println!("\nyour answer:\n{}", log);
+            println!("correct answer:\n{}", answer);
         }
         if log != answer {
             panic!();
         }
-
     }
 }
