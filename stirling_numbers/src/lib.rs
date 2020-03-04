@@ -332,5 +332,4 @@ mod tests {
         assert_eq!(format!("{:.7}", p1), "0.0005953");
         assert_eq!(format!("{:.7}", p2), "0.0005936");
     }
-
 }
