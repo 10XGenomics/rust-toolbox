@@ -1334,6 +1334,11 @@ mod tests {
         // Author: David Jaffe <david.jaffe@10xgenomics.com>
         // Date:   Thu Dec 19 03:04:12 2019 -0800
         // add exit_message(...) to PrettyTrace
+        //
+        // In addition, and connected to this,
+        // cargo test --release
+        // does not work, and instead you need to use
+        // cargo test --release -- --nocapture
 
         let message = "Dang it, you found a bug!  Please call us at (999) 123-4567.";
         PrettyTrace::new().exit_message(&message).ctrlc().fd(pipefd.1).on();
