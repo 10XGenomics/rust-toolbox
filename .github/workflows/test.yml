@@ -32,7 +32,6 @@ jobs:
           path: target
           key: ${{runner.os}}-cargo-target-${{hashFiles('src/**/*.rs')}}
           restore-keys: |
-            ${{runner.os}}-cargo-target-${{hashFiles('Cargo.lock')}}-
             ${{runner.os}}-cargo-target-
       - name: Remove the Cargo target directory
         if: github.ref == 'refs/heads/master'
