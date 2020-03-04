@@ -480,7 +480,7 @@ mod tests {
     // run this test using:
     // cargo test -p tenkit2 test_print_tabular_vbox
 
-    use tables::print_tabular_vbox;
+    use crate::print_tabular_vbox;
 
     // (should add some escape codes)
 
