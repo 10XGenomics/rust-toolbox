@@ -18,7 +18,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry
-          key: ${{runner.os}}-cargo-registry-${{hashFiles('Cargo.lock')}}
+          key: ${{runner.os}}-cargo-registry-${{hashFiles('src/**/*.rs')}}
           restore-keys: ${{runner.os}}-cargo-registry-
       - name: Cache cargo git index
         uses: actions/cache@v1
