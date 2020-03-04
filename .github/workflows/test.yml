@@ -30,7 +30,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: target
-          key: ${{runner.os}}-cargo-target-${{hashFiles('src/**/*.rs')}}
+          key: ${{runner.os}}-cargo-target-${{hashFiles('**/*.rs')}}
           restore-keys: |
             ${{runner.os}}-cargo-target-
       - name: Remove the Cargo target directory
