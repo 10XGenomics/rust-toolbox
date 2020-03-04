@@ -1,6 +1,6 @@
 // Copyright (c) 2019 10X Genomics, Inc. All rights reserved.
 
-// When tested under OS X, this code correctly panics, but the resulting 
+// When tested under OS X, this code correctly panics, but the resulting
 // traceback does not reach the main program.  Interestingly, setting
 // RUST_FULL_TRACE does not help, but commenting out the PrettyTrace line does.
 //

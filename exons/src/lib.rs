@@ -7,12 +7,12 @@ extern crate io_utils;
 extern crate string_utils;
 extern crate vector_utils;
 
+use io_utils::*;
 use std::{
     fs::File,
     io::{BufRead, BufReader},
     *,
 };
-use io_utils::*;
 use string_utils::*;
 use vector_utils::*;
 

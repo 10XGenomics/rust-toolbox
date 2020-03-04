@@ -18,13 +18,13 @@
 // which refers to Wong, B. (2011) Points of View: Color Blindness.  Nature Methods 8:441.
 
 pub fn print_color(s: usize, log: &mut Vec<u8>) {
-    assert!( s <=  6 );
+    assert!(s <= 6);
     if s == 0 {
         log.append(&mut b"[01m[38;5;75m".to_vec());
     } else if s == 1 {
         log.append(&mut b"[01m[38;5;166m".to_vec());
     } else if s == 2 {
-        // At one point this was made bold, which makes it more readable when printed, but 
+        // At one point this was made bold, which makes it more readable when printed, but
         // it's uglier if bold and overall contrast is reduced.
         log.append(&mut b"[38;5;178m".to_vec());
     } else if s == 3 {
@@ -61,11 +61,11 @@ pub fn bold(s: &str) -> String {
 }
 
 pub fn emit_eight_bit_color_escape(log: &mut Vec<u8>, c: usize) {
-    log.append( &mut b"[38;5;".to_vec() );
-    log.append( &mut format!("{}", c).as_bytes().to_vec() );
-    log.push( b'm' );
+    log.append(&mut b"[38;5;".to_vec());
+    log.append(&mut format!("{}", c).as_bytes().to_vec());
+    log.push(b'm');
 }
 
 pub fn emit_disable_alternate_screen_buffer_escape(log: &mut Vec<u8>) {
-    log.append( &mut b"[?1049l".to_vec() );
+    log.append(&mut b"[?1049l".to_vec());
 }

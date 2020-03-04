@@ -10,11 +10,11 @@ extern crate string_utils;
 use debruijn::dna_string::*;
 use flate2::read::MultiGzDecoder;
 use io_utils::*;
+use std::process::Command;
 use std::{
     fs::File,
     io::{prelude::*, BufReader},
 };
-use std::process::Command;
 use string_utils::*;
 
 // This allows either a fasta file or a gzipped one.  This APPENDS to the
@@ -107,7 +107,7 @@ pub fn read_fasta_contents_into_vec_dna_string_plus_headers(
 
 // This APPENDS.
 
-pub fn read_fasta_headers( f: &String, headers: &mut Vec<String> ) {
+pub fn read_fasta_headers(f: &String, headers: &mut Vec<String>) {
     let fin = open_for_read![&f];
     let mut last: String = String::new();
     let mut first = true;

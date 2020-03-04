@@ -6,16 +6,19 @@ extern crate debruijn;
 extern crate rayon;
 extern crate vector_utils;
 
-use debruijn::{Vmer, dna_string::*, kmer::*, *};
+use debruijn::{dna_string::*, kmer::*, Vmer, *};
 use rayon::prelude::*;
-use vector_utils::*;
 use std::iter::Extend;
+use vector_utils::*;
 
 /// Given a vector of DnaStrings dv, create a sorted vector whose entries are
 /// (kmer, e, estart), where the kmer starts at position estart on dv[e].
 pub fn make_kmer_lookup_single<K: Kmer>(dv: &Vec<DnaString>, x: &mut Vec<(K, i32, i32)>) {
-
-    let sz = dv.iter().filter(|b| b.len() >= K::k()).map(|b| b.len() - K::k() + 1).sum();
+    let sz = dv
+        .iter()
+        .filter(|b| b.len() >= K::k())
+        .map(|b| b.len() - K::k() + 1)
+        .sum();
     x.clear();
     x.reserve(sz);
 
@@ -38,11 +41,13 @@ pub fn make_kmer_lookup_12_single(dv: &Vec<DnaString>, x: &mut Vec<(Kmer12, i32,
     make_kmer_lookup_single(dv, x);
 }
 
-
 /// Just create a unique sorted vector of kmers.
 pub fn make_kmer_lookup_single_simple<K: Kmer>(dv: &Vec<DnaString>, x: &mut Vec<K>) {
-
-    let sz = dv.iter().filter(|b| b.len() >= K::k()).map(|b| b.len() - K::k() + 1).sum();
+    let sz = dv
+        .iter()
+        .filter(|b| b.len() >= K::k())
+        .map(|b| b.len() - K::k() + 1)
+        .sum();
     x.clear();
     x.reserve(sz);
 
@@ -100,13 +105,18 @@ pub fn make_kmer_lookup_20_parallel(dv: &Vec<DnaString>, x: &mut Vec<(Kmer20, i3
     x.par_sort();
 }
 
-
 // Same but replace each kmer by the min of it and its rc, and if we use rc,
 // adjust pos accordingly.
 
-pub fn make_kmer_lookup_20_oriented_single<K: Kmer>(dv: &Vec<DnaString>, x: &mut Vec<(K, i32, i32)>) {
-
-    let sz = dv.iter().filter(|b| b.len() >= K::k()).map(|b| b.len() - K::k() + 1).sum();
+pub fn make_kmer_lookup_20_oriented_single<K: Kmer>(
+    dv: &Vec<DnaString>,
+    x: &mut Vec<(K, i32, i32)>,
+) {
+    let sz = dv
+        .iter()
+        .filter(|b| b.len() >= K::k())
+        .map(|b| b.len() - K::k() + 1)
+        .sum();
     x.clear();
     x.reserve(sz);
 
@@ -114,19 +124,17 @@ pub fn make_kmer_lookup_20_oriented_single<K: Kmer>(dv: &Vec<DnaString>, x: &mut
         for (j, kmer) in b.iter_kmers::<K>().enumerate() {
             let kmer_rc = kmer.rc();
 
-            let item =
-                if kmer < kmer_rc {
-                    (kmer, i as i32, j as i32)
-                } else {
-                    (kmer_rc, i as i32, -(j as i32) - 1)
-                };
+            let item = if kmer < kmer_rc {
+                (kmer, i as i32, j as i32)
+            } else {
+                (kmer_rc, i as i32, -(j as i32) - 1)
+            };
             x.push(item);
         }
     }
 
     x.sort();
 }
-
 
 // Same but replace each kmer by the min of it and its rc, and if we use rc,
 // adjust pos accordingly.
