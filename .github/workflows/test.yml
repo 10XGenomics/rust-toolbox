@@ -24,7 +24,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cargo/git
-          key: ${{runner.os}}-cargo-git-${{hashFiles('Cargo.lock')}}
+          key: ${{runner.os}}-cargo-git-${{hashFiles('src/**/*.rs')}}
           restore-keys: ${{runner.os}}-cargo-git-
       - name: Cache cargo build --release
         uses: actions/cache@v1
