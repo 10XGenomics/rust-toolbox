@@ -1,16 +1,16 @@
 // Copyright (c) 2019 10X Genomics, Inc. All rights reserved.
 
 // This file describes a data structure that reasonably efficiently encodes a non-editable sparse
-// matrix of nonnegative integers, each < 2^32, and most which are very small.  The number of rows 
-// and columns are assumed to be ≤ 2^32.  The structure is optimized for the case where the number 
+// matrix of nonnegative integers, each < 2^32, and most which are very small.  The number of rows
+// and columns are assumed to be ≤ 2^32.  The structure is optimized for the case where the number
 // of columns is ≤ 2^16.  Space requirements roughly double if this is exceeded.
 //
-// The defining property and raison d'être for this data structure is that it can be read directly 
-// ("mirrored") as a single block of bytes, and thus reading is fast and especially fast on 
+// The defining property and raison d'être for this data structure is that it can be read directly
+// ("mirrored") as a single block of bytes, and thus reading is fast and especially fast on
 // subsequent reads once the data are cached.  This makes it appropriate for interactive
 // applications.  But note that actually extracting values from the data structure can be slow.
 //
-// The data structure is laid out as a vector of bytes, representing a mix of u8, u16 and u32 
+// The data structure is laid out as a vector of bytes, representing a mix of u8, u16 and u32
 // entries, in general unaligned, as follow in the case where the number of columns is ≤ 2^16:
 //
 // 1. "MirrorSparseMatrix binary file \n" (32 bytes)
@@ -60,12 +60,12 @@ pub struct MirrorSparseMatrix {
 pub fn read_from_file(s: &mut MirrorSparseMatrix, f: &str) {
     let mut ff = std::fs::File::open(&f).unwrap();
     binary_read_vec::<u8>(&mut ff, &mut s.x).unwrap();
-    assert_eq!( s.code_version(), 0 );
-    assert_eq!( s.storage_version(), 0 );
+    assert_eq!(s.code_version(), 0);
+    assert_eq!(s.storage_version(), 0);
 }
 
 pub fn write_to_file(s: &MirrorSparseMatrix, f: &str) {
-    let mut ff = std::fs::File::create(&f).expect( &format!("Failed to create file {}.", f) );
+    let mut ff = std::fs::File::create(&f).expect(&format!("Failed to create file {}.", f));
     binary_write_vec::<u8>(&mut ff, &s.x).unwrap();
 }
 
@@ -126,7 +126,6 @@ fn push_u32(v: &mut Vec<u8>, val: u32) {
 }
 
 impl MirrorSparseMatrix {
-
     pub fn new() -> MirrorSparseMatrix {
         let v = Vec::<u8>::new();
         MirrorSparseMatrix { x: v }
@@ -162,7 +161,7 @@ impl MirrorSparseMatrix {
         if max_col >= 65536 {
             storage_version = 1 as u32;
         }
-        let hs =  MirrorSparseMatrix::header_size();
+        let hs = MirrorSparseMatrix::header_size();
         let mut v = Vec::<u8>::new();
         let mut total_bytes = hs + 4 * x.len();
         for i in 0..x.len() {
@@ -176,20 +175,20 @@ impl MirrorSparseMatrix {
                     m4 += 1;
                 }
             }
-            if storage_version  == 0 {
+            if storage_version == 0 {
                 total_bytes += 6 + 3 * m1 + 4 * m2 + 6 * m4;
             } else {
                 total_bytes += 12 + 5 * m1 + 6 * m2 + 8 * m4;
             }
         }
         v.reserve(total_bytes);
-        v.append( &mut b"MirrorSparseMatrix binary file \n".to_vec() );
-        assert_eq!( v.len(), 32 );
+        v.append(&mut b"MirrorSparseMatrix binary file \n".to_vec());
+        assert_eq!(v.len(), 32);
         let code_version = 0 as u32;
         push_u32(&mut v, code_version);
         push_u32(&mut v, storage_version);
         push_u32(&mut v, x.len() as u32);
-        assert_eq!( v.len(), hs );
+        assert_eq!(v.len(), hs);
         for _ in 0..x.len() {
             push_u32(&mut v, 0 as u32);
         }
@@ -210,7 +209,7 @@ impl MirrorSparseMatrix {
                 push_u16(&mut v, m1 as u16);
                 push_u16(&mut v, m2 as u16);
                 push_u16(&mut v, m4 as u16);
-            }  else {
+            } else {
                 push_u32(&mut v, m1 as u32);
                 push_u32(&mut v, m2 as u32);
                 push_u32(&mut v, m4 as u32);
@@ -246,7 +245,7 @@ impl MirrorSparseMatrix {
                 }
             }
         }
-        assert_eq!( total_bytes, v.len() );
+        assert_eq!(total_bytes, v.len());
         MirrorSparseMatrix { x: v }
     }
 
@@ -259,8 +258,8 @@ impl MirrorSparseMatrix {
         get_u32_at_pos(&self.x, pos) as usize
     }
 
-    pub fn row(&self, row: usize) -> Vec<(usize,usize)> {
-        let mut all = Vec::<(usize,usize)>::new();
+    pub fn row(&self, row: usize) -> Vec<(usize, usize)> {
+        let mut all = Vec::<(usize, usize)>::new();
         let s = self.start_of_row(row);
         if self.storage_version() == 0 {
             let m1 = get_u16_at_pos(&self.x, s) as usize;
@@ -270,19 +269,19 @@ impl MirrorSparseMatrix {
                 let pos = s + 6 + 3 * i;
                 let col = get_u16_at_pos(&self.x, pos) as usize;
                 let entry = get_u8_at_pos(&self.x, pos + 2) as usize;
-                all.push( (col,entry) );
+                all.push((col, entry));
             }
             for i in 0..m2 {
                 let pos = s + 6 + 3 * m1 + 4 * i;
                 let col = get_u16_at_pos(&self.x, pos) as usize;
                 let entry = get_u16_at_pos(&self.x, pos + 2) as usize;
-                all.push( (col,entry) );
+                all.push((col, entry));
             }
             for i in 0..m4 {
                 let pos = s + 6 + 3 * m1 + 4 * m2 + 6 * i;
                 let col = get_u16_at_pos(&self.x, pos) as usize;
                 let entry = get_u32_at_pos(&self.x, pos + 2) as usize;
-                all.push( (col,entry) );
+                all.push((col, entry));
             }
         } else {
             let m1 = get_u32_at_pos(&self.x, s) as usize;
@@ -292,19 +291,19 @@ impl MirrorSparseMatrix {
                 let pos = s + 12 + 5 * i;
                 let col = get_u32_at_pos(&self.x, pos) as usize;
                 let entry = get_u8_at_pos(&self.x, pos + 4) as usize;
-                all.push( (col,entry) );
+                all.push((col, entry));
             }
             for i in 0..m2 {
                 let pos = s + 12 + 5 * m1 + 6 * i;
                 let col = get_u32_at_pos(&self.x, pos) as usize;
                 let entry = get_u16_at_pos(&self.x, pos + 4) as usize;
-                all.push( (col,entry) );
+                all.push((col, entry));
             }
             for i in 0..m4 {
                 let pos = s + 12 + 5 * m1 + 6 * m2 + 8 * i;
                 let col = get_u32_at_pos(&self.x, pos) as usize;
                 let entry = get_u32_at_pos(&self.x, pos + 4) as usize;
-                all.push( (col,entry) );
+                all.push((col, entry));
             }
         }
         all.sort();
@@ -478,8 +477,8 @@ mod tests {
     // cargo test -p tenkit2 -- --nocapture
     // Another test will fail because it requires release mode, but that test comes after this one.
 
-    use io_utils::*;
     use super::*;
+    use io_utils::*;
     use pretty_trace::*;
 
     #[test]
@@ -490,18 +489,18 @@ mod tests {
         // without --release works.
         // Really should document this example in pretty_trace.
         for storage_version in 0..2 {
-            printme!( storage_version );
+            printme!(storage_version);
             let mut x = Vec::<Vec<(i32, i32)>>::new();
             for i in 0..10 {
-                let mut y = Vec::<(i32,i32)>::new();
+                let mut y = Vec::<(i32, i32)>::new();
                 for j in 0..100 {
-                    let col : usize;
+                    let col: usize;
                     if storage_version == 0 {
-                        col = i+j;
-                    } else  {
-                        col = 10000*i + j;
+                        col = i + j;
+                    } else {
+                        col = 10000 * i + j;
                     }
-                    y.push( (col as i32, (i*i*j) as i32) );
+                    y.push((col as i32, (i * i * j) as i32));
                 }
                 x.push(y);
             }
@@ -512,7 +511,7 @@ mod tests {
             }
             let y = MirrorSparseMatrix::build_from_vec(&x);
             let row_sum2 = y.sum_of_row(test_row);
-            assert_eq!( row_sum, row_sum2 );
+            assert_eq!(row_sum, row_sum2);
             let test_col;
             if storage_version == 0 {
                 test_col = 15;
@@ -522,16 +521,16 @@ mod tests {
             let mut col_sum = 0;
             for i in 0..x.len() {
                 for j in 0..x[i].len() {
-                    assert_eq!( x[i][j].1 as usize, y.value( i, x[i][j].0 as usize ) );
+                    assert_eq!(x[i][j].1 as usize, y.value(i, x[i][j].0 as usize));
                     if x[i][j].0 as usize == test_col {
                         col_sum += x[i][j].1 as usize;
                     }
                 }
             }
             let col_sum2 = y.sum_of_col(test_col);
-            printme!( col_sum, col_sum2 );
-            assert_eq!( col_sum, col_sum2 );
-            assert_eq!( y.storage_version(), storage_version );
+            printme!(col_sum, col_sum2);
+            assert_eq!(col_sum, col_sum2);
+            assert_eq!(y.storage_version(), storage_version);
         }
     }
 }

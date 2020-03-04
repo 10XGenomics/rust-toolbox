@@ -10,8 +10,7 @@ use std::{
     fs::File,
     io::{BufRead, BufReader},
     process::Command,
-    thread,
-    time,
+    thread, time,
 };
 use string_utils::*;
 
@@ -32,15 +31,17 @@ pub fn pipestance(lena: &String) -> String {
             .output()
             .expect("failed to execute marsoc http");
         m = String::from_utf8(o.stdout).unwrap();
-        if !m.contains( "502 Bad Gateway" ) {
+        if !m.contains("502 Bad Gateway") {
             break;
         }
         if rep < nreps - 1 {
             thread::sleep(time::Duration::from_millis(sleeptime));
             continue;
         }
-        panic!( "502 Bad Gateway from curl http://marsoc.fuzzplex.com/pipestance/{}",
-            lena );
+        panic!(
+            "502 Bad Gateway from curl http://marsoc.fuzzplex.com/pipestance/{}",
+            lena
+        );
     }
     m
 }
@@ -145,8 +146,8 @@ pub struct PipelineInfo {
 // Make a sorted list of all complete pipestances on marsoc, returning the
 // lena id, pipeline name, pipeline directory, and description.
 
-pub fn get_all_pipestances() -> Vec<(i32,PipelineInfo)> {
-    let mut info = Vec::<(i32,PipelineInfo)>::new();
+pub fn get_all_pipestances() -> Vec<(i32, PipelineInfo)> {
+    let mut info = Vec::<(i32, PipelineInfo)>::new();
     // ◼: doing this via a command is ugly and somewhat dangerous
     let o = Command::new("csh")
         .arg("-c")
@@ -213,11 +214,14 @@ pub fn get_all_pipestances() -> Vec<(i32,PipelineInfo)> {
                 "/mnt/analysis/marsoc/pipestances/{}/{}/{}/HEAD",
                 fc, pipeline, lena
             );
-            info.push( (lena, PipelineInfo{ 
-                pipeline_name: pipeline,
-                pipestance_dir: dir,
-                descrip: descrip,
-            } ) );
+            info.push((
+                lena,
+                PipelineInfo {
+                    pipeline_name: pipeline,
+                    pipestance_dir: dir,
+                    descrip: descrip,
+                },
+            ));
         }
         j += 1;
         if j == marsoc.len() {

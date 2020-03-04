@@ -35,8 +35,8 @@ extern crate string_utils;
 // use vdj_asm_utils::*;
 
 use debruijn::{dna_string::*, *};
-use fasta::*;
 use exons::*;
+use fasta::*;
 use pretty_trace::*;
 use std::{collections::HashMap, env};
 use string_utils::TextUtils;

@@ -1323,9 +1323,30 @@ mod tests {
 
         let pipefd = pipe().unwrap();
 
-        // Set up tracebacks with ctrlc and using the pipe.
+        // Set up tracebacks with ctrlc and using the pipe.  The use of the exit message
+        // makes absolutely no sense at all.  However, without it, something very weird
+        // happens in the test.  The test seems to finish and return control, and then you
+        // get a message "thread panicked while processing panic. aborting.".  So this is
+        // a weird workaround for a problem that is not understood.  And the problem arose
+        // exactly when the exit message was added, with this commit:
+        //
+        // commit d32162f15d7192eeb077744bace91a3cb27094b0
+        // Author: David Jaffe <david.jaffe@10xgenomics.com>
+        // Date:   Thu Dec 19 03:04:12 2019 -0800
+        // add exit_message(...) to PrettyTrace
+        //
+        // In addition, and connected to this,
+        // cargo test --release
+        // does not work, and instead you need to use
+        // cargo test --release -- --nocapture
 
-        PrettyTrace::new().ctrlc().fd(pipefd.1).on();
+        let message = "Dang it, you found a bug!  Please call us at (999) 123-4567.";
+        PrettyTrace::new()
+            .exit_message(&message)
+            .ctrlc()
+            .fd(pipefd.1)
+            .on();
+        // PrettyTrace::new().ctrlc().fd(pipefd.1).on();
 
         // Create stuff needed for computation we're going to interrupt.
 

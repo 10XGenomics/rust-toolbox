@@ -106,16 +106,15 @@ pub fn summary_less(a: &Alignment) -> String {
     let mut s = String::new();
     if sub == 0 && del.is_empty() && ins.is_empty() {
         s = "0".to_string();
-    }
-    else {
+    } else {
         if sub > 0 {
             s = format!("{}", sub);
         }
         for i in 0..del.len() {
-            s += &format!( "D{}", del[i] );
+            s += &format!("D{}", del[i]);
         }
         for i in 0..ins.len() {
-            s += &format!( "I{}", ins[i] );
+            s += &format!("I{}", ins[i]);
         }
     }
     s

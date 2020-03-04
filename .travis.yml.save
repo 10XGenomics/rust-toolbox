@@ -20,7 +20,7 @@ before_script:
 # the main build
 script:
   - cargo build
-  - cargo test --release
+# - cargo test --release -- --nocapture
   - cargo doc --no-deps
 
 # after_success:
