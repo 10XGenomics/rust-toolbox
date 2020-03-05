@@ -145,7 +145,7 @@ pub fn parse_csv(x: &str) -> Vec<String> {
         }
         let mut s = String::new();
         for m in start..stop {
-            s.push( w[m] );
+            s.push(w[m]);
         }
         y.push(s);
         i = j + 1;
