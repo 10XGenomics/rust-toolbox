@@ -118,30 +118,36 @@ impl<'a> TextUtils<'a> for str {
 // THINGS USED OCCASIONALLY
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-// Parse a line, breaking at commas, but not if they're in quotes.  And strip
-// the quotes.
+// Parse a line, breaking at commas, but not if they're in quotes.  And strip the quotes.
 
-pub fn parse_csv(x: &[u8]) -> Vec<Vec<u8>> {
-    let mut y = Vec::<Vec<u8>>::new();
+pub fn parse_csv(x: &str) -> Vec<String> {
+    let mut y = Vec::<String>::new();
+    let mut w = Vec::<char>::new();
+    for c in x.chars() {
+        w.push(c);
+    }
     let (mut quotes, mut i) = (0, 0);
-    while i < x.len() {
+    while i < w.len() {
         let mut j = i;
-        while j < x.len() {
-            if quotes % 2 == 0 && x[j] == b',' {
+        while j < w.len() {
+            if quotes % 2 == 0 && w[j] == ',' {
                 break;
             }
-            if x[j] == b'"' {
+            if w[j] == '"' {
                 quotes += 1;
             }
             j += 1;
         }
-        let mut start = i;
-        let mut stop = j;
-        if stop - start >= 2 && x[start] == b'"' && x[stop - 1] == b'"' {
+        let (mut start, mut stop) = (i, j);
+        if stop - start >= 2 && w[start] == '"' && w[stop - 1] == '"' {
             start += 1;
             stop -= 1;
         }
-        y.push(x[start..stop].to_vec());
+        let mut s = String::new();
+        for m in start..stop {
+            s.push(w[m]);
+        }
+        y.push(s);
         i = j + 1;
     }
     y
