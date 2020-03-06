@@ -2647,6 +2647,39 @@ pub fn make_annotation_units(
 mod tests {
     use super::*;
 
+    // The following test checks for alignment of a D region.  This example was fixed by code
+    // changes in March 2020.
+
+    #[test]
+    fn test_d_region_alignment() {
+        use annotate::*;
+        let seq = DnaString::from_acgt_bytes(
+            b"GGAGGTGCGAATGACTCTGCTCTCTGTCCTGTCTCCTCATCTGCAAAATTAGGAAGCCTGTCTTGATTATCTCCAGGAA\
+            CCTCCCACCTCTTCATTCCAGCCTCTGACAAACTCTGCACATTAGGCCAGGAGAAGCCCCCGAGCCAAGTCTCTTTTCTCATTCTC\
+            TTCCAACAAGTGCTTGGAGCTCCAAGAAGGCCCCCTTTGCACTATGAGCAACCAGGTGCTCTGCTGTGTGGTCCTTTGTCTCCTGG\
+            GAGCAAACACCGTGGATGGTGGAATCACTCAGTCCCCAAAGTACCTGTTCAGAAAGGAAGGACAGAATGTGACCCTGAGTTGTGAA\
+            CAGAATTTGAACCACGATGCCATGTACTGGTACCGACAGGACCCAGGGCAAGGGCTGAGATTGATCTACTACTCACAGATAGTAAA\
+            TGACTTTCAGAAAGGAGATATAGCTGAAGGGTACAGCGTCTCTCGGGAGAAGAAGGAATCCTTTCCTCTCACTGTGACATCGGCCC\
+            AAAAGAACCCGACAGCTTTCTATCTCTGTGCCAGTAGTATTTTTCTTGCCGGGACAGGGGGCTGGAGCGGCACTGAAGCTTTCTTT\
+            GGACAAGGCACCAGACTCACAGTTGTAGAGGACCTGAACAAGGTGTTCCCACCCGAGGTCGCTGTGTTTGAGCCATCAGA",
+        );
+        let (refx, ext_refx) = (human_ref(), String::new());
+        let (is_tcr, is_bcr) = (true, false);
+        let mut refdata = RefData::new();
+        make_vdj_ref_data_core(&mut refdata, &refx, &ext_refx, is_tcr, is_bcr, None);
+        let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
+        annotate_seq(&seq, &refdata, &mut ann, true, false, true);
+        let mut have_d = false;
+        for i in 0..ann.len() {
+            if refdata.is_d(ann[i].2 as usize) {
+                have_d = true;
+            }
+        }
+        if !have_d {
+            panic!("\nFailed to find alignment of D region.\n");
+        }
+    }
+
     #[test]
     fn test_no_internal_soft_clipping() {
         use refx::RefData;
