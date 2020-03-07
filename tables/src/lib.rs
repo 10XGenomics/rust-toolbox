@@ -150,6 +150,8 @@ pub fn visible_width(s: &str) -> usize {
 // use one or more of these in succession horizontally to connect two vertical lines.  Cannot
 // be combined with \ext.
 //
+// bold_box: use bold box characters
+//
 // Really only guaranteed to work for the tested cases.
 
 pub fn print_tabular_vbox(
@@ -158,7 +160,79 @@ pub fn print_tabular_vbox(
     sep: usize,
     justify: &Vec<u8>,
     debug_print: bool,
+    bold_box: bool,
 ) {
+    // Define box characters.
+
+    let dash;
+    if !bold_box {
+        dash = '─';
+    } else {
+        dash = '━';
+    }
+    let verty;
+    if !bold_box {
+        verty = '│';
+    } else {
+        verty = '┃';
+    }
+    let topleft;
+    if !bold_box {
+        topleft = '┌';
+    } else {
+        topleft = '┏';
+    }
+    let topright;
+    if !bold_box {
+        topright = '┐';
+    } else {
+        topright = '┓';
+    }
+    let botleft;
+    if !bold_box {
+        botleft = '└';
+    } else {
+        botleft = '┗';
+    }
+    let botright;
+    if !bold_box {
+        botright = '┘';
+    } else {
+        botright = '┛';
+    }
+    let tee;
+    if !bold_box {
+        tee = '┬';
+    } else {
+        tee = '┳';
+    }
+    let uptee;
+    if !bold_box {
+        uptee = '┴';
+    } else {
+        uptee = '┻';
+    }
+    let cross;
+    if !bold_box {
+        cross = '┼';
+    } else {
+        cross = '╋';
+    }
+    let lefty;
+    if !bold_box {
+        lefty = '├';
+    } else {
+        lefty = '┣';
+    }
+    let righty;
+    if !bold_box {
+        righty = '┤';
+    } else {
+        righty = '┫';
+    }
+
+    // Proceed.
+
     let mut rrr = rows.clone();
     let nrows = rrr.len();
     let mut ncols = 0;
@@ -274,23 +348,23 @@ pub fn print_tabular_vbox(
 
     // Create top boundary of table.
 
-    log.push('┌');
+    log.push(topleft);
     for i in 0..ncols {
         let mut n = maxcol[i];
         if i < ncols - 1 {
             n += sep;
         }
         for _ in 0..n {
-            log.push('─');
+            log.push(dash);
         }
         if vert[i] {
-            log.push('┬');
+            log.push(tee);
             for _ in 0..sep {
-                log.push('─');
+                log.push(dash);
             }
         }
     }
-    log.push('┐');
+    log.push(topright);
     log.push('\n');
 
     // Go through the rows.
@@ -300,7 +374,7 @@ pub fn print_tabular_vbox(
             println!("now row {} = {}", i, rrr[i].iter().format(","));
             println!("0 - pushing │ onto row {}", i);
         }
-        log.push('│');
+        log.push(verty);
         for j in 0..min(ncols, rrr[i].len()) {
             // Pad entries according to justification.
 
@@ -311,7 +385,7 @@ pub fn print_tabular_vbox(
                 }
             } else if rrr[i][j] == "\\hline".to_string() {
                 for _ in 0..maxcol[j] {
-                    x.push('─');
+                    x.push(dash);
                 }
             } else {
                 let r = rrr[i][j].clone();
@@ -361,7 +435,7 @@ pub fn print_tabular_vbox(
             if add_sep && jp < ncols - 1 {
                 if rrr[i][j] == "\\hline".to_string() {
                     for _ in 0..sep {
-                        log.push('─');
+                        log.push(dash);
                     }
                 } else {
                     for _ in 0..sep {
@@ -371,12 +445,12 @@ pub fn print_tabular_vbox(
             }
             if vert[j] && rrr[i][j + 1] != "\\ext" {
                 if debug_print {
-                    println!("1 - pushing │ onto row {}, j = {}", i, j);
+                    println!("1 - pushing {} onto row {}, j = {}", verty, i, j);
                 }
-                log.push('│');
+                log.push(verty);
                 if rrr[i][j + 1] == "\\hline".to_string() {
                     for _ in 0..sep {
-                        log.push('─');
+                        log.push(dash);
                     }
                 } else {
                     for _ in 0..sep {
@@ -386,32 +460,32 @@ pub fn print_tabular_vbox(
             }
         }
         if debug_print {
-            println!("2 - pushing │ onto row {}", i);
+            println!("2 - pushing {} onto row {}", verty, i);
         }
-        log.push('│');
+        log.push(verty);
         log.push('\n');
     }
-    log.push('└');
+    log.push(botleft);
     for i in 0..ncols {
         let mut n = maxcol[i];
         if i < ncols - 1 {
             n += sep;
         }
         for _ in 0..n {
-            log.push('─');
+            log.push(dash);
         }
         if vert[i] {
             if rrr[rrr.len() - 1][i + 1] != "\\ext" {
-                log.push('┴');
+                log.push(uptee);
             } else {
-                log.push('─');
+                log.push(dash);
             }
             for _ in 0..sep {
-                log.push('─');
+                log.push(dash);
             }
         }
     }
-    log.push('┘');
+    log.push(botright);
     log.push('\n');
 
     // Convert into a super-character vec of matrices.  There is one vector entry per line.
@@ -445,31 +519,33 @@ pub fn print_tabular_vbox(
     for i in 0..mat.len() {
         for j in 0..mat[i].len() {
             if j > 0
-                && mat[i][j - 1] == vec!['─']
-                && mat[i][j] == vec!['│']
+                && mat[i][j - 1] == vec![dash]
+                && mat[i][j] == vec![verty]
                 && j + 1 < mat[i].len()
-                && mat[i][j + 1] == vec!['─']
+                && mat[i][j + 1] == vec![dash]
                 && i + 1 < mat.len()
                 && j < mat[i + 1].len()
-                && mat[i + 1][j] != vec!['│']
+                && mat[i + 1][j] != vec![verty]
             {
-                mat[i][j] = vec!['┴'];
+                mat[i][j] = vec![uptee];
             } else if j > 0
-                && mat[i][j - 1] == vec!['─']
-                && mat[i][j] == vec!['│']
+                && mat[i][j - 1] == vec![dash]
+                && mat[i][j] == vec![verty]
                 && j + 1 < mat[i].len()
-                && mat[i][j + 1] == vec!['─']
+                && mat[i][j + 1] == vec![dash]
             {
-                mat[i][j] = vec!['┼'];
-            } else if mat[i][j] == vec!['│'] && j + 1 < mat[i].len() && mat[i][j + 1] == vec!['─']
+                mat[i][j] = vec![cross];
+            } else if mat[i][j] == vec![verty]
+                && j + 1 < mat[i].len()
+                && mat[i][j + 1] == vec![dash]
             {
-                mat[i][j] = vec!['├'];
+                mat[i][j] = vec![lefty];
             } else if j > 0
-                && mat[i][j - 1] == vec!['─']
-                && mat[i][j] == vec!['│']
-                && (j + 1 == mat[i].len() || mat[i][j + 1] != vec!['─'])
+                && mat[i][j - 1] == vec![dash]
+                && mat[i][j] == vec![verty]
+                && (j + 1 == mat[i].len() || mat[i][j + 1] != vec![dash])
             {
-                mat[i][j] = vec!['┤'];
+                mat[i][j] = vec![righty];
             }
         }
     }
@@ -536,7 +612,7 @@ mod tests {
         justify.push(b'|');
         justify.push(b'l');
         justify.push(b'l');
-        print_tabular_vbox(&mut log, &rows, 2, &justify, false);
+        print_tabular_vbox(&mut log, &rows, 2, &justify, false, false);
         let answer = "┌────────┬─────────────────────────┐\n\
                       │ omega  │  superduperfineexcellent│\n\
                       │  woof  │  snarl      octopus     │\n\
@@ -566,7 +642,7 @@ mod tests {
         justify.push(b'l');
         justify.push(b'|');
         justify.push(b'l');
-        print_tabular_vbox(&mut log, &rows, 2, &justify, false);
+        print_tabular_vbox(&mut log, &rows, 2, &justify, false, false);
         let answer = "┌────────┬────────┐\n\
                       │pencil  │  pusher│\n\
                       ├────────┴────────┤\n\
