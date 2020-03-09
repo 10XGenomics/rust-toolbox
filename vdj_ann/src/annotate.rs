@@ -1388,6 +1388,51 @@ pub fn annotate_seq_core(
         }
     }
 
+    // For IGH and TRB, if there is a V and J, but no D, look for a D that matches perfectly
+    // between them.
+
+    let (mut v, mut d, mut j) = (false, false, false);
+    let (mut vstop, mut jstart) = (0, 0);
+    const VJTRIM: i32 = 10;
+    for i in 0..annx.len() {
+        let t = annx[i].2 as usize;
+        if !rheaders[t].contains("segment") {
+            let rt = refdata.rtype[t];
+            if rt == 0 || rt == 4 {
+                if refdata.segtype[t] == "V".to_string() {
+                    v = true;
+                    vstop = annx[i].0 + annx[i].1;
+                } else if refdata.segtype[t] == "D".to_string() {
+                    d = true;
+                } else if refdata.segtype[t] == "J".to_string() {
+                    j = true;
+                    jstart = annx[i].0;
+                }
+            }
+        }
+    }
+    if v && !d && j {
+        let start = max(0, vstop - VJTRIM);
+        let stop = min(b.len() as i32, jstart + VJTRIM);
+        'outer: for t in refdata.ds.iter() {
+            let r = &refdata.refs[*t];
+            for m in start..=stop - (r.len() as i32) {
+                let mut mismatch = false;
+                for x in 0..r.len() {
+                    if r.get(x) != b.get((m + x as i32) as usize) {
+                        mismatch = true;
+                        break;
+                    }
+                }
+                if !mismatch {
+                    annx.push((m, r.len() as i32, *t as i32, 0, Vec::new()));
+                    annx.sort();
+                    break 'outer;
+                }
+            }
+        }
+    }
+
     // Log alignments.
 
     if verbose {
@@ -2601,6 +2646,39 @@ pub fn make_annotation_units(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // The following test checks for alignment of a D region.  This example was fixed by code
+    // changes in March 2020.
+
+    #[test]
+    fn test_d_region_alignment() {
+        use annotate::*;
+        let seq = DnaString::from_acgt_bytes(
+            b"GGAGGTGCGAATGACTCTGCTCTCTGTCCTGTCTCCTCATCTGCAAAATTAGGAAGCCTGTCTTGATTATCTCCAGGAA\
+            CCTCCCACCTCTTCATTCCAGCCTCTGACAAACTCTGCACATTAGGCCAGGAGAAGCCCCCGAGCCAAGTCTCTTTTCTCATTCTC\
+            TTCCAACAAGTGCTTGGAGCTCCAAGAAGGCCCCCTTTGCACTATGAGCAACCAGGTGCTCTGCTGTGTGGTCCTTTGTCTCCTGG\
+            GAGCAAACACCGTGGATGGTGGAATCACTCAGTCCCCAAAGTACCTGTTCAGAAAGGAAGGACAGAATGTGACCCTGAGTTGTGAA\
+            CAGAATTTGAACCACGATGCCATGTACTGGTACCGACAGGACCCAGGGCAAGGGCTGAGATTGATCTACTACTCACAGATAGTAAA\
+            TGACTTTCAGAAAGGAGATATAGCTGAAGGGTACAGCGTCTCTCGGGAGAAGAAGGAATCCTTTCCTCTCACTGTGACATCGGCCC\
+            AAAAGAACCCGACAGCTTTCTATCTCTGTGCCAGTAGTATTTTTCTTGCCGGGACAGGGGGCTGGAGCGGCACTGAAGCTTTCTTT\
+            GGACAAGGCACCAGACTCACAGTTGTAGAGGACCTGAACAAGGTGTTCCCACCCGAGGTCGCTGTGTTTGAGCCATCAGA",
+        );
+        let (refx, ext_refx) = (human_ref(), String::new());
+        let (is_tcr, is_bcr) = (true, false);
+        let mut refdata = RefData::new();
+        make_vdj_ref_data_core(&mut refdata, &refx, &ext_refx, is_tcr, is_bcr, None);
+        let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
+        annotate_seq(&seq, &refdata, &mut ann, true, false, true);
+        let mut have_d = false;
+        for i in 0..ann.len() {
+            if refdata.is_d(ann[i].2 as usize) {
+                have_d = true;
+            }
+        }
+        if !have_d {
+            panic!("\nFailed to find alignment of D region.\n");
+        }
+    }
 
     #[test]
     fn test_no_internal_soft_clipping() {

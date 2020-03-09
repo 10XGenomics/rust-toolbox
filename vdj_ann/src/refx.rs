@@ -54,6 +54,7 @@ pub struct RefData {
     pub rtype: Vec<i32>,         // index in "IGH","IGK","IGL","TRA","TRB","TRD","TRG" or -1
     pub igjs: Vec<usize>,        // index of all IGJ segments
     pub cs: Vec<usize>,          // index of all C segments
+    pub ds: Vec<usize>,          // index of all D segments
     pub id: Vec<i32>,            // the number after ">" on the header line
     pub transcript: Vec<String>, // transcript name from header line
 }
@@ -70,6 +71,7 @@ impl<'a> RefData {
             rtype: Vec::<i32>::new(),
             igjs: Vec::<usize>::new(),
             cs: Vec::<usize>::new(),
+            ds: Vec::<usize>::new(),
             id: Vec::<i32>::new(),
             transcript: Vec::<String>::new(),
         }
@@ -227,7 +229,7 @@ pub fn make_vdj_ref_data_core(
         erase_if(&mut refdata.rtype, &to_delete);
     }
 
-    // Fill in igjs and cs.
+    // Fill in igjs and cs and ds.
 
     for i in 0..rheaders.len() {
         if refdata.segtype[i] == "J".to_string() && refdata.rtype[i] >= 0 && refdata.rtype[i] < 3 {
@@ -235,6 +237,9 @@ pub fn make_vdj_ref_data_core(
         }
         if refdata.segtype[i] == "C".to_string() {
             refdata.cs.push(i);
+        }
+        if refdata.segtype[i] == "D".to_string() {
+            refdata.ds.push(i);
         }
     }
 
