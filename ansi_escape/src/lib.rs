@@ -36,6 +36,27 @@ pub fn print_color(s: usize, log: &mut Vec<u8>) {
     }
 }
 
+// Return a color order that is optimized in such a way that e.g. colors 0, 1, 2 are the best
+// subset, and so that adjacent colors are maximally different (as best we could arrange them).
+
+pub fn best_color_order(i: usize) -> usize {
+    if i == 0 {
+        3
+    } else if i == 1 {
+        4
+    } else if i == 2 {
+        5
+    } else if i == 3 {
+        1
+    } else if i == 4 {
+        0
+    } else {
+        2
+    }
+}
+
+// Miscellaneous escape codes.
+
 pub fn emit_red_escape(log: &mut Vec<u8>) {
     log.append(&mut b"[01;31m".to_vec());
 }
