@@ -5,6 +5,7 @@ members = [
     "amino",
     "ansi_escape",
     "binary_vec_io",
+    "dna",
     "equiv",
     "exons",
     "fasta",
