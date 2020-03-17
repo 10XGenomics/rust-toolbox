@@ -333,6 +333,9 @@ pub fn print_tabular_vbox(
                 }
                 let mut m = 0;
                 for u in 0..rrr.len() {
+                    if j >= rrr[u].len() {
+                        eprintln!("\nProblem with line {}, not enough fields.\n", u);
+                    }
                     if rrr[u][j] != "\\ext".to_string() {
                         m = max(m, visible_width(&rrr[u][j]));
                     }
