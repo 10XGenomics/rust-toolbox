@@ -37,7 +37,7 @@ pub fn package_characters_with_escapes(c: &Vec<u8>) -> Vec<Vec<u8>> {
     x
 }
 
-fn package_characters_with_escapes_char(c: &Vec<char>) -> Vec<Vec<char>> {
+pub fn package_characters_with_escapes_char(c: &Vec<char>) -> Vec<Vec<char>> {
     let mut x = Vec::<Vec<char>>::new();
     let mut escaped = false;
     let mut package = Vec::<char>::new();
