@@ -83,14 +83,14 @@ pub fn print_tabular(
     let mut maxcol = vec![0; ncols];
     for i in 0..rows.len() {
         for j in 0..rows[i].len() {
-            maxcol[j] = max(maxcol[j], rows[i][j].len());
+            maxcol[j] = max(maxcol[j], rows[i][j].chars().count());
         }
     }
     for i in 0..rows.len() {
         for j in 0..rows[i].len() {
             let x = rows[i][j].clone();
             if j < just.len() && just[j] == b'r' {
-                log.append(&mut vec![b' '; maxcol[j] - x.len()]);
+                log.append(&mut vec![b' '; maxcol[j] - x.chars().count()]);
                 log.append(&mut x.as_bytes().to_vec());
                 if j < rows[i].len() - 1 {
                     log.append(&mut vec![b' '; sep]);
@@ -98,7 +98,7 @@ pub fn print_tabular(
             } else {
                 log.append(&mut x.as_bytes().to_vec());
                 if j < rows[i].len() - 1 {
-                    log.append(&mut vec![b' '; maxcol[j] - x.len() + sep]);
+                    log.append(&mut vec![b' '; maxcol[j] - x.chars().count() + sep]);
                 }
             }
         }
