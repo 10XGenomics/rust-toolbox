@@ -193,25 +193,12 @@
 // EXTERNAL DEPENDENCIES
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-extern crate backtrace;
-extern crate chashmap;
-extern crate failure;
-extern crate io_utils;
-#[macro_use]
-extern crate lazy_static;
-extern crate libc;
-extern crate nix;
-extern crate rayon;
-extern crate stats_utils;
-extern crate string_utils;
-extern crate vector_utils;
-
 use backtrace::Backtrace;
 use backtrace::*;
-use chashmap::CHashMap;
 use failure::Error;
 use io_utils::*;
 use libc::{kill, SIGINT, SIGKILL, SIGUSR1};
+use lazy_static::lazy_static;
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
 use stats_utils::*;
 use std::{
@@ -664,10 +651,36 @@ extern "C" fn handler(sig: i32) {
 // CORE TRACEBACK FUNCTION
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
+use std::collections::HashMap;
+use std::sync::RwLock;
+
+/// Super simplifed concurrent HashMap for use with pretty_trace. The only public method is
+/// `insert`, allowing the user to set the current thread message.
+pub struct CHashMap<K, V> {
+    map: RwLock<HashMap<K, V>>
+}
+
+impl<K, V> CHashMap<K, V>
+where 
+    K: std::hash::Hash + std::cmp::Eq
+{
+    pub fn new() -> CHashMap<K, V> {
+        CHashMap {
+            map: RwLock::new(HashMap::new()),
+        }
+    }
+
+    pub fn insert(&self, k: K, v: V) {
+        self.map.write().unwrap().insert(k, v);
+    }
+}
+
+
 /// See <code>PrettyTrace</code> documentation for how this is used.
 
 pub fn new_thread_message() -> &'static CHashMap<ThreadId, String> {
-    let box_thread_message = Box::new(CHashMap::<ThreadId, String>::new());
+    let hashmap = CHashMap::new();
+    let box_thread_message = Box::new(hashmap);
     let thread_message: &'static CHashMap<ThreadId, String> = Box::leak(box_thread_message);
     thread_message
 }
@@ -788,8 +801,8 @@ fn force_pretty_trace_fancy(
 
         let mut tm = String::new();
         let this_thread = thread::current().id();
-        if thread_message.contains_key(&this_thread) {
-            tm = format!("{}\n\n", thread_message.get(&this_thread).unwrap().deref());
+        if thread_message.map.read().unwrap().contains_key(&this_thread) {
+            tm = format!("{}\n\n", thread_message.map.read().unwrap().get(&this_thread).unwrap().deref());
         }
 
         // Handle verbose mode.
