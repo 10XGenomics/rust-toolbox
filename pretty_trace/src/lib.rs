@@ -202,6 +202,7 @@ use lazy_static::lazy_static;
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
 use stats_utils::*;
 use std::{
+    collections::HashMap,
     env,
     fs::{remove_file, File},
     io::{BufRead, BufReader, BufWriter, Write},
@@ -211,7 +212,7 @@ use std::{
     str::from_utf8,
     sync::atomic::AtomicBool,
     sync::atomic::Ordering::SeqCst,
-    sync::Mutex,
+    sync::{Mutex, RwLock},
     thread,
     thread::ThreadId,
     time,
@@ -650,9 +651,6 @@ extern "C" fn handler(sig: i32) {
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // CORE TRACEBACK FUNCTION
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-
-use std::collections::HashMap;
-use std::sync::RwLock;
 
 /// Super simplifed concurrent HashMap for use with pretty_trace. The only public method is
 /// `insert`, allowing the user to set the current thread message.
