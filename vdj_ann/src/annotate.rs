@@ -3,12 +3,14 @@
 // This file contains code to annotate a contig, in the sense of finding alignments
 // to VDJ reference contigs.  Also to find CDR3 sequences.  And some related things.
 
+use crate::refx::*;
+use crate::transcript::*;
 use align_tools::*;
 use amino::*;
 use bio::alignment::AlignmentOperation::*;
 use debruijn::{dna_string::*, kmer::*, *};
+use io_utils::{fwrite, fwriteln};
 use itertools::*;
-use refx::*;
 use serde::{Deserialize, Serialize};
 use stats_utils::*;
 use std::{
@@ -18,7 +20,6 @@ use std::{
     io::{BufWriter, Write},
 };
 use string_utils::*;
-use transcript::*;
 use vector_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -2646,6 +2647,7 @@ pub fn make_annotation_units(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{annotate, refx};
 
     // The following test checks for alignment of a D region.  This example was fixed by code
     // changes in March 2020.

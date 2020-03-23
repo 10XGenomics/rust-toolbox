@@ -25,19 +25,13 @@
 //
 // And these also need to go into the references on /mnt/opt and possibly /mnt/test.
 
-extern crate debruijn;
-extern crate exons;
-extern crate fasta;
-extern crate pretty_trace;
-extern crate string_utils;
-
 // extern crate vdj_asm_utils;
 // use vdj_asm_utils::*;
 
 use debruijn::{dna_string::*, *};
 use exons::*;
 use fasta::*;
-use pretty_trace::*;
+use pretty_trace::PrettyTrace;
 use std::{collections::HashMap, env};
 use string_utils::TextUtils;
 
