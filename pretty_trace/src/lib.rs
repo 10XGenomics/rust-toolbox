@@ -197,8 +197,8 @@ use backtrace::Backtrace;
 use backtrace::*;
 use failure::Error;
 use io_utils::*;
-use libc::{kill, SIGINT, SIGKILL, SIGUSR1};
 use lazy_static::lazy_static;
+use libc::{kill, SIGINT, SIGKILL, SIGUSR1};
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
 use stats_utils::*;
 use std::{
@@ -655,12 +655,12 @@ extern "C" fn handler(sig: i32) {
 /// Super simplifed concurrent HashMap for use with pretty_trace. The only public method is
 /// `insert`, allowing the user to set the current thread message.
 pub struct CHashMap<K, V> {
-    map: RwLock<HashMap<K, V>>
+    map: RwLock<HashMap<K, V>>,
 }
 
 impl<K, V> CHashMap<K, V>
-where 
-    K: std::hash::Hash + std::cmp::Eq
+where
+    K: std::hash::Hash + std::cmp::Eq,
 {
     pub fn new() -> CHashMap<K, V> {
         CHashMap {
@@ -672,7 +672,6 @@ where
         self.map.write().unwrap().insert(k, v);
     }
 }
-
 
 /// See <code>PrettyTrace</code> documentation for how this is used.
 
@@ -799,8 +798,22 @@ fn force_pretty_trace_fancy(
 
         let mut tm = String::new();
         let this_thread = thread::current().id();
-        if thread_message.map.read().unwrap().contains_key(&this_thread) {
-            tm = format!("{}\n\n", thread_message.map.read().unwrap().get(&this_thread).unwrap().deref());
+        if thread_message
+            .map
+            .read()
+            .unwrap()
+            .contains_key(&this_thread)
+        {
+            tm = format!(
+                "{}\n\n",
+                thread_message
+                    .map
+                    .read()
+                    .unwrap()
+                    .get(&this_thread)
+                    .unwrap()
+                    .deref()
+            );
         }
 
         // Handle verbose mode.
