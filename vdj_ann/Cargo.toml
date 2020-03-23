@@ -2,6 +2,7 @@
 name = "vdj_ann"
 version = "0.1.0"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com"]
+edition = "2018"
 
 [dependencies]
 align_tools = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
@@ -15,7 +16,7 @@ hyper = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
 io_utils = "0.2.4"
 itertools = "0.8"
 kmer_lookup = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
-pretty_trace = "0.1.1"
+pretty_trace = "0.3"
 serde = "1.0.90"
 serde_json = "1.0.41"
 sha2 = "0.8.0"
