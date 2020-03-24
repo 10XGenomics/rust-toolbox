@@ -79,20 +79,10 @@
 // For both: this code has the advantage of producing reproducible results from
 // defined external files.
 
-extern crate debruijn;
-extern crate fasta;
-extern crate flate2;
-#[macro_use]
-extern crate io_utils;
-extern crate pretty_trace;
-extern crate sha2;
-extern crate string_utils;
-extern crate vector_utils;
-
 use debruijn::{dna_string::*, *};
 use fasta::*;
 use flate2::read::MultiGzDecoder;
-use pretty_trace::*;
+use pretty_trace::PrettyTrace;
 use process::Command;
 use sha2::*;
 use std::io::copy;
@@ -106,6 +96,8 @@ use std::{
 };
 use string_utils::*;
 use vector_utils::*;
+
+use io_utils::{fwrite, fwriteln, open_for_read, open_for_write_new};
 
 fn header_from_gene(gene: &str, is_utr: bool, record: &mut usize, source: &str) -> String {
     let genev = gene.as_bytes();
