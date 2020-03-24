@@ -4,8 +4,14 @@
 // convert_text_with_ansi_escapes_to_html.
 //
 // LIMITATIONS
-// - This code only recognizes certain escape codes.
+//
+// - This code only recognizes certain escape codes.  However it's not clear in all cases how
+//   escape codes should be translated, e.g. is 01;47 background white or background gray?
+//   On a terminal, when tested, it appeared as background gray, but the wikipedia article seems
+//   to suggest that it should be background white.  So we do not attempt to translate it.
+//
 // - The run time and space usage are not optimized.
+//
 // - After a newline, possibly a </span> should be emitted.
 //
 // REFERENCES
@@ -229,16 +235,16 @@ fn ansi_escape_to_color_state(x: &[u8]) -> ColorState {
             background: String::new(),
             bold: false,
         }
-    } else if y.len() == 2 && y[0] == 1 && y[1] >= 30 && y[1] <= 37 {
+    } else if y.len() == 1 && y[0] >= 30 && y[0] <= 37 {
         ColorState {
-            color: rgb_to_html(&color_256_to_rgb(y[1] - 22)),
+            color: rgb_to_html(&color_256_to_rgb(y[0] - 30)),
             background: String::new(),
             bold: false,
         }
-    } else if y.len() == 2 && y[0] == 1 && y[1] >= 40 && y[1] <= 47 {
+    } else if y.len() == 1 && y[0] >= 40 && y[0] <= 47 {
         ColorState {
             color: String::new(),
-            background: rgb_to_html(&color_256_to_rgb(y[1] - 32)),
+            background: rgb_to_html(&color_256_to_rgb(y[0] - 40)),
             bold: false,
         }
     } else {
