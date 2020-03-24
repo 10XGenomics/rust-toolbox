@@ -231,6 +231,12 @@ fn ansi_escape_to_color_state(x: &[u8]) -> ColorState {
             background: String::new(),
             bold: false,
         }
+    } else if y.len() == 2 && y[1] >= 40 && y[1] <= 47 {
+        ColorState {
+            color: String::new(),
+            background: rgb_to_html(&color_256_to_rgb(y[1] - 30)),
+            bold: false,
+        }
     } else {
         panic!(
             "\nSorry, ANSI escape translation not implemented for {}.\n",
