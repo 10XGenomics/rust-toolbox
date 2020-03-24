@@ -192,7 +192,7 @@ fn merge(s: &Vec<ColorState>) -> ColorState {
         } else if !s[i].color.is_empty() {
             x.color = s[i].color.clone();
         } else if !s[i].background.is_empty() {
-            x.color = s[i].background.clone();
+            x.background = s[i].background.clone();
         } else {
             x.bold = true;
         }
