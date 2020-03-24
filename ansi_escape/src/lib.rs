@@ -62,7 +62,7 @@ pub fn best_color_order(i: usize) -> usize {
 // Miscellaneous escape codes.
 
 pub fn emit_red_escape(log: &mut Vec<u8>) {
-    log.append(&mut b"[01;31m".to_vec());
+    log.append(&mut b"[31m".to_vec());
 }
 
 pub fn emit_blue_escape(log: &mut Vec<u8>) {
@@ -70,7 +70,7 @@ pub fn emit_blue_escape(log: &mut Vec<u8>) {
 }
 
 pub fn emit_green_escape(log: &mut Vec<u8>) {
-    log.append(&mut b"[01;32m".to_vec());
+    log.append(&mut b"[32m".to_vec());
 }
 
 pub fn emit_bold_escape(log: &mut Vec<u8>) {
