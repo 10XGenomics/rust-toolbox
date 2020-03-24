@@ -47,7 +47,11 @@ pub fn convert_text_with_ansi_escapes_to_html(
                 }
                 states.clear();
             }
-            html.push(y[i]);
+            if y[i] != '<' {
+                html.push(y[i]);
+            } else {
+                html += "&lt;";
+            }
             i += 1;
         } else {
             let mut j = i + 1;
