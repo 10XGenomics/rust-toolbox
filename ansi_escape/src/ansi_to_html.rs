@@ -100,9 +100,46 @@ fn html_tail() -> String {
 }
 
 // Convert an ANSI escape color code in [0,256) to (r,g,b).
-// See https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit.
+// See https://en.wikipedia.org/wiki/ANSI_escape_code.
+// For 0-15, we use what wikipedia calls the "Terminal.app" colors for 30-37,90-97.
+// as listed in the table for 3/4 bit.
 
 fn color_256_to_rgb(c: u8) -> (u8, u8, u8) {
+
+    if c == 0 {
+        (0, 0, 0)
+    } else if c == 1 {
+        (194,54,33)
+    } else if c == 2 {
+        (37,188,36)
+    } else if c == 3 {
+        (173,173,39)
+    } else if c == 4 {
+        (73,46,225)
+    } else if c == 5 {
+        (211,56,211)
+    } else if c == 6 {
+        (51,187,200)
+    } else if c == 7 {
+        (203,204,205)
+    } else if c == 8 {
+        (129,131,131)
+    } else if c == 9 {
+        (252,57,31)
+    } else if c == 10 {
+        (49,231,34)
+    } else if c == 11 {
+        (234,236,35)
+    } else if c == 12 {
+        (88,51,255)
+    } else if c == 13 {
+        (249,53,248)
+    } else if c == 14 {
+        (20,240,240)
+    } else if c == 15 {
+        (233,235,235)
+
+    /*
     if c <= 6 {
         (128 * (c % 2), 128 * ((c / 2) % 2), 128 * (c / 4))
     } else if c == 7 {
@@ -115,6 +152,8 @@ fn color_256_to_rgb(c: u8) -> (u8, u8, u8) {
             255 * (((c - 8) / 2) % 2),
             255 * ((c - 8) / 4),
         )
+    */
+
     } else if c <= 231 {
         let mut x = c - 16;
         let r = x / 36;
