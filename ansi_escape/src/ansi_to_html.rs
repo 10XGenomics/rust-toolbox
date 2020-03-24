@@ -229,16 +229,16 @@ fn ansi_escape_to_color_state(x: &[u8]) -> ColorState {
             background: String::new(),
             bold: false,
         }
-    } else if y.len() == 2 && y[1] >= 30 && y[1] <= 37 {
+    } else if y.len() == 2 && y[0] == 1 && y[1] >= 30 && y[1] <= 37 {
         ColorState {
-            color: rgb_to_html(&color_256_to_rgb(y[1] - 30)),
+            color: rgb_to_html(&color_256_to_rgb(y[1] - 22)),
             background: String::new(),
             bold: false,
         }
-    } else if y.len() == 2 && y[1] >= 40 && y[1] <= 47 {
+    } else if y.len() == 2 && y[0] == 1 && y[1] >= 40 && y[1] <= 47 {
         ColorState {
             color: String::new(),
-            background: rgb_to_html(&color_256_to_rgb(y[1] - 30)),
+            background: rgb_to_html(&color_256_to_rgb(y[1] - 32)),
             bold: false,
         }
     } else {
