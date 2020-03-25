@@ -49,11 +49,10 @@ pub fn convert_text_with_ansi_escapes_to_html(
             if !states.is_empty() {
                 let new_state = merge(&states);
                 if new_state != current_state {
-                    if !current_state.null() {
+                    if !current_state.null() && !new_state.null() {
                         html += "</span>";
                     }
                     html += &new_state.html();
-
                     current_state = new_state;
                 }
                 states.clear();
