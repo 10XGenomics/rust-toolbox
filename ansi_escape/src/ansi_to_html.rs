@@ -34,6 +34,8 @@
 use string_utils::*;
 use vector_utils::*;
 
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
 pub fn convert_text_with_ansi_escapes_to_html(
     x: &str,
     source: &str,
@@ -86,6 +88,8 @@ pub fn convert_text_with_ansi_escapes_to_html(
     }
     format!("{}{}", html, html_tail())
 }
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 // Remove redundant ansi escape sequences.  Note that this only recognizes certain escapes.
 
@@ -170,6 +174,8 @@ pub fn compress_ansi_escapes(
     out
 }
 
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
 fn html_head(source: &str, title: &str, font_family: &str, font_size: usize) -> String {
     format!(
         "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
@@ -184,9 +190,13 @@ fn html_head(source: &str, title: &str, font_family: &str, font_size: usize) -> 
     )
 }
 
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
 fn html_tail() -> String {
     format!("</pre>\n</body>\n</html>\n")
 }
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 // Unpack an ANSI escape sequence into a vector of integers.  This assumes that semicolons are
 // used as separators.
@@ -204,6 +214,8 @@ fn unpack_ansi_escape(x: &[u8]) -> Vec<u8> {
     y
 }
 
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
 // Reverse the process.
 
 fn pack_ansi_escape(y: &[u8]) -> Vec<u8> {
@@ -218,11 +230,15 @@ fn pack_ansi_escape(y: &[u8]) -> Vec<u8> {
     x
 }
 
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
 // Convert an rgb code to a seven-character html string.
 
 fn rgb_to_html(rgb: &(u8, u8, u8)) -> String {
     format!("#{:02x}{:02x}{:02x}", rgb.0, rgb.1, rgb.2)
 }
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 // ColorState semantics are as follows:
 // - initially only one thing is set;
@@ -260,6 +276,8 @@ impl ColorState {
     }
 }
 
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
 fn merge(s: &Vec<ColorState>) -> ColorState {
     let mut x = ColorState::default();
     for i in 0..s.len() {
@@ -277,6 +295,8 @@ fn merge(s: &Vec<ColorState>) -> ColorState {
     }
     x
 }
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 // Translate an ANSI escape sequence into a ColorState.  This only works for certain ANSI escape
 // sequences, but could be generalized.
@@ -326,6 +346,8 @@ fn ansi_escape_to_color_state(x: &[u8]) -> ColorState {
         );
     }
 }
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 // Convert an ANSI escape color code in [0,256) to (r,g,b).
 // See https://en.wikipedia.org/wiki/ANSI_escape_code.
