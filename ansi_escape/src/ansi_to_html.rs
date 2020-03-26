@@ -1,7 +1,8 @@
 // Copyright (c) 2020 10X Genomics, Inc. All rights reserved.
 
-// Convert text containing ANSI escape codes to html.  There is a single public function
-// convert_text_with_ansi_escapes_to_html.
+// Convert text containing ANSI escape codes to html.  There is a public function
+// convert_text_with_ansi_escapes_to_html, and there is also a related public function
+// compress_ansi_escapes.
 //
 // FEATURES AND LIMITATIONS
 //
@@ -31,6 +32,9 @@
 // translates colors differently.
 
 use string_utils::*;
+use vector_utils::*;
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 pub fn convert_text_with_ansi_escapes_to_html(
     x: &str,
@@ -85,6 +89,116 @@ pub fn convert_text_with_ansi_escapes_to_html(
     format!("{}{}", html, html_tail())
 }
 
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+// Remove redundant ansi escape sequences.  Note that this only recognizes certain escapes.
+
+pub fn compress_ansi_escapes(x: &str) -> String {
+    let y: Vec<char> = x.chars().collect();
+    let mut out = String::new();
+    let mut escapes = Vec::<Vec<u8>>::new();
+    let mut old_state = ColorState::default();
+    let mut on = false;
+    let mut i = 0;
+    while i < y.len() {
+        if y[i] != '' {
+            if !escapes.is_empty() {
+                let mut states = Vec::<ColorState>::new();
+                for j in 0..escapes.len() {
+                    states.push(ansi_escape_to_color_state(&pack_ansi_escape(&escapes[j])));
+                }
+                let new_state = merge(&states);
+                if new_state != old_state {
+                    let mut end = None;
+                    for i in 0..escapes.len() {
+                        if escapes[i].solo() && escapes[i][0] == 0 {
+                            end = Some(i);
+                        }
+                    }
+                    if end.is_some() {
+                        escapes = escapes[end.unwrap() + 1..escapes.len()].to_vec();
+                    }
+                    if escapes.is_empty() {
+                        // Emit end escape.
+
+                        out += "[0m";
+                        on = false;
+                    } else {
+                        let mut reset = false;
+                        if on
+                            && ((old_state.bold && !new_state.bold)
+                                || (old_state.color.len() > 0 && new_state.color.len() == 0)
+                                || (old_state.background.len() > 0
+                                    && new_state.background.len() == 0))
+                        {
+                            out += "[0m";
+                            reset = true;
+                        }
+                        on = true;
+
+                        // Emit bold, then color, then background.
+
+                        for e in escapes.iter() {
+                            if e.solo() && e[0] == 1 {
+                                if reset || new_state.bold != old_state.bold {
+                                    out += &format!("{}", strme(&pack_ansi_escape(&e)));
+                                }
+                                break;
+                            }
+                        }
+                        for i in (0..escapes.len()).rev() {
+                            let y = &escapes[i];
+                            if (y.solo() && y[0] >= 30 && y[0] <= 37)
+                                || (y.len() == 3 && y[0] == 38 && y[1] == 5)
+                            {
+                                if reset || new_state.color != old_state.color {
+                                    out += &format!("{}", strme(&pack_ansi_escape(&y)));
+                                }
+                                break;
+                            }
+                        }
+                        for i in (0..escapes.len()).rev() {
+                            let y = &escapes[i];
+                            if (y.solo() && y[0] >= 40 && y[0] <= 47)
+                                || (y.len() == 3 && y[0] == 48 && y[1] == 5)
+                            {
+                                if reset || new_state.background != old_state.background {
+                                    out += &format!("{}", strme(&pack_ansi_escape(&y)));
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    old_state = new_state;
+                }
+                escapes.clear();
+            }
+            out.push(y[i]);
+            i += 1;
+        } else {
+            let mut j = i + 1;
+            loop {
+                if y[j] == 'm' {
+                    break;
+                }
+                j += 1;
+            }
+            let mut e = Vec::<u8>::new();
+            for m in i..=j {
+                e.push(y[m] as u8);
+            }
+            escapes.push(unpack_ansi_escape(&e));
+            i = j + 1;
+        }
+    }
+    if on {
+        out += "[0m";
+    }
+    out
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
 fn html_head(source: &str, title: &str, font_family: &str, font_size: usize) -> String {
     format!(
         "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
@@ -99,9 +213,171 @@ fn html_head(source: &str, title: &str, font_family: &str, font_size: usize) -> 
     )
 }
 
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
 fn html_tail() -> String {
     format!("</pre>\n</body>\n</html>\n")
 }
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+// Unpack an ANSI escape sequence into a vector of integers.  This assumes that semicolons are
+// used as separators.
+
+fn unpack_ansi_escape(x: &[u8]) -> Vec<u8> {
+    let n = x.len();
+    if x[0] != b'' {
+        panic!(
+            "unpack_ansi_escape passed something that is not an escape sequence: \"{}\" \
+            (len={})",
+            strme(x),
+            x.len()
+        );
+    }
+    assert_eq!(x[1], b'[');
+    assert_eq!(x[n - 1], b'm');
+    let s = x[2..n - 1].split(|c| *c == b';').collect::<Vec<&[u8]>>();
+    let mut y = Vec::<u8>::new();
+    for i in 0..s.len() {
+        y.push(strme(&s[i]).force_usize() as u8);
+    }
+    y
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+// Reverse the process.
+
+fn pack_ansi_escape(y: &[u8]) -> Vec<u8> {
+    let mut x = b"[".to_vec();
+    for i in 0..y.len() {
+        if i > 0 {
+            x.push(b';');
+        }
+        x.append(&mut format!("{}", y[i]).as_bytes().to_vec());
+    }
+    x.push(b'm');
+    x
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+// Convert an rgb code to a seven-character html string.
+
+fn rgb_to_html(rgb: &(u8, u8, u8)) -> String {
+    format!("#{:02x}{:02x}{:02x}", rgb.0, rgb.1, rgb.2)
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+// ColorState semantics are as follows:
+// - initially only one thing is set;
+// - if nothing is set, it means clear;
+// - after merging, any combination can be set (and nothing still means clear).
+
+#[derive(Default, PartialEq, Eq)]
+struct ColorState {
+    color: String,
+    background: String,
+    bold: bool,
+}
+
+impl ColorState {
+    fn null(&self) -> bool {
+        self.color.is_empty() && self.background.is_empty() && !self.bold
+    }
+    fn html(&self) -> String {
+        if self.null() {
+            "</span>".to_string()
+        } else {
+            let mut s = "<span style=\"".to_string();
+            if !self.color.is_empty() {
+                s += &format!("color:{};", self.color);
+            }
+            if !self.background.is_empty() {
+                s += &format!("background-color:{};", self.background);
+            }
+            if self.bold {
+                s += &format!("font-weight:bold;")
+            }
+            s += "\">";
+            s
+        }
+    }
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+fn merge(s: &Vec<ColorState>) -> ColorState {
+    let mut x = ColorState::default();
+    for i in 0..s.len() {
+        if s[i].null() {
+            x.color = String::new();
+            x.background = String::new();
+            x.bold = false;
+        } else if !s[i].color.is_empty() {
+            x.color = s[i].color.clone();
+        } else if !s[i].background.is_empty() {
+            x.background = s[i].background.clone();
+        } else {
+            x.bold = true;
+        }
+    }
+    x
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+// Translate an ANSI escape sequence into a ColorState.  This only works for certain ANSI escape
+// sequences, but could be generalized.
+
+fn ansi_escape_to_color_state(x: &[u8]) -> ColorState {
+    let y = unpack_ansi_escape(&x);
+    if y.len() == 3 && y[0] == 38 && y[1] == 5 {
+        ColorState {
+            color: rgb_to_html(&color_256_to_rgb(y[2])),
+            background: String::new(),
+            bold: false,
+        }
+    } else if y.len() == 3 && y[0] == 48 && y[1] == 5 {
+        ColorState {
+            color: String::new(),
+            background: rgb_to_html(&color_256_to_rgb(y[2])),
+            bold: false,
+        }
+    } else if y.len() == 1 && y[0] == 1 {
+        ColorState {
+            color: String::new(),
+            background: String::new(),
+            bold: true,
+        }
+    } else if y.len() == 1 && y[0] == 0 {
+        ColorState {
+            color: String::new(),
+            background: String::new(),
+            bold: false,
+        }
+    } else if y.len() == 1 && y[0] >= 30 && y[0] <= 37 {
+        ColorState {
+            color: rgb_to_html(&color_256_to_rgb(y[0] - 30)),
+            background: String::new(),
+            bold: false,
+        }
+    } else if y.len() == 1 && y[0] >= 40 && y[0] <= 47 {
+        ColorState {
+            color: String::new(),
+            background: rgb_to_html(&color_256_to_rgb(y[0] - 40)),
+            bold: false,
+        }
+    } else {
+        panic!(
+            "\nSorry, ANSI escape translation not implemented for {}.\n",
+            strme(&x)
+        );
+    }
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 // Convert an ANSI escape color code in [0,256) to (r,g,b).
 // See https://en.wikipedia.org/wiki/ANSI_escape_code.
@@ -671,130 +947,5 @@ fn color_256_to_rgb(c: u8) -> (u8, u8, u8) {
             let z = (((c - 232) as usize * 32) / 3) as u8;
             (z, z, z)
         */
-    }
-}
-
-// Unpack an ANSI escape sequence into a vector of integers.  This assumes that semicolons are
-// used as separators.
-
-fn unpack_ansi_escape(x: &[u8]) -> Vec<u8> {
-    let n = x.len();
-    assert_eq!(x[0], b'');
-    assert_eq!(x[1], b'[');
-    assert_eq!(x[n - 1], b'm');
-    let s = x[2..n - 1].split(|c| *c == b';').collect::<Vec<&[u8]>>();
-    let mut y = Vec::<u8>::new();
-    for i in 0..s.len() {
-        y.push(strme(&s[i]).force_usize() as u8);
-    }
-    y
-}
-
-// Convert an rgb code to a seven-character html string.
-
-fn rgb_to_html(rgb: &(u8, u8, u8)) -> String {
-    format!("#{:02x}{:02x}{:02x}", rgb.0, rgb.1, rgb.2)
-}
-
-// ColorState semantics are as follows:
-// - initially only one thing is set;
-// - if nothing is set, it means clear;
-// - after merging, any combination can be set (and nothing still means clear).
-
-#[derive(Default, PartialEq, Eq)]
-struct ColorState {
-    color: String,
-    background: String,
-    bold: bool,
-}
-
-impl ColorState {
-    fn null(&self) -> bool {
-        self.color.is_empty() && self.background.is_empty() && !self.bold
-    }
-    fn html(&self) -> String {
-        if self.null() {
-            "</span>".to_string()
-        } else {
-            let mut s = "<span style=\"".to_string();
-            if !self.color.is_empty() {
-                s += &format!("color:{};", self.color);
-            }
-            if !self.background.is_empty() {
-                s += &format!("background-color:{};", self.background);
-            }
-            if self.bold {
-                s += &format!("font-weight:bold;")
-            }
-            s += "\">";
-            s
-        }
-    }
-}
-
-fn merge(s: &Vec<ColorState>) -> ColorState {
-    let mut x = ColorState::default();
-    for i in 0..s.len() {
-        if s[i].null() {
-            x.color = String::new();
-            x.background = String::new();
-            x.bold = false;
-        } else if !s[i].color.is_empty() {
-            x.color = s[i].color.clone();
-        } else if !s[i].background.is_empty() {
-            x.background = s[i].background.clone();
-        } else {
-            x.bold = true;
-        }
-    }
-    x
-}
-
-// Translate an ANSI escape sequence into a ColorState.  This only works for certain ANSI escape
-// sequences, but could be generalized.
-
-fn ansi_escape_to_color_state(x: &[u8]) -> ColorState {
-    let y = unpack_ansi_escape(&x);
-    if y.len() == 3 && y[0] == 38 && y[1] == 5 {
-        ColorState {
-            color: rgb_to_html(&color_256_to_rgb(y[2])),
-            background: String::new(),
-            bold: false,
-        }
-    } else if y.len() == 3 && y[0] == 48 && y[1] == 5 {
-        ColorState {
-            color: String::new(),
-            background: rgb_to_html(&color_256_to_rgb(y[2])),
-            bold: false,
-        }
-    } else if y.len() == 1 && y[0] == 1 {
-        ColorState {
-            color: String::new(),
-            background: String::new(),
-            bold: true,
-        }
-    } else if y.len() == 1 && y[0] == 0 {
-        ColorState {
-            color: String::new(),
-            background: String::new(),
-            bold: false,
-        }
-    } else if y.len() == 1 && y[0] >= 30 && y[0] <= 37 {
-        ColorState {
-            color: rgb_to_html(&color_256_to_rgb(y[0] - 30)),
-            background: String::new(),
-            bold: false,
-        }
-    } else if y.len() == 1 && y[0] >= 40 && y[0] <= 47 {
-        ColorState {
-            color: String::new(),
-            background: rgb_to_html(&color_256_to_rgb(y[0] - 40)),
-            bold: false,
-        }
-    } else {
-        panic!(
-            "\nSorry, ANSI escape translation not implemented for {}.\n",
-            strme(&x)
-        );
     }
 }

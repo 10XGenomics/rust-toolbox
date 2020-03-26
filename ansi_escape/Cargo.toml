@@ -7,3 +7,4 @@ description = "Some tools that are 'internal' for now because they are insuffici
 
 [dependencies]
 string_utils = "0.1.0"
+vector_utils = "0.1.0"
