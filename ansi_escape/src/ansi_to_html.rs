@@ -109,7 +109,6 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                 }
                 let new_state = merge(&states);
                 if new_state != old_state {
-                    old_state = new_state;
                     let mut end = None;
                     for i in 0..escapes.len() {
                         if escapes[i].solo() && escapes[i][0] == 0 {
@@ -125,13 +124,25 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                         out += "[0m";
                         on = false;
                     } else {
+                        let mut reset = false;
+                        if on
+                            && ((!old_state.bold && new_state.bold)
+                                || (old_state.color.len() > 0 && new_state.color.len() == 0)
+                                || (old_state.background.len() > 0
+                                    && new_state.background.len() == 0))
+                        {
+                            out += "[0m";
+                            reset = true;
+                        }
                         on = true;
 
                         // Emit bold, then color, then background.
 
                         for e in escapes.iter() {
                             if e.solo() && e[0] == 1 {
-                                out += &format!("{}", strme(&pack_ansi_escape(&e)));
+                                if reset || new_state.bold != old_state.bold {
+                                    out += &format!("{}", strme(&pack_ansi_escape(&e)));
+                                }
                                 break;
                             }
                         }
@@ -140,7 +151,9 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                             if (y.solo() && y[0] >= 30 && y[0] <= 37)
                                 || (y.len() == 3 && y[0] == 38 && y[1] == 5)
                             {
-                                out += &format!("{}", strme(&pack_ansi_escape(&y)));
+                                if reset || new_state.color != old_state.color {
+                                    out += &format!("{}", strme(&pack_ansi_escape(&y)));
+                                }
                                 break;
                             }
                         }
@@ -149,11 +162,14 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                             if (y.solo() && y[0] >= 40 && y[0] <= 47)
                                 || (y.len() == 3 && y[0] == 48 && y[1] == 5)
                             {
-                                out += &format!("{}", strme(&pack_ansi_escape(&y)));
+                                if reset || new_state.background != old_state.background {
+                                    out += &format!("{}", strme(&pack_ansi_escape(&y)));
+                                }
                                 break;
                             }
                         }
                     }
+                    old_state = new_state;
                 }
                 escapes.clear();
             }
