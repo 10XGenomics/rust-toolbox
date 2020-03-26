@@ -126,7 +126,7 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                     } else {
                         let mut reset = false;
                         if on
-                            && ((!old_state.bold && new_state.bold)
+                            && ((old_state.bold && !new_state.bold)
                                 || (old_state.color.len() > 0 && new_state.color.len() == 0)
                                 || (old_state.background.len() > 0
                                     && new_state.background.len() == 0))
