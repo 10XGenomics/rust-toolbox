@@ -93,58 +93,65 @@ pub fn convert_text_with_ansi_escapes_to_html(
 
 // Remove redundant ansi escape sequences.  Note that this only recognizes certain escapes.
 
-pub fn compress_ansi_escapes(
-    x: &str,
-) -> String {
+pub fn compress_ansi_escapes(x: &str) -> String {
     let y: Vec<char> = x.chars().collect();
     let mut out = String::new();
     let mut escapes = Vec::<Vec<u8>>::new();
+    let mut old_state = ColorState::default();
     let mut on = true;
     let mut i = 0;
     while i < y.len() {
         if y[i] != '' {
             if !escapes.is_empty() {
-                let mut end = None;
-                for i in 0..escapes.len() {
-                    if escapes[i].solo() && escapes[i][0] == 0 {
-                        end = Some(i);
-                    }
+                let mut states = Vec::<ColorState>::new();
+                for j in 0..escapes.len() {
+                    states.push(ansi_escape_to_color_state(&escapes[j]));
                 }
-                if end.is_some() {
-                    escapes = escapes[end.unwrap()+1..escapes.len()].to_vec();
-                }
-                if escapes.is_empty() {
-
-                    // Emit end escape.
-
-                    out += "[0m";
-                    on = false;
-
-                } else {
-                    on = true;
-
-                    // Emit bold, then color, then background.
-
-                    for e in escapes.iter() {
-                        if e.solo() && e[0] == 1 {
-                            out += &format!("{}", strme(&pack_ansi_escape(&e)));
-                            break;
+                let new_state = merge(&states);
+                if new_state != old_state {
+                    old_state = new_state;
+                    let mut end = None;
+                    for i in 0..escapes.len() {
+                        if escapes[i].solo() && escapes[i][0] == 0 {
+                            end = Some(i);
                         }
                     }
-                    for i in (0..escapes.len()).rev() {
-                        let y = &escapes[i];
-                        if ( y.solo() && y[0] >= 30 && y[0] <= 37 )
-                            || ( y.len() == 3 && y[0] == 38 && y[1] == 5 ) {
-                            out += &format!("{}", strme(&pack_ansi_escape(&y)));
-                            break;
-                        }
+                    if end.is_some() {
+                        escapes = escapes[end.unwrap() + 1..escapes.len()].to_vec();
                     }
-                    for i in (0..escapes.len()).rev() {
-                        let y = &escapes[i];
-                        if ( y.solo() && y[0] >= 40 && y[0] <= 47 )
-                            || ( y.len() == 3 && y[0] == 48 && y[1] == 5 ) {
-                            out += &format!("{}", strme(&pack_ansi_escape(&y)));
-                            break;
+                    if escapes.is_empty() {
+                        // Emit end escape.
+
+                        out += "[0m";
+                        on = false;
+                    } else {
+                        on = true;
+
+                        // Emit bold, then color, then background.
+
+                        for e in escapes.iter() {
+                            if e.solo() && e[0] == 1 {
+                                out += &format!("{}", strme(&pack_ansi_escape(&e)));
+                                break;
+                            }
+                        }
+                        for i in (0..escapes.len()).rev() {
+                            let y = &escapes[i];
+                            if (y.solo() && y[0] >= 30 && y[0] <= 37)
+                                || (y.len() == 3 && y[0] == 38 && y[1] == 5)
+                            {
+                                out += &format!("{}", strme(&pack_ansi_escape(&y)));
+                                break;
+                            }
+                        }
+                        for i in (0..escapes.len()).rev() {
+                            let y = &escapes[i];
+                            if (y.solo() && y[0] >= 40 && y[0] <= 47)
+                                || (y.len() == 3 && y[0] == 48 && y[1] == 5)
+                            {
+                                out += &format!("{}", strme(&pack_ansi_escape(&y)));
+                                break;
+                            }
                         }
                     }
                 }
@@ -224,7 +231,7 @@ fn pack_ansi_escape(y: &[u8]) -> Vec<u8> {
         if i > 0 {
             x.push(b';');
         }
-        x.append(&mut format!("{}",y[i]).as_bytes().to_vec());
+        x.append(&mut format!("{}", y[i]).as_bytes().to_vec());
     }
     x.push(b'm');
     x
