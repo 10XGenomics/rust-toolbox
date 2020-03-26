@@ -212,8 +212,10 @@ fn unpack_ansi_escape(x: &[u8]) -> Vec<u8> {
     let n = x.len();
     if x[0] != b'' {
         panic!(
-            "\nunpack_ansi_escape passed something that is not an escape sequence: \"{}\"",
-            strme(x)
+            "\nunpack_ansi_escape passed something that is not an escape sequence: \"{}\" \
+            (len={})",
+            strme(x),
+            x.len()
         );
     }
     assert_eq!(x[1], b'[');
