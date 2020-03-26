@@ -210,7 +210,12 @@ fn html_tail() -> String {
 
 fn unpack_ansi_escape(x: &[u8]) -> Vec<u8> {
     let n = x.len();
-    assert_eq!(x[0], b'');
+    if x[0] != b'' {
+        panic!(
+            "\nunpack_ansi_escape passed something that is not an escape sequence: \"{}\"",
+            strme(x)
+        );
+    }
     assert_eq!(x[1], b'[');
     assert_eq!(x[n - 1], b'm');
     let s = x[2..n - 1].split(|c| *c == b';').collect::<Vec<&[u8]>>();
