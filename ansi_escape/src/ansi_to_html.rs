@@ -98,7 +98,7 @@ pub fn compress_ansi_escapes(x: &str) -> String {
     let mut out = String::new();
     let mut escapes = Vec::<Vec<u8>>::new();
     let mut old_state = ColorState::default();
-    let mut on = true;
+    let mut on = false;
     let mut i = 0;
     while i < y.len() {
         if y[i] != '' {
