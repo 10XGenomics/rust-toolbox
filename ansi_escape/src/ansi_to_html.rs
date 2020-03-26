@@ -105,7 +105,7 @@ pub fn compress_ansi_escapes(x: &str) -> String {
             if !escapes.is_empty() {
                 let mut states = Vec::<ColorState>::new();
                 for j in 0..escapes.len() {
-                    states.push(ansi_escape_to_color_state(&escapes[j]));
+                    states.push(ansi_escape_to_color_state(&pack_ansi_escape(&escapes[j])));
                 }
                 let new_state = merge(&states);
                 if new_state != old_state {
