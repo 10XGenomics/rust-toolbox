@@ -265,7 +265,12 @@ pub fn print_tabular_vbox(
         );
         eprintln!("justify = {}", strme(&justify));
         for i in 0..rows.len() {
-            eprintln!("row {} = {}", i + 1, rows[i].iter().format(","));
+            eprintln!(
+                "row {} = {} = {}",
+                i + 1,
+                rows[i].len(),
+                rows[i].iter().format(",")
+            );
         }
         assert_eq!(just.len(), ncols);
     }
