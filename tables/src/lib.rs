@@ -264,6 +264,9 @@ pub fn print_tabular_vbox(
             just.len()
         );
         eprintln!("justify = {}", strme(&justify));
+        for i in 0..rows.len() {
+            eprintln!("row {} = {}", i + 1, rows[i].iter().format(","));
+        }
         assert_eq!(just.len(), ncols);
     }
     let mut maxcol = vec![0; ncols];
