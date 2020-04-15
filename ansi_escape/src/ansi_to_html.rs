@@ -50,7 +50,7 @@ pub fn convert_text_with_ansi_escapes_to_svg(
     // Compute separations.  These may be font-specific; optimized for Menlo.
 
     let vsep = (19.1/15.0) * font_size as f64;
-    let hsep = 0.75 * font_size as f64;
+    let hsep = 0.65 * font_size as f64;
 
     // Proceed.
 
@@ -68,7 +68,7 @@ pub fn convert_text_with_ansi_escapes_to_svg(
         svg += &format!("<text x=\"{}\" y=\"{:.1}\" font-family=\"{}\" font-size=\"{}\" \
                 style=\"white-space: pre;\">",
             0,
-            m as f64 * vsep,
+            (m+1) as f64 * vsep,
             font_family,
             font_size,
         );
