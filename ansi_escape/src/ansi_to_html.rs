@@ -46,7 +46,7 @@ pub fn convert_text_with_ansi_escapes_to_svg(
     font_family: &str,
     font_size: usize,
 ) -> String {
-    let vsep = (20.0/15.0) * font_size as f64; // not sure how specific this might be to the font
+    let vsep = (19.5/15.0) * font_size as f64; // not sure how specific this might be to the font
     let lines0 = x.split('\n').collect::<Vec<&str>>();
     let height = vsep * lines0.len() as f64;
     let mut lines = Vec::<String>::new();
