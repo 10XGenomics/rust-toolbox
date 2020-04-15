@@ -30,9 +30,97 @@
 // A program that translates text with arbitrary ANSI escape codes to html, so more general
 // than what is done here.  However this code produces html that is shorter.  And this code
 // translates colors differently.
+//
+// svg translation added
 
+use std::cmp::max;
 use string_utils::*;
 use vector_utils::*;
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+// This does not translate background!
+
+pub fn convert_text_with_ansi_escapes_to_svg(
+    x: &str,
+    font_family: &str,
+    font_size: usize,
+) -> String {
+    let vsep = (19.0/15.0) * font_size as f64; // not sure how specific this might be to the font
+    let lines0 = x.split('\n').collect::<Vec<&str>>();
+    let height = vsep * lines0.len() as f64;
+    let mut lines = Vec::<String>::new();
+    lines.push("<svg version=\"1.1\"".to_string());
+    lines.push("".to_string()); // PLACEHOLDER
+    lines.push("xmlns=\"http://www.w3.org/2000/svg\">".to_string());
+    let mut max_width = 0;
+    for m in 0..lines0.len() {
+        let t = &lines0[m];
+        let mut width = 0;
+        let mut svg = String::new();
+        svg += &format!("<text x=\"{}\" y=\"{:.1}\" font-family=\"{}\" font-size=\"{}\" \
+                style=\"white-space: pre;\">",
+            0,
+            m as f64 * vsep,
+            font_family,
+            font_size,
+        );
+        let y: Vec<char> = t.chars().collect();
+        let mut states = Vec::<ColorState>::new();
+        let mut current_state = ColorState::default();
+        let mut i = 0;
+        while i < y.len() {
+            if y[i] != '' {
+                width += 1;
+                if !states.is_empty() {
+                    let new_state = merge(&states);
+                    if new_state != current_state {
+                        if !current_state.null() && !new_state.null() {
+                            svg += "</tspan>";
+                        }
+                        svg += &new_state.svg();
+                        current_state = new_state;
+                    }
+                    states.clear();
+                }
+                if y[i] != '<' {
+                    svg.push(y[i]);
+                } else {
+                    svg += "&lt;";
+                }
+                i += 1;
+            } else {
+                let mut j = i + 1;
+                loop {
+                    if y[j] == 'm' {
+                        break;
+                    }
+                    j += 1;
+                }
+                let mut e = Vec::<u8>::new();
+                for m in i..=j {
+                    e.push(y[m] as u8);
+                }
+                states.push(ansi_escape_to_color_state(&e));
+                i = j + 1;
+            }
+        }
+        max_width = max( width, max_width );
+        if !states.is_empty() {
+            svg += &merge(&states).svg();
+        }
+        svg += "</text>";
+        lines.push(svg);
+    }
+    lines[1] = format!("viewBox=\"0 0 {} {}\"", max_width * font_size, height);
+    let mut svg = String::new();
+    for i in 0..lines.len() {
+        svg += &lines[i];
+        svg += "\n";
+    }
+    svg += "</svg>\n";
+    svg
+}
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
@@ -299,6 +387,24 @@ impl ColorState {
             }
             if self.bold {
                 s += &format!("font-weight:bold;")
+            }
+            s += "\">";
+            s
+        }
+    }
+
+    // This does not translate background!
+
+    fn svg(&self) -> String {
+        if self.null() {
+            "</tspan>".to_string()
+        } else {
+            let mut s = "<tspan style=\"".to_string();
+            if !self.color.is_empty() {
+                s += &format!("fill: {};", self.color);
+            }
+            if self.bold {
+                s += &format!("font-weight: bold;")
             }
             s += "\">";
             s
