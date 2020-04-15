@@ -54,7 +54,7 @@ pub fn convert_text_with_ansi_escapes_to_svg(
     // Proceed.
 
     let lines0 = x.split('\n').collect::<Vec<&str>>();
-    let height = vsep * (lines0.len() as f64 - 1.5);
+    let height = vsep * (lines0.len() as f64 - 1.2);
     let mut lines = Vec::<String>::new();
     lines.push("<svg version=\"1.1\"".to_string());
     lines.push("".to_string()); // PLACEHOLDER
