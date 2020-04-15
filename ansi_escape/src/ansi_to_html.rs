@@ -46,7 +46,14 @@ pub fn convert_text_with_ansi_escapes_to_svg(
     font_family: &str,
     font_size: usize,
 ) -> String {
-    let vsep = (19.1/15.0) * font_size as f64; // not sure how specific this might be to the font
+
+    // Compute separations.  These may be font-specific; optimized for Menlo.
+
+    let vsep = (19.1/15.0) * font_size as f64;
+    let hsep = 0.75 * font_size as f64;
+
+    // Proceed.
+
     let lines0 = x.split('\n').collect::<Vec<&str>>();
     let height = vsep * lines0.len() as f64;
     let mut lines = Vec::<String>::new();
@@ -112,7 +119,7 @@ pub fn convert_text_with_ansi_escapes_to_svg(
         svg += "</text>";
         lines.push(svg);
     }
-    lines[1] = format!("viewBox=\"0 0 {} {}\"", max_width * font_size, height);
+    lines[1] = format!("viewBox=\"0 0 {} {}\"", max_width as f64 * hsep, height);
     let mut svg = String::new();
     for i in 0..lines.len() {
         svg += &lines[i];
