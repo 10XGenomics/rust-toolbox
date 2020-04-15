@@ -46,7 +46,10 @@ pub fn convert_text_with_ansi_escapes_to_svg(
     font_family: &str,
     font_size: usize,
 ) -> String {
-    let vsep = (19.5/15.0) * font_size as f64; // not sure how specific this might be to the font
+    // Increasing 19.0 below to 19.5 causes vertical box characters to appear separated.
+    // However it would appear that it should be increased by some small amount to get the aspect 
+    // ratio to match what is observed in a terminal window.
+    let vsep = (19.0/15.0) * font_size as f64; // not sure how specific this might be to the font
     let lines0 = x.split('\n').collect::<Vec<&str>>();
     let height = vsep * lines0.len() as f64;
     let mut lines = Vec::<String>::new();
