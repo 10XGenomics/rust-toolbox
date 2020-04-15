@@ -46,16 +46,15 @@ pub fn convert_text_with_ansi_escapes_to_svg(
     font_family: &str,
     font_size: usize,
 ) -> String {
-
     // Compute separations.  These may be font-specific; optimized for Menlo.
 
-    let vsep = (19.1/15.0) * font_size as f64;
-    let hsep = 0.65 * font_size as f64;
+    let vsep = (19.1 / 15.0) * font_size as f64;
+    let hsep = 0.63 * font_size as f64;
 
     // Proceed.
 
     let lines0 = x.split('\n').collect::<Vec<&str>>();
-    let height = vsep * lines0.len() as f64;
+    let height = vsep * (lines0.len() - 1) as f64;
     let mut lines = Vec::<String>::new();
     lines.push("<svg version=\"1.1\"".to_string());
     lines.push("".to_string()); // PLACEHOLDER
@@ -65,10 +64,11 @@ pub fn convert_text_with_ansi_escapes_to_svg(
         let t = &lines0[m];
         let mut width = 0;
         let mut svg = String::new();
-        svg += &format!("<text x=\"{}\" y=\"{:.1}\" font-family=\"{}\" font-size=\"{}\" \
+        svg += &format!(
+            "<text x=\"{}\" y=\"{:.1}\" font-family=\"{}\" font-size=\"{}\" \
                 style=\"white-space: pre;\">",
             0,
-            (m+1) as f64 * vsep,
+            (m + 1) as f64 * vsep,
             font_family,
             font_size,
         );
@@ -112,7 +112,7 @@ pub fn convert_text_with_ansi_escapes_to_svg(
                 i = j + 1;
             }
         }
-        max_width = max( width, max_width );
+        max_width = max(width, max_width);
         if !states.is_empty() {
             svg += &merge(&states).svg();
         }
