@@ -49,7 +49,7 @@ pub fn convert_text_with_ansi_escapes_to_svg(
     // Compute separations.  These may be font-specific; optimized for Menlo.
 
     let vsep = (19.1 / 15.0) * font_size as f64;
-    let hsep = 0.62 * font_size as f64;
+    let hsep = 0.61 * font_size as f64;
 
     // Proceed.
 
