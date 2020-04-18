@@ -2413,9 +2413,9 @@ pub struct ContigAnnotation {
     // The start position of the amino acid sequence on the contig is unspecified.
     // ◼ This seems like a flaw.
     pub start_codon_pos: Option<usize>, // start pos on contig of start codon
-    stop_codon_pos: Option<usize>,  // start pos on contig of stop codon
+    stop_codon_pos: Option<usize>,      // start pos on contig of stop codon
     pub aa_sequence: Option<String>,    // amino acid sequence
-    frame: Option<usize>,           // null and never changed (unused field)
+    frame: Option<usize>,               // null and never changed (unused field)
 
     // CDR3
     pub cdr3: Option<String>,      // amino acid sequence for CDR3, or null
@@ -2426,7 +2426,7 @@ pub struct ContigAnnotation {
     // annotations
     pub annotations: Vec<AnnotationUnit>,    // the annotations
     primer_annotations: Vec<AnnotationUnit>, // [], never filled in
-    pub clonotype: Option<String>,               // null, filled in later
+    pub clonotype: Option<String>,           // null, filled in later
     info: HashMap<String, String>,           // {} initially, may be filled in later
 
     // state of the contig
