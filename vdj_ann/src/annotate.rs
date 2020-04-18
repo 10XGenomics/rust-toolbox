@@ -2405,28 +2405,28 @@ pub struct ContigAnnotation {
     pub quals: String,       // contig quality scores
 
     // contig support
-    read_count: usize, // number of reads assigned to contig
-    umi_count: usize,  // number of UMIs assigned to the contig
+    pub read_count: usize, // number of reads assigned to contig
+    pub umi_count: usize,  // number of UMIs assigned to the contig
 
     // amino acid sequence
     //
     // The start position of the amino acid sequence on the contig is unspecified.
     // ◼ This seems like a flaw.
-    start_codon_pos: Option<usize>, // start pos on contig of start codon
-    stop_codon_pos: Option<usize>,  // start pos on contig of stop codon
-    aa_sequence: Option<String>,    // amino acid sequence
-    frame: Option<usize>,           // null and never changed (unused field)
+    pub start_codon_pos: Option<usize>, // start pos on contig of start codon
+    stop_codon_pos: Option<usize>,      // start pos on contig of stop codon
+    pub aa_sequence: Option<String>,    // amino acid sequence
+    frame: Option<usize>,               // null and never changed (unused field)
 
     // CDR3
-    cdr3: Option<String>,      // amino acid sequence for CDR3, or null
-    cdr3_seq: Option<String>,  // nucleotide sequence for CDR3, or null
-    cdr3_start: Option<usize>, // start position in bases on contig of CDR3
-    cdr3_stop: Option<usize>,  // stop position in bases on contig of CDR3
+    pub cdr3: Option<String>,      // amino acid sequence for CDR3, or null
+    pub cdr3_seq: Option<String>,  // nucleotide sequence for CDR3, or null
+    pub cdr3_start: Option<usize>, // start position in bases on contig of CDR3
+    pub cdr3_stop: Option<usize>,  // stop position in bases on contig of CDR3
 
     // annotations
     pub annotations: Vec<AnnotationUnit>,    // the annotations
     primer_annotations: Vec<AnnotationUnit>, // [], never filled in
-    clonotype: Option<String>,               // null, filled in later
+    pub clonotype: Option<String>,           // null, filled in later
     info: HashMap<String, String>,           // {} initially, may be filled in later
 
     // state of the contig
