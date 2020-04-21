@@ -302,6 +302,7 @@ fn html_head(
     font_family: &str,
     font_size: usize,
 ) -> String {
+    let ff = format!("\"{}\"", font_family.replace(", ", "\", \""));
     format!(
         "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
               <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \
@@ -312,7 +313,7 @@ fn html_head(
               <title>{}</title>\n\
               {}\n\
               </head>\n<body>\n<pre style='font-family: \"{}\"; font-size: \"{}pt\";'>\n",
-        source, title, head_text, font_family, font_size
+        source, title, head_text, ff, font_size
     )
 }
 
