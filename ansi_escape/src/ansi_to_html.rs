@@ -135,11 +135,12 @@ pub fn convert_text_with_ansi_escapes_to_html(
     x: &str,
     source: &str,
     title: &str,
+    html_text: &str,
     font_family: &str,
     font_size: usize,
 ) -> String {
     let y: Vec<char> = x.chars().collect();
-    let mut html = html_head(&source, &title, &font_family, font_size);
+    let mut html = html_head(&source, &title, &html_text, &font_family, font_size);
     let mut states = Vec::<ColorState>::new();
     let mut current_state = ColorState::default();
     let mut i = 0;
@@ -294,7 +295,13 @@ pub fn compress_ansi_escapes(x: &str) -> String {
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-fn html_head(source: &str, title: &str, font_family: &str, font_size: usize) -> String {
+fn html_head(
+    source: &str,
+    title: &str,
+    head_text: &str,
+    font_family: &str,
+    font_size: usize,
+) -> String {
     format!(
         "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
               <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \
@@ -303,8 +310,9 @@ fn html_head(source: &str, title: &str, font_family: &str, font_size: usize) -> 
               <meta http-equiv=\"Content-Type\" content=\"application/xml+xhtml; \
               charset=UTF-8\"/>\n\
               <title>{}</title>\n\
+              {}\n\
               </head>\n<body>\n<pre style='font-family: \"{}\"; font-size: \"{}pt\";'>\n",
-        source, title, font_family, font_size
+        source, title, head_text, font_family, font_size
     )
 }
 
