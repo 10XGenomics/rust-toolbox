@@ -312,7 +312,8 @@ fn html_head(
               charset=UTF-8\"/>\n\
               <title>{}</title>\n\
               {}\n\
-              </head>\n<body>\n<pre style='font-family: {}; font-size: \"{}pt\"; line-height: 122%'>\n",
+              </head>\n<body>\n<pre style='font-family: {}; line-height: 122%'>\n\
+              <span style=\"font-size: {}px\">\n",
         source, title, head_text, ff, font_size
     )
 }
@@ -320,7 +321,7 @@ fn html_head(
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 fn html_tail() -> String {
-    format!("</pre>\n</body>\n</html>\n")
+    format!("</span></pre>\n</body>\n</html>\n")
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
