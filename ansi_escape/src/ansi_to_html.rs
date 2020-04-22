@@ -312,7 +312,7 @@ fn html_head(
               charset=UTF-8\"/>\n\
               <title>{}</title>\n\
               {}\n\
-              </head>\n<body>\n<pre style='font-family: {}; line-height: 122%'>\
+              </head>\n<body>\n<pre style='font-family: {}; line-height: 120%'>\
               <span style=\"font-size: {}px\">",
         source, title, head_text, ff, font_size
     )
