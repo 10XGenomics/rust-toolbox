@@ -2427,7 +2427,7 @@ pub struct ContigAnnotation {
     pub annotations: Vec<AnnotationUnit>,    // the annotations
     primer_annotations: Vec<AnnotationUnit>, // [], never filled in
     pub clonotype: Option<String>,           // null, filled in later
-    info: HashMap<String, String>,           // {} initially, may be filled in later
+    pub info: HashMap<String, String>,           // {} initially, may be filled in later
 
     // state of the contig
     pub high_confidence: bool,    // declared high confidence?
