@@ -6,4 +6,5 @@ license = "MIT"
 description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
 
 [dependencies]
+permutation = "0.2.5"
 superslice = "1.0.0"

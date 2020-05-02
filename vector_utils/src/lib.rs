@@ -468,3 +468,72 @@ pub unsafe fn resize_without_setting<T>(x: &mut Vec<T>, n: usize) {
     x.reserve(n);
     x.set_len(n); /* unsafe */
 }
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// SORT SYNC VECTORS
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+pub fn sort_sync2<T: Ord + Clone, S1: Ord + Clone>(t: &mut Vec<T>, s1: &mut Vec<S1>) {
+    let permutation = permutation::sort(&t[..]);
+    *t = permutation.apply_slice(&t[..]);
+    t.reverse();
+    *s1 = permutation.apply_slice(&s1[..]);
+    s1.reverse();
+}
+
+pub fn sort_sync3<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone>(
+    t: &mut Vec<T>,
+    s1: &mut Vec<S1>,
+    s2: &mut Vec<S2>,
+) {
+    let permutation = permutation::sort(&t[..]);
+    *t = permutation.apply_slice(&t[..]);
+    t.reverse();
+    *s1 = permutation.apply_slice(&s1[..]);
+    s1.reverse();
+    *s2 = permutation.apply_slice(&s2[..]);
+    s2.reverse();
+}
+
+pub fn sort_sync4<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone, S3: Ord + Clone>(
+    t: &mut Vec<T>,
+    s1: &mut Vec<S1>,
+    s2: &mut Vec<S2>,
+    s3: &mut Vec<S3>,
+) {
+    let permutation = permutation::sort(&t[..]);
+    *t = permutation.apply_slice(&t[..]);
+    t.reverse();
+    *s1 = permutation.apply_slice(&s1[..]);
+    s1.reverse();
+    *s2 = permutation.apply_slice(&s2[..]);
+    s2.reverse();
+    *s3 = permutation.apply_slice(&s3[..]);
+    s3.reverse();
+}
+
+pub fn sort_sync5<
+    T: Ord + Clone,
+    S1: Ord + Clone,
+    S2: Ord + Clone,
+    S3: Ord + Clone,
+    S4: Ord + Clone,
+>(
+    t: &mut Vec<T>,
+    s1: &mut Vec<S1>,
+    s2: &mut Vec<S2>,
+    s3: &mut Vec<S3>,
+    s4: &mut Vec<S4>,
+) {
+    let permutation = permutation::sort(&t[..]);
+    *t = permutation.apply_slice(&t[..]);
+    t.reverse();
+    *s1 = permutation.apply_slice(&s1[..]);
+    s1.reverse();
+    *s2 = permutation.apply_slice(&s2[..]);
+    s2.reverse();
+    *s3 = permutation.apply_slice(&s3[..]);
+    s3.reverse();
+    *s4 = permutation.apply_slice(&s4[..]);
+    s4.reverse();
+}
