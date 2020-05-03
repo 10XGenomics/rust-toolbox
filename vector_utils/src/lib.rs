@@ -478,7 +478,6 @@ pub fn sort_sync2<T: Ord + Clone, S1: Ord + Clone>(t: &mut Vec<T>, s1: &mut Vec<
     *t = permutation.apply_slice(&t[..]);
     t.reverse();
     *s1 = permutation.apply_slice(&s1[..]);
-    s1.reverse();
 }
 
 pub fn sort_sync3<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone>(
@@ -488,11 +487,8 @@ pub fn sort_sync3<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone>(
 ) {
     let permutation = permutation::sort(&t[..]);
     *t = permutation.apply_slice(&t[..]);
-    t.reverse();
     *s1 = permutation.apply_slice(&s1[..]);
-    s1.reverse();
     *s2 = permutation.apply_slice(&s2[..]);
-    s2.reverse();
 }
 
 pub fn sort_sync4<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone, S3: Ord + Clone>(
@@ -503,13 +499,9 @@ pub fn sort_sync4<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone, S3: Ord + Cl
 ) {
     let permutation = permutation::sort(&t[..]);
     *t = permutation.apply_slice(&t[..]);
-    t.reverse();
     *s1 = permutation.apply_slice(&s1[..]);
-    s1.reverse();
     *s2 = permutation.apply_slice(&s2[..]);
-    s2.reverse();
     *s3 = permutation.apply_slice(&s3[..]);
-    s3.reverse();
 }
 
 pub fn sort_sync5<
@@ -527,13 +519,8 @@ pub fn sort_sync5<
 ) {
     let permutation = permutation::sort(&t[..]);
     *t = permutation.apply_slice(&t[..]);
-    t.reverse();
     *s1 = permutation.apply_slice(&s1[..]);
-    s1.reverse();
     *s2 = permutation.apply_slice(&s2[..]);
-    s2.reverse();
     *s3 = permutation.apply_slice(&s3[..]);
-    s3.reverse();
     *s4 = permutation.apply_slice(&s4[..]);
-    s4.reverse();
 }
