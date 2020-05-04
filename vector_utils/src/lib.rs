@@ -524,3 +524,27 @@ pub fn sort_sync5<
     *s3 = permutation.apply_slice(&s3[..]);
     *s4 = permutation.apply_slice(&s4[..]);
 }
+
+pub fn sort_sync6<
+    T: Ord + Clone,
+    S1: Ord + Clone,
+    S2: Ord + Clone,
+    S3: Ord + Clone,
+    S4: Ord + Clone,
+    S5: Ord + Clone,
+>(
+    t: &mut Vec<T>,
+    s1: &mut Vec<S1>,
+    s2: &mut Vec<S2>,
+    s3: &mut Vec<S3>,
+    s4: &mut Vec<S4>,
+    s5: &mut Vec<S5>,
+) {
+    let permutation = permutation::sort(&t[..]);
+    *t = permutation.apply_slice(&t[..]);
+    *s1 = permutation.apply_slice(&s1[..]);
+    *s2 = permutation.apply_slice(&s2[..]);
+    *s3 = permutation.apply_slice(&s3[..]);
+    *s4 = permutation.apply_slice(&s4[..]);
+    *s5 = permutation.apply_slice(&s5[..]);
+}
