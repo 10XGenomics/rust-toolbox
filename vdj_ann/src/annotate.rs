@@ -1022,6 +1022,7 @@ pub fn annotate_seq_core(
             }
             let t1 = annx[data[i1].2[0]].2 as usize;
             let t2 = annx[data[i2].2[0]].2 as usize;
+
             let mut same_class = false;
             if refdata.segtype[t1] == refdata.segtype[t2] {
                 same_class = true;
@@ -1034,7 +1035,31 @@ pub fn annotate_seq_core(
                 continue;
             }
 
-            // Find mismatch positions.
+            // At this point we have two alignments, for which the reference sequence names
+            // are the same, and for which either they both have the same segment type
+            // (U, V, J, C), or else one is U and one is V.  Next we compare them, first
+            // gathering information about UTRs.
+
+            let name1 = &refdata.name[t1];
+            let name2 = &refdata.name[t2];
+            let (mut utr1, mut utr2) = (false, false);
+            if refdata.is_v(t1) || refdata.is_u(t1) {
+                utr1 = refdata.has_utr[name1];
+                utr2 = refdata.has_utr[name2];
+            }
+            let (mut have_utr_align1, mut have_utr_align2) = (false, false);
+            for j in data[i1].2.iter() {
+                if refdata.is_u(annx[*j].2 as usize) {
+                    have_utr_align1 = true;
+                }
+            }
+            for j in data[i2].2.iter() {
+                if refdata.is_u(annx[*j].2 as usize) {
+                    have_utr_align2 = true;
+                }
+            }
+
+            // Now find their mismatch positions.
 
             let n = b.len();
             let (mut mis1, mut mis2) = (vec![false; n], vec![false; n]);
@@ -1052,13 +1077,6 @@ pub fn annotate_seq_core(
             // Compute the fraction of i2 coverage that's outside i1 coverage.
             // ◼ This is horrendously inefficient.  Use ho intervals.
 
-            let name1 = &refdata.name[t1];
-            let name2 = &refdata.name[t2];
-            let (mut utr1, mut utr2) = (false, false);
-            if refdata.is_v(t1) || refdata.is_u(t1) {
-                utr1 = refdata.has_utr[name1];
-                utr2 = refdata.has_utr[name2];
-            }
             let (mut cov1, mut cov2) = (vec![false; n], vec![false; n]);
             for j in 0..data[i1].0.len() {
                 let t = annx[data[i1].2[j]].2;
@@ -1212,6 +1230,12 @@ pub fn annotate_seq_core(
                 fwriteln!(log, "m1 = {}, m2 = {}", m1, m2);
                 fwriteln!(log, "err1 = {}, err2 = {}", err1, err2);
                 fwriteln!(log, "utr1 = {}, utr2 = {}", utr1, utr2);
+                fwriteln!(
+                    log,
+                    "have_utr_align1 = {}, have_utr_align2 = {}",
+                    have_utr_align1,
+                    have_utr_align2
+                );
                 fwriteln!(
                     log,
                     "total1 = {}, total2 = {}, share = {}",
