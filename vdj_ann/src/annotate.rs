@@ -991,13 +991,14 @@ pub fn annotate_seq_core(
         }
     }
     combo.sort();
-    //                     cov                 mis    locs        rstarts
-    let mut data = Vec::<(Vec<(usize, usize)>, usize, Vec<usize>, Vec<usize>)>::new();
+    //                     cov                 mis    locs        rstarts     mis_nutr
+    let mut data = Vec::<(Vec<(usize, usize)>, usize, Vec<usize>, Vec<usize>, usize)>::new();
     let mut i = 0;
     while i < combo.len() {
         let j = next_diff1_3(&combo, i as i32) as usize;
         let mut cov = Vec::<(usize, usize)>::new();
         let mut mis = 0;
+        let mut mis_nutr = 0;
         let mut locs = Vec::<usize>::new();
         let mut rstarts = Vec::<usize>::new();
         for k in i..j {
@@ -1006,8 +1007,11 @@ pub fn annotate_seq_core(
             rstarts.push(a.3 as usize);
             cov.push((a.0 as usize, (a.0 + a.1) as usize));
             mis += a.4.len();
+            if !refdata.is_u(a.2 as usize) {
+                mis_nutr += a.4.len();
+            }
         }
-        data.push((cov, mis, locs, rstarts));
+        data.push((cov, mis, locs, rstarts, mis_nutr));
         i = j;
     }
     let mut to_delete = vec![false; annx.len()];
@@ -1107,6 +1111,42 @@ pub fn annotate_seq_core(
                     total2 += 1;
                 }
             }
+
+            // Same as above but always exclude UTRs.
+
+            let (mut cov1_nu, mut cov2_nu) = (vec![false; n], vec![false; n]);
+            for j in 0..data[i1].0.len() {
+                let t = annx[data[i1].2[j]].2;
+                if !refdata.is_u(t as usize) {
+                    let x = &data[i1].0[j];
+                    for m in x.0..x.1 {
+                        cov1_nu[m] = true;
+                    }
+                }
+            }
+            for j in 0..data[i2].0.len() {
+                let t = annx[data[i2].2[j]].2;
+                if !refdata.is_u(t as usize) {
+                    let x = &data[i2].0[j];
+                    for m in x.0..x.1 {
+                        cov2_nu[m] = true;
+                    }
+                }
+            }
+            let (mut total1_nu, mut total2_nu) = (0, 0);
+            for l in 0..n {
+                if cov1_nu[l] {
+                    total1_nu += 1;
+                }
+            }
+            for l in 0..n {
+                if cov2_nu[l] {
+                    total2_nu += 1;
+                }
+            }
+
+            // Compute amount shared.
+
             let mut share = 0;
             for l in 0..n {
                 if cov1[l] && cov2[l] {
@@ -1132,9 +1172,12 @@ pub fn annotate_seq_core(
 
             // Compute error rates.
             // ◼ This is incorrect in the case where the UTR has been excluded.
+            // Added separate estimates with UTRs excluded.
 
             let err1 = percent_ratio(data[i1].1, total1);
             let err2 = percent_ratio(data[i2].1, total2);
+            let err1_nu = percent_ratio(data[i1].4, total1_nu);
+            let err2_nu = percent_ratio(data[i2].4, total2_nu);
 
             // Compute zstops.
 
@@ -1229,6 +1272,7 @@ pub fn annotate_seq_core(
                 fwriteln!(log, "zstop1 = {}, zstop2 = {}", zstop1, zstop2);
                 fwriteln!(log, "m1 = {}, m2 = {}", m1, m2);
                 fwriteln!(log, "err1 = {}, err2 = {}", err1, err2);
+                fwriteln!(log, "err1_nu = {}, err2_nu = {}", err1_nu, err2_nu);
                 fwriteln!(log, "utr1 = {}, utr2 = {}", utr1, utr2);
                 fwriteln!(
                     log,
