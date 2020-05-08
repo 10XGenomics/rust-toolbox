@@ -1213,6 +1213,7 @@ pub fn annotate_seq_core(
                     || (m1 == m2 && err1 < err2)
                     || (m1 == m2 && err1 == err2 && outside1 > outside2)
                     || (m1 == m2 && err1 == err2 && outside1 == outside2 && t1 < t2)
+                    || (m1 == m2 && !have_utr_align2 && err1_nu == err2_nu && outside1 > outside2)
                 {
                     win1 = true;
                 }
@@ -1230,6 +1231,7 @@ pub fn annotate_seq_core(
                     || (m2 == m1 && err2 < err1)
                     || (m2 == m1 && err2 == err1 && outside2 > outside1)
                     || (m2 == m1 && err2 == err1 && outside2 == outside1 && t2 < t1)
+                    || (m2 == m1 && !have_utr_align1 && err2_nu == err1_nu && outside2 > outside1)
                 {
                     win2 = true;
                 }
