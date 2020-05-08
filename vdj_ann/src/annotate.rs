@@ -1211,6 +1211,7 @@ pub fn annotate_seq_core(
                 fwriteln!(log, "zstop1 = {}, zstop2 = {}", zstop1, zstop2);
                 fwriteln!(log, "m1 = {}, m2 = {}", m1, m2);
                 fwriteln!(log, "err1 = {}, err2 = {}", err1, err2);
+                fwriteln!(log, "utr1 = {}, utr2 = {}", utr1, utr2);
                 fwriteln!(
                     log,
                     "total1 = {}, total2 = {}, share = {}",
