@@ -1203,6 +1203,7 @@ pub fn annotate_seq_core(
             // deletion.  Be very careful to respect this if editing!
 
             let (mut win1, mut win2) = (false, false);
+            let c1 = m1 == m2 && !have_utr_align2 && err1_nu == err2_nu && outside1 > outside2;
             if zstop1 > zstop2 + 20 && (outside2 <= 10.0 || total2 - share <= 10) {
                 win1 = true;
             } else if outside1 >= 10.0 && outside2 <= 1.0 && err1 - err2 <= 2.5 {
@@ -1210,10 +1211,10 @@ pub fn annotate_seq_core(
             } else if zstop1 == 0 && zstop2 > 0 {
             } else if outside2 <= 10.0 || total2 - share <= 10 {
                 if m1 < m2
-                    || (m1 == m2 && err1 < err2)
+                    || (m1 == m2 && err1 < err2 && !c1)
                     || (m1 == m2 && err1 == err2 && outside1 > outside2)
                     || (m1 == m2 && err1 == err2 && outside1 == outside2 && t1 < t2)
-                    || (m1 == m2 && !have_utr_align2 && err1_nu == err2_nu && outside1 > outside2)
+                    || c1
                 {
                     win1 = true;
                 }
@@ -1221,6 +1222,7 @@ pub fn annotate_seq_core(
 
             // Symmetrization.
 
+            let c2 = m2 == m1 && !have_utr_align1 && err2_nu == err1_nu && outside2 > outside1;
             if zstop2 > zstop1 + 20 && (outside1 <= 10.0 || total1 - share <= 10) {
                 win2 = true;
             } else if outside2 >= 10.0 && outside1 <= 1.0 && err2 - err1 <= 2.5 {
@@ -1228,10 +1230,10 @@ pub fn annotate_seq_core(
             } else if zstop2 == 0 && zstop1 > 0 {
             } else if outside1 <= 10.0 || total1 - share <= 10 {
                 if m2 < m1
-                    || (m2 == m1 && err2 < err1)
+                    || (m2 == m1 && err2 < err1 && !c2)
                     || (m2 == m1 && err2 == err1 && outside2 > outside1)
                     || (m2 == m1 && err2 == err1 && outside2 == outside1 && t2 < t1)
-                    || (m2 == m1 && !have_utr_align1 && err2_nu == err1_nu && outside2 > outside1)
+                    || c2
                 {
                     win2 = true;
                 }
