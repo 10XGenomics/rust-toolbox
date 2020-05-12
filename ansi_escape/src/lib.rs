@@ -76,6 +76,8 @@ pub fn ansi_256(n: usize) -> Vec<u8> {
 // codes for ansi color escape sequences.  So we just picked an ANSI 256-color index
 // that seemed visually close in comparison to the output of color_table.
 //
+// The function print_color13 gives the actual RGB codes.
+//
 // N  COLOR           R    G    B   ANSI
 // ----------------------------------
 // 0   black           0    0    0     0
@@ -92,7 +94,7 @@ pub fn ansi_256(n: usize) -> Vec<u8> {
 // 11  light green   160  250  130    84
 // 12  banana mania  250  230  190   223
 
-pub fn print_color13(s: usize, log: &mut Vec<u8>) {
+pub fn print_color13_ansi(s: usize, log: &mut Vec<u8>) {
     assert!(s < 13);
     if s == 0 {
         log.append(&mut ansi_256(0));
@@ -120,6 +122,37 @@ pub fn print_color13(s: usize, log: &mut Vec<u8>) {
         log.append(&mut ansi_256(84));
     } else if s == 12 {
         log.append(&mut ansi_256(223));
+    }
+}
+
+pub fn print_color13(s: usize) -> (usize, usize, usize) {
+    assert!(s < 13);
+    if s == 0 {
+        (0, 0, 0)
+    } else if s == 1 {
+        (0, 110, 130)
+    } else if s == 2 {
+        (130, 20, 160)
+    } else if s == 3 {
+        (0, 90, 200)
+    } else if s == 4 {
+        (0, 160, 250)
+    } else if s == 5 {
+        (250, 120, 250)
+    } else if s == 6 {
+        (20, 210, 220)
+    } else if s == 7 {
+        (170, 10, 60)
+    } else if s == 8 {
+        (10, 155, 75)
+    } else if s == 9 {
+        (255, 130, 95)
+    } else if s == 10 {
+        (234, 214, 68)
+    } else if s == 11 {
+        (160, 250, 130)
+    } else {
+        (250, 230, 190)
     }
 }
 
