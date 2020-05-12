@@ -23,7 +23,7 @@ pub mod ansi_to_html;
 // which refers to Wong, B. (2011) Points of View: Color Blindness.  Nature Methods 8:441.
 
 pub fn print_color(s: usize, log: &mut Vec<u8>) {
-    assert!(s <= 6);
+    assert!(s < 6);
     if s == 0 {
         log.append(&mut b"[01m[38;5;75m".to_vec());
     } else if s == 1 {
@@ -57,6 +57,69 @@ pub fn best_color_order(i: usize) -> usize {
         0
     } else {
         2
+    }
+}
+
+// Return ANSI 256 color escape sequence.
+
+pub fn ansi_256(n: usize) -> Vec<u8> {
+    let mut x = b"[38;5;".to_vec();
+    x.append(&mut format!("{}", n).as_bytes().to_vec());
+    x.push(b'm');
+    x
+}
+
+// A 13-color palette for color blindness =
+// http://mkweb.bcgsc.ca/colorblind/img/colorblindness.palettes.8-12-13.pdf.
+//
+// The RGB codes are shown below.  However, not all closely matched the empirical mac RGB
+// codes for ansi color escape sequences.  So we just picked an ANSI 256-color index
+// that seemed visually close in comparison to the output of color_table.
+//
+// N  COLOR           R    G    B   ANSI
+// ----------------------------------
+// 0   black           0    0    0     0
+// 1   teal blue       0  110  130    23
+// 2   purple        130   20  160    53
+// 3   blue            0   90  200    20
+// 4   azure           0  160  250    33
+// 5   pink          250  120  250   170
+// 6   aqua           20  210  220     6
+// 7   raspberry     170   10   60     1
+// 8   green          10  155   75    28
+// 9   vermillion    255  130   95   209
+// 10  yellow        234  214   68   185
+// 11  light green   160  250  130    84
+// 12  banana mania  250  230  190   223
+
+pub fn print_color13(s: usize, log: &mut Vec<u8>) {
+    assert!(s < 13);
+    if s == 0 {
+        log.append(&mut ansi_256(0));
+    } else if s == 1 {
+        log.append(&mut ansi_256(23));
+    } else if s == 2 {
+        log.append(&mut ansi_256(53));
+    } else if s == 3 {
+        log.append(&mut ansi_256(20));
+    } else if s == 4 {
+        log.append(&mut ansi_256(33));
+    } else if s == 5 {
+        log.append(&mut ansi_256(170));
+    } else if s == 6 {
+        log.append(&mut ansi_256(6));
+    } else if s == 7 {
+        log.append(&mut ansi_256(1));
+    } else if s == 8 {
+        log.append(&mut ansi_256(28));
+    } else if s == 9 {
+        log.append(&mut ansi_256(209));
+    } else if s == 10 {
+        log.append(&mut ansi_256(185));
+    } else if s == 11 {
+        log.append(&mut ansi_256(84));
+    } else if s == 12 {
+        log.append(&mut ansi_256(223));
     }
 }
 
