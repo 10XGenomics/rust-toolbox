@@ -476,7 +476,6 @@ pub unsafe fn resize_without_setting<T>(x: &mut Vec<T>, n: usize) {
 pub fn sort_sync2<T: Ord + Clone, S1: Ord + Clone>(t: &mut Vec<T>, s1: &mut Vec<S1>) {
     let permutation = permutation::sort(&t[..]);
     *t = permutation.apply_slice(&t[..]);
-    t.reverse();
     *s1 = permutation.apply_slice(&s1[..]);
 }
 
