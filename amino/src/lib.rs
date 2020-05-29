@@ -107,7 +107,11 @@ pub fn aa_seq(x: &Vec<u8>, start: usize) -> Vec<u8> {
     let mut a = Vec::<u8>::new();
     if x.len() >= 3 {
         for j in (start..x.len() - 3 + 1).step_by(3) {
-            a.push(codon_to_aa(&x[j..j + 3]));
+            if x[j] == b'-' && x[j + 1] == b'-' && x[j + 2] == b'-' {
+                a.push(b'-');
+            } else {
+                a.push(codon_to_aa(&x[j..j + 3]));
+            }
         }
     }
     a
