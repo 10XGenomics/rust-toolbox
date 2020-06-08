@@ -1462,6 +1462,29 @@ pub fn annotate_seq_core(
         }
     }
 
+    // If there is a D gene alignment that is from a different chain type than the V gene
+    // alignment, delete it.
+
+    let mut to_delete: Vec<bool> = vec![false; annx.len()];
+    for i1 in 0..annx.len() {
+        let t1 = annx[i1].2 as usize;
+        if refdata.segtype[t1] == "D".to_string() {
+            let mut have_v = false;
+            for i2 in 0..annx.len() {
+                let t2 = annx[i2].2 as usize;
+                if refdata.segtype[t2] == "V".to_string() {
+                    if refdata.rtype[t1] == refdata.rtype[t2] {
+                        have_v = true;
+                    }
+                }
+            }
+            if !have_v {
+                to_delete[i1] = true;
+            }
+        }
+    }
+    erase_if(&mut annx, &to_delete);
+
     // For IGH and TRB, if there is a V and J, but no D, look for a D that matches perfectly
     // between them.
 
