@@ -1528,7 +1528,7 @@ pub fn annotate_seq_core(
                         }
                     }
                     if !mismatch {
-                        println!("adding D"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                        println!("adding D with rtype {}", refdata.rtype[*t]); // XXXXXXXXXXXXXXXXX
                         annx.push((m, r.len() as i32, *t as i32, 0, Vec::new()));
                         annx.sort();
                         break 'outer;
