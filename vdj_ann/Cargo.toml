@@ -5,17 +5,17 @@ authors = ["David Jaffe <david.jaffe@10xgenomics.com"]
 edition = "2018"
 
 [dependencies]
-align_tools = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
-amino = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
+align_tools = { path = "../align_tools" }
+amino = { path = "../amino" }
 bio = "0.31"
 debruijn = { git = "https://github.com/10XGenomics/rust-debruijn.git" }
-exons = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
-fasta = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
+exons = { path = "../exons" }
+fasta = { path = "../fasta" }
 flate2 = "1.0.12"
-hyper = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
+hyper = { path = "../hyper" }
 io_utils = "0.2.4"
 itertools = "0.8"
-kmer_lookup = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
+kmer_lookup = { path = "../kmer_lookup" }
 pretty_trace = "0.3"
 serde = "1.0.90"
 serde_json = "1.0.41"

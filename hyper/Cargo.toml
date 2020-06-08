@@ -7,8 +7,8 @@ description = "Some tools that are 'internal' for now because they are insuffici
 
 [dependencies]
 debruijn = { git = "https://github.com/10XGenomics/rust-debruijn.git" }
-equiv = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
-graph_simple = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
-kmer_lookup = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
+equiv = { path = "../equiv" }
+graph_simple = { path = "../graph_simple" }
+kmer_lookup = { path = "../kmer_lookup" }
 petgraph = "0.4.13"
 vector_utils = "0.1.0"
