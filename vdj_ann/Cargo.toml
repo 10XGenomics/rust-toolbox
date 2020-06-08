@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 align_tools = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
 amino = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
-bio = "0.29.0"
+bio = "0.31"
 debruijn = { git = "https://github.com/10XGenomics/rust-debruijn.git" }
 exons = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
 fasta = { git = "https://github.com/10XGenomics/rust-toolbox.git" }
