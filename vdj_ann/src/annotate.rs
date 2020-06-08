@@ -1468,6 +1468,7 @@ pub fn annotate_seq_core(
     let mut to_delete: Vec<bool> = vec![false; annx.len()];
     for i1 in 0..annx.len() {
         let t1 = annx[i1].2 as usize;
+        println!("{}", refdata.segtype[t1]); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         if refdata.segtype[t1] == "D".to_string() {
             println!("found D"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             let mut have_v = false;
@@ -1524,6 +1525,7 @@ pub fn annotate_seq_core(
                     }
                 }
                 if !mismatch {
+                    println!("adding D"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
                     annx.push((m, r.len() as i32, *t as i32, 0, Vec::new()));
                     annx.sort();
                     break 'outer;
