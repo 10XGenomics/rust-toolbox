@@ -1494,6 +1494,7 @@ pub fn annotate_seq_core(
     let (mut v, mut d, mut j) = (false, false, false);
     let (mut vstop, mut jstart) = (0, 0);
     const VJTRIM: i32 = 10;
+    let mut v_rtype = -2 as i32;
     for i in 0..annx.len() {
         let t = annx[i].2 as usize;
         if !rheaders[t].contains("segment") {
@@ -1502,6 +1503,7 @@ pub fn annotate_seq_core(
                 if refdata.segtype[t] == "V".to_string() {
                     v = true;
                     vstop = annx[i].0 + annx[i].1;
+                    v_rtype = rt;
                 } else if refdata.segtype[t] == "D".to_string() {
                     d = true;
                 } else if refdata.segtype[t] == "J".to_string() {
@@ -1515,20 +1517,22 @@ pub fn annotate_seq_core(
         let start = max(0, vstop - VJTRIM);
         let stop = min(b.len() as i32, jstart + VJTRIM);
         'outer: for t in refdata.ds.iter() {
-            let r = &refdata.refs[*t];
-            for m in start..=stop - (r.len() as i32) {
-                let mut mismatch = false;
-                for x in 0..r.len() {
-                    if r.get(x) != b.get((m + x as i32) as usize) {
-                        mismatch = true;
-                        break;
+            if refdata.rtype[*t] == v_rtype {
+                let r = &refdata.refs[*t];
+                for m in start..=stop - (r.len() as i32) {
+                    let mut mismatch = false;
+                    for x in 0..r.len() {
+                        if r.get(x) != b.get((m + x as i32) as usize) {
+                            mismatch = true;
+                            break;
+                        }
                     }
-                }
-                if !mismatch {
-                    println!("adding D"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                    annx.push((m, r.len() as i32, *t as i32, 0, Vec::new()));
-                    annx.sort();
-                    break 'outer;
+                    if !mismatch {
+                        println!("adding D"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                        annx.push((m, r.len() as i32, *t as i32, 0, Vec::new()));
+                        annx.sort();
+                        break 'outer;
+                    }
                 }
             }
         }
