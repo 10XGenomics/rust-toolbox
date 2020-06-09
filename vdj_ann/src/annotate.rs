@@ -1486,7 +1486,12 @@ pub fn annotate_seq_core(
     erase_if(&mut annx, &to_delete);
 
     // For IGH and TRB, if there is a V and J, but no D, look for a D that matches nearly perfectly
-    // between them.
+    // between them.  We consider only alignments having no indels.  The following conditions
+    // are required:
+    // 1. At most three mismatches.
+    // 2. Excluding genes having the same name:
+    //    (a) all others have more mismatches
+    //    (b) all others have no more matches.
 
     let (mut v, mut d, mut j) = (false, false, false);
     let (mut vstop, mut jstart) = (0, 0);
@@ -1515,7 +1520,6 @@ pub fn annotate_seq_core(
         let start = max(0, vstop - VJTRIM);
         let stop = min(b.len() as i32, jstart + VJTRIM);
         const MAX_MISMATCHES: usize = 3;
-        println!("\nlooking for D segment matches"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         for t in refdata.ds.iter() {
             if refdata.rtype[*t] == v_rtype {
                 let r = &refdata.refs[*t];
@@ -1537,13 +1541,6 @@ pub fn annotate_seq_core(
         }
         results.sort();
         if !results.is_empty() && results[0].0 <= MAX_MISMATCHES {
-
-            // XXX:
-            for i in 0..results.len() {
-                println!("mismatches = {}, matches = {}, m = {}, t = {}, gene = {}",
-                    results[i].0, results[i].1, results[i].4, results[i].2, results[i].3);
-            }
-            
             let mut to_delete = vec![false; results.len()];
             for i in 1..results.len() {
                 if results[i].3 == results[0].3 {
