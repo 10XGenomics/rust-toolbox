@@ -15,15 +15,17 @@ pub mod ansi_to_html;
 // 3  25  = rgb(0,95,175)    close to (0,114,178)   bold + blue
 // 4  175 = rgb(215,135,175) close to (204,121,167) bold + reddish purple
 // 5  36  = rgb(0,175,135)   close to (0,158,115)   bluish green
+// 6  11                                            yellow
 //
 // sources:
-// https://jonasjacek.github.io/colors (256 color RGB values) -- should get better URL
-// https://en.wikipedia.org/wiki/ANSI_escape_code (8 bit color escape codes)
-// http://mkweb.bcgsc.ca/colorblind/img/colorblindness.palettes.trivial.png (good color palette)
-// which refers to Wong, B. (2011) Points of View: Color Blindness.  Nature Methods 8:441.
+// 1. https://jonasjacek.github.io/colors (256 color RGB values) -- should get better URL
+// 2. https://en.wikipedia.org/wiki/ANSI_escape_code (8 bit color escape codes)
+// 3. http://mkweb.bcgsc.ca/colorblind/img/colorblindness.palettes.trivial.png (good color palette)
+//    which refers to Wong, B. (2011) Points of View: Color Blindness.  Nature Methods 8:441.
+//    (URL was broken when last tested but article is publicly accessible.)
 
 pub fn print_color(s: usize, log: &mut Vec<u8>) {
-    assert!(s < 6);
+    assert!(s < 7);
     if s == 0 {
         log.append(&mut b"[01m[38;5;75m".to_vec());
     } else if s == 1 {
@@ -36,8 +38,10 @@ pub fn print_color(s: usize, log: &mut Vec<u8>) {
         log.append(&mut b"[01m[38;5;25m".to_vec());
     } else if s == 4 {
         log.append(&mut b"[01m[38;5;175m".to_vec());
-    } else {
+    } else if s == 5 {
         log.append(&mut b"[38;5;36m".to_vec());
+    } else {
+        log.append(&mut b"[38;5;11m".to_vec());
     }
 }
 
@@ -55,8 +59,10 @@ pub fn best_color_order(i: usize) -> usize {
         1
     } else if i == 4 {
         0
-    } else {
+    } else if i == 5 {
         2
+    } else {
+        6
     }
 }
 
