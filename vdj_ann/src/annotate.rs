@@ -1524,7 +1524,6 @@ pub fn annotate_seq_core(
                     for x in 0..r.len() {
                         if r.get(x) != b.get((m + x as i32) as usize) {
                             mismatches += 1;
-                            break;
                         }
                     }
                     let matches = r.len() - mismatches;
