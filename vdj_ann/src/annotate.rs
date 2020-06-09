@@ -1515,6 +1515,7 @@ pub fn annotate_seq_core(
         let start = max(0, vstop - VJTRIM);
         let stop = min(b.len() as i32, jstart + VJTRIM);
         const MAX_MISMATCHES: usize = 3;
+        println!("\nlooking for D segment matches"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         for t in refdata.ds.iter() {
             if refdata.rtype[*t] == v_rtype {
                 let r = &refdata.refs[*t];
@@ -1532,7 +1533,7 @@ pub fn annotate_seq_core(
                         gene = gene.before("*").to_string();
                     }
                     use io_utils::*; // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                    printme!(mismatches, matches); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                    printme!(mismatches, matches, gene); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
                     results.push((mismatches, matches, *t, gene, m as usize));
                 }
             }
