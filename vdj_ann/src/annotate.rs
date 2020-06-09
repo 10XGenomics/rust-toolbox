@@ -1511,7 +1511,7 @@ pub fn annotate_seq_core(
         }
     }
     if v && !d && j {
-        let mut results = Vec::<(usize, usize, usize, String, usize)>::new();
+        let mut results = Vec::<(usize, usize, usize, String, usize, Vec<i32>)>::new();
         let start = max(0, vstop - VJTRIM);
         let stop = min(b.len() as i32, jstart + VJTRIM);
         const MAX_MISMATCHES: usize = 3;
@@ -1520,20 +1520,20 @@ pub fn annotate_seq_core(
             if refdata.rtype[*t] == v_rtype {
                 let r = &refdata.refs[*t];
                 for m in start..=stop - (r.len() as i32) {
-                    let mut mismatches = 0;
+                    let mut mismatches = Vec::<i32>::new();
                     for x in 0..r.len() {
                         if r.get(x) != b.get((m + x as i32) as usize) {
-                            mismatches += 1;
+                            mismatches.push(x as i32);
                         }
                     }
-                    let matches = r.len() - mismatches;
+                    let matches = r.len() - mismatches.len();
                     let mut gene = refdata.name[*t].clone();
                     if gene.contains('*') {
                         gene = gene.before("*").to_string();
                     }
                     use io_utils::*; // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                    printme!(mismatches, matches, gene); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                    results.push((mismatches, matches, *t, gene, m as usize));
+                    printme!(mismatches.len(), matches, gene); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                    results.push((mismatches.len(), matches, *t, gene, m as usize, mismatches));
                 }
             }
         }
@@ -1555,7 +1555,7 @@ pub fn annotate_seq_core(
                     let t = results[0].2;
                     let r = results[0].0 + results[0].1;
                     let m = results[0].4;
-                    annx.push((m as i32, r as i32, t as i32, 0, Vec::new()));
+                    annx.push((m as i32, r as i32, t as i32, 0, results[0].5.clone()));
                     annx.sort();
                 }
             }
