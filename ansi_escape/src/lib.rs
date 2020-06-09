@@ -41,7 +41,7 @@ pub fn print_color(s: usize, log: &mut Vec<u8>) {
     } else if s == 5 {
         log.append(&mut b"[38;5;36m".to_vec());
     } else {
-        log.append(&mut b"[38;5;11m".to_vec());
+        log.append(&mut b"[01m[38;5;11m".to_vec());
     }
 }
 
