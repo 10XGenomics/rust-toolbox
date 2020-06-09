@@ -1531,6 +1531,8 @@ pub fn annotate_seq_core(
                     if gene.contains('*') {
                         gene = gene.before("*").to_string();
                     }
+                    use io_utils::*; // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                    printme!(mismatches, matches); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
                     results.push((mismatches, matches, *t, gene, m as usize));
                 }
             }
