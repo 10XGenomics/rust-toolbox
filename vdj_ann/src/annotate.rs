@@ -1531,14 +1531,19 @@ pub fn annotate_seq_core(
                     if gene.contains('*') {
                         gene = gene.before("*").to_string();
                     }
-                    use io_utils::*; // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                    printme!(mismatches.len(), matches, gene); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
                     results.push((mismatches.len(), matches, *t, gene, m as usize, mismatches));
                 }
             }
         }
         results.sort();
         if !results.is_empty() && results[0].0 <= MAX_MISMATCHES {
+
+            // XXX:
+            for i in 0..results.len() {
+                println!("mismatches = {}, matches = {}, m = {}, t = {}, gene = {}",
+                    results[i].0, results[i].1, results[i].4, results[i].2, results[i].3);
+            }
+            
             let mut to_delete = vec![false; results.len()];
             for i in 1..results.len() {
                 if results[i].3 == results[0].3 {
