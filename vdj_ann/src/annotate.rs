@@ -1462,12 +1462,41 @@ pub fn annotate_seq_core(
         }
     }
 
-    // For IGH and TRB, if there is a V and J, but no D, look for a D that matches perfectly
-    // between them.
+    // If there is a D gene alignment that is from a different chain type than the V gene
+    // alignment, delete it.
+
+    let mut to_delete: Vec<bool> = vec![false; annx.len()];
+    for i1 in 0..annx.len() {
+        let t1 = annx[i1].2 as usize;
+        if refdata.segtype[t1] == "D".to_string() {
+            let mut have_v = false;
+            for i2 in 0..annx.len() {
+                let t2 = annx[i2].2 as usize;
+                if refdata.segtype[t2] == "V".to_string() {
+                    if refdata.rtype[t1] == refdata.rtype[t2] {
+                        have_v = true;
+                    }
+                }
+            }
+            if !have_v {
+                to_delete[i1] = true;
+            }
+        }
+    }
+    erase_if(&mut annx, &to_delete);
+
+    // For IGH and TRB, if there is a V and J, but no D, look for a D that matches nearly perfectly
+    // between them.  We consider only alignments having no indels.  The following conditions
+    // are required:
+    // 1. At most three mismatches.
+    // 2. Excluding genes having the same name:
+    //    (a) all others have more mismatches
+    //    (b) all others have no more matches.
 
     let (mut v, mut d, mut j) = (false, false, false);
     let (mut vstop, mut jstart) = (0, 0);
     const VJTRIM: i32 = 10;
+    let mut v_rtype = -2 as i32;
     for i in 0..annx.len() {
         let t = annx[i].2 as usize;
         if !rheaders[t].contains("segment") {
@@ -1476,6 +1505,7 @@ pub fn annotate_seq_core(
                 if refdata.segtype[t] == "V".to_string() {
                     v = true;
                     vstop = annx[i].0 + annx[i].1;
+                    v_rtype = rt;
                 } else if refdata.segtype[t] == "D".to_string() {
                     d = true;
                 } else if refdata.segtype[t] == "J".to_string() {
@@ -1486,22 +1516,49 @@ pub fn annotate_seq_core(
         }
     }
     if v && !d && j {
+        let mut results = Vec::<(usize, usize, usize, String, usize, Vec<i32>)>::new();
         let start = max(0, vstop - VJTRIM);
         let stop = min(b.len() as i32, jstart + VJTRIM);
-        'outer: for t in refdata.ds.iter() {
-            let r = &refdata.refs[*t];
-            for m in start..=stop - (r.len() as i32) {
-                let mut mismatch = false;
-                for x in 0..r.len() {
-                    if r.get(x) != b.get((m + x as i32) as usize) {
-                        mismatch = true;
-                        break;
+        const MAX_MISMATCHES: usize = 3;
+        for t in refdata.ds.iter() {
+            if refdata.rtype[*t] == v_rtype {
+                let r = &refdata.refs[*t];
+                for m in start..=stop - (r.len() as i32) {
+                    let mut mismatches = Vec::<i32>::new();
+                    for x in 0..r.len() {
+                        if r.get(x) != b.get((m + x as i32) as usize) {
+                            mismatches.push(x as i32);
+                        }
                     }
+                    let matches = r.len() - mismatches.len();
+                    let mut gene = refdata.name[*t].clone();
+                    if gene.contains('*') {
+                        gene = gene.before("*").to_string();
+                    }
+                    results.push((mismatches.len(), matches, *t, gene, m as usize, mismatches));
                 }
-                if !mismatch {
-                    annx.push((m, r.len() as i32, *t as i32, 0, Vec::new()));
+            }
+        }
+        results.sort();
+        if !results.is_empty() && results[0].0 <= MAX_MISMATCHES {
+            let mut to_delete = vec![false; results.len()];
+            for i in 1..results.len() {
+                if results[i].3 == results[0].3 {
+                    to_delete[i] = true;
+                }
+            }
+            erase_if(&mut results, &to_delete);
+            if results.solo() || results[0].0 < results[1].0 {
+                let mut best_matches = 0;
+                for i in 0..results.len() {
+                    best_matches = max(best_matches, results[i].1);
+                }
+                if results[0].1 == best_matches {
+                    let t = results[0].2;
+                    let r = results[0].0 + results[0].1;
+                    let m = results[0].4;
+                    annx.push((m as i32, r as i32, t as i32, 0, results[0].5.clone()));
                     annx.sort();
-                    break 'outer;
                 }
             }
         }
