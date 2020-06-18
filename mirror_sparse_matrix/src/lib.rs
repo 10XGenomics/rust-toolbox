@@ -72,7 +72,6 @@ pub fn get_code_version_from_file(f: &str) -> u32 {
     let mut ff = std::fs::File::open(&f).unwrap();
     let mut x = vec![0 as u32; 11];
     binary_read_to_ref::<u32>(&mut ff, &mut x[0], 11).unwrap();
-    println!("returning code version = {}", x[10]); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     x[10]
 }
 
@@ -95,7 +94,6 @@ pub fn read_from_file(s: &mut MirrorSparseMatrix, f: &str) {
 
 pub fn write_to_file(s: &MirrorSparseMatrix, f: &str) {
     assert!(s.code_version() > 0);
-    println!("writing, code version = {}", s.code_version()); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     let mut ff = std::fs::File::create(&f).expect(&format!("Failed to create file {}.", f));
     binary_write_vec::<u8>(&mut ff, &s.x).unwrap();
 }
