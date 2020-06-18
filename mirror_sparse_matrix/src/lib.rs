@@ -107,6 +107,7 @@ pub fn read_from_file(s: &mut MirrorSparseMatrix, f: &str) {
 
 pub fn write_to_file(s: &MirrorSparseMatrix, f: &str) {
     assert!(s.code_version() > 0);
+    std::fs::remove_file(&f).unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     println!("writing, code version = {}", s.code_version()); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     let mut ff = std::fs::File::create(&f).expect(&format!("Failed to create file {}.", f));
     binary_write_vec::<u8>(&mut ff, &s.x).unwrap();
