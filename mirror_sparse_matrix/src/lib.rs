@@ -47,7 +47,8 @@
 // * report the sum of entries for a given row
 // * report the sum of entries for a given column
 // * return the value of a given matrix entry
-// * return a given row.
+// * return a given row
+// * return a row or column label.
 //
 // The initial version was 0.  In version 1, string labels for rows and columns were added.
 // A version 0 file can no longer be read, except that, you can read the version and exit.
@@ -335,6 +336,22 @@ impl MirrorSparseMatrix {
         get_u32_at_pos(&self.x, pos) as usize
     }
 
+    pub fn row_label(&self, i: usize) -> String {
+        let row_labels_start = self.header_size() + self.nrows() * 4;
+        let label_start = self.x(row_labels_start + i * 4);
+        let label_stop = self.x(row_labels_start + (i + 1) * 4);
+        let label_bytes = &self.x[label_start..label_stop];
+        String::from_utf8(&self.x[&label_bytes]).unwrap()
+    }
+
+    pub fn col_label(&self, i: usize) -> String {
+        let col_labels_start = self.header_size() + self.nrows() * 8;
+        let label_start = self.x(col_labels_start + i * 4);
+        let label_stop = self.x(col_labels_start + (i + 1) * 4);
+        let label_bytes = &self.x[label_start..label_stop];
+        String::from_utf8(&self.x[&label_bytes]).unwrap()
+    }
+
     pub fn row(&self, row: usize) -> Vec<(usize, usize)> {
         let mut all = Vec::<(usize, usize)>::new();
         let s = self.start_of_row(row);
@@ -545,15 +562,6 @@ impl MirrorSparseMatrix {
             0
         }
     }
-
-
-    TO DO:
-    1. Add way to retrieve row and column labels.
-    2. Modify tests appropriately.
-
-    ***** WORKING HERE *****
-
-
 }
 
 #[cfg(test)]
@@ -577,9 +585,10 @@ mod tests {
         for storage_version in 0..2 {
             printme!(storage_version);
             let mut x = Vec::<Vec<(i32, i32)>>::new();
-            for i in 0..10 {
+            let (n, k) = (10, 100);
+            for i in 0..n {
                 let mut y = Vec::<(i32, i32)>::new();
-                for j in 0..100 {
+                for j in 0..k {
                     let col: usize;
                     if storage_version == 0 {
                         col = i + j;
@@ -595,7 +604,14 @@ mod tests {
             for j in 0..x[test_row].len() {
                 row_sum += x[test_row][j].1 as usize;
             }
-            let y = MirrorSparseMatrix::build_from_vec(&x);
+            let (mut row_labels, mut col_labels) = (Vec::<String>::new(), Vec::<String>::new());
+            for i in 0..n {
+                row_labels.push(format!("row {}", i));
+            }
+            for j in 0..k {
+                col_labels.push(format!("col {}", j));
+            }
+            let y = MirrorSparseMatrix::build_from_vec(&x, &row_labels, &col_labels);
             let row_sum2 = y.sum_of_row(test_row);
             assert_eq!(row_sum, row_sum2);
             let test_col;
@@ -617,6 +633,8 @@ mod tests {
             printme!(col_sum, col_sum2);
             assert_eq!(col_sum, col_sum2);
             assert_eq!(y.storage_version(), storage_version);
+            assert_eq!(y.row_label(5), row_labels(5));
+            assert_eq!(y.col_label(7), col_labels(7));
         }
     }
 }
