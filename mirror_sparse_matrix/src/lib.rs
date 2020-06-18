@@ -43,7 +43,7 @@
 // * read from disk
 // * write to disk
 // * build from (Vec<Vec<(i32,i32)>, Vec<String>, Vec<String>) representation
-// * report the number of rows
+// * report the number of rows and the number of columns
 // * report the sum of entries for a given row
 // * report the sum of entries for a given column
 // * return the value of a given matrix entry
@@ -229,15 +229,24 @@ impl MirrorSparseMatrix {
             push_u32(&mut v, 0 as u32);
         }
 
+        // Define row and column label starts.
 
-        To do:
-        1. fill in row and col label starts
-        2. fill in row and col label entries
-        3. adjust downstream positions
+        let mut pos = byte_start_of_row_labels;
+        for i in 0..=n {
+            push_u32(&mut v, pos as u32);
+            if i < n {
+                pos += row_labels[i].len() as u32;
+            }
+        }
+        let mut pos = byte_start_of_col_labels;
+        for j in 0..=k {
+            push_u32(&mut v, pos as u32);
+            if i < k {
+                pos += col_labels[i].len() as u32;
+            }
+        }
 
-
-*************************************** WORKING HERE **************************************
-
+        // Insert matrix entries.
 
         for i in 0..n {
             let p = v.len() as u32;
@@ -292,12 +301,33 @@ impl MirrorSparseMatrix {
                 }
             }
         }
+
+        // Insert row and column labels.
+
+        for i in 0..n {
+            for p in 0..row_labels[i].len() {
+                v.push(row_labels[i].as_bytes()[p]);
+            }
+        }
+        for i in 0..k {
+            for p in 0..col_labels[i].len() {
+                v.push(col_labels[i].as_bytes()[p]);
+                pos += 1;
+            }
+        }
+
+        // Done.
+
         assert_eq!(total_bytes, v.len());
         MirrorSparseMatrix { x: v }
     }
 
     pub fn nrows(&self) -> usize {
         get_u32_at_pos(&self.x, 40) as usize
+    }
+
+    pub fn ncols(&self) -> usize {
+        get_u32_at_pos(&self.x, 44) as usize
     }
 
     fn start_of_row(&self, row: usize) -> usize {
@@ -515,6 +545,15 @@ impl MirrorSparseMatrix {
             0
         }
     }
+
+
+    TO DO:
+    1. Add way to retrieve row and column labels.
+    2. Modify tests appropriately.
+
+    ***** WORKING HERE *****
+
+
 }
 
 #[cfg(test)]
