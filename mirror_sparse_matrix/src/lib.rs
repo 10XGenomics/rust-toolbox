@@ -71,6 +71,10 @@ pub fn get_code_version_from_file(f: &str) -> u32 {
     let mut ff = std::fs::File::open(&f).unwrap();
     let mut x = vec![0 as u32; 9];
     binary_read_to_ref::<u32>(&mut ff, &mut x[0], 9).unwrap();
+    println!("returning code version = {}", x[8]); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    let mut m = MirrorSparseMatrix::new(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    read_from_file(&mut m, &f); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    println!("m.code_version() = {}", m.code_version()); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     x[8]
 }
 
@@ -79,13 +83,13 @@ pub fn read_from_file(s: &mut MirrorSparseMatrix, f: &str) {
     binary_read_vec::<u8>(&mut ff, &mut s.x).unwrap();
     if s.code_version() != 0 && s.code_version() != 1 {
         panic!(
-            "\nMirrowSparseMatrix: code_version has to be 0 or 1, but it is {}.\n",
+            "\nMirrorSparseMatrix: code_version has to be 0 or 1, but it is {}.\n",
             s.code_version()
         );
     }
     if s.storage_version() != 0 && s.storage_version() != 1 {
         panic!(
-            "\nMirrowSparseMatrix: storage_version has to be 0 or 1, but it is {}.\n",
+            "\nMirrorSparseMatrix: storage_version has to be 0 or 1, but it is {}.\n",
             s.storage_version()
         );
     }
