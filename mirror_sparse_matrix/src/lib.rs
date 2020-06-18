@@ -312,9 +312,9 @@ impl MirrorSparseMatrix {
                 v.push(row_labels[i].as_bytes()[p]);
             }
         }
-        for i in 0..k {
-            for p in 0..col_labels[i].len() {
-                v.push(col_labels[i].as_bytes()[p]);
+        for j in 0..k {
+            for p in 0..col_labels[j].len() {
+                v.push(col_labels[j].as_bytes()[p]);
                 pos += 1;
             }
         }
@@ -346,10 +346,10 @@ impl MirrorSparseMatrix {
         String::from_utf8(label_bytes.to_vec()).unwrap()
     }
 
-    pub fn col_label(&self, i: usize) -> String {
-        let col_labels_start = MirrorSparseMatrix::header_size() + self.nrows() * 8;
-        let label_start = get_u32_at_pos(&self.x, col_labels_start + i * 4);
-        let label_stop = get_u32_at_pos(&self.x, col_labels_start + (i + 1) * 4);
+    pub fn col_label(&self, j: usize) -> String {
+        let col_labels_start = MirrorSparseMatrix::header_size() + self.nrows() * 8 + 4;
+        let label_start = get_u32_at_pos(&self.x, col_labels_start + j * 4);
+        let label_stop = get_u32_at_pos(&self.x, col_labels_start + (j + 1) * 4);
         let label_bytes = &self.x[label_start as usize..label_stop as usize];
         String::from_utf8(label_bytes.to_vec()).unwrap()
     }
@@ -569,9 +569,7 @@ impl MirrorSparseMatrix {
 #[cfg(test)]
 mod tests {
 
-    // If test fails, test with:
-    // cargo test -p tenkit2 -- --nocapture
-    // Another test will fail because it requires release mode, but that test comes after this one.
+    // test with: cargo test --release -p mirror_sparse_matrix  -- --nocapture
 
     use super::*;
     use io_utils::*;
@@ -635,8 +633,8 @@ mod tests {
             printme!(col_sum, col_sum2);
             assert_eq!(col_sum, col_sum2);
             assert_eq!(y.storage_version(), storage_version);
-            assert_eq!(y.row_label(5), row_labels(5));
-            assert_eq!(y.col_label(7), col_labels(7));
+            assert_eq!(y.row_label(5), row_labels[5]);
+            assert_eq!(y.col_label(7), col_labels[7]);
         }
     }
 }
