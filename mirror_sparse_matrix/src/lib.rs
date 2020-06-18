@@ -2,8 +2,8 @@
 
 // This file describes a data structure that reasonably efficiently encodes a non-editable sparse
 // matrix of nonnegative integers, each < 2^32, and most which are very small, together with
-// string labels for rows and columns.  The number of rows and columns are assumed to be ≤ 2^32.  
-// The structure is optimized for the case where the number of columns is ≤ 2^16.  Space 
+// string labels for rows and columns.  The number of rows and columns are assumed to be ≤ 2^32.
+// The structure is optimized for the case where the number of columns is ≤ 2^16.  Space
 // requirements roughly double if this is exceeded.
 //
 // The defining property and raison d'être for this data structure is that it can be read directly
@@ -69,20 +69,22 @@ pub struct MirrorSparseMatrix {
 pub fn read_from_file(s: &mut MirrorSparseMatrix, f: &str) {
     let mut ff = std::fs::File::open(&f).unwrap();
     binary_read_vec::<u8>(&mut ff, &mut s.x).unwrap();
-    if s.code_version != 0 && s.code_version != 1 {
-        panic!("\nMirrowSparseMatrix: code_version has to be 0 or 1, but it is {}.\n",
-            s.code_version
+    if s.code_version() != 0 && s.code_version() != 1 {
+        panic!(
+            "\nMirrowSparseMatrix: code_version has to be 0 or 1, but it is {}.\n",
+            s.code_version()
         );
     }
-    if s.storage_version != 0 && s.storage_version != 1 {
-        panic!("\nMirrowSparseMatrix: storage_version has to be 0 or 1, but it is {}.\n",
-            s.storage_version
+    if s.storage_version() != 0 && s.storage_version() != 1 {
+        panic!(
+            "\nMirrowSparseMatrix: storage_version has to be 0 or 1, but it is {}.\n",
+            s.storage_version()
         );
     }
 }
 
 pub fn write_to_file(s: &MirrorSparseMatrix, f: &str) {
-    assert!(s.version > 0);
+    assert!(s.code_version() > 0);
     let mut ff = std::fs::File::create(&f).expect(&format!("Failed to create file {}.", f));
     binary_write_vec::<u8>(&mut ff, &s.x).unwrap();
 }
@@ -183,7 +185,7 @@ impl MirrorSparseMatrix {
         let mut storage_version = 0 as u32;
         if max_col >= 65536 {
             storage_version = 1 as u32;
-       }
+        }
         let hs = MirrorSparseMatrix::header_size();
         let mut v = Vec::<u8>::new();
         let mut total_bytes = hs + 4 * x.len();
@@ -236,14 +238,14 @@ impl MirrorSparseMatrix {
         for i in 0..=n {
             push_u32(&mut v, pos as u32);
             if i < n {
-                pos += row_labels[i].len() as u32;
+                pos += row_labels[i].len();
             }
         }
         let mut pos = byte_start_of_col_labels;
         for j in 0..=k {
             push_u32(&mut v, pos as u32);
-            if i < k {
-                pos += col_labels[i].len() as u32;
+            if j < k {
+                pos += col_labels[j].len();
             }
         }
 
@@ -337,19 +339,19 @@ impl MirrorSparseMatrix {
     }
 
     pub fn row_label(&self, i: usize) -> String {
-        let row_labels_start = self.header_size() + self.nrows() * 4;
-        let label_start = self.x(row_labels_start + i * 4);
-        let label_stop = self.x(row_labels_start + (i + 1) * 4);
-        let label_bytes = &self.x[label_start..label_stop];
-        String::from_utf8(&self.x[&label_bytes]).unwrap()
+        let row_labels_start = MirrorSparseMatrix::header_size() + self.nrows() * 4;
+        let label_start = get_u32_at_pos(&self.x, row_labels_start + i * 4);
+        let label_stop = get_u32_at_pos(&self.x, row_labels_start + (i + 1) * 4);
+        let label_bytes = &self.x[label_start as usize..label_stop as usize];
+        String::from_utf8(label_bytes.to_vec()).unwrap()
     }
 
     pub fn col_label(&self, i: usize) -> String {
-        let col_labels_start = self.header_size() + self.nrows() * 8;
-        let label_start = self.x(col_labels_start + i * 4);
-        let label_stop = self.x(col_labels_start + (i + 1) * 4);
-        let label_bytes = &self.x[label_start..label_stop];
-        String::from_utf8(&self.x[&label_bytes]).unwrap()
+        let col_labels_start = MirrorSparseMatrix::header_size() + self.nrows() * 8;
+        let label_start = get_u32_at_pos(&self.x, col_labels_start + i * 4);
+        let label_stop = get_u32_at_pos(&self.x, col_labels_start + (i + 1) * 4);
+        let label_bytes = &self.x[label_start as usize..label_stop as usize];
+        String::from_utf8(label_bytes.to_vec()).unwrap()
     }
 
     pub fn row(&self, row: usize) -> Vec<(usize, usize)> {
