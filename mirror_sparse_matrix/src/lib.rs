@@ -68,24 +68,12 @@ pub struct MirrorSparseMatrix {
 }
 
 pub fn get_code_version_from_file(f: &str) -> u32 {
-    /*
+    assert_eq!(std::mem::size_of::<usize>(), 8); // for the usize at the beginning of the file
     let mut ff = std::fs::File::open(&f).unwrap();
-    let mut x = vec![0 as u32; 9];
-    binary_read_to_ref::<u32>(&mut ff, &mut x[0], 9).unwrap();
-    println!("returning code version = {}", x[8]); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    let mut m = MirrorSparseMatrix::new(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    read_from_file(&mut m, &f); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    println!("m.code_version() = {}", m.code_version()); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    */
-
-    let mut ff = std::fs::File::open(&f).unwrap();
-    let mut x = vec![0 as u8; 36];
-    binary_read_to_ref::<u8>(&mut ff, &mut x[0], 36).unwrap();
-    let alt = get_u32_at_pos(&x, 32);
-    println!("alt = {}", alt);
-
-    alt
-    // x[8]
+    let mut x = vec![0 as u32; 11];
+    binary_read_to_ref::<u32>(&mut ff, &mut x[0], 11).unwrap();
+    println!("returning code version = {}", x[10]); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    x[10]
 }
 
 pub fn read_from_file(s: &mut MirrorSparseMatrix, f: &str) {
@@ -107,7 +95,6 @@ pub fn read_from_file(s: &mut MirrorSparseMatrix, f: &str) {
 
 pub fn write_to_file(s: &MirrorSparseMatrix, f: &str) {
     assert!(s.code_version() > 0);
-    std::fs::remove_file(&f).unwrap(); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     println!("writing, code version = {}", s.code_version()); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     let mut ff = std::fs::File::create(&f).expect(&format!("Failed to create file {}.", f));
     binary_write_vec::<u8>(&mut ff, &s.x).unwrap();
