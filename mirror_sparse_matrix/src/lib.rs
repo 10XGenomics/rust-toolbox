@@ -67,10 +67,10 @@ pub struct MirrorSparseMatrix {
     x: Vec<u8>,
 }
 
-pub fn get_code_version_from_file(f: &str) -> usize {
+pub fn get_code_version_from_file(f: &str) -> u32 {
     let mut ff = std::fs::File::open(&f).unwrap();
-    let mut x = vec![0; 9];
-    binary_read_to_ref::<usize>(&mut ff, &mut x[0], 9).unwrap();
+    let mut x = vec![0 as u32; 9];
+    binary_read_to_ref::<u32>(&mut ff, &mut x[0], 9).unwrap();
     x[8]
 }
 
