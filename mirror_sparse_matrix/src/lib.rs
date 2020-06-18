@@ -1,9 +1,10 @@
 // Copyright (c) 2019 10X Genomics, Inc. All rights reserved.
 
 // This file describes a data structure that reasonably efficiently encodes a non-editable sparse
-// matrix of nonnegative integers, each < 2^32, and most which are very small.  The number of rows
-// and columns are assumed to be ≤ 2^32.  The structure is optimized for the case where the number
-// of columns is ≤ 2^16.  Space requirements roughly double if this is exceeded.
+// matrix of nonnegative integers, each < 2^32, and most which are very small, together with
+// string labels for rows and columns.  The number of rows and columns are assumed to be ≤ 2^32.  
+// The structure is optimized for the case where the number of columns is ≤ 2^16.  Space 
+// requirements roughly double if this is exceeded.
 //
 // The defining property and raison d'être for this data structure is that it can be read directly
 // ("mirrored") as a single block of bytes, and thus reading is fast and especially fast on
@@ -17,8 +18,11 @@
 // 2. code version (4 bytes)
 // 3. storage version (4 bytes)
 // 4. number of rows (u32) = n
-// 5. for each i in 0..n, byte start of data for row i (n x u32)
-// 6. for each row:
+// 5. number of columns (u32) = k                                    *** ADDED ***
+// 6. for each i in 0..n, byte start of data for row i (n x u32)
+// 7. for each i in 0..=n, byte start of string label for row i      *** ADDED ***
+// 8. for each j in 0..=k, byte start of string label for column j   *** ADDED ***
+// 9. for each row:
 //    (a) number of sparse entries whose value is stored in u8 (u16) = m1
 //    (b) number of sparse entries whose value is stored in u16 (u16) = m2
 //    (c) number of sparse entries whose value is stored in u32 (u16) = m4 [note redundant]
@@ -38,12 +42,16 @@
 // Initial API:
 // * read from disk
 // * write to disk
-// * build from Vec<Vec<(i32,i32)> representation
+// * build from (Vec<Vec<(i32,i32)>, Vec<String>, Vec<String>) representation
 // * report the number of rows
 // * report the sum of entries for a given row
 // * report the sum of entries for a given column
 // * return the value of a given matrix entry
 // * return a given row.
+//
+// The initial version was 0.  In version 1, string labels for rows and columns were added.
+// A version 0 file can no longer be read, except that, you can read the version and exit.
+// All functions after item 4 above will assert strangely or return garbage.
 
 extern crate binary_vec_io;
 extern crate io_utils;
@@ -60,11 +68,20 @@ pub struct MirrorSparseMatrix {
 pub fn read_from_file(s: &mut MirrorSparseMatrix, f: &str) {
     let mut ff = std::fs::File::open(&f).unwrap();
     binary_read_vec::<u8>(&mut ff, &mut s.x).unwrap();
-    assert_eq!(s.code_version(), 0);
-    assert_eq!(s.storage_version(), 0);
+    if s.code_version != 0 && s.code_version != 1 {
+        panic!("\nMirrowSparseMatrix: code_version has to be 0 or 1, but it is {}.\n",
+            s.code_version
+        );
+    }
+    if s.storage_version != 0 && s.storage_version != 1 {
+        panic!("\nMirrowSparseMatrix: storage_version has to be 0 or 1, but it is {}.\n",
+            s.storage_version
+        );
+    }
 }
 
 pub fn write_to_file(s: &MirrorSparseMatrix, f: &str) {
+    assert!(s.version > 0);
     let mut ff = std::fs::File::create(&f).expect(&format!("Failed to create file {}.", f));
     binary_write_vec::<u8>(&mut ff, &s.x).unwrap();
 }
@@ -140,6 +157,7 @@ impl MirrorSparseMatrix {
         + 4 // code version
         + 4 // storage version
         + 4 // number of rows
+        + 4 // number of columns
     }
 
     fn code_version(&self) -> usize {
@@ -150,7 +168,11 @@ impl MirrorSparseMatrix {
         get_u32_at_pos(&self.x, 36) as usize
     }
 
-    pub fn build_from_vec(x: &Vec<Vec<(i32, i32)>>) -> MirrorSparseMatrix {
+    pub fn build_from_vec(
+        x: &Vec<Vec<(i32, i32)>>,
+        row_labels: &Vec<String>,
+        col_labels: &Vec<String>,
+    ) -> MirrorSparseMatrix {
         let mut max_col = 0 as i32;
         for i in 0..x.len() {
             for j in 0..x[i].len() {
@@ -160,7 +182,7 @@ impl MirrorSparseMatrix {
         let mut storage_version = 0 as u32;
         if max_col >= 65536 {
             storage_version = 1 as u32;
-        }
+       }
         let hs = MirrorSparseMatrix::header_size();
         let mut v = Vec::<u8>::new();
         let mut total_bytes = hs + 4 * x.len();
@@ -181,18 +203,43 @@ impl MirrorSparseMatrix {
                 total_bytes += 12 + 5 * m1 + 6 * m2 + 8 * m4;
             }
         }
+        let (n, k) = (row_labels.len(), col_labels.len());
+        assert_eq!(n, x.len());
+        total_bytes += 4 * (1 + n);
+        total_bytes += 4 * (1 + k);
+        let byte_start_of_row_labels = total_bytes;
+        for i in 0..n {
+            total_bytes += row_labels[i].len();
+        }
+        let byte_start_of_col_labels = total_bytes;
+        for j in 0..k {
+            total_bytes += col_labels[j].len();
+        }
         v.reserve(total_bytes);
         v.append(&mut b"MirrorSparseMatrix binary file \n".to_vec());
         assert_eq!(v.len(), 32);
-        let code_version = 0 as u32;
+        const CURRENT_CODE_VERSION: usize = 1;
+        let code_version = CURRENT_CODE_VERSION as u32;
         push_u32(&mut v, code_version);
         push_u32(&mut v, storage_version);
-        push_u32(&mut v, x.len() as u32);
+        push_u32(&mut v, n as u32);
+        push_u32(&mut v, k as u32);
         assert_eq!(v.len(), hs);
-        for _ in 0..x.len() {
+        for _ in 0..n {
             push_u32(&mut v, 0 as u32);
         }
-        for i in 0..x.len() {
+
+
+        To do:
+        1. fill in row and col label starts
+        2. fill in row and col label entries
+        3. adjust downstream positions
+
+
+*************************************** WORKING HERE **************************************
+
+
+        for i in 0..n {
             let p = v.len() as u32;
             put_u32_at_pos(&mut v, hs + 4 * i, p);
             let (mut m1, mut m2, mut m4) = (0, 0, 0);
