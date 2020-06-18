@@ -52,18 +52,26 @@
 //
 // The initial version was 0.  In version 1, string labels for rows and columns were added.
 // A version 0 file can no longer be read, except that, you can read the version and exit.
-// All functions after item 4 above will assert strangely or return garbage.
+// All functions after item 4 above will assert strangely or return garbage.  It would be
+// better to first call get_code_version_from_file.
 
 extern crate binary_vec_io;
 extern crate io_utils;
 extern crate pretty_trace;
 
-use binary_vec_io::{binary_read_vec, binary_write_vec};
+use binary_vec_io::{binary_read_to_ref, binary_read_vec, binary_write_vec};
 use std::cmp::max;
 
 #[derive(Clone)]
 pub struct MirrorSparseMatrix {
     x: Vec<u8>,
+}
+
+pub fn get_code_version_from_file(f: &str) -> usize {
+    let mut ff = std::fs::File::open(&f).unwrap();
+    let mut x = vec![0; 9];
+    binary_read_to_ref::<usize>(&mut ff, &mut x[0], 9).unwrap();
+    x[8]
 }
 
 pub fn read_from_file(s: &mut MirrorSparseMatrix, f: &str) {
