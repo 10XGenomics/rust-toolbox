@@ -28,7 +28,7 @@ use vector_utils::*;
 
 pub fn debruijn_to_petgraph_hyperbasevector<K: Kmer>(
     g_in: &DebruijnGraph<K, Vec<u32>>,
-    g_out: &mut Graph<u32, DnaString, Directed>,
+    g_out: &mut Graph<u32, DnaString, Directed, u32>,
     inv: &mut Vec<u32>,
 ) {
     // Find the edges in the transformed graph, and build inv.
@@ -162,7 +162,7 @@ pub fn debruijn_to_petgraph_hyperbasevector<K: Kmer>(
 
 pub struct HyperBasevector {
     pub k: i32,
-    pub g: Graph<u32, DnaString, Directed>,
+    pub g: Graph<u32, DnaString, Directed, u32>,
 }
 
 impl HyperBasevector {
