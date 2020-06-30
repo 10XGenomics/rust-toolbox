@@ -100,39 +100,40 @@ pub trait GraphSimple<T> {
     fn components_e_pos_sorted(&self, comp: &mut Vec<Vec<u32>>);
 }
 
-impl<S, T, U> GraphSimple<T> for Graph<S, T, U>
+impl<S, T, U, V> GraphSimple<T> for Graph<S, T, U, V>
 where
     U: EdgeType,
+    V: petgraph::csr::IndexType,
 {
     fn edge_obj(&self, e: u32) -> &T {
-        &self[EdgeIndex::<u32>::new(e as usize)]
+        &self[EdgeIndex::<V>::new(e as usize)]
     }
 
     fn to_left(&self, e: u32) -> u32 {
-        self.edge_endpoints(EdgeIndex::<u32>::new(e as usize))
+        self.edge_endpoints(EdgeIndex::<V>::new(e as usize))
             .unwrap()
             .0
             .index() as u32
     }
 
     fn to_right(&self, e: u32) -> u32 {
-        self.edge_endpoints(EdgeIndex::<u32>::new(e as usize))
+        self.edge_endpoints(EdgeIndex::<V>::new(e as usize))
             .unwrap()
             .1
             .index() as u32
     }
 
     fn n_from(&self, v: usize) -> usize {
-        self.neighbors(NodeIndex::<u32>::new(v)).count()
+        self.neighbors(NodeIndex::<V>::new(v)).count()
     }
 
     fn n_to(&self, v: usize) -> usize {
-        self.neighbors_directed(NodeIndex::<u32>::new(v), Incoming)
+        self.neighbors_directed(NodeIndex::<V>::new(v), Incoming)
             .count()
     }
 
     fn v_from(&self, v: usize, n: usize) -> usize {
-        self.edges_directed(NodeIndex::<u32>::new(v), Outgoing)
+        self.edges_directed(NodeIndex::<V>::new(v), Outgoing)
             .nth(n)
             .unwrap()
             .target()
@@ -140,7 +141,7 @@ where
     }
 
     fn v_to(&self, v: usize, n: usize) -> usize {
-        self.edges_directed(NodeIndex::<u32>::new(v), Incoming)
+        self.edges_directed(NodeIndex::<V>::new(v), Incoming)
             .nth(n)
             .unwrap()
             .source()
@@ -148,7 +149,7 @@ where
     }
 
     fn e_from(&self, v: usize, n: usize) -> usize {
-        let mut e: EdgeIndex<u32> = self.first_edge(NodeIndex::<u32>::new(v), Outgoing).unwrap();
+        let mut e: EdgeIndex<V> = self.first_edge(NodeIndex::<V>::new(v), Outgoing).unwrap();
         for _j in 0..n {
             let f = self.next_edge(e, Outgoing).unwrap();
             e = f;
@@ -157,7 +158,7 @@ where
     }
 
     fn e_to(&self, v: usize, n: usize) -> usize {
-        let mut e: EdgeIndex<u32> = self.first_edge(NodeIndex::<u32>::new(v), Incoming).unwrap();
+        let mut e: EdgeIndex<V> = self.first_edge(NodeIndex::<V>::new(v), Incoming).unwrap();
         for _j in 0..n {
             let f = self.next_edge(e, Incoming).unwrap();
             e = f;

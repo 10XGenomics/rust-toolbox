@@ -10,5 +10,5 @@ debruijn = { git = "https://github.com/10XGenomics/rust-debruijn.git" }
 equiv = { path = "../equiv" }
 graph_simple = { path = "../graph_simple" }
 kmer_lookup = { path = "../kmer_lookup" }
-petgraph = "0.4.13"
+petgraph = "0.5.1"
 vector_utils = "0.1.0"
