@@ -2562,6 +2562,7 @@ pub struct ContigAnnotation {
     pub is_cell: bool,            // was the barcode declared a cell?
     pub productive: Option<bool>, // productive?  (null means not full length)
     pub filtered: bool,           // true and never changed (unused field)
+                                  // TODO: full_length field?
 }
 
 impl ContigAnnotation {
@@ -2722,13 +2723,23 @@ impl ContigAnnotation {
             .find(|ann_unit| ann_unit.feature.region_type == region)
     }
 
-    /// FInd annotation unit corresponding to the given region
+    /// Find gene name corresponding to the given region if it exists
     pub fn get_gene_name(&self, region: VdjRegion) -> Option<&String> {
         self.get_region(region).map(|unit| &unit.feature.gene_name)
     }
 
     pub fn is_productive(&self) -> bool {
         self.productive.unwrap_or(false)
+    }
+
+    pub fn is_full_length(&self) -> bool {
+        match (self.get_region(VdjRegion::V), self.get_region(VdjRegion::J)) {
+            (Some(v_region), Some(j_region)) => {
+                v_region.annotation_match_start == 0
+                    && j_region.annotation_match_end == j_region.annotation_length
+            }
+            _ => false,
+        }
     }
 }
 
