@@ -5,6 +5,7 @@
 
 use crate::refx::*;
 use crate::transcript::*;
+use crate::types::VdjChain;
 use align_tools::*;
 use amino::*;
 use bio::alignment::AlignmentOperation::*;
@@ -2379,7 +2380,7 @@ pub fn print_cdr3_using_ann(
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AnnotationFeature {
-    pub chain: String,        // chain type of the reference record, e.g. TRA
+    pub chain: VdjChain,      // chain type of the reference record, e.g. TRA
     pub display_name: String, // same as gene_name
     pub feature_id: usize,    // id of reference record
     pub gene_name: String,    // name of reference record e.g. TRAV14-1
@@ -2516,7 +2517,7 @@ impl AnnotationUnit {
             score: s,
             mismatches: Vec::<usize>::new(),
             feature: AnnotationFeature {
-                chain: chain_type,
+                chain: chain_type.parse().unwrap(),
                 display_name: refdata.name[t].clone(),
                 feature_id: v[1].force_usize(),
                 gene_name: refdata.name[t].clone(),
