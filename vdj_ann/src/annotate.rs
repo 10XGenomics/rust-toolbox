@@ -2396,7 +2396,6 @@ pub struct AnnotationUnit {
     pub annotation_length: usize,      // length of reference record
     pub cigar: String,                 // cigar of the alignment
     pub score: i32,                    // score of the alignment
-    pub mismatches: Vec<usize>,        // unused
     pub feature: AnnotationFeature,    // feature type
 }
 
@@ -2515,7 +2514,6 @@ impl AnnotationUnit {
             annotation_length: refdata.refs[t].len(),
             cigar: cig,
             score: s,
-            mismatches: Vec::<usize>::new(),
             feature: AnnotationFeature {
                 chain: chain_type.parse().unwrap(),
                 display_name: refdata.name[t].clone(),
