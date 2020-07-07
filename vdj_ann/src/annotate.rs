@@ -5,7 +5,7 @@
 
 use crate::refx::*;
 use crate::transcript::*;
-use crate::types::{VdjChain, VdjRegion};
+use crate::types::{VdjChain, VdjContigChain, VdjRegion};
 use align_tools::*;
 use amino::*;
 use bio::alignment::AlignmentOperation::*;
@@ -14,6 +14,7 @@ use io_utils::{fwrite, fwriteln};
 use itertools::*;
 use serde::{Deserialize, Serialize};
 use stats_utils::*;
+use std::collections::HashSet;
 use std::{
     cmp::{max, min},
     fs::File,
@@ -2752,6 +2753,21 @@ impl ContigAnnotation {
                     && j_region.annotation_match_end == j_region.annotation_length
             }
             _ => false,
+        }
+    }
+
+    /// The chain corresponding to this contig. If different regions have
+    /// different chains, we call it a Multi chain
+    pub fn contig_chain(&self) -> Option<VdjContigChain> {
+        let chains: HashSet<_> = self
+            .annotations
+            .iter()
+            .map(|ann| ann.feature.chain)
+            .collect();
+        match chains.len() {
+            0 => None,
+            1 => Some(VdjContigChain::Single(chains.into_iter().next().unwrap())),
+            _ => Some(VdjContigChain::Multi),
         }
     }
 }

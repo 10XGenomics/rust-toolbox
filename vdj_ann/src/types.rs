@@ -1,4 +1,7 @@
 use serde::{Deserialize, Serialize};
+use std::convert::TryFrom;
+use std::fmt;
+use std::str::FromStr;
 use strum_macros::{Display, EnumIter, EnumString};
 
 /// All the possible heavy and light chains
@@ -25,6 +28,50 @@ pub enum VdjChain {
     TRB,
     TRD,
     TRG,
+}
+
+/// A contig could contain different regions that belong to different
+/// chains. For e.g TRD V-region with TRB J-region
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Hash)]
+#[serde(into = "String", try_from = "&str")]
+pub enum VdjContigChain {
+    Single(VdjChain),
+    Multi, // Could store a bitvec here listing the chains
+}
+
+impl fmt::Display for VdjContigChain {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                VdjContigChain::Single(chain) => chain.to_string(),
+                VdjContigChain::Multi => "Multi".to_string(),
+            }
+        )
+    }
+}
+
+impl From<VdjContigChain> for String {
+    fn from(contig_chain: VdjContigChain) -> String {
+        contig_chain.to_string()
+    }
+}
+
+impl FromStr for VdjContigChain {
+    type Err = strum::ParseError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "Multi" => Ok(VdjContigChain::Multi),
+            single => Ok(VdjContigChain::Single(single.parse()?)),
+        }
+    }
+}
+impl TryFrom<&str> for VdjContigChain {
+    type Error = strum::ParseError;
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        s.parse()
+    }
 }
 
 /// Different segments or regions in a full-length receptor transcript
@@ -65,6 +112,7 @@ pub enum VdjRegion {
 mod tests {
     use super::*;
     use std::str::FromStr;
+    use strum::IntoEnumIterator;
 
     #[test]
     fn vdj_region_from_str() {
@@ -111,6 +159,33 @@ mod tests {
         assert_eq!(
             serde_json::to_string(&VdjRegion::C).unwrap(),
             "\"C-REGION\""
+        );
+    }
+
+    #[test]
+    fn test_vdj_contig_chain() {
+        for chain in VdjChain::iter() {
+            let contig_chain = VdjContigChain::Single(chain);
+            assert_eq!(contig_chain.to_string(), chain.to_string());
+            let chain_str = serde_json::to_string(&chain).unwrap();
+            assert_eq!(serde_json::to_string(&contig_chain).unwrap(), chain_str,);
+            assert_eq!(
+                serde_json::from_str::<VdjContigChain>(&chain_str).unwrap(),
+                contig_chain,
+            );
+            assert_eq!(
+                chain.to_string().parse::<VdjContigChain>().unwrap(),
+                contig_chain
+            )
+        }
+        assert_eq!(VdjContigChain::Multi.to_string(), "Multi");
+        assert_eq!(
+            "Multi".parse::<VdjContigChain>().unwrap(),
+            VdjContigChain::Multi
+        );
+        assert_eq!(
+            serde_json::to_string(&VdjContigChain::Multi).unwrap(),
+            "\"Multi\""
         );
     }
 }
