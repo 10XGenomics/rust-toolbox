@@ -16,7 +16,6 @@ use serde::{Deserialize, Serialize};
 use stats_utils::*;
 use std::{
     cmp::{max, min},
-    collections::HashMap,
     fs::File,
     io::{BufWriter, Write},
 };
@@ -2525,6 +2524,14 @@ impl AnnotationUnit {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct ClonotypeInfo {
+    #[serde(default)]
+    raw_clonotype_id: Option<String>,
+    #[serde(default)]
+    raw_consensus_id: Option<String>,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ContigAnnotation {
     // raw data for the contig
@@ -2555,7 +2562,7 @@ pub struct ContigAnnotation {
     // annotations
     pub annotations: Vec<AnnotationUnit>, // the annotations
     pub clonotype: Option<String>,        // null, filled in later
-    pub info: HashMap<String, String>,    // {} initially, may be filled in later
+    pub info: ClonotypeInfo,              // Empty initially, may be filled in later
 
     // state of the contig
     pub high_confidence: bool,    // declared high confidence?
@@ -2662,7 +2669,7 @@ impl ContigAnnotation {
             },
             annotations: make_annotation_units(b, refdata, ann),
             clonotype: None,
-            info: HashMap::new(),
+            info: ClonotypeInfo::default(),
             high_confidence: high_confidencex,
             is_cell: is_cellx,
             productive: Some(productivex),
