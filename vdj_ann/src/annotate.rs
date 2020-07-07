@@ -2722,6 +2722,11 @@ impl ContigAnnotation {
             .find(|ann_unit| ann_unit.feature.region_type == region)
     }
 
+    /// FInd annotation unit corresponding to the given region
+    pub fn get_gene_name(&self, region: VdjRegion) -> Option<&String> {
+        self.get_region(region).map(|unit| &unit.feature.gene_name)
+    }
+
     pub fn is_productive(&self) -> bool {
         self.productive.unwrap_or(false)
     }
