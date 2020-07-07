@@ -7,3 +7,4 @@
 pub mod annotate;
 pub mod refx;
 pub mod transcript;
+pub mod types;
