@@ -2554,7 +2554,6 @@ pub struct ContigAnnotation {
 
     // annotations
     pub annotations: Vec<AnnotationUnit>, // the annotations
-    pub primer_annotations: Vec<AnnotationUnit>, // [], never filled in
     pub clonotype: Option<String>,        // null, filled in later
     pub info: HashMap<String, String>,    // {} initially, may be filled in later
 
@@ -2661,7 +2660,6 @@ impl ContigAnnotation {
                 _ => Some(cdr3x_stop as usize),
             },
             annotations: make_annotation_units(b, refdata, ann),
-            primer_annotations: Vec::<AnnotationUnit>::new(),
             clonotype: None,
             info: HashMap::new(),
             high_confidence: high_confidencex,
