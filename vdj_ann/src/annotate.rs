@@ -2527,9 +2527,15 @@ impl AnnotationUnit {
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct ClonotypeInfo {
     #[serde(default)]
-    raw_clonotype_id: Option<String>,
+    pub raw_clonotype_id: Option<String>,
     #[serde(default)]
-    raw_consensus_id: Option<String>,
+    pub raw_consensus_id: Option<String>,
+}
+
+impl ClonotypeInfo {
+    pub fn empty() -> Self {
+        ClonotypeInfo::default()
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -2669,7 +2675,7 @@ impl ContigAnnotation {
             },
             annotations: make_annotation_units(b, refdata, ann),
             clonotype: None,
-            info: ClonotypeInfo::default(),
+            info: ClonotypeInfo::empty(),
             high_confidence: high_confidencex,
             is_cell: is_cellx,
             productive: Some(productivex),
