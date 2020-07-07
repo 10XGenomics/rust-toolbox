@@ -45,14 +45,19 @@ pub enum VdjChain {
 )]
 pub enum VdjRegion {
     #[strum(to_string = "5'UTR")]
+    #[serde(rename = "5'UTR")]
     UTR, // 5′ untranslated region (5′ UTR)
     #[strum(to_string = "L-REGION+V-REGION")]
+    #[serde(rename = "L-REGION+V-REGION")]
     V, // Variable region
     #[strum(to_string = "D-REGION")]
+    #[serde(rename = "D-REGION")]
     D, // Diversity region
     #[strum(to_string = "J-REGION")]
+    #[serde(rename = "J-REGION")]
     J, // Joining region
     #[strum(to_string = "C-REGION")]
+    #[serde(rename = "C-REGION")]
     C, // Constant region
 }
 
@@ -68,5 +73,44 @@ mod tests {
         assert_eq!(VdjRegion::from_str("D-REGION"), Ok(VdjRegion::D));
         assert_eq!(VdjRegion::from_str("J-REGION"), Ok(VdjRegion::J));
         assert_eq!(VdjRegion::from_str("C-REGION"), Ok(VdjRegion::C));
+
+        assert_eq!(
+            serde_json::from_str::<VdjRegion>("\"5'UTR\"").unwrap(),
+            VdjRegion::UTR
+        );
+        assert_eq!(
+            serde_json::from_str::<VdjRegion>("\"L-REGION+V-REGION\"").unwrap(),
+            VdjRegion::V
+        );
+        assert_eq!(
+            serde_json::from_str::<VdjRegion>("\"D-REGION\"").unwrap(),
+            VdjRegion::D
+        );
+        assert_eq!(
+            serde_json::from_str::<VdjRegion>("\"J-REGION\"").unwrap(),
+            VdjRegion::J
+        );
+        assert_eq!(
+            serde_json::from_str::<VdjRegion>("\"C-REGION\"").unwrap(),
+            VdjRegion::C
+        );
+
+        assert_eq!(serde_json::to_string(&VdjRegion::UTR).unwrap(), "\"5'UTR\"");
+        assert_eq!(
+            serde_json::to_string(&VdjRegion::V).unwrap(),
+            "\"L-REGION+V-REGION\""
+        );
+        assert_eq!(
+            serde_json::to_string(&VdjRegion::D).unwrap(),
+            "\"D-REGION\""
+        );
+        assert_eq!(
+            serde_json::to_string(&VdjRegion::J).unwrap(),
+            "\"J-REGION\""
+        );
+        assert_eq!(
+            serde_json::to_string(&VdjRegion::C).unwrap(),
+            "\"C-REGION\""
+        );
     }
 }
