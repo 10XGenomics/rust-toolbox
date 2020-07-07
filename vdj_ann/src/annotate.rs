@@ -2714,6 +2714,17 @@ impl ContigAnnotation {
     pub fn print(&self, log: &mut Vec<u8>) {
         log.append(&mut serde_json::to_vec_pretty(&self).unwrap());
     }
+
+    /// FInd annotation unit corresponding to the given region
+    pub fn get_region(&self, region: VdjRegion) -> Option<&AnnotationUnit> {
+        self.annotations
+            .iter()
+            .find(|ann_unit| ann_unit.feature.region_type == region)
+    }
+
+    pub fn is_productive(&self) -> bool {
+        self.productive.unwrap_or(false)
+    }
 }
 
 // Given the alignment entities produced by annotate_seq, produce an AnnotationUnit.
