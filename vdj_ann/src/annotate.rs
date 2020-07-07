@@ -5,7 +5,7 @@
 
 use crate::refx::*;
 use crate::transcript::*;
-use crate::types::VdjChain;
+use crate::types::{VdjChain, VdjRegion};
 use align_tools::*;
 use amino::*;
 use bio::alignment::AlignmentOperation::*;
@@ -2380,11 +2380,11 @@ pub fn print_cdr3_using_ann(
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AnnotationFeature {
-    pub chain: VdjChain,      // chain type of the reference record, e.g. TRA
-    pub display_name: String, // same as gene_name
-    pub feature_id: usize,    // id of reference record
-    pub gene_name: String,    // name of reference record e.g. TRAV14-1
-    pub region_type: String,  // region type e.g. L-REGION+V-REGION
+    pub chain: VdjChain,        // chain type of the reference record, e.g. TRA
+    pub display_name: String,   // same as gene_name
+    pub feature_id: usize,      // id of reference record
+    pub gene_name: String,      // name of reference record e.g. TRAV14-1
+    pub region_type: VdjRegion, // region type e.g. L-REGION+V-REGION
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -2521,7 +2521,7 @@ impl AnnotationUnit {
                 display_name: refdata.name[t].clone(),
                 feature_id: v[1].force_usize(),
                 gene_name: refdata.name[t].clone(),
-                region_type: v[3].to_string(),
+                region_type: v[3].parse().unwrap(),
             },
         }
     }
@@ -2544,9 +2544,9 @@ pub struct ContigAnnotation {
     // The start position of the amino acid sequence on the contig is unspecified.
     // ◼ This seems like a flaw.
     pub start_codon_pos: Option<usize>, // start pos on contig of start codon
-    stop_codon_pos: Option<usize>,      // start pos on contig of stop codon
+    pub stop_codon_pos: Option<usize>,  // start pos on contig of stop codon
     pub aa_sequence: Option<String>,    // amino acid sequence
-    frame: Option<usize>,               // null and never changed (unused field)
+    pub frame: Option<usize>,           // null and never changed (unused field)
 
     // CDR3
     pub cdr3: Option<String>,      // amino acid sequence for CDR3, or null
@@ -2555,10 +2555,10 @@ pub struct ContigAnnotation {
     pub cdr3_stop: Option<usize>,  // stop position in bases on contig of CDR3
 
     // annotations
-    pub annotations: Vec<AnnotationUnit>,    // the annotations
-    primer_annotations: Vec<AnnotationUnit>, // [], never filled in
-    pub clonotype: Option<String>,           // null, filled in later
-    pub info: HashMap<String, String>,       // {} initially, may be filled in later
+    pub annotations: Vec<AnnotationUnit>, // the annotations
+    pub primer_annotations: Vec<AnnotationUnit>, // [], never filled in
+    pub clonotype: Option<String>,        // null, filled in later
+    pub info: HashMap<String, String>,    // {} initially, may be filled in later
 
     // state of the contig
     pub high_confidence: bool,    // declared high confidence?
