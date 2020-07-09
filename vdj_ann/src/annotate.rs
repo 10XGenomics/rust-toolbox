@@ -1473,7 +1473,7 @@ pub fn annotate_seq_core(
             let mut have_v = false;
             for i2 in 0..annx.len() {
                 let t2 = annx[i2].2 as usize;
-                if refdata.segtype[t2] == "V".to_string() {
+                if !rheaders[t2].contains("segment") && refdata.segtype[t2] == "V".to_string() {
                     if refdata.rtype[t1] == refdata.rtype[t2] {
                         have_v = true;
                     }
