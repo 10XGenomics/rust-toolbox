@@ -8,11 +8,22 @@
 //!
 //! This crate consists of a few functions related to these Stirling numbers.
 
-extern crate num_bigint;
-extern crate num_rational;
 extern crate num_traits;
+
+#[cfg(not(debug_assertions))]
+#[cfg(test)]
+extern crate num_bigint;
+#[cfg(not(debug_assertions))]
+#[cfg(test)]
+extern crate num_rational;
+#[cfg(not(debug_assertions))]
+#[cfg(test)]
 extern crate rand;
+#[cfg(not(debug_assertions))]
+#[cfg(test)]
 extern crate rayon;
+#[cfg(not(debug_assertions))]
+#[cfg(test)]
 extern crate vector_utils;
 
 use num_traits::{Num, One, Zero};
@@ -201,7 +212,8 @@ mod tests {
     fn test_stirling_stuff() {
         use num_bigint::{BigInt, BigUint, ToBigUint};
         use num_rational::Ratio;
-        use rand::{Rng, SeedableRng, StdRng};
+        use rand::rngs::StdRng;
+        use rand::{Rng, SeedableRng};
         use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
         use vector_utils::*;
 
@@ -330,6 +342,6 @@ mod tests {
         let p1 = p_at_most_m_distinct_in_sample_of_x_from_n(m, x, n, &sr);
         let p2 = simulate_p_at_most_m_distinct_in_sample_of_x_from_n(m, x, n, 100_000_000);
         assert_eq!(format!("{:.7}", p1), "0.0005953");
-        assert_eq!(format!("{:.7}", p2), "0.0005936");
+        assert_eq!(format!("{:.7}", p2), "0.0005952");
     }
 }
