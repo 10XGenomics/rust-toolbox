@@ -7,9 +7,11 @@ description = "A few functions relating to Stirling numbers of the second kind."
 homepage = "https://github.com/10XGenomics/rust-toolbox/tree/master/stirling_numbers"
 
 [dependencies]
-num-bigint = "0.2.2"
-num-rational = "0.2"
-num-traits = "0.2"
-rand = "0.5"
+num-traits = "^0.2"
+
+[dev-dependencies]
+num-bigint = "^0.3"
+num-rational = "^0.3"
+rand = "0.7.3"
 rayon = "1.0.2"
 vector_utils = "0.1.0"
