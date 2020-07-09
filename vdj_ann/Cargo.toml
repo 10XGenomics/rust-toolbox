@@ -14,7 +14,7 @@ fasta = { path = "../fasta" }
 flate2 = "1.0.12"
 hyper = { path = "../hyper" }
 io_utils = "0.2.4"
-itertools = "0.8"
+itertools = ">= 0.8, <= 0.9"
 kmer_lookup = { path = "../kmer_lookup" }
 pretty_trace = "0.3"
 serde = "1.0.90"
