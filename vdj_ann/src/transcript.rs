@@ -6,7 +6,7 @@ use crate::annotate::*;
 use crate::refx::*;
 use amino::*;
 use debruijn::{dna_string::*, kmer::*, *};
-use hyper::*;
+use hyperbase::*;
 use io_utils::fwriteln;
 use kmer_lookup::*;
 use std::{cmp::max, io::prelude::*};
