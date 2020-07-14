@@ -153,3 +153,4 @@ pub fn load_genbank_accession(accession: &String, bases: &mut DnaString) {
     fasta = fasta.replace("\n", "");
     *bases = DnaString::from_dna_string(&fasta);
 }
+
