@@ -10,7 +10,7 @@ members = [
     "exons",
     "fasta",
     "graph_simple",
-    "hyper",
+    "hyperbase",
     "io_utils",
     "kmer_lookup",
     "load_feature_bc",
