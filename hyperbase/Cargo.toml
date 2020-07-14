@@ -9,7 +9,7 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 [dependencies]
 debruijn = "0.3.2"
 equiv = "0.1.1"
-graph_simple = { path = "../graph_simple" }
+graph_simple = "0.1.1"
 kmer_lookup = "0.1.1"
 petgraph = "0.4.13"
 vector_utils = "0.1.3"
