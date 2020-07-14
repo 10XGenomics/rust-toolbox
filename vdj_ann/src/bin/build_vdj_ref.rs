@@ -80,7 +80,7 @@
 // defined external files.
 
 use debruijn::{dna_string::*, *};
-use fasta::*;
+use fasta_tools::*;
 use flate2::read::MultiGzDecoder;
 use pretty_trace::PrettyTrace;
 use process::Command;

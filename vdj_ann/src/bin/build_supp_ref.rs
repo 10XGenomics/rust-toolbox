@@ -30,7 +30,7 @@
 
 use debruijn::{dna_string::*, *};
 use exons::*;
-use fasta::*;
+use fasta_tools::*;
 use pretty_trace::PrettyTrace;
 use std::{collections::HashMap, env};
 use string_utils::TextUtils;
