@@ -7,6 +7,6 @@ description = "Some tools that are 'internal' for now because they are insuffici
 
 [dependencies]
 bio = "0.31"
-debruijn = { git = "https://github.com/10XGenomics/rust-debruijn.git" }
+debruijn = "0.3.2"
 itertools = ">= 0.8, <= 0.9"
-vector_utils = "0.1.0"
+vector_utils = "0.1.3"
