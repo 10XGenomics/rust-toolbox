@@ -8,6 +8,7 @@ description = "Some tools that are 'internal' for now because they are insuffici
 repository = "https://github.com/10XGenomics/rust-toolbox"
 
 # This crate is not published because it is too big.
+include = ["src/**/*"]
 
 [dependencies]
 align_tools = "0.1"
