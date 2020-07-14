@@ -8,7 +8,7 @@ members = [
     "dna",
     "equiv",
     "exons",
-    "fasta",
+    "fasta_tools",
     "graph_simple",
     "hyperbase",
     "io_utils",
