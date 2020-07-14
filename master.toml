@@ -26,6 +26,7 @@ string_utils = "0.1.1"
 strum = ">=0.17.1"
 strum_macros = ">=0.17.1"
 superslice = "1.0.0"
+vdj_ann = "0.1.1"
 vector_utils = "0.1.3"
 
 exons = { path = "../exons" }
