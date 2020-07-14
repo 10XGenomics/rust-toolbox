@@ -10,7 +10,7 @@
 // ◼ code.
 
 use debruijn::{dna_string::*, kmer::*};
-use fasta::*;
+use fasta_tools::*;
 use io_utils::*;
 use kmer_lookup::*;
 use std::collections::{HashMap, HashSet};

@@ -7,5 +7,5 @@ description = "Some tools that are 'internal' for now because they are insuffici
 
 [dependencies]
 flate2 = "1.0.16"
-io_utils = "0.2.4"
+io_utils = "0.2.6"
 string_utils = "0.1.1"

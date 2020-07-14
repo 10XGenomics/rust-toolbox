@@ -5,15 +5,15 @@ authors = ["David Jaffe <david.jaffe@10xgenomics.com"]
 edition = "2018"
 
 [dependencies]
-align_tools = { path = "../align_tools" }
+align_tools = "0.1.1"
 amino = "0.1.1"
 bio = "0.31"
 debruijn = "0.3.2"
 exons = "0.1.1"
-fasta = "0.1.1"
+fasta_tools = "0.1.1"
 flate2 = "1.0.16"
 hyperbase = "0.1.1"
-io_utils = "0.2.4"
+io_utils = "0.2.6"
 itertools = ">= 0.8, <= 0.9"
 kmer_lookup = "0.1.1"
 pretty_trace = "0.3.1"

@@ -7,7 +7,7 @@ flate2 = "1.0.16"
 graph_simple = "0.1.1"
 hyperbase = "0.1.1"
 # io_utils = "0.2.5"
-io_utils = "0.2.4"
+io_utils = "0.2.6"
 # io_utils = { path = "../io_utils" }
 itertools = ">= 0.8, <= 0.9"
 kmer_lookup = "0.1.1"
@@ -35,7 +35,13 @@ superslice = "1.0.0"
 vdj_ann = "0.1.1"
 vector_utils = "0.1.3"
 
-exons = { path = "../exons" }
-fasta = { path = "../fasta" }
-graph_simple = { path = "../graph_simple" }
-hyper = { path = "../hyper" }
+align_tools = "0.1.1"
+ansi_escape = "0.1.0"
+binary_vec_io = "0.1.1"
+exons = "0.1.1"
+fasta_tools = "0.1.1"
+load_feature_bc = "0.1.1"
+marsoc = "0.1.1"
+mirror_sparse_matrix = "0.1.2"
+perf_stats = "0.1.1"
+tables = "0.1.1"
