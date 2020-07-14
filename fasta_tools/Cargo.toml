@@ -8,5 +8,5 @@ description = "Some tools that are 'internal' for now because they are insuffici
 [dependencies]
 debruijn = "0.3.2"
 flate2 = "1.0.16"
-io_utils = { path = "../io_utils" }
+io_utils = "0.2"
 string_utils = "0.1.1"

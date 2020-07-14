@@ -7,6 +7,6 @@ description = "Some tools that are 'internal' for now because they are insuffici
 repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
-io_utils = { path = "../io_utils" }
+io_utils = "0.2"
 itertools = ">= 0.8, <= 0.9"
 string_utils = "0.1.1"

@@ -7,5 +7,5 @@ description = "Some tools that are 'internal' for now because they are insuffici
 
 [dependencies]
 binary_vec_io = "0.1.1"
-io_utils = "0.2.6"
+io_utils = "0.2"
 pretty_trace = "0.3.1"
