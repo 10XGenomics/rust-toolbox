@@ -7,6 +7,8 @@ license = "MIT"
 description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
 repository = "https://github.com/10XGenomics/rust-toolbox"
 
+# This crate is not published because it is too big.
+
 [dependencies]
 align_tools = "0.1.1"
 amino = "0.1.1"
