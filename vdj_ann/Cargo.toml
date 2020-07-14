@@ -1,6 +1,6 @@
 [package]
 name = "vdj_ann"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com"]
 edition = "2018"
 
@@ -9,7 +9,7 @@ align_tools = "0.1.1"
 amino = "0.1.1"
 bio = "0.31"
 debruijn = "0.3.2"
-exons = "0.1.1"
+exons = "0.1.2"
 fasta_tools = "0.1.1"
 flate2 = "1.0.16"
 hyperbase = "0.1.1"
