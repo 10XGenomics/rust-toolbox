@@ -3,6 +3,7 @@ name = "vdj_ann"
 version = "0.1.1"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com"]
 edition = "2018"
+include = ["src/**/*"]
 
 [dependencies]
 align_tools = { path = "../align_tools" }
