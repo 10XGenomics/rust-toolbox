@@ -9,8 +9,8 @@ align_tools = { path = "../align_tools" }
 amino = "0.1.1"
 bio = "0.31"
 debruijn = "0.3.2"
-exons = { path = "../exons" }
-fasta = { path = "../fasta" }
+exons = "0.1.1"
+fasta = "0.1.1"
 flate2 = "1.0.16"
 hyperbase = "0.1.1"
 io_utils = "0.2.4"
