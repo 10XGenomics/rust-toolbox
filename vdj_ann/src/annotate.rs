@@ -5,7 +5,6 @@
 
 use crate::refx::*;
 use crate::transcript::*;
-use crate::types::{VdjChain, VdjContigChain, VdjRegion};
 use align_tools::*;
 use amino::*;
 use bio::alignment::AlignmentOperation::*;
@@ -21,6 +20,7 @@ use std::{
     io::{BufWriter, Write},
 };
 use string_utils::*;
+use vdj_types::{VdjChain, VdjContigChain, VdjRegion};
 use vector_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
