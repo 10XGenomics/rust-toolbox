@@ -2378,7 +2378,7 @@ pub fn print_cdr3_using_ann(
 // EXTEND_PENALTY = 1
 // which are copied from cellranger/lib/python/cellranger/vdj/constants.py.
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AnnotationFeature {
     pub chain: VdjChain,        // chain type of the reference record, e.g. TRA
     pub display_name: String,   // same as gene_name
@@ -2387,7 +2387,7 @@ pub struct AnnotationFeature {
     pub region_type: VdjRegion, // region type e.g. L-REGION+V-REGION
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AnnotationUnit {
     pub contig_match_start: usize,     // start on contig
     pub contig_match_end: usize,       // stop on contig
@@ -2525,7 +2525,7 @@ impl AnnotationUnit {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default, PartialEq)]
 pub struct ClonotypeInfo {
     #[serde(default)]
     pub raw_clonotype_id: Option<String>,
@@ -2539,7 +2539,7 @@ impl ClonotypeInfo {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct ContigAnnotation {
     // raw data for the contig
     pub barcode: String,     // the barcode

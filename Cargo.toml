@@ -23,6 +23,7 @@ members = [
     "string_utils",
     "tables",
     "vdj_ann",
+    "vdj_types",
     "vector_utils",
 ]
 
