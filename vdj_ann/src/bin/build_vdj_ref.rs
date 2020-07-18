@@ -871,12 +871,12 @@ fn main() {
     fwriteln!(json, "{{");
     let mut sha256 = Sha256::new();
     copy(&mut File::open(&fasta).unwrap(), &mut sha256).unwrap();
-    let hash = sha256.result();
+    let hash = sha256.finalize();
     fwriteln!(json, r###"    "fasta_hash": "{:x}","###, hash);
     fwriteln!(json, r###"    "genomes": "{}","###, source2);
     let mut sha256 = Sha256::new();
     copy(&mut File::open(&gtf).unwrap(), &mut sha256).unwrap();
-    let hash = sha256.result();
+    let hash = sha256.finalize();
     fwriteln!(json, r###"    "gtf_hash": "{:x}","###, hash);
     fwriteln!(
         json,
