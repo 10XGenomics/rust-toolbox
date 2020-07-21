@@ -2576,7 +2576,9 @@ pub struct ContigAnnotation {
     pub is_cell: bool,            // was the barcode declared a cell?
     pub productive: Option<bool>, // productive?  (null means not full length)
     pub filtered: bool,           // true and never changed (unused field)
-                                  // TODO: full_length field?
+
+    pub is_gex_cell: Option<bool>, // Was the barcode declared a cell by Gene expression data, if available
+    pub is_asm_cell: Option<bool>, // Was the barcode declared a cell by the VDJ assembler
 }
 
 impl ContigAnnotation {
@@ -2681,6 +2683,9 @@ impl ContigAnnotation {
             is_cell: is_cellx,
             productive: Some(productivex),
             filtered: true,
+            // These need to be populated by the assembler explicitly as needed
+            is_gex_cell: None,
+            is_asm_cell: None,
         }
     }
 
