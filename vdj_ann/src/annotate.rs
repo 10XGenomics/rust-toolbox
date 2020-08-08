@@ -13,14 +13,13 @@ use io_utils::{fwrite, fwriteln};
 use itertools::*;
 use serde::{Deserialize, Serialize};
 use stats_utils::*;
-use std::collections::HashSet;
 use std::{
     cmp::{max, min},
     fs::File,
     io::{BufWriter, Write},
 };
 use string_utils::*;
-use vdj_types::{VdjChain, VdjContigChain, VdjRegion};
+use vdj_types::{VdjChain, VdjRegion};
 use vector_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -2579,6 +2578,8 @@ pub struct ContigAnnotation {
 
     pub is_gex_cell: Option<bool>, // Was the barcode declared a cell by Gene expression data, if available
     pub is_asm_cell: Option<bool>, // Was the barcode declared a cell by the VDJ assembler
+
+    pub full_length: Option<bool>, // New field added in CR 4.1. None if the field is not set
 }
 
 impl ContigAnnotation {
@@ -2640,7 +2641,7 @@ impl ContigAnnotation {
         for i in 0..q.len() {
             qp[i] += 33;
         }
-        ContigAnnotation {
+        let mut ann = ContigAnnotation {
             barcode: tigname.before("_").to_string(),
             contig_name: tigname.clone(),
             sequence: b.to_string(),
@@ -2686,7 +2687,10 @@ impl ContigAnnotation {
             // These need to be populated by the assembler explicitly as needed
             is_gex_cell: None,
             is_asm_cell: None,
-        }
+            full_length: None,
+        };
+        ann.full_length = Some(ann.is_full_length());
+        ann
     }
 
     // Produce a ContigAnnotation from a sequence.
@@ -2735,7 +2739,7 @@ impl ContigAnnotation {
         log.append(&mut serde_json::to_vec_pretty(&self).unwrap());
     }
 
-    /// FInd annotation unit corresponding to the given region
+    /// Find annotation unit corresponding to the given region
     pub fn get_region(&self, region: VdjRegion) -> Option<&AnnotationUnit> {
         self.annotations
             .iter()
@@ -2752,28 +2756,26 @@ impl ContigAnnotation {
     }
 
     pub fn is_full_length(&self) -> bool {
-        match (self.get_region(VdjRegion::V), self.get_region(VdjRegion::J)) {
-            (Some(v_region), Some(j_region)) => {
-                v_region.annotation_match_start == 0
-                    && j_region.annotation_match_end == j_region.annotation_length
-            }
-            _ => false,
-        }
+        self.full_length.unwrap_or(check_full_length(
+            self.get_region(VdjRegion::V),
+            self.get_region(VdjRegion::J),
+        ))
     }
 
-    /// The chain corresponding to this contig. If different regions have
-    /// different chains, we call it a Multi chain
-    pub fn contig_chain(&self) -> Option<VdjContigChain> {
-        let chains: HashSet<_> = self
-            .annotations
-            .iter()
-            .map(|ann| ann.feature.chain)
-            .collect();
-        match chains.len() {
-            0 => None,
-            1 => Some(VdjContigChain::Single(chains.into_iter().next().unwrap())),
-            _ => Some(VdjContigChain::Multi),
+    /// The chain corresponding to this contig is defined as the chain type of the V-region
+    /// if it exists. This is consistent with the defn used in enclone
+    pub fn chain_type(&self) -> Option<VdjChain> {
+        self.get_region(VdjRegion::V).map(|unit| unit.feature.chain)
+    }
+}
+
+fn check_full_length(v_ann: Option<&AnnotationUnit>, j_ann: Option<&AnnotationUnit>) -> bool {
+    match (v_ann, j_ann) {
+        (Some(v_region), Some(j_region)) => {
+            v_region.annotation_match_start == 0
+                && j_region.annotation_match_end == j_region.annotation_length
         }
+        _ => false,
     }
 }
 
