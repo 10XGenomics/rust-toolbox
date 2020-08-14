@@ -294,6 +294,34 @@ impl Hyper {
         }
     }
 
+    // =============================================================================
+    // Print the graph, component by component, with edge annotations.
+    // =============================================================================
+
+    pub fn print_with_annotations(&self, ann: &Vec<String>) {
+        let mut comp = Vec::<Vec<u32>>::new();
+        self.h.g.components_e(&mut comp);
+        for j in 0..comp.len() {
+            println!("\nCOMPONENT {}", j + 1);
+            for i in 0..comp[j].len() {
+                let e = comp[j][i];
+                let v = self.h.g.to_left(e as u32);
+                let w = self.h.g.to_right(e as u32);
+                let b: DnaString = self.h.g[EdgeIndex::<u32>::new(e as usize)].clone();
+                println!(
+                    "\n{} ==(e={},len={},supp={})==> {}\n{}",
+                    v,
+                    e,
+                    b.len() - self.h.k as usize + 1,
+                    self.supp(e as usize),
+                    w,
+                    ann[e as usize]
+                );
+                println!("{}", b.to_string());
+            }
+        }
+    }
+
     // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
     // UTILITY FUNCTIONS
     // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
