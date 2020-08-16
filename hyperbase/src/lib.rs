@@ -304,18 +304,22 @@ impl Hyper {
         for j in 0..comp.len() {
             println!("\nCOMPONENT {}", j + 1);
             for i in 0..comp[j].len() {
-                let e = comp[j][i];
+                let e = comp[j][i] as usize;
                 let v = self.h.g.to_left(e as u32);
                 let w = self.h.g.to_right(e as u32);
-                let b: DnaString = self.h.g[EdgeIndex::<u32>::new(e as usize)].clone();
+                let b: DnaString = self.h.g[EdgeIndex::<u32>::new(e)].clone();
+                let mut a = String::new();
+                if ann[e as usize].len() > 0 {
+                    a = format!("\n{}", ann[e]);
+                }
                 println!(
-                    "\n{} ==(e={},len={},supp={})==> {}\n{}",
+                    "\n{} ==(e={},len={},supp={})==> {}{}",
                     v,
                     e,
                     b.len() - self.h.k as usize + 1,
-                    self.supp(e as usize),
+                    self.supp(e),
                     w,
-                    ann[e as usize]
+                    a
                 );
                 println!("{}", b.to_string());
             }
