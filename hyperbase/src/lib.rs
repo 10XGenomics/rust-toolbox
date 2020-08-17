@@ -308,17 +308,16 @@ impl Hyper {
                 let v = self.h.g.to_left(e as u32);
                 let w = self.h.g.to_right(e as u32);
                 let b: DnaString = self.h.g[EdgeIndex::<u32>::new(e)].clone();
-                print!(
-                    "\n{} ==(e={},len={},supp={})==> {}{}",
+                println!(
+                    "\n{} ==(e={},len={},supp={})==> {}\n",
                     v,
                     e,
                     b.len() - self.h.k as usize + 1,
                     self.supp(e),
-                    w,
-                    ann[e]
+                    w
                 );
                 if ann[e].len() > 0 {
-                    println!("");
+                    print!("{}\n", ann[e]);
                 }
                 println!("{}", b.to_string());
             }
