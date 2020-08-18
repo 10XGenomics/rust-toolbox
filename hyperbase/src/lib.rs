@@ -303,9 +303,9 @@ impl Hyper {
     pub fn print_with_annotations(&self, ann: &Vec<String>, require_ann: bool) {
         let mut comp = Vec::<Vec<u32>>::new();
         self.h.g.components_e(&mut comp);
-        let mut have_ann = false;
         let mut n = 0;
         for j in 0..comp.len() {
+            let mut have_ann = false;
             for i in 0..comp[j].len() {
                 let e = comp[j][i] as usize;
                 if ann[e].len() > 0 {
