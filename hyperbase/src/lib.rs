@@ -316,7 +316,7 @@ impl Hyper {
                 continue;
             }
             n += 1;
-            println!("\nCOMPONENT {}", n + 1);
+            println!("\nCOMPONENT {}", n);
             for i in 0..comp[j].len() {
                 let e = comp[j][i] as usize;
                 let v = self.h.g.to_left(e as u32);
