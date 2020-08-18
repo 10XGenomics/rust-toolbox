@@ -296,13 +296,27 @@ impl Hyper {
 
     // =============================================================================
     // Print the graph, component by component, with edge annotations.
+    //
+    // Last argument: if true, only show components having annotations.
     // =============================================================================
 
-    pub fn print_with_annotations(&self, ann: &Vec<String>) {
+    pub fn print_with_annotations(&self, ann: &Vec<String>, require_ann: bool) {
         let mut comp = Vec::<Vec<u32>>::new();
         self.h.g.components_e(&mut comp);
+        let mut have_ann = false;
+        let mut n = 0;
         for j in 0..comp.len() {
-            println!("\nCOMPONENT {}", j + 1);
+            for i in 0..comp[j].len() {
+                let e = comp[j][i] as usize;
+                if ann[e].len() > 0 {
+                    have_ann = true;
+                }
+            }
+            if require_ann && !have_ann {
+                continue;
+            }
+            n += 1;
+            println!("\nCOMPONENT {}", n + 1);
             for i in 0..comp[j].len() {
                 let e = comp[j][i] as usize;
                 let v = self.h.g.to_left(e as u32);
