@@ -54,6 +54,14 @@ impl EquivRel {
         }
     }
 
+    pub fn from_raw(xx: Vec<i32>, yy: Vec<i32>, zz: Vec<i32>) -> EquivRel {
+        EquivRel {
+            x: xx,
+            y: yy,
+            z: zz,
+        }
+    }
+
     pub fn join(&mut self, a: i32, b: i32) {
         let mut ax = a;
         let mut bx = b;
