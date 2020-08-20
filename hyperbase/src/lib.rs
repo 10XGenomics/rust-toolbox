@@ -332,7 +332,10 @@ impl Hyper {
                     w
                 );
                 if ann[e].len() > 0 {
-                    print!("{}\n", ann[e]);
+                    print!("{}", ann[e]);
+                    if !hide_seq {
+                        println!("");
+                    }
                 }
                 if !hide_seq || ann[e].is_empty() {
                     println!("{}", b.to_string());
