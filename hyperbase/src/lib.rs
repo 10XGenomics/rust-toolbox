@@ -294,13 +294,14 @@ impl Hyper {
         }
     }
 
-    // =============================================================================
+    // ============================================================================================
     // Print the graph, component by component, with edge annotations.
     //
-    // Last argument: if true, only show components having annotations.
-    // =============================================================================
+    // require_ann: if true, only show components having annotations.
+    // hide_seq: if true, and there is an annotation on an edge, don't print the sequence
+    // ============================================================================================
 
-    pub fn print_with_annotations(&self, ann: &Vec<String>, require_ann: bool) {
+    pub fn print_with_annotations(&self, ann: &Vec<String>, require_ann: bool, hide_seq: bool) {
         let mut comp = Vec::<Vec<u32>>::new();
         self.h.g.components_e(&mut comp);
         let mut n = 0;
@@ -333,7 +334,9 @@ impl Hyper {
                 if ann[e].len() > 0 {
                     print!("{}\n", ann[e]);
                 }
-                println!("{}", b.to_string());
+                if !hide_seq || ann[e].is_empty() {
+                    println!("{}", b.to_string());
+                }
             }
         }
     }
