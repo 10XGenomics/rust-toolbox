@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Sreenath Krishnan <sreenath.krishnan@10xgenomics.com>"]
 edition = "2018"
 license = "MIT"
-
+description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
 
 [dependencies]
 serde = { version = "1.0.90", features = ["derive"] }
