@@ -1243,6 +1243,8 @@ fn main() {
                     || gene.starts_with("IGLV");
                 if ncodons == 2 || !standard {
                     print_fasta(&mut out, &header, &seqx.slice(m, n as usize), none);
+                } else {
+                    record -= 1;
                 }
             }
         }
