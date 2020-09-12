@@ -46,6 +46,7 @@ pub fn mouse_ref_old() -> String {
 pub struct RefData {
     pub refs: Vec<DnaString>,
     pub rheaders: Vec<String>,
+    pub rheaders_orig: Vec<String>,
     pub rkmers_plus: Vec<(Kmer12, i32, i32)>,
     // which V segments have matched UTRs in the reference:
     pub has_utr: HashMap<String, bool>,
@@ -64,6 +65,7 @@ impl<'a> RefData {
         RefData {
             refs: Vec::<DnaString>::new(),
             rheaders: Vec::<String>::new(),
+            rheaders_orig: Vec::<String>::new(),
             rkmers_plus: Vec::<(Kmer12, i32, i32)>::new(),
             has_utr: HashMap::<String, bool>::new(),
             name: Vec::<String>::new(),
@@ -162,6 +164,7 @@ pub fn make_vdj_ref_data_core(
         erase_if(&mut refs, &to_delete);
         erase_if(&mut rheaders, &to_delete);
     }
+    refdata.rheaders_orig = rheaders.clone();
 
     // Now build stuff.
 
