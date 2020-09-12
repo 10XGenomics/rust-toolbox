@@ -230,6 +230,7 @@ pub fn make_vdj_ref_data_core(
         erase_if(&mut refdata.segtype, &to_delete);
         erase_if(&mut refdata.transcript, &to_delete);
         erase_if(&mut refdata.rtype, &to_delete);
+        erase_if(&mut refdata.rheaders_orig, &to_delete);
     }
 
     // Fill in igjs and cs and ds.
