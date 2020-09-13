@@ -1,9 +1,11 @@
 // Copyright (c) 2019 10x Genomics, Inc. All rights reserved.
 
 extern crate debruijn;
+extern crate string_utils;
 
 use debruijn::dna_string::*;
 use debruijn::*;
+use string_utils::*;
 
 // Test to see if a given DnaString has a start or stop codon at a given position.
 
@@ -96,7 +98,7 @@ pub fn codon_to_aa(codon: &[u8]) -> u8 {
         b"TAG" => b'*',
         b"TAA" => b'*',
         b"TGA" => b'*',
-        _ => panic!("Unexpected codon"),
+        _ => panic!("Unexpected codon {}.", strme(&codon)),
     };
     return aa;
 }

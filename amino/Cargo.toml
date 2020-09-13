@@ -8,3 +8,4 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
 debruijn = "0.3.2"
+string_utils = "0.1.1"
