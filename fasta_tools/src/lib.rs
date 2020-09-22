@@ -17,6 +17,62 @@ use std::{
 };
 use string_utils::*;
 
+// Read a fasta file or gzipped fasta file and convert to a Vec<Vec<u8>>, in which
+// outer vec entries alternate between header lines and base lines.
+
+pub fn read_fasta_to_vec_vec_u8(f: &str) -> Vec<Vec<u8>> {
+    let mut x = Vec::<Vec<u8>>::new();
+    if !f.ends_with(".gz") {
+        let fin = open_for_read![&f];
+        let mut last: String = String::new();
+        let mut first = true;
+        for line in fin.lines() {
+            let s = line.unwrap();
+            if first {
+                if !s.starts_with(">") {
+                    panic!("fasta format failure reading {}", f);
+                }
+                first = false;
+                x.push(s.get(1..).unwrap().as_bytes().to_vec());
+            } else {
+                if s.starts_with(">") {
+                    x.push(last.as_bytes().to_vec());
+                    last.clear();
+                    x.push(s.get(1..).unwrap().as_bytes().to_vec());
+                } else {
+                    last += &s;
+                }
+            }
+        }
+        x.push(last.as_bytes().to_vec());
+    } else {
+        let gz = MultiGzDecoder::new(std::fs::File::open(&f).unwrap());
+        let fin = std::io::BufReader::new(gz);
+        let mut last: String = String::new();
+        let mut first = true;
+        for line in fin.lines() {
+            let s = line.unwrap();
+            if first {
+                if !s.starts_with(">") {
+                    panic!("fasta format failure");
+                }
+                first = false;
+                x.push(s.get(1..).unwrap().as_bytes().to_vec());
+            } else {
+                if s.starts_with(">") {
+                    x.push(last.as_bytes().to_vec());
+                    last.clear();
+                    x.push(s.get(1..).unwrap().as_bytes().to_vec());
+                } else {
+                    last += &s;
+                }
+            }
+        }
+        x.push(last.as_bytes().to_vec());
+    }
+    x
+}
+
 // This allows either a fasta file or a gzipped one.  This APPENDS to the
 // dv and headers vectors.
 // ◼ Kill the code duplication below.
