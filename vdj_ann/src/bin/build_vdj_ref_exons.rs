@@ -912,9 +912,9 @@ fn main() {
     // Build modified fasta.
 
     for i in 1..exons.len() {
-        if exons[i].1 == exons[i-1].1 && dna[i].len() < dna[i-1].len() {
-            dna.swap(i, i-1);
-            exons.swap(i, i-1);
+        if exons[i].1 == exons[i - 1].1 && dna[i].len() < dna[i - 1].len() {
+            dna.swap(i, i - 1);
+            exons.swap(i, i - 1);
         }
     }
     println!("");
@@ -924,11 +924,21 @@ fn main() {
             reverse_complement(&mut x);
         }
         let n = x.len();
-        if i > 0 && exons[i].1 != exons[i-1].1 {
+        if i > 0 && exons[i].1 != exons[i - 1].1 {
             println!("");
         }
-        println!(">{}, transcript = {}, len = {} = {} % 3", 
-            exons[i].0, exons[i].1, n - 20, (n - 20) % 3);
-        println!("{}|{}|{}", strme(&x[0..10]), strme(&x[10..n-10]), strme(&x[n-10..n]));
+        println!(
+            ">{}, transcript = {}, len = {} = {} % 3",
+            exons[i].0,
+            exons[i].1,
+            n - 20,
+            (n - 20) % 3
+        );
+        println!(
+            "{}|{}|{}",
+            strme(&x[0..10]),
+            strme(&x[10..n - 10]),
+            strme(&x[n - 10..n])
+        );
     }
 }
