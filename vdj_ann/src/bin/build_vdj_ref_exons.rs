@@ -901,22 +901,44 @@ fn main() {
     // Get the DNA sequences for the exons.  Extended by ten in both directions.
 
     let mut dna = Vec::<DnaString>::new();
+    let mut starts = Vec::<usize>::new();
+    let mut stops = Vec::<usize>::new();
     for i in 0..exons.len() {
         let chr = &exons[i].2;
         let chrid = to_chr[&chr.to_string()];
+        starts.push(exons[i].3 as usize);
+        stops.push(exons[i].4 as usize);
         let (start, stop) = (exons[i].3 - 10, exons[i].4 + 10);
         let seq = refs[chrid].slice(start as usize, stop as usize).to_owned();
         dna.push(seq);
     }
 
-    // Build modified fasta.
+    // Put exons in order.
 
     for i in 1..exons.len() {
         if exons[i].1 == exons[i - 1].1 && dna[i].len() < dna[i - 1].len() {
             dna.swap(i, i - 1);
             exons.swap(i, i - 1);
+            starts.swap(i, i - 1);
+            stops.swap(i, i - 1);
         }
     }
+
+    // Exclude solo exons.
+
+    let mut to_delete = vec![false; exons.len()];
+    for i in 1..exons.len() - 1 {
+        if exons[i].1 != exons[i-1].1 && exons[i].1 != exons[i+1].1 {
+            to_delete[i] = true;
+        }
+    }
+    erase_if(&mut exons, &to_delete);
+    erase_if(&mut dna, &to_delete);
+    erase_if(&mut starts, &to_delete);
+    erase_if(&mut stops, &to_delete);
+
+    // Build modified fasta.
+
     println!("");
     for i in 0..exons.len() {
         let mut x = dna[i].to_ascii_vec();
@@ -927,15 +949,24 @@ fn main() {
         if i > 0 && exons[i].1 != exons[i - 1].1 {
             println!("");
         }
-        println!(
+        print!(
             ">{}, transcript = {}, len = {} = {} % 3",
             exons[i].0,
             exons[i].1,
             n - 20,
             (n - 20) % 3
         );
+        if i < exons.len() - 1 && exons[i].1 == exons[i+1].1 {
+            let intron;
+            if !exons[i].6 {
+                intron = starts[i] - stops[i+1];
+            } else {
+                intron = starts[i+1] - stops[i];
+            }
+            print!(", intron = {}", intron);
+        }
         println!(
-            "{}|{}|{}",
+            "\n{}|{}|{}",
             strme(&x[0..10]),
             strme(&x[10..n - 10]),
             strme(&x[n - 10..n])
