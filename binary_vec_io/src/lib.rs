@@ -99,7 +99,7 @@ where
 
 pub fn _binary_read_vec_vec<T>(f: &mut std::fs::File, x: &mut Vec<Vec<T>>) -> Result<(), Error>
 where
-    T: BinaryInputOutputSafe,
+    T: BinaryInputOutputSafe + Clone,
 {
     let mut n: usize = 0;
     binary_read_to_ref::<usize>(f, &mut n, 1)?;
@@ -108,9 +108,7 @@ where
         let extra: usize = len + n - x.capacity();
         x.reserve(extra);
     }
-    unsafe {
-        x.set_len(len + n);
-    }
+    x.resize(len + n, Vec::<T>::new());
     for i in 0..n {
         binary_read_vec::<T>(f, &mut x[i])?;
     }
