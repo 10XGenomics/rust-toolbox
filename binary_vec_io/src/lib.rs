@@ -85,7 +85,7 @@ where
     binary_read_to_ref::<T>(f, &mut x[len], n)
 }
 
-pub fn _binary_write_vec_vec<T>(f: &mut std::fs::File, x: &Vec<Vec<T>>) -> Result<(), Error>
+pub fn binary_write_vec_vec<T>(f: &mut std::fs::File, x: &Vec<Vec<T>>) -> Result<(), Error>
 where
     T: BinaryInputOutputSafe,
 {
@@ -97,7 +97,7 @@ where
     Ok(())
 }
 
-pub fn _binary_read_vec_vec<T>(f: &mut std::fs::File, x: &mut Vec<Vec<T>>) -> Result<(), Error>
+pub fn binary_read_vec_vec<T>(f: &mut std::fs::File, x: &mut Vec<Vec<T>>) -> Result<(), Error>
 where
     T: BinaryInputOutputSafe + Clone,
 {
