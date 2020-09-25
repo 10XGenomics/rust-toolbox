@@ -74,7 +74,6 @@
 // 1. Our C segments are correct.
 // 2. Our L+V segments start with start codons.
 // 3. Our TRBV11-2 and TRAJ37 are correct.
-// 4. Our TRBV21-1 begins with a start codon.
 //
 // For both: this code has the advantage of producing reproducible results from
 // defined external files.
@@ -451,7 +450,6 @@ fn main() {
         deleted_genes.push("TRBV6-3");
         allowed_pseudogenes.push("TRAJ8");
         allowed_pseudogenes.push("TRAV35");
-        allowed_pseudogenes.push("TRBV21-1");
         added_genes.push(("TRBD2", "7", 142795705, 142795720, false));
         added_genes.push(("TRAJ15", "14", 22529629, 22529688, false));
         added_genes.push(("IGLV6-57", "22", 22195713, 22195798, true)); // UTR
@@ -535,6 +533,7 @@ fn main() {
 
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
         // Begin human changes for cell ranger 4.1.
+        // (see also mouse changes, below)
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
         // 1. Replace IGKV2D-40.  It has a leader sequence of length 9 amino acids, which is an 
@@ -556,6 +555,17 @@ fn main() {
         // added_genes2.push((
         //     "IGKV2-18", "2", 89128701, 89129017, 89129435, 89129449, false,
         // ));
+
+        // 3. Delete IGLV5-48.  This is truncated on the right.
+
+        deleted_genes.push("IGLV5-48");
+
+        // 4. Our previouse notes for TRBV21-1 said that our version began with a start codon.
+        // That's great, but it has multiple frameshifts, we don't see it in 10x data, and it is
+        // annotated as a pseudogene.  Therefore we are "unallowing" it here.  Note that there
+        // are two versions.
+
+        // allowed_pseudogenes.push("TRBV21-1");
 
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
         // End human changes for cell ranger 4.1.
@@ -736,11 +746,30 @@ fn main() {
              CTTCTCCTCAGTGGTGCAGGTGAAGCAGACGGCCATCCCTGACTACAGGAACATGATTGGACAAGGTGCC",
         ));
 
-        // A BALB/c constant region, from GenBank V00763.1.
+        // Trim TRAJ49.
+
+        right_trims.push(("TRAJ49", 3));
+
+        // Remove extra first base from a constant region.
+
+        left_trims.push(("IGLC2", 1));
+
+        // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+        // Begin mouse changes for cell ranger 4.1.
+        // (see also human changes, above)
+        // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+        // 1. The gene TRAV23 is frameshifted.
+
+        deleted_genes.push("TRAV23");
+
+        // 2. The constant region gene IGHG2B has an extra base at its beginning.  We previously
+        // added this sequence, and so we've moved that addition here, and deleted its first base.
+        // It is a BALB/c constant region, from GenBank V00763.1.
 
         added_genes_seq.push((
             "IGHG2B",
-            "GCCAAAACAACACCCCCATCAGTCTATCCACTGGCCCCTGGGTGTGGAGATACAACTGGTTCCTCCGTGAC\
+            "CCAAAACAACACCCCCATCAGTCTATCCACTGGCCCCTGGGTGTGGAGATACAACTGGTTCCTCCGTGAC\
              CTCTGGGTGCCTGGTCAAGGGGTACTTCCCTGAGCCAGTGACTGTGACTTGGAACTCTGGATCCCTGTCCA\
              GCAGTGTGCACACCTTCCCAGCTCTCCTGCAGTCTGGACTCTACACTATGAGCAGCTCAGTGACTGTCCCC\
              TCCAGCACCTGGCCAAGTCAGACCGTCACCTGCAGCGTTGCTCACCCAGCCAGCAGCACCACGGTGGACAA\
@@ -757,13 +786,9 @@ fn main() {
              GGTCTCCGGGTAAA",
         ));
 
-        // Trim TRAJ49.
-
-        right_trims.push(("TRAJ49", 3));
-
-        // Remove extra first base from a constant region.
-
-        left_trims.push(("IGLC2", 1));
+        // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+        // End human changes for cell ranger 4.1.
+        // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
     }
     if species == "balbc" {}
 
