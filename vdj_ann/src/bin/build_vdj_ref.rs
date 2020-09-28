@@ -536,13 +536,21 @@ fn main() {
         // (see also mouse changes, below)
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-        // 1. Replace IGKV2D-40.  It has a leader sequence of length 9 amino acids, which is an 
-        // extreme low outlier, and we observe in the whole genome reference and in 10x data a 
-        // left extension of it whose leader is 20 amino acids long, as expected, and which has a 
+        // 1. Replace IGKV2D-40.  It has a leader sequence of length 9 amino acids, which is an
+        // extreme low outlier, and we observe in the whole genome reference and in 10x data a
+        // left extension of it whose leader is 20 amino acids long, as expected, and which has a
         // leucine-rich stretch, as expected, unlike the short leader.
 
         deleted_genes.push("IGKV2D-40");
-        added_genes2.push(("IGKV2D-40", "2", 89851758, 89851806, 89852178, 89852493, true));
+        added_genes2.push((
+            "IGKV2D-40",
+            "2",
+            89851758,
+            89851806,
+            89852178,
+            89852493,
+            true,
+        ));
 
         // 2. Delete IGKV2-18.  We previously added this gene to our reference but it is listed
         // in some places as a pseudogene, and the sequence we provided had a leader of length
@@ -567,10 +575,15 @@ fn main() {
 
         // allowed_pseudogenes.push("TRBV21-1");
 
+        // 5. Add a gene that is present in the human reference and in our data, but which
+        // we missed.
+
+        added_genes_seq.push(("IGHV4-30-4",
+            "ATGAAACACCTGTGGTTCTTCCTCCTGCTGGTGGCAGCTCCCAGATGGGTCCTGTCCCAGCTGCAGCTGCAGGAGTCGGGCCCAGGACTGGTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACTGTCTCTGGTGGCTCCATCAGCAGTGGTGATTACTACTGGAGCTGGATCCGCCAGCCCCCAGGGAAGGGCCTGGAGTGGATTGGGTACATCTATTACAGTGGGAGCACCTACTACAACCCGTCCCTCAAGAGTCGAGTTACCATATCAGTAGACACGTCCAAGAACCAGTTCTCCCTGAAGCTGAGCTCTGTGACTGCCGCAGACACGGCCGTGTATTACTGT"));
+
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
         // End human changes for cell ranger 4.1.
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-
     }
     if species == "mouse" {
         // Doesn't start with start codon, is labeled a pseudogene by NCBI,
