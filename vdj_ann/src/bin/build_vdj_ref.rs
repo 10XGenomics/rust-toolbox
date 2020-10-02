@@ -99,6 +99,10 @@ use vector_utils::*;
 use io_utils::{fwrite, fwriteln, open_for_read, open_for_write_new};
 
 fn header_from_gene(gene: &str, is_utr: bool, record: &mut usize, source: &str) -> String {
+    let mut gene = gene.to_string();
+    if gene.ends_with(" ") {
+        gene = gene.rev_before(" ").to_string();
+    }
     let genev = gene.as_bytes();
     let mut xx = "None";
     if gene == "IGHD"
@@ -822,6 +826,16 @@ fn main() {
             68835268,
             68835307,
             false,
+        ));
+
+        // 4. Fix a gene for which the canonical C at the end of FWR3 is seen as S.  In all our
+        // data, we see C.  This is a single base change, except that we've truncated after the C.
+        // The space after the gene name is to work around a crash.
+
+        deleted_genes.push("IGHV8-9");
+        added_genes_seq.push((
+            "IGHV8-9 ",
+            "ATGGACAGGCTTACTTCCTCATTCCTACTCCTGATTGTTCCTGTCTATGTCCTATCCCAGGTTACTCTGAAAGAGTCTGGCCCTGGGATATTGCAGCCCTCCCAGACCCTCAGTCTGACTTGTTCTTTCTCTGGGTTTTCACTGAGCACTTTTGGTATGGGTGTGAGCTGGATTCGTCAGCCTTCAGGGAATGGTCTGGAGTGGCTGGCACACATTTATTGGGATGATGACAAGCACTATAACCCATCCTTGAAGAGCCGGCTCACAATCTCCAAGGATACCTCCAACAACCAGGTATTCCTCAAGATCACGACTGTGGACACTGCAGATACTGCCACATACTACTGT",
         ));
 
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
