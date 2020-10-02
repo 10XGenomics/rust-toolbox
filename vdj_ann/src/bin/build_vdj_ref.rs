@@ -811,8 +811,21 @@ fn main() {
              GGTCTCCGGGTAAA",
         ));
 
+        // 3. The gene IGKV12-89 shows a six base insertion in all 10x data, so we insert it here.
+
+        deleted_genes.push("IGKV12-89");
+        added_genes2.push((
+            "IGKV12-89",
+            "6",
+            68834846,
+            68835149,
+            68835268,
+            68835307,
+            false,
+        ));
+
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-        // End human changes for cell ranger 4.1.
+        // End mouse changes for cell ranger 4.1.
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
     }
     if species == "balbc" {}
