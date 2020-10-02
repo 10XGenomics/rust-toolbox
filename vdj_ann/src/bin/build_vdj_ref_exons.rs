@@ -928,7 +928,7 @@ fn main() {
 
     let mut to_delete = vec![false; exons.len()];
     for i in 1..exons.len() - 1 {
-        if exons[i].1 != exons[i-1].1 && exons[i].1 != exons[i+1].1 {
+        if exons[i].1 != exons[i - 1].1 && exons[i].1 != exons[i + 1].1 {
             to_delete[i] = true;
         }
     }
@@ -956,12 +956,12 @@ fn main() {
             n - 20,
             (n - 20) % 3
         );
-        if i < exons.len() - 1 && exons[i].1 == exons[i+1].1 {
+        if i < exons.len() - 1 && exons[i].1 == exons[i + 1].1 {
             let intron;
             if !exons[i].6 {
-                intron = starts[i] - stops[i+1];
+                intron = starts[i] - stops[i + 1];
             } else {
-                intron = starts[i+1] - stops[i];
+                intron = starts[i + 1] - stops[i];
             }
             print!(", intron = {}", intron);
         }
