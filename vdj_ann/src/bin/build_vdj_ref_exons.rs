@@ -900,8 +900,7 @@ fn main() {
 
     // Get the DNA sequences for the exons.  Extended by ten in both directions.
 
-    const LEFT_EXT : usize = 10;
-    const RIGHT_EXT : usize = 40;
+    const EXT : usize = 40;
     let mut dna = Vec::<DnaString>::new();
     let mut starts = Vec::<usize>::new();
     let mut stops = Vec::<usize>::new();
@@ -910,7 +909,7 @@ fn main() {
         let chrid = to_chr[&chr.to_string()];
         starts.push(exons[i].3 as usize);
         stops.push(exons[i].4 as usize);
-        let (start, stop) = (exons[i].3 - LEFT_EXT as i32, exons[i].4 + RIGHT_EXT as i32);
+        let (start, stop) = (exons[i].3 - EXT as i32, exons[i].4 + EXT as i32);
         let seq = refs[chrid].slice(start as usize, stop as usize).to_owned();
         dna.push(seq);
     }
@@ -955,8 +954,8 @@ fn main() {
             ">{}, transcript = {}, len = {} = {} % 3",
             exons[i].0,
             exons[i].1,
-            n - LEFT_EXT - RIGHT_EXT,
-            (n - LEFT_EXT - RIGHT_EXT) % 3
+            n - EXT - EXT,
+            (n - EXT - EXT) % 3
         );
         if i < exons.len() - 1 && exons[i].1 == exons[i + 1].1 {
             let intron;
@@ -969,9 +968,9 @@ fn main() {
         }
         println!(
             "\n{}|{}|{}",
-            strme(&x[0..LEFT_EXT]),
-            strme(&x[LEFT_EXT..n - RIGHT_EXT]),
-            strme(&x[n - RIGHT_EXT..n])
+            strme(&x[0..EXT]),
+            strme(&x[EXT..n - EXT]),
+            strme(&x[n - EXT..n])
         );
     }
 }
