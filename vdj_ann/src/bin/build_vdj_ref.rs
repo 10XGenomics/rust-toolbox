@@ -536,7 +536,7 @@ fn main() {
         ));
 
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-        // Begin human changes for cell ranger 4.1.
+        // Begin human changes for cell ranger 5.0.
         // (see also mouse changes, below)
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
@@ -598,7 +598,7 @@ fn main() {
             "ATGAAGCACCTGTGGTTTTTCCTCCTGCTGGTGGCAGCTCCCAGATGGGTCCTGTCCCAGGTGCAGCTGCAGGAGTCGGGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCACTGTCTCTGGTTACTCCATCAGCAGTGGTTACTACTGGGGCTGGATCCGGCAGCCCCCAGGGAAGGGGCTGGAGTGGATTGGGAGTATCTATCATAGTGGGAGCACCTACTACAACCCGTCCCTCAAGAGTCGAGTCACCATATCAGTAGACACGTCCAAGAACCAGTTCTCCCTGAAGCTGAGCTCTGTGACCGCCGCAGACACGGCCGTGTATTACTGT"));
 
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-        // End human changes for cell ranger 4.1.
+        // End human changes for cell ranger 5.0.
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
     }
     if species == "mouse" {
@@ -784,7 +784,7 @@ fn main() {
         left_trims.push(("IGLC2", 1));
 
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-        // Begin mouse changes for cell ranger 4.1.
+        // Begin mouse changes for cell ranger 5.0.
         // (see also human changes, above)
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
@@ -839,8 +839,15 @@ fn main() {
             "ATGGACAGGCTTACTTCCTCATTCCTACTGCTGATTGTCCCTGTCTATGTCCTATCCCAGGTTACTCTGAAAGAGTCTGGCCCTGGTATATTGCAGCCCTCCCAGACCCTCAGTCTGACCTGTTCTTTCTCTGTGTTTTCACTGAGCACTTTTGGTATGGGTGTGAGCTGGATTCGTCAGCCTTCAGGGAAGGGTCTGGAGTGGCTGGCACACATTTATTGGGATGAGGACAAGCACTATAAACCATCCTTGAAGAGCCGGCTCACAATCTCCAAGGATACCTCCAACAACCAGGTATTCCTCAAGATCACCACTGTGGACACTGCAGATACTGCCACATACTACTGT",
         ));
 
+        // 5. Add a missing allele of IGKV2-109.  This is in GRCm38 and in 10x data.
+
+        added_genes_seq.push((
+            "IGKV2-109",
+            "ATGAGGTTCTCTGCTCAGCTTCTGGGGCTGCTTGTGCTCTGGATCCCTGGATCCACTGCAGATATTGTGATGACGCAGGCTGCCTTCTCCAATCCAGTCACTCTTGGAACATCAGCTTCCATCTCCTGCAGGTCTAGTAAGAATCTCCTACATAGTAATGGCATCACTTATTTGTATTGGTATCTGCAGAGGCCAGGCCAGTCTCCTCAGCTCCTGATATATCGGGTGTCCAATCTGGCCTCAGGAGTCCCAAACAGGTTCAGTGGCAGTGAGTCAGGAACTGATTTCACACTGAGAATCAGCAGAGTGGAGGCTGAGGATGTGGGTGTTTATTACTGT",
+        ));
+
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-        // End mouse changes for cell ranger 4.1.
+        // End mouse changes for cell ranger 5.0.
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
     }
     if species == "balbc" {}
