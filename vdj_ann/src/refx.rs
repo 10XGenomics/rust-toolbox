@@ -25,6 +25,10 @@ pub fn human_supp_ref() -> String {
     include_str!["../vdj_refs/human/fasta/supp_regions.fa"].to_string()
 }
 
+pub fn human_ref_2_0() -> String {
+    include_str!["../vdj_refs_2.0/human/fasta/regions.fa"].to_string()
+}
+
 pub fn human_ref_3_1() -> String {
     include_str!["../vdj_refs_3.1/human/fasta/regions.fa"].to_string()
 }
