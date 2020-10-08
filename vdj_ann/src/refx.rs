@@ -25,8 +25,8 @@ pub fn human_supp_ref() -> String {
     include_str!["../vdj_refs/human/fasta/supp_regions.fa"].to_string()
 }
 
-pub fn human_ref_old() -> String {
-    include_str!["../vdj_refs_old/human/fasta/regions.fa"].to_string()
+pub fn human_ref_3_1() -> String {
+    include_str!["../vdj_refs_3.1/human/fasta/regions.fa"].to_string()
 }
 
 pub fn mouse_ref() -> String {
@@ -37,8 +37,8 @@ pub fn mouse_supp_ref() -> String {
     include_str!["../vdj_refs/mouse/fasta/supp_regions.fa"].to_string()
 }
 
-pub fn mouse_ref_old() -> String {
-    include_str!["../vdj_refs_old/mouse/fasta/regions.fa"].to_string()
+pub fn mouse_ref_3_1() -> String {
+    include_str!["../vdj_refs_3.1/mouse/fasta/regions.fa"].to_string()
 }
 
 // RefData: this is a packaging of reference data appropriate for VDJ analysis.
