@@ -120,7 +120,9 @@ fn parse_gtf_file(
             gene2 = "IGHM".to_string();
         }
 
-        if !gene2.starts_with("IGHV") && !gene2.starts_with("IGKV") && !gene2.starts_with("IGLV") {
+        if !gene2.starts_with("IGHV") && !gene2.starts_with("IGKV") && !gene2.starts_with("IGLV")
+            && !gene2.starts_with("IGHJ") && !gene2.starts_with("IGKJ") 
+            && !gene2.starts_with("IGLJ") {
             continue;
         }
 
@@ -939,7 +941,8 @@ fn main() {
 
     let mut to_delete = vec![false; exons.len()];
     for i in 1..exons.len() - 1 {
-        if exons[i].1 != exons[i - 1].1 && exons[i].1 != exons[i + 1].1 {
+        if exons[i].1 != exons[i - 1].1 && exons[i].1 != exons[i + 1].1 
+            && exons[i].0.as_bytes()[3] == b'V' {
             to_delete[i] = true;
         }
     }
@@ -967,7 +970,7 @@ fn main() {
             n - EXT - EXT,
             (n - EXT - EXT) % 3
         );
-        if exons[i].5 == "CDS" {
+        if exons[i].5 == "CDS" && exons[i].0.as_bytes()[3] == b'V' {
             if i < exons.len() - 1 && exons[i].1 == exons[i + 1].1 {
                 let intron;
                 if !exons[i].6 {
@@ -977,7 +980,7 @@ fn main() {
                 }
                 print!(", intron = {}", intron);
             }
-        } else {
+        } else if exons[i].0.as_bytes()[3] == b'V' {
             print!(", 5'-UTR");
         }
         println!(
