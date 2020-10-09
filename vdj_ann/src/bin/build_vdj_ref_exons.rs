@@ -80,7 +80,7 @@ fn parse_gtf_file(
 
         // Exclude certain types.
 
-        if cat != "CDS" {
+        if cat != "CDS" && cat != "five_prime_utr" {
             continue;
         }
 
@@ -916,8 +916,18 @@ fn main() {
 
     // Put exons in order.
 
+    for _pass in 1..=2 {
+        for i in 1..exons.len() {
+            if exons[i].1 == exons[i - 1].1 && exons[i].5 != "CDS" && exons[i-1].5 == "CDS" {
+                dna.swap(i, i - 1);
+                exons.swap(i, i - 1);
+                starts.swap(i, i - 1);
+                stops.swap(i, i - 1);
+            }
+        }
+    }
     for i in 1..exons.len() {
-        if exons[i].1 == exons[i - 1].1 && dna[i].len() < dna[i - 1].len() {
+        if exons[i].1 == exons[i - 1].1 && dna[i].len() < dna[i - 1].len() && exons[i].5 == "CDS" && exons[i-1].5 == "CDS" {
             dna.swap(i, i - 1);
             exons.swap(i, i - 1);
             starts.swap(i, i - 1);
@@ -957,14 +967,18 @@ fn main() {
             n - EXT - EXT,
             (n - EXT - EXT) % 3
         );
-        if i < exons.len() - 1 && exons[i].1 == exons[i + 1].1 {
-            let intron;
-            if !exons[i].6 {
-                intron = starts[i] - stops[i + 1];
-            } else {
-                intron = starts[i + 1] - stops[i];
+        if exons[i].5 == "CDS" {
+            if i < exons.len() - 1 && exons[i].1 == exons[i + 1].1 {
+                let intron;
+                if !exons[i].6 {
+                    intron = starts[i] - stops[i + 1];
+                } else {
+                    intron = starts[i + 1] - stops[i];
+                }
+                print!(", intron = {}", intron);
             }
-            print!(", intron = {}", intron);
+        } else {
+            print!(", 5'-UTR");
         }
         println!(
             "\n{}|{}|{}",
