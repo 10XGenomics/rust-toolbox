@@ -77,9 +77,9 @@ fn parse_gtf_file(
         if !biotype.starts_with("IG_") {
             continue;
         }
-        if biotype.starts_with("IG_C") {
-            continue;
-        }
+        // if biotype.starts_with("IG_C") {
+        //     continue;
+        // }
 
         // Exclude certain types.
 
@@ -123,11 +123,13 @@ fn parse_gtf_file(
             gene2 = "IGHM".to_string();
         }
 
+        /*
         if !gene2.starts_with("IGHV") && !gene2.starts_with("IGKV") && !gene2.starts_with("IGLV")
             && !gene2.starts_with("IGHJ") && !gene2.starts_with("IGKJ") 
             && !gene2.starts_with("IGLJ") && !gene2.starts_with("IGHD") {
             continue;
         }
+        */
 
         // For now, require havana (except for mouse strains).  Could try turning
         // this off, but there may be some issues.
