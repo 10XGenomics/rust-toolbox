@@ -125,7 +125,7 @@ fn parse_gtf_file(
 
         /*
         if !gene2.starts_with("IGHV") && !gene2.starts_with("IGKV") && !gene2.starts_with("IGLV")
-            && !gene2.starts_with("IGHJ") && !gene2.starts_with("IGKJ") 
+            && !gene2.starts_with("IGHJ") && !gene2.starts_with("IGKJ")
             && !gene2.starts_with("IGLJ") && !gene2.starts_with("IGHD") {
             continue;
         }
@@ -907,7 +907,7 @@ fn main() {
 
     // Get the DNA sequences for the exons.  Extended by ten in both directions.
 
-    const EXT : usize = 60;
+    const EXT: usize = 60;
     let mut dna = Vec::<DnaString>::new();
     let mut starts = Vec::<usize>::new();
     let mut stops = Vec::<usize>::new();
@@ -925,7 +925,7 @@ fn main() {
 
     for _pass in 1..=2 {
         for i in 1..exons.len() {
-            if exons[i].1 == exons[i - 1].1 && exons[i].5 != "CDS" && exons[i-1].5 == "CDS" {
+            if exons[i].1 == exons[i - 1].1 && exons[i].5 != "CDS" && exons[i - 1].5 == "CDS" {
                 dna.swap(i, i - 1);
                 exons.swap(i, i - 1);
                 starts.swap(i, i - 1);
@@ -934,7 +934,11 @@ fn main() {
         }
     }
     for i in 1..exons.len() {
-        if exons[i].1 == exons[i - 1].1 && dna[i].len() < dna[i - 1].len() && exons[i].5 == "CDS" && exons[i-1].5 == "CDS" {
+        if exons[i].1 == exons[i - 1].1
+            && dna[i].len() < dna[i - 1].len()
+            && exons[i].5 == "CDS"
+            && exons[i - 1].5 == "CDS"
+        {
             dna.swap(i, i - 1);
             exons.swap(i, i - 1);
             starts.swap(i, i - 1);
@@ -946,8 +950,10 @@ fn main() {
 
     let mut to_delete = vec![false; exons.len()];
     for i in 1..exons.len() - 1 {
-        if exons[i].1 != exons[i - 1].1 && exons[i].1 != exons[i + 1].1 
-            && exons[i].0.as_bytes()[3] == b'V' {
+        if exons[i].1 != exons[i - 1].1
+            && exons[i].1 != exons[i + 1].1
+            && exons[i].0.as_bytes()[3] == b'V'
+        {
             to_delete[i] = true;
         }
     }
