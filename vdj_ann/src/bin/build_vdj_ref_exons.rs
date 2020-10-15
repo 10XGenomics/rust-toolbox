@@ -905,7 +905,7 @@ fn main() {
 
     // Get the DNA sequences for the exons.  Extended by ten in both directions.
 
-    const EXT : usize = 40;
+    const EXT : usize = 60;
     let mut dna = Vec::<DnaString>::new();
     let mut starts = Vec::<usize>::new();
     let mut stops = Vec::<usize>::new();
