@@ -410,7 +410,6 @@ fn main() {
 
     // Define release.  If this is ever changed, the effect on the fasta output
     // files should be very carefully examined.  Specify sequence source.
-    // Note that source2 depends on the cellranger version!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     let release = 94;
     let version = "5.0.0";
@@ -418,10 +417,10 @@ fn main() {
     let source2: String;
     if species == "human" {
         source = format!("GRCh38-release{}", release);
-        source2 = format!("vdj_GRCh38_alts_ensembl-{}", version);
+        source2 = format!("vdj_GRCh38_alts_ensembl");
     } else if species == "mouse" {
         source = format!("GRCm38-release{}", release);
-        source2 = format!("vdj_GRCm38_alts_ensembl-{}", version);
+        source2 = format!("vdj_GRCm38_alts_ensembl");
     } else {
         source = format!("BALB_cJ_v1.{}", release);
         source2 = source.clone();
