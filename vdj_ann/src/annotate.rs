@@ -2125,6 +2125,8 @@ pub fn print_annotations(
 // sequence is an amino acid sequence having length between 5 and 27, starting with
 // a C, and not containing a stop codon.
 //
+// NOTE THAT THE RIGHT MOTIF OVERLAPS THE CDR3 BY THREE AMINO ACIDS!
+//
 // In addition, we score the CDR3 and flanking sequences versus left and right
 // motifs, and require a minimum score to pass.  These motifs were derived by
 // appropriately stacking up V and J segments and looking for high multiplicity
