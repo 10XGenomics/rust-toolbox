@@ -2155,7 +2155,7 @@ pub fn cdr3_min_len() -> usize {
 }
 
 pub fn cdr3_max_len() -> usize {
-    27
+    50
 }
 
 pub fn get_cdr3(tig: &DnaStringSlice, cdr3: &mut Vec<(usize, Vec<u8>, usize, usize)>) {
