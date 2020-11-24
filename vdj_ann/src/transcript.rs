@@ -132,7 +132,8 @@ pub fn is_valid(
         const MIN_DELTA_IGH: i32 = -55;
         const MAX_DELTA: i32 = 30;
         if first_vstart >= 0 && last_jstop >= 0 {
-            let delta = (last_jstop_len + first_vstart_len + 3*cdr3[0].1.len() as i32 - 20) - (last_jstop - first_vstart);
+            let delta = (last_jstop_len + first_vstart_len + 3 * cdr3[0].1.len() as i32 - 20)
+                - (last_jstop - first_vstart);
             if logme {
                 fwriteln!(log, "VJ delta = {}", delta);
             }
