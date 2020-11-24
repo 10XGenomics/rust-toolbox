@@ -126,7 +126,7 @@ pub fn is_valid(
         let mut too_large = false;
         const MIN_DELTA: i32 = -25;
         const MIN_DELTA_IGH: i32 = -55;
-        const MAX_DELTA: i32 = 25;
+        const MAX_DELTA: i32 = 35;
         if first_vstart >= 0 && last_jstop >= 0 {
             let delta = (last_jstop_len + first_vstart_len) - (last_jstop - first_vstart);
             if logme {
