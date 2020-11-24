@@ -2122,7 +2122,7 @@ pub fn print_annotations(
 
 // Given a DNA sequence, return a CDR3 sequence in it (if found), its start
 // position on the DNA sequence, and left and right scores (see below).  The CDR3
-// sequence is an amino acid sequence having length between 5 and 27, starting with
+// sequence is an amino acid sequence having length at least 5, starting with
 // a C, and not containing a stop codon.
 //
 // NOTE THAT THE RIGHT MOTIF OVERLAPS THE CDR3 BY THREE AMINO ACIDS!
@@ -2154,26 +2154,22 @@ pub fn cdr3_min_len() -> usize {
     5
 }
 
-pub fn cdr3_max_len() -> usize {
-    27
-}
-
 pub fn get_cdr3(tig: &DnaStringSlice, cdr3: &mut Vec<(usize, Vec<u8>, usize, usize)>) {
     const MIN_TOTAL_CDR3_SCORE: usize = 10; // about as high as one can go
     let (left, right) = (cdr3_motif_left(), cdr3_motif_right());
     cdr3.clear();
-    if tig.len() < 3 * (cdr3_max_len() + 3) {
-        return;
-    }
     let x = tig.to_owned().to_ascii_vec();
     for i in 0..3 {
         // go through three frames
         let a = aa_seq(&x, i);
+        if a.len() < 4 {
+            return;
+        }
         for j in 0..a.len() - min(a.len(), (cdr3_min_len() + 3) + 1) {
             if a[j] == b'C' {
                 // CDR3 starts at position j on a
                 let first_f = j + (cdr3_min_len() - 3);
-                let last_f = min(a.len() - 4, j + (cdr3_max_len() - 1));
+                let last_f = a.len() - 4;
                 for k in first_f..last_f {
                     if k + right[0].len() - 1 >= a.len() {
                         break;
@@ -2281,10 +2277,9 @@ pub fn cdr3_loc<'a>(
     refdata: &RefData,
     ann: &Vec<(i32, i32, i32, i32, i32)>,
 ) -> DnaStringSlice<'a> {
-    // Given the design of this function, the following bounds appear to be optimal
+    // Given the design of this function, the following bound appears to be optimal
     // except possibly for changes less than ten.
     const LOW_RELV_CDR3: isize = -40;
-    const HIGH_RELV_CDR3: isize = 20;
     if ann.len() == 0 {
         return tig.slice(0, 0);
     }
@@ -2301,11 +2296,7 @@ pub fn cdr3_loc<'a>(
             if start > tig.len() as isize {
                 start = tig.len() as isize;
             }
-            let mut stop = vstop_on_tig + HIGH_RELV_CDR3 + 3 * cdr3_max_len() as isize;
-            if stop > tig.len() as isize {
-                stop = tig.len() as isize;
-            }
-            return tig.slice(start as usize, stop as usize);
+            return tig.slice(start as usize, tig.len());
         }
         if i == 0 {
             return tig.slice(0, 0);

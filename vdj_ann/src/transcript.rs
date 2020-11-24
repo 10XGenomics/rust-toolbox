@@ -122,13 +122,18 @@ pub fn is_valid(
                 }
             }
         }
-
+        let mut cdr3 = Vec::<(usize, Vec<u8>, usize, usize)>::new();
+        get_cdr3_using_ann(&b, &refdata, &ann, &mut cdr3);
+        if cdr3.is_empty() {
+            return false;
+        }
         let mut too_large = false;
         const MIN_DELTA: i32 = -25;
         const MIN_DELTA_IGH: i32 = -55;
-        const MAX_DELTA: i32 = 25;
+        const MAX_DELTA: i32 = 30;
         if first_vstart >= 0 && last_jstop >= 0 {
-            let delta = (last_jstop_len + first_vstart_len) - (last_jstop - first_vstart);
+            let delta = (last_jstop_len + first_vstart_len + 3 * cdr3[0].1.len() as i32 - 20)
+                - (last_jstop - first_vstart);
             if logme {
                 fwriteln!(log, "VJ delta = {}", delta);
             }
@@ -161,9 +166,7 @@ pub fn is_valid(
                 }
             }
         }
-        let mut cdr3 = Vec::<(usize, Vec<u8>, usize, usize)>::new();
-        get_cdr3_using_ann(&b, &refdata, &ann, &mut cdr3);
-        if full && !too_large && !misordered && cdr3.len() > 0 {
+        if full && !too_large && !misordered {
             return true;
         }
     }
