@@ -145,3 +145,26 @@ pub fn make_random_vec(x: &mut Vec<i64>, n: usize) {
             .wrapping_add(1_442_695_040_888_963_407);
     }
 }
+
+// binomial_sum( n, k, p ): return sum_{i=0..k} choose(n,i) * p^i * (1-p)^(n-i)
+//
+// No attempt has been made to make this efficient or to pay attention to
+// accuracy or overflow problems.
+
+pub fn binomial_sum(n: usize, k: usize, p: f64) -> f64 {
+    assert!(n >= 1);
+    assert!(k <= n);
+    let mut sum = 0.0;
+    let mut choose = 1.0;
+    for _ in 0..n {
+        choose *= 1.0 - p;
+    }
+    let q = p / (1.0 - p);
+    for i in 0..=k {
+        sum += choose;
+        choose *= (n - i) as f64;
+        choose /= (i + 1) as f64;
+        choose *= q;
+    }
+    sum
+}
