@@ -125,6 +125,9 @@ pub fn is_valid(
         let mut cdr3 = Vec::<(usize, Vec<u8>, usize, usize)>::new();
         get_cdr3_using_ann(&b, &refdata, &ann, &mut cdr3);
         if cdr3.is_empty() {
+            if logme {
+                fwriteln!(log, "did not find CDR3");
+            }
             return false;
         }
         let mut too_large = false;
@@ -165,6 +168,12 @@ pub fn is_valid(
                     misordered = true;
                 }
             }
+        }
+        if misordered && logme {
+            fwriteln!(log, "misordered");
+        }
+        if !full && logme {
+            fwriteln!(log, "not full");
         }
         if full && !too_large && !misordered {
             return true;
