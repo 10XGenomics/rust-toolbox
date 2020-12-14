@@ -31,6 +31,34 @@ pub fn have_stop(b: &DnaString, j: usize) -> bool {
     false
 }
 
+// Note capitalization requirement below.
+
+pub fn aa3_to_aa(aa3: &[u8]) -> u8 {
+    assert!(aa3.len() == 3);
+    let aa = match aa3 {
+        b"ALA" => b'A',
+        b"ARG" => b'R',
+        b"ASN" => b'N',
+        b"ASP" => b'D',
+        b"CYS" => b'C',
+        b"GLU" => b'E',
+        b"GLN" => b'Q',
+        b"GLY" => b'G',
+        b"HIS" => b'H',
+        b"ILE" => b'I',
+        b"MET" => b'M',
+        b"PHE" => b'F',
+        b"PRO" => b'P',
+        b"SER" => b'S',
+        b"THR" => b'T',
+        b"TRP" => b'W',
+        b"TYR" => b'Y',
+        b"VAL" => b'V',
+        _ => panic!("Unexpected three-letter amino acid code {}.", strme(&aa3)),
+    };
+    return aa;
+}
+
 pub fn codon_to_aa(codon: &[u8]) -> u8 {
     assert!(codon.len() == 3);
     let aa = match codon {
