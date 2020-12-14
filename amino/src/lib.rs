@@ -46,6 +46,7 @@ pub fn aa3_to_aa(aa3: &[u8]) -> u8 {
         b"GLY" => b'G',
         b"HIS" => b'H',
         b"ILE" => b'I',
+        b"LYS" => b'K',
         b"LEU" => b'L',
         b"MET" => b'M',
         b"PHE" => b'F',
