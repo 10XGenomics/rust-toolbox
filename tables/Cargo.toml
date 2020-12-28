@@ -8,5 +8,5 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
 io_utils = "0.2"
-itertools = ">= 0.8, <= 0.9"
+itertools = ">= 0.8, <= 0.11"
 string_utils = "0.1.1"
