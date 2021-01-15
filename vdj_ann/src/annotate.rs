@@ -2532,6 +2532,14 @@ impl ClonotypeInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct Region {
+    pub start: usize,
+    pub stop: usize,
+    pub nt_seq: String,
+    pub aa_seq: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct ContigAnnotation {
     // raw data for the contig
     pub barcode: String,     // the barcode
@@ -2557,6 +2565,15 @@ pub struct ContigAnnotation {
     pub cdr3_seq: Option<String>,  // nucleotide sequence for CDR3, or null
     pub cdr3_start: Option<usize>, // start position in bases on contig of CDR3
     pub cdr3_stop: Option<usize>,  // stop position in bases on contig of CDR3
+
+    // CDR* and FWR* regions. There are not filled in here
+    // CDR3 follows a different convention here to ensure backwards compatibility
+    pub fwr1: Option<Region>,
+    pub cdr1: Option<Region>,
+    pub fwr2: Option<Region>,
+    pub cdr2: Option<Region>,
+    pub fwr3: Option<Region>,
+    pub fwr4: Option<Region>,
 
     // annotations
     pub annotations: Vec<AnnotationUnit>, // the annotations
@@ -2681,6 +2698,13 @@ impl ContigAnnotation {
             is_gex_cell: None,
             is_asm_cell: None,
             full_length: None,
+
+            fwr1: None,
+            cdr1: None,
+            fwr2: None,
+            cdr2: None,
+            fwr3: None,
+            fwr4: None,
         };
         ann.full_length = Some(ann.is_full_length());
         ann
