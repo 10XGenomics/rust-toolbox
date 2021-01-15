@@ -2523,6 +2523,8 @@ pub struct ClonotypeInfo {
     pub raw_clonotype_id: Option<String>,
     #[serde(default)]
     pub raw_consensus_id: Option<String>,
+    #[serde(default)]
+    pub exact_subclonotype_id: Option<String>,
 }
 
 impl ClonotypeInfo {
