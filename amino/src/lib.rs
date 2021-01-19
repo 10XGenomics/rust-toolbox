@@ -135,7 +135,7 @@ pub fn codon_to_aa(codon: &[u8]) -> u8 {
 
 // Convert a given DNA sequence to amino acids, starting at a given position.
 
-pub fn aa_seq(x: &Vec<u8>, start: usize) -> Vec<u8> {
+pub fn aa_seq(x: &[u8], start: usize) -> Vec<u8> {
     let mut a = Vec::<u8>::new();
     if x.len() >= 3 {
         for j in (start..x.len() - 3 + 1).step_by(3) {
