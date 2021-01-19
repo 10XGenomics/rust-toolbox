@@ -1,5 +1,5 @@
 align_tools = "0.1.1"
-amino = "0.1.2"
+amino = "0.1.4"
 ansi_escape = "0.1.0"
 binary_vec_io = "0.1.2"
 debruijn = "0.3.2"
