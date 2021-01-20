@@ -1,4 +1,4 @@
-// Copyright (c) 2018 10x Genomics, Inc. All rights reserved.
+// Copyright (c) 2021 10x Genomics, Inc. All rights reserved.
 
 // This file contains miscellaneous utilities for input and output.
 
@@ -82,6 +82,21 @@ macro_rules! open_for_read {
             File::open(&$filename).expect(&format!("Could not open file \"{}\"", &$filename)),
         );
     };
+}
+
+pub fn open_userfile_for_read(f: &str) -> BufReader<File> {
+    let g = File::open(&f);
+    if g.is_err() {
+        if g.as_ref().err().unwrap().kind() == std::io::ErrorKind::PermissionDenied {
+            eprintln!(
+                "\nCould not open file \n{}\nfor reading because you \
+                lack read permission on this file.\n",
+                f
+            );
+            std::process::exit(1);
+        }
+    }
+    BufReader::new(g.expect(&format!("Could not open file \"{}\"", f)))
 }
 
 #[macro_export]
