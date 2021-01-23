@@ -2584,6 +2584,7 @@ pub struct ContigAnnotation {
 
     // state of the contig
     pub high_confidence: bool,    // declared high confidence?
+    pub validated: Vec<String>,   // validated UMIs
     pub is_cell: bool,            // was the barcode declared a cell?
     pub productive: Option<bool>, // productive?  (null means not full length)
     pub filtered: bool,           // true and never changed (unused field)
@@ -2609,6 +2610,7 @@ impl ContigAnnotation {
         nreads: usize,                        // number of reads assigned to contig
         numis: usize,                         // number of umis assigned to contig
         high_confidencex: bool,               // declared high confidence?
+        validated: Vec<String>,               // validated UMIs
         is_cellx: bool,                       // was the barcode declared a cell?
         productivex: bool,                    // productive?
     ) -> ContigAnnotation {
@@ -2693,6 +2695,7 @@ impl ContigAnnotation {
             clonotype: None,
             info: ClonotypeInfo::empty(),
             high_confidence: high_confidencex,
+            validated: validated,
             is_cell: is_cellx,
             productive: Some(productivex),
             filtered: true,
@@ -2715,14 +2718,15 @@ impl ContigAnnotation {
     // Produce a ContigAnnotation from a sequence.
 
     pub fn from_seq(
-        b: &DnaString,         // the contig
-        q: &[u8],              // qual scores for the contig
-        tigname: &String,      // name of the contig
-        refdata: &RefData,     // reference data
-        nreads: usize,         // number of reads assigned to contig
-        numis: usize,          // number of umis assigned to contig
-        high_confidence: bool, // declared high confidence?
-        is_cell: bool,         // was the barcode declared a cell?
+        b: &DnaString,          // the contig
+        q: &[u8],               // qual scores for the contig
+        tigname: &String,       // name of the contig
+        refdata: &RefData,      // reference data
+        nreads: usize,          // number of reads assigned to contig
+        numis: usize,           // number of umis assigned to contig
+        high_confidence: bool,  // declared high confidence?
+        validated: Vec<String>, // validated UMIs
+        is_cell: bool,          // was the barcode declared a cell?
     ) -> ContigAnnotation {
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
         annotate_seq(&b, &refdata, &mut ann, true, false, true);
@@ -2737,6 +2741,7 @@ impl ContigAnnotation {
             nreads,
             numis,
             high_confidence,
+            validated,
             is_cell,
             productive,
         )
