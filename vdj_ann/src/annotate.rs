@@ -1,4 +1,4 @@
-// Copyright (c) 2018 10X Genomics, Inc. All rights reserved.
+// Copyright (c) 2021 10X Genomics, Inc. All rights reserved.
 
 // This file contains code to annotate a contig, in the sense of finding alignments
 // to VDJ reference contigs.  Also to find CDR3 sequences.  And some related things.
@@ -2583,11 +2583,11 @@ pub struct ContigAnnotation {
     pub info: ClonotypeInfo,              // Empty initially, may be filled in later
 
     // state of the contig
-    pub high_confidence: bool,    // declared high confidence?
-    pub validated: Vec<String>,   // validated UMIs
-    pub is_cell: bool,            // was the barcode declared a cell?
-    pub productive: Option<bool>, // productive?  (null means not full length)
-    pub filtered: bool,           // true and never changed (unused field)
+    pub high_confidence: bool,               // declared high confidence?
+    pub validated_umis: Option<Vec<String>>, // validated UMIs
+    pub is_cell: bool,                       // was the barcode declared a cell?
+    pub productive: Option<bool>,            // productive?  (null means not full length)
+    pub filtered: bool,                      // true and never changed (unused field)
 
     pub is_gex_cell: Option<bool>, // Was the barcode declared a cell by Gene expression data, if available
     pub is_asm_cell: Option<bool>, // Was the barcode declared a cell by the VDJ assembler
@@ -2610,7 +2610,7 @@ impl ContigAnnotation {
         nreads: usize,                        // number of reads assigned to contig
         numis: usize,                         // number of umis assigned to contig
         high_confidencex: bool,               // declared high confidence?
-        validated: Vec<String>,               // validated UMIs
+        validated_umis: Option<Vec<String>>,  // validated UMIs
         is_cellx: bool,                       // was the barcode declared a cell?
         productivex: bool,                    // productive?
     ) -> ContigAnnotation {
@@ -2695,7 +2695,7 @@ impl ContigAnnotation {
             clonotype: None,
             info: ClonotypeInfo::empty(),
             high_confidence: high_confidencex,
-            validated: validated,
+            validated_umis: validated_umis,
             is_cell: is_cellx,
             productive: Some(productivex),
             filtered: true,
@@ -2718,15 +2718,15 @@ impl ContigAnnotation {
     // Produce a ContigAnnotation from a sequence.
 
     pub fn from_seq(
-        b: &DnaString,          // the contig
-        q: &[u8],               // qual scores for the contig
-        tigname: &String,       // name of the contig
-        refdata: &RefData,      // reference data
-        nreads: usize,          // number of reads assigned to contig
-        numis: usize,           // number of umis assigned to contig
-        high_confidence: bool,  // declared high confidence?
-        validated: Vec<String>, // validated UMIs
-        is_cell: bool,          // was the barcode declared a cell?
+        b: &DnaString,                       // the contig
+        q: &[u8],                            // qual scores for the contig
+        tigname: &String,                    // name of the contig
+        refdata: &RefData,                   // reference data
+        nreads: usize,                       // number of reads assigned to contig
+        numis: usize,                        // number of umis assigned to contig
+        high_confidence: bool,               // declared high confidence?
+        validated_umis: Option<Vec<String>>, // validated UMIs
+        is_cell: bool,                       // was the barcode declared a cell?
     ) -> ContigAnnotation {
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
         annotate_seq(&b, &refdata, &mut ann, true, false, true);
@@ -2741,7 +2741,7 @@ impl ContigAnnotation {
             nreads,
             numis,
             high_confidence,
-            validated,
+            validated_umis,
             is_cell,
             productive,
         )
