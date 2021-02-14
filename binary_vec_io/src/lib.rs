@@ -42,7 +42,8 @@ pub fn binary_read_to_ref<T>(f: &mut std::fs::File, p: &mut T, n: usize) -> Resu
         use std::io::Read;
         let bytes_to_read = n * std::mem::size_of::<T>();
         let mut bytes_read = 0;
-        // Rarely, one must read twice.  Conceivably one needs to read more than twice on occasion.
+        // Rarely, one must read twice (maybe, not necessarily proven).  Conceivably one needs 
+        // to read more than twice on occasion.
         const MAX_TRIES: usize = 10;
         let mut reads = Vec::<usize>::new();
         for _ in 0..MAX_TRIES {
