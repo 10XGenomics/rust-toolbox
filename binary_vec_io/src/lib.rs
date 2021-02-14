@@ -8,9 +8,10 @@
 extern crate failure;
 extern crate itertools;
 
-use self::failure::Error;
 use itertools::Itertools;
+use self::failure::Error;
 use std::io::Write;
+use std::os::unix::fs::MetadataExt;
 
 pub trait BinaryInputOutputSafe {}
 impl BinaryInputOutputSafe for i8 {}
@@ -55,12 +56,16 @@ pub fn binary_read_to_ref<T>(f: &mut std::fs::File, p: &mut T, n: usize) -> Resu
             bytes_read += n;
         }
         if bytes_read != bytes_to_read {
+            let metadata = f.metadata()?;
             let msg = format!(
                 "Failure in binary_read_to_ref, bytes_read = {}, but \
-                bytes_to_read = {}.  Bytes read on successive attempts = \n{}.",
+                bytes_to_read = {}.  Bytes read on successive\nattempts = {}.\n\
+                File has length {} and inode {}.",
                 bytes_read,
                 bytes_to_read,
                 reads.iter().format(","),
+                metadata.len(),
+                metadata.ino(),
             );
             panic!(msg);
         }
