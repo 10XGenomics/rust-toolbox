@@ -34,20 +34,22 @@ pub fn binary_write_from_ref<T>(f: &mut std::fs::File, p: &T, n: usize) -> Resul
 }
 
 pub fn binary_read_to_ref<T>(f: &mut std::fs::File, p: &mut T, n: usize) -> Result<(), Error> {
-    let raw = p as *mut T as *mut u8;
+    let mut raw = p as *mut T as *mut u8;
     unsafe {
-        let sli: &mut [u8] = std::slice::from_raw_parts_mut(raw, n * (std::mem::size_of::<T>()));
-        // A read can be incomplete, so we try a second time if needed.  Conceivably more attempts
-        // are necessary.
         use std::io::Read;
-        let bytes_to_read = sli.len();
-        let bytes_read = f.read(sli).unwrap();
-        if bytes_read < bytes_to_read {
-            let raw = raw.add(bytes_read);
+        let bytes_to_read = n * std::mem::size_of::<T>();
+        let mut bytes_read = 0;
+        // Rarely, one must read twice.  Conceivably one needs to read more than twice on occasion.
+        const MAX_TRIES: usize = 10;
+        for _ in 0..MAX_TRIES {
+            if bytes_read == bytes_to_read {
+                break;
+            }
+            raw = raw.add(bytes_read);
             let sli: &mut [u8] = std::slice::from_raw_parts_mut(raw, bytes_to_read - bytes_read);
-            let bytes_read2 = f.read(sli).unwrap();
-            assert_eq!(bytes_read2, 0);
+            bytes_read += f.read(sli).unwrap();
         }
+        assert_eq!(bytes_read, bytes_to_read);
     }
     Ok(())
 }
