@@ -37,10 +37,17 @@ pub fn binary_read_to_ref<T>(f: &mut std::fs::File, p: &mut T, n: usize) -> Resu
     let raw = p as *mut T as *mut u8;
     unsafe {
         let sli: &mut [u8] = std::slice::from_raw_parts_mut(raw, n * (std::mem::size_of::<T>()));
-        // We use read_exact instead of read because read can return less than
-        // the full number of bytes, and we observed this on large reads.
+        // A read can be incomplete, so we try a second time if needed.  Conceivably more attempts
+        // are necessary.
         use std::io::Read;
-        f.read_exact(sli)?;
+        let bytes_to_read = sli.len();
+        let bytes_read = f.read(sli).unwrap();
+        if bytes_read < bytes_to_read {
+            let raw = raw.add(bytes_read);
+            let sli: &mut [u8] = std::slice::from_raw_parts_mut(raw, bytes_to_read - bytes_read);
+            let bytes_read2 = f.read(sli).unwrap();
+            assert_eq!(bytes_read2, 0);
+        }
     }
     Ok(())
 }
