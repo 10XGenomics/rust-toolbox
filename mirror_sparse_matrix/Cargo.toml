@@ -6,7 +6,6 @@ license = "MIT"
 description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
 
 [dependencies]
-# binary_vec_io = "0.1.1"
-binary_vec_io = { git = "https://github.com/10XGenomics/rust-toolbox.git", rev="146e4ac2c7f1435032c55036363b2b6a7e18728d" }
+binary_vec_io = "0.1.3"
 io_utils = "0.2"
 pretty_trace = "0.3.2"
