@@ -6,8 +6,10 @@
 // See also crate memmap.
 
 extern crate failure;
+extern crate itertools;
 
 use self::failure::Error;
+use itertools::Itertools;
 use std::io::Write;
 
 pub trait BinaryInputOutputSafe {}
@@ -41,15 +43,27 @@ pub fn binary_read_to_ref<T>(f: &mut std::fs::File, p: &mut T, n: usize) -> Resu
         let mut bytes_read = 0;
         // Rarely, one must read twice.  Conceivably one needs to read more than twice on occasion.
         const MAX_TRIES: usize = 10;
+        let mut reads = Vec::<usize>::new();
         for _ in 0..MAX_TRIES {
             if bytes_read == bytes_to_read {
                 break;
             }
             raw = raw.add(bytes_read);
             let sli: &mut [u8] = std::slice::from_raw_parts_mut(raw, bytes_to_read - bytes_read);
-            bytes_read += f.read(sli).unwrap();
+            let n = f.read(sli).unwrap();
+            reads.push(n);
+            bytes_read += n;
         }
-        assert_eq!(bytes_read, bytes_to_read);
+        if bytes_read != bytes_to_read {
+            let msg = format!(
+                "Failure in binary_read_to_ref, bytes_read = {}, but \
+                bytes_to_read = {}.  Bytes read on successive attempts = \n{}.",
+                bytes_read,
+                bytes_to_read,
+                reads.iter().format(","),
+            );
+            panic!(msg);
+        }
     }
     Ok(())
 }

@@ -8,3 +8,4 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
 failure = "0.1.5"
+itertools = ">= 0.8, <= 0.9"
