@@ -2931,7 +2931,7 @@ mod tests {
             &refdata,
             120,
             2,
-            true,  // high_confidence
+            true, // high_confidence
             None,
             false, // is_cell, should be changed to None
         );
