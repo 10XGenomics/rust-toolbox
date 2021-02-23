@@ -92,6 +92,7 @@ impl TryFrom<&str> for VdjContigChain {
     EnumString,
     Display,
     EnumIter,
+    IntoEnumIterator,
     Hash,
 )]
 pub enum VdjRegion {
