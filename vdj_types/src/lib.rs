@@ -1,3 +1,6 @@
+// Copyright (c) 2021 10x Genomics, Inc. All rights reserved.
+
+use enum_iterator::*;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::fmt;
@@ -18,6 +21,7 @@ use strum_macros::{Display, EnumIter, EnumString};
     EnumString,
     Display,
     EnumIter,
+    IntoEnumIterator,
     Hash,
 )]
 pub enum VdjChain {
