@@ -1,11 +1,11 @@
 [package]
 name = "mirror_sparse_matrix"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
 
 [dependencies]
-binary_vec_io = "0.1.5"
+binary_vec_io = "0.1.6"
 io_utils = "0.2"
 pretty_trace = "0.3.2"
