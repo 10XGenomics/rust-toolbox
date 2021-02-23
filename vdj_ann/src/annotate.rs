@@ -2544,11 +2544,11 @@ pub struct Region {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct ContigAnnotation {
     // raw data for the contig
-    pub barcode: String,                // the barcode
-    pub contig_name: String,            // name of the contig
-    pub sequence: String,               // nucleotide sequence for contig
-    pub quals: String,                  // contig quality scores
-    pub barcode_read_pair_count: usize, // npairs assigned to the barcode (allowing correction)
+    pub barcode: String,                        // the barcode
+    pub contig_name: String,                    // name of the contig
+    pub sequence: String,                       // nucleotide sequence for contig
+    pub quals: String,                          // contig quality scores
+    pub barcode_read_pair_count: Option<usize>, // npairs assigned to the barcode (allowing correction)
 
     // contig support
     pub read_count: usize, // number of reads assigned to contig
@@ -2661,7 +2661,7 @@ impl ContigAnnotation {
             contig_name: tigname.clone(),
             sequence: b.to_string(),
             quals: stringme(&qp),
-            barcode_read_pair_count: 0,
+            barcode_read_pair_count: None,
             read_count: nreads,
             umi_count: numis,
             start_codon_pos: match vstart {
