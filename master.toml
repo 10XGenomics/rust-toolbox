@@ -1,7 +1,8 @@
-align_tools = "0.1.1"
+align_tools = { path = "../align_tools" }
 amino = "0.1.4"
 ansi_escape = "0.1.0"
 binary_vec_io = "0.1.5"
+bio = { git = "https://github.com/rust-bio/rust-bio.git", rev = "792d3e21296d85a711f1a383db513924528b6da5" }
 debruijn = "0.3.2"
 dna = "0.1.1"
 equiv = "0.1.2"
