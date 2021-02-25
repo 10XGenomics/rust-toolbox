@@ -759,6 +759,7 @@ fn force_pretty_trace_fancy(
                         thread::sleep(time::Duration::from_millis(1000));
                         if PROCESSING_SIGUSR1 {
                             thread::sleep(time::Duration::from_millis(5000));
+                            eprintln!("\nProfiling has gotten confused, giving up.\n");
                             kill(pid as i32, SIGKILL);
                         }
                     }
