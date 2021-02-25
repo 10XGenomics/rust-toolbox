@@ -761,7 +761,7 @@ fn force_pretty_trace_fancy(
                             thread::sleep(time::Duration::from_millis(5000));
                             eprintln!(
                                 "\nProfiling has gotten confused, printing summary \
-                                and terminating prematurely."
+                                and terminating prematurely by killing process."
                             );
                             // NOTE DUPLICATED CODE ...............................................
                             traces.sort();
@@ -777,8 +777,7 @@ fn force_pretty_trace_fancy(
                                 report += &format!("[{}] COUNT = {}\n{}", i + 1, x.0, x.1);
                             }
                             print!("{}", report);
-                            std::process::exit(0);
-                            // kill(pid as i32, SIGKILL);
+                            kill(pid as i32, SIGKILL);
                         }
                     }
                 }
