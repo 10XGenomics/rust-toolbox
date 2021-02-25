@@ -1314,7 +1314,7 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
             to_delete[i] = true;
         }
     }
-    // erase_if(&mut blocks, &to_delete);
+    erase_if(&mut blocks, &to_delete);
 
     // stuff from earlier version, not addressing now
 
