@@ -118,6 +118,8 @@
 //! <br> To instead profile, e.g. for 100 events, do this
 //! <pre>
 //!     PrettyTrace::new().profile(100).on();
+//!     ... (your code) ...
+//!     complete_profiling();
 //! </pre>
 //!
 //! Several other useful features are described below.  This include the capability
@@ -160,9 +162,6 @@
 //! ◼ Profile mode only sees the main thread.  This seems intrinsic to the
 //!   approach.  So you may need to modify your code to run single-threaded to
 //!   effectively use this mode.
-//!
-//! ◼ Profile mode yields no output if your program exits before obtaining the
-//!   requested number of stack traces.
 //!
 //! ◼ Profile mode does not yield a stack trace if the code is executing inside
 //!   the allocator.  In our test cases this is around 15% of the time.
@@ -683,6 +682,18 @@ pub fn new_thread_message() -> &'static CHashMap<ThreadId, String> {
     let box_thread_message = Box::new(hashmap);
     let thread_message: &'static CHashMap<ThreadId, String> = Box::leak(box_thread_message);
     thread_message
+}
+
+/// See <code>PrettyTrace</code> documentation for how this is used.
+
+pub fn complete_profiling() {
+    let pid = std::process::id();
+    let donefile = format!("/tmp/done_from_process_{}", pid);
+    {
+        let mut f = open_for_write_new![&donefile];
+        fwriteln!(f, "done");
+    }
+    thread::sleep(time::Duration::from_millis(2000));
 }
 
 fn force_pretty_trace_fancy(
