@@ -443,8 +443,8 @@ impl PrettyTrace {
     }
 
     /// Request that a profile consisting of `count` traces be generated, at separation `sep`
-    /// seconds.
-    /// If you use this, consider calling `whitelist` too.
+    /// seconds.  Values of `sep` lower than about `0.01` probably do about the same thing as
+    /// `0.01`.  If you use this, consider calling `whitelist` too.
 
     pub fn profile2(&mut self, count: usize, sep: f32) -> &mut PrettyTrace {
         self.profile = true;
