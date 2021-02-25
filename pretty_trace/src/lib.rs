@@ -118,6 +118,8 @@
 //! <br> To instead profile, e.g. for 100 events, do this
 //! <pre>
 //!     PrettyTrace::new().profile(100).on();
+//!     ... (your code) ...
+//!     complete_profiling();
 //! </pre>
 //!
 //! Several other useful features are described below.  This include the capability
@@ -160,9 +162,6 @@
 //! ◼ Profile mode only sees the main thread.  This seems intrinsic to the
 //!   approach.  So you may need to modify your code to run single-threaded to
 //!   effectively use this mode.
-//!
-//! ◼ Profile mode yields no output if your program exits before obtaining the
-//!   requested number of stack traces.
 //!
 //! ◼ Profile mode does not yield a stack trace if the code is executing inside
 //!   the allocator.  In our test cases this is around 15% of the time.
@@ -685,6 +684,18 @@ pub fn new_thread_message() -> &'static CHashMap<ThreadId, String> {
     thread_message
 }
 
+/// See <code>PrettyTrace</code> documentation for how this is used.
+
+pub fn complete_profiling() {
+    let pid = std::process::id();
+    let donefile = format!("/tmp/done_from_process_{}", pid);
+    {
+        let mut f = open_for_write_new![&donefile];
+        fwriteln!(f, "done");
+    }
+    thread::sleep(time::Duration::from_millis(2000));
+}
+
 fn force_pretty_trace_fancy(
     log_file_name: String,
     fd: i32,
@@ -715,9 +726,15 @@ fn force_pretty_trace_fancy(
 
         // Gather tracebacks.
 
+        let pid = std::process::id();
+        let donefile = format!("/tmp/done_from_process_{}", pid);
+        if path_exists(&donefile) {
+            remove_file(&donefile).unwrap();
+        }
         thread::spawn(move || {
             let pid = std::process::id();
             let tracefile = format!("/tmp/traceback_from_process_{}", pid);
+            let donefile = format!("/tmp/done_from_process_{}", pid);
             let mut traces = Vec::<String>::new();
             let (mut interrupts, mut tracebacks) = (0, 0);
             loop {
@@ -759,7 +776,10 @@ fn force_pretty_trace_fancy(
                     traces.push(trace);
                     tracebacks += 1;
                 }
-                if traces.len() == hcount {
+                if traces.len() == hcount || path_exists(&donefile) {
+                    if path_exists(&donefile) {
+                        remove_file(&donefile).unwrap();
+                    }
                     traces.sort();
                     let mut freq = Vec::<(u32, String)>::new();
                     make_freq(&traces, &mut freq);
