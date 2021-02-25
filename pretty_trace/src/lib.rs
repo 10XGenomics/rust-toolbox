@@ -542,7 +542,7 @@ fn test_in_allocator() -> bool {
                         eprintln!("in allocator");
                     }
                     in_alloc = true;
-                    // break;
+                    return;
                 }
             }
         });
