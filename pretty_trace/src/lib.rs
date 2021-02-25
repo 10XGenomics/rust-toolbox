@@ -173,6 +173,8 @@
 //!   the profiling process is killed.  Generally what is missing from the list can be
 //!   determined by setting <code>haps_debug()</code>, and looking at the trace right before
 //!   the process was killed.  Under development, this was needed once over a one year period.
+//!   <b>However, subsequently we have found instances where the process is killed, and we have
+//!   been unable to determine the cause.</b>
 //!
 //! ◼ Ideally out-of-memory events would be caught and converted to panics so
 //!   we could trace them, but we don't.  This is a general rust problem that no one
