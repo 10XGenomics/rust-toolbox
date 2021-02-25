@@ -29,7 +29,7 @@ num-traits = "^0.2"
 perf_stats = "0.1.2"
 permutation = "0.2.5"
 petgraph = "0.4.13"
-pretty_trace = "0.3.2"
+pretty_trace = "0.3.3"
 rand = "0.7.3"
 rayon = "1.0.2"
 serde = { version = "1.0.90", features = ["derive"] }
