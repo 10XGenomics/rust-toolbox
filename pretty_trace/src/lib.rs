@@ -248,6 +248,7 @@ pub struct PrettyTrace {
     pub ctrlc: bool,
     pub ctrlc_debug: bool,
     pub haps_debug: bool,
+    pub haps_raw: bool,
     pub noexit: bool,
 }
 
@@ -301,6 +302,7 @@ impl PrettyTrace {
                 self.ctrlc,
                 self.ctrlc_debug,
                 self.haps_debug,
+                self.haps_raw,
                 self.noexit,
             );
         } else {
@@ -314,6 +316,7 @@ impl PrettyTrace {
                 self.ctrlc,
                 self.ctrlc_debug,
                 self.haps_debug,
+                self.haps_raw,
                 self.noexit,
             );
         }
@@ -343,6 +346,13 @@ impl PrettyTrace {
 
     pub fn haps_debug(&mut self) -> &mut PrettyTrace {
         self.haps_debug = true;
+        self
+    }
+
+    /// Turn on some debugging for profiling.  For development purposes.
+
+    pub fn haps_raw(&mut self) -> &mut PrettyTrace {
+        self.haps_raw = true;
         self
     }
 
@@ -483,8 +493,8 @@ impl Happening {
 }
 
 static CTRLC_DEBUG: AtomicBool = AtomicBool::new(false);
-
 static HAPS_DEBUG: AtomicBool = AtomicBool::new(false);
+static HAPS_RAW: AtomicBool = AtomicBool::new(false);
 
 lazy_static! {
     static ref HAPPENING: Mutex<Happening> = Mutex::new(Happening::new());
@@ -633,8 +643,7 @@ extern "C" fn handler(sig: i32) {
         let backtrace = Backtrace::new();
         let tracefile = format!("/tmp/traceback_from_process_{}", process::id());
         let mut tf = open_for_write_new![&tracefile];
-        let raw = true; // for debugging
-        if raw {
+        if HAPS_RAW.load(SeqCst) {
             fwriteln!(tf, "RAW BACKTRACE\n");
             fwriteln!(tf, "{:?}", backtrace);
             fwriteln!(tf, "\nPRETTIFIED BACKTRACE\n");
@@ -705,6 +714,7 @@ fn force_pretty_trace_fancy(
     ctrlc: bool,
     ctrlc_debug: bool,
     haps_debug: bool,
+    haps_raw: bool,
     noexit: bool,
 ) {
     // Launch happening thread, which imits SIGUSR1 interrupts.  Usually, it will
@@ -825,6 +835,9 @@ fn force_pretty_trace_fancy(
     }
     if haps_debug {
         HAPS_DEBUG.store(true, SeqCst);
+    }
+    if haps_raw {
+        HAPS_RAW.store(true, SeqCst);
     }
 
     // Setup panic hook. If we panic, this code gets run.
