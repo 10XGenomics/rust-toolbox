@@ -242,12 +242,15 @@ pub struct PrettyTrace {
     pub profile: bool,
     // count for profile mode
     pub count: Option<usize>,
+    // separation for profile mode
+    pub sep: f32,
     // whitelist for profile mode
     pub whitelist: Option<Vec<String>>,
     // convert Ctrl-Cs to panics
     pub ctrlc: bool,
     pub ctrlc_debug: bool,
     pub haps_debug: bool,
+    pub haps_raw: bool,
     pub noexit: bool,
 }
 
@@ -284,7 +287,11 @@ impl PrettyTrace {
             if self.whitelist.is_none() {
                 self.whitelist = Some(Vec::<String>::new());
             }
-            haps.initialize(&self.whitelist.clone().unwrap(), self.count.unwrap());
+            haps.initialize(
+                &self.whitelist.clone().unwrap(),
+                self.count.unwrap(),
+                self.sep,
+            );
         }
         let full_file = if self.full_file.is_some() {
             self.full_file.clone().unwrap()
@@ -301,6 +308,7 @@ impl PrettyTrace {
                 self.ctrlc,
                 self.ctrlc_debug,
                 self.haps_debug,
+                self.haps_raw,
                 self.noexit,
             );
         } else {
@@ -314,6 +322,7 @@ impl PrettyTrace {
                 self.ctrlc,
                 self.ctrlc_debug,
                 self.haps_debug,
+                self.haps_raw,
                 self.noexit,
             );
         }
@@ -343,6 +352,13 @@ impl PrettyTrace {
 
     pub fn haps_debug(&mut self) -> &mut PrettyTrace {
         self.haps_debug = true;
+        self
+    }
+
+    /// Turn on some debugging for profiling.  For development purposes.
+
+    pub fn haps_raw(&mut self) -> &mut PrettyTrace {
+        self.haps_raw = true;
         self
     }
 
@@ -416,12 +432,24 @@ impl PrettyTrace {
         self
     }
 
-    /// Request that a profile consisting of `count` traces be generated.
+    /// Request that a profile consisting of `count` traces be generated, at separation `1` second.
     /// If you use this, consider calling `whitelist` too.
 
     pub fn profile(&mut self, count: usize) -> &mut PrettyTrace {
         self.profile = true;
         self.count = Some(count);
+        self.sep = 1.0;
+        self
+    }
+
+    /// Request that a profile consisting of `count` traces be generated, at separation `sep`
+    /// seconds.  Values of `sep` lower than about `0.01` probably do about the same thing as
+    /// `0.01`.  If you use this, consider calling `whitelist` too.
+
+    pub fn profile2(&mut self, count: usize, sep: f32) -> &mut PrettyTrace {
+        self.profile = true;
+        self.count = Some(count);
+        self.sep = sep;
         self
     }
 
@@ -460,6 +488,7 @@ struct Happening {
     pub on: bool,               // turned on?
     pub whitelist: Vec<String>, // tracebacks are grepped for these
     pub hcount: usize,          // number of tracebacks to gather
+    pub sep: f32,               // separation in seconds
 }
 
 impl Happening {
@@ -468,23 +497,25 @@ impl Happening {
             on: false,
             whitelist: Vec::<String>::new(),
             hcount: 0,
+            sep: 1.0,
         }
     }
 
-    // EXAMPLE: set whitelist to a or b or c, hcount to 250
+    // EXAMPLE: set whitelist to a or b or c, hcount to 250, sep to 1.0
     // let mut happening = Happening::new();
-    // happening.initialize( &vec![ "a", "b", "c" ], 250 );
+    // happening.initialize( &vec![ "a", "b", "c" ], 250, 1.0 );
 
-    pub fn initialize(&mut self, whitelist: &[String], hcount: usize) {
+    pub fn initialize(&mut self, whitelist: &[String], hcount: usize, sep: f32) {
         self.on = true;
         self.whitelist = whitelist.to_owned();
         self.hcount = hcount;
+        self.sep = sep;
     }
 }
 
 static CTRLC_DEBUG: AtomicBool = AtomicBool::new(false);
-
 static HAPS_DEBUG: AtomicBool = AtomicBool::new(false);
+static HAPS_RAW: AtomicBool = AtomicBool::new(false);
 
 lazy_static! {
     static ref HAPPENING: Mutex<Happening> = Mutex::new(Happening::new());
@@ -581,6 +612,8 @@ static mut HEARD_CTRLC: usize = 0;
 static mut PROCESSING_SIGUSR1: bool = false;
 
 extern "C" fn handler(sig: i32) {
+    let sep = HAPPENING.lock().unwrap().sep;
+    let sleep_time = (sep * 1000.0).round() as u64;
     if sig == SIGINT {
         if CTRLC_DEBUG.load(SeqCst) {
             unsafe {
@@ -594,7 +627,7 @@ extern "C" fn handler(sig: i32) {
                 std::process::exit(0);
             }
             HEARD_CTRLC += 1;
-            thread::sleep(time::Duration::from_millis(1000));
+            thread::sleep(time::Duration::from_millis(sleep_time));
             if CTRLC_DEBUG.load(SeqCst) {
                 eprintln!("done sleeping");
             }
@@ -631,19 +664,19 @@ extern "C" fn handler(sig: i32) {
         // Now do the backtrace.
 
         let backtrace = Backtrace::new();
+        let bt: Vec<u8> = format!("{:?}", backtrace).into_bytes();
         let tracefile = format!("/tmp/traceback_from_process_{}", process::id());
         let mut tf = open_for_write_new![&tracefile];
-        let raw = false; // for debugging
-        if raw {
+        if HAPS_RAW.load(SeqCst) {
             fwriteln!(tf, "RAW BACKTRACE\n");
-            fwriteln!(tf, "{:?}", backtrace);
+            fwriteln!(tf, "{}", strme(&bt));
             fwriteln!(tf, "\nPRETTIFIED BACKTRACE\n");
         }
         let mut whitelist = Vec::<String>::new();
         for x in HAPPENING.lock().unwrap().whitelist.iter() {
             whitelist.push(x.clone());
         }
-        fwriteln!(tf, "{}", prettify_traceback(&backtrace, &whitelist, true));
+        fwriteln!(tf, "{}", prettify_traceback(&bt, &whitelist, true));
         unsafe {
             PROCESSING_SIGUSR1 = false;
         }
@@ -705,6 +738,7 @@ fn force_pretty_trace_fancy(
     ctrlc: bool,
     ctrlc_debug: bool,
     haps_debug: bool,
+    haps_raw: bool,
     noexit: bool,
 ) {
     // Launch happening thread, which imits SIGUSR1 interrupts.  Usually, it will
@@ -722,7 +756,10 @@ fn force_pretty_trace_fancy(
             .whitelist
             .append(&mut happening.whitelist.clone());
         HAPPENING.lock().unwrap().hcount = happening.hcount;
+        HAPPENING.lock().unwrap().sep = happening.sep;
         let hcount = happening.hcount;
+        let sep = happening.sep;
+        let sleep_time = (sep * 1000.0).round() as u64;
 
         // Gather tracebacks.
 
@@ -738,7 +775,7 @@ fn force_pretty_trace_fancy(
             let mut traces = Vec::<String>::new();
             let (mut interrupts, mut tracebacks) = (0, 0);
             loop {
-                thread::sleep(time::Duration::from_millis(1000));
+                thread::sleep(time::Duration::from_millis(sleep_time));
                 if path_exists(&tracefile) {
                     remove_file(&tracefile).unwrap();
                 }
@@ -756,7 +793,7 @@ fn force_pretty_trace_fancy(
                 }
                 if !path_exists(&tracefile) {
                     unsafe {
-                        thread::sleep(time::Duration::from_millis(1000));
+                        thread::sleep(time::Duration::from_millis(sleep_time));
                         if PROCESSING_SIGUSR1 {
                             thread::sleep(time::Duration::from_millis(5000));
                             eprintln!(
@@ -825,6 +862,9 @@ fn force_pretty_trace_fancy(
     }
     if haps_debug {
         HAPS_DEBUG.store(true, SeqCst);
+    }
+    if haps_raw {
+        HAPS_RAW.store(true, SeqCst);
     }
 
     // Setup panic hook. If we panic, this code gets run.
@@ -896,7 +936,8 @@ fn force_pretty_trace_fancy(
 
         // Prettify the traceback.
 
-        let all_out = prettify_traceback(&backtrace, &Vec::<String>::new(), false);
+        let bt: Vec<u8> = format!("{:?}", backtrace).into_bytes();
+        let all_out = prettify_traceback(&bt, &Vec::<String>::new(), false);
 
         // Print thread panic message.  Bail before doing so if broken pipe
         // detected.  This protects against running e.g. "exec |& head -50"
@@ -1067,14 +1108,13 @@ fn force_pretty_trace_fancy(
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 #[allow(clippy::cognitive_complexity)]
-fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -> String {
+fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String {
     // Parse the backtrace into lines.
 
-    let bt: Vec<u8> = format!("{:?}", backtrace).into_bytes();
     let mut btlines = Vec::<Vec<u8>>::new();
     let mut line = Vec::<u8>::new();
     for z in bt {
-        if z == b'\n' {
+        if *z == b'\n' {
             // Replace long constructs of the form /rustc/......./src/
             //                                  by /rustc/<stuff>/src/.
             // and some similar things.
@@ -1106,7 +1146,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
 
             line.clear();
         } else {
-            line.push(z);
+            line.push(*z);
         }
     }
 
@@ -1197,7 +1237,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
         "start_thread",
         "__clone",
         "call_once",
-        "<unknown>",
+        // "<unknown>", // turning this on yields cleaner tracebacks but loses critical information
         "/panic.rs",
         "/panicking.rs",
         "catch_unwind",
