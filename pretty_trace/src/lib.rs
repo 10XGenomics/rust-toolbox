@@ -380,11 +380,22 @@ impl PrettyTrace {
     /// <i>raison d'etre</i> for this is that an abbreviated pretty traceback might
     /// in some cases elide useful information (although this has not been observed).
     ///
+    /// This may only be set from the main thread of a process.  We disallow setting it from
+    /// other threads because `PrettyTrace` works by setting the panic hook, which is global,
+    /// and a value for `full_file` set by one thread might not be valid for another.
+    ///
     /// You can also force <code>PrettyTrace</code> to emit full tracebacks by
     /// setting the environment variable <code>RUST_FULL_TRACE</code>.
 
     pub fn full_file(&mut self, full_file: &str) -> &mut PrettyTrace {
         self.full_file = Some(full_file.to_string());
+        if thread::current().name().unwrap() != "main" {
+            panic!(
+                "PrettyTrace::full_file was called from a non-main thread.  This is not\n\
+                allowed because PrettyTrace works by setting the panic hook, which is global.\n\
+                A value set by one thread might not be valid for another."
+            );
+        }
         self
     }
 
