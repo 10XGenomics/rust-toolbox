@@ -633,7 +633,7 @@ extern "C" fn handler(sig: i32) {
         let backtrace = Backtrace::new();
         let tracefile = format!("/tmp/traceback_from_process_{}", process::id());
         let mut tf = open_for_write_new![&tracefile];
-        let raw = false; // for debugging
+        let raw = true; // for debugging
         if raw {
             fwriteln!(tf, "RAW BACKTRACE\n");
             fwriteln!(tf, "{:?}", backtrace);
