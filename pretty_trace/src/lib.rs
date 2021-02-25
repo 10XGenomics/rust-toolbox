@@ -242,6 +242,8 @@ pub struct PrettyTrace {
     pub profile: bool,
     // count for profile mode
     pub count: Option<usize>,
+    // separation for profile mode
+    pub sep: f32,
     // whitelist for profile mode
     pub whitelist: Option<Vec<String>>,
     // convert Ctrl-Cs to panics
@@ -285,7 +287,11 @@ impl PrettyTrace {
             if self.whitelist.is_none() {
                 self.whitelist = Some(Vec::<String>::new());
             }
-            haps.initialize(&self.whitelist.clone().unwrap(), self.count.unwrap());
+            haps.initialize(
+                &self.whitelist.clone().unwrap(),
+                self.count.unwrap(),
+                self.sep,
+            );
         }
         let full_file = if self.full_file.is_some() {
             self.full_file.clone().unwrap()
@@ -426,12 +432,24 @@ impl PrettyTrace {
         self
     }
 
-    /// Request that a profile consisting of `count` traces be generated.
+    /// Request that a profile consisting of `count` traces be generated, at separation `1` second.
     /// If you use this, consider calling `whitelist` too.
 
     pub fn profile(&mut self, count: usize) -> &mut PrettyTrace {
         self.profile = true;
         self.count = Some(count);
+        self.sep = 1.0;
+        self
+    }
+
+    /// Request that a profile consisting of `count` traces be generated, at separation `sep`
+    /// seconds.
+    /// If you use this, consider calling `whitelist` too.
+
+    pub fn profile2(&mut self, count: usize, sep: f32) -> &mut PrettyTrace {
+        self.profile = true;
+        self.count = Some(count);
+        self.sep = sep;
         self
     }
 
@@ -470,6 +488,7 @@ struct Happening {
     pub on: bool,               // turned on?
     pub whitelist: Vec<String>, // tracebacks are grepped for these
     pub hcount: usize,          // number of tracebacks to gather
+    pub sep: f32,               // separation in seconds
 }
 
 impl Happening {
@@ -478,17 +497,19 @@ impl Happening {
             on: false,
             whitelist: Vec::<String>::new(),
             hcount: 0,
+            sep: 1.0,
         }
     }
 
-    // EXAMPLE: set whitelist to a or b or c, hcount to 250
+    // EXAMPLE: set whitelist to a or b or c, hcount to 250, sep to 1.0
     // let mut happening = Happening::new();
-    // happening.initialize( &vec![ "a", "b", "c" ], 250 );
+    // happening.initialize( &vec![ "a", "b", "c" ], 250, 1.0 );
 
-    pub fn initialize(&mut self, whitelist: &[String], hcount: usize) {
+    pub fn initialize(&mut self, whitelist: &[String], hcount: usize, sep: f32) {
         self.on = true;
         self.whitelist = whitelist.to_owned();
         self.hcount = hcount;
+        self.sep = sep;
     }
 }
 
@@ -591,6 +612,8 @@ static mut HEARD_CTRLC: usize = 0;
 static mut PROCESSING_SIGUSR1: bool = false;
 
 extern "C" fn handler(sig: i32) {
+    let sep = HAPPENING.lock().unwrap().sep;
+    let sleep_time = (sep * 1000.0).round() as u64;
     if sig == SIGINT {
         if CTRLC_DEBUG.load(SeqCst) {
             unsafe {
@@ -604,7 +627,7 @@ extern "C" fn handler(sig: i32) {
                 std::process::exit(0);
             }
             HEARD_CTRLC += 1;
-            thread::sleep(time::Duration::from_millis(1000));
+            thread::sleep(time::Duration::from_millis(sleep_time));
             if CTRLC_DEBUG.load(SeqCst) {
                 eprintln!("done sleeping");
             }
@@ -732,7 +755,10 @@ fn force_pretty_trace_fancy(
             .whitelist
             .append(&mut happening.whitelist.clone());
         HAPPENING.lock().unwrap().hcount = happening.hcount;
+        HAPPENING.lock().unwrap().sep = happening.sep;
         let hcount = happening.hcount;
+        let sep = happening.sep;
+        let sleep_time = (sep * 1000.0).round() as u64;
 
         // Gather tracebacks.
 
@@ -748,7 +774,7 @@ fn force_pretty_trace_fancy(
             let mut traces = Vec::<String>::new();
             let (mut interrupts, mut tracebacks) = (0, 0);
             loop {
-                thread::sleep(time::Duration::from_millis(1000));
+                thread::sleep(time::Duration::from_millis(sleep_time));
                 if path_exists(&tracefile) {
                     remove_file(&tracefile).unwrap();
                 }
@@ -766,7 +792,7 @@ fn force_pretty_trace_fancy(
                 }
                 if !path_exists(&tracefile) {
                     unsafe {
-                        thread::sleep(time::Duration::from_millis(1000));
+                        thread::sleep(time::Duration::from_millis(sleep_time));
                         if PROCESSING_SIGUSR1 {
                             thread::sleep(time::Duration::from_millis(5000));
                             eprintln!(
