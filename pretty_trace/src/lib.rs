@@ -664,18 +664,19 @@ extern "C" fn handler(sig: i32) {
         // Now do the backtrace.
 
         let backtrace = Backtrace::new();
+        let bt: Vec<u8> = format!("{:?}", backtrace).into_bytes();
         let tracefile = format!("/tmp/traceback_from_process_{}", process::id());
         let mut tf = open_for_write_new![&tracefile];
         if HAPS_RAW.load(SeqCst) {
             fwriteln!(tf, "RAW BACKTRACE\n");
-            fwriteln!(tf, "{:?}", backtrace);
+            fwriteln!(tf, "{}", strme(&bt));
             fwriteln!(tf, "\nPRETTIFIED BACKTRACE\n");
         }
         let mut whitelist = Vec::<String>::new();
         for x in HAPPENING.lock().unwrap().whitelist.iter() {
             whitelist.push(x.clone());
         }
-        fwriteln!(tf, "{}", prettify_traceback(&backtrace, &whitelist, true));
+        fwriteln!(tf, "{}", prettify_traceback(&bt, &whitelist, true));
         unsafe {
             PROCESSING_SIGUSR1 = false;
         }
@@ -935,7 +936,8 @@ fn force_pretty_trace_fancy(
 
         // Prettify the traceback.
 
-        let all_out = prettify_traceback(&backtrace, &Vec::<String>::new(), false);
+        let bt: Vec<u8> = format!("{:?}", backtrace).into_bytes();
+        let all_out = prettify_traceback(&bt, &Vec::<String>::new(), false);
 
         // Print thread panic message.  Bail before doing so if broken pipe
         // detected.  This protects against running e.g. "exec |& head -50"
@@ -1106,14 +1108,13 @@ fn force_pretty_trace_fancy(
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 #[allow(clippy::cognitive_complexity)]
-fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -> String {
+fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String {
     // Parse the backtrace into lines.
 
-    let bt: Vec<u8> = format!("{:?}", backtrace).into_bytes();
     let mut btlines = Vec::<Vec<u8>>::new();
     let mut line = Vec::<u8>::new();
     for z in bt {
-        if z == b'\n' {
+        if *z == b'\n' {
             // Replace long constructs of the form /rustc/......./src/
             //                                  by /rustc/<stuff>/src/.
             // and some similar things.
@@ -1145,7 +1146,7 @@ fn prettify_traceback(backtrace: &Backtrace, whitelist: &[String], pack: bool) -
 
             line.clear();
         } else {
-            line.push(z);
+            line.push(*z);
         }
     }
 
