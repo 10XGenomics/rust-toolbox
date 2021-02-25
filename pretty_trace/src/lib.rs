@@ -1237,7 +1237,7 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
         "start_thread",
         "__clone",
         "call_once",
-        // "<unknown>",
+        // "<unknown>", // turning this on yields cleaner tracebacks but loses critical information
         "/panic.rs",
         "/panicking.rs",
         "catch_unwind",
