@@ -754,7 +754,6 @@ fn force_pretty_trace_fancy(
                         thread::sleep(time::Duration::from_millis(10));
                     }
                 }
-                /*
                 if !path_exists(&tracefile) {
                     unsafe {
                         thread::sleep(time::Duration::from_millis(1000));
@@ -765,7 +764,6 @@ fn force_pretty_trace_fancy(
                         }
                     }
                 }
-                */
                 if !path_exists(&tracefile) {
                     continue;
                 } // or should we break?
