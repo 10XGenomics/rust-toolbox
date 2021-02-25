@@ -760,6 +760,22 @@ fn force_pretty_trace_fancy(
                         if PROCESSING_SIGUSR1 {
                             thread::sleep(time::Duration::from_millis(5000));
                             eprintln!("\nProfiling has gotten confused, giving up.\n");
+
+                            traces.sort();
+                            let mut freq = Vec::<(u32, String)>::new();
+                            make_freq(&traces, &mut freq);
+                            let mut report = String::new();
+                            report += &format!(
+                                "\nPRETTY TRACE PROFILE\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n",
+                                percent_ratio(tracebacks, interrupts),
+                                traces.len()
+                            );
+                            for (i, x) in freq.iter().enumerate() {
+                                report += &format!("[{}] COUNT = {}\n{}", i + 1, x.0, x.1);
+                            }
+                            print!("{}", report);
+                            // std::process::exit(0);
+
                             kill(pid as i32, SIGKILL);
                         }
                     }
