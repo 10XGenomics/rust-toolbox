@@ -1,4 +1,4 @@
-align_tools = "0.1.2"
+align_tools = { git = "https://github.com/10XGenomics/rust-toolbox.git", rev="591b502c92a7d3825fbe7bb20994e0787cc29a9d" }
 amino = "0.1.4"
 ansi_escape = "0.1.0"
 binary_vec_io = "0.1.7"
