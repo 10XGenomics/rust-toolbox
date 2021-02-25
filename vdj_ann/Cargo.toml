@@ -12,7 +12,7 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 [dependencies]
 align_tools = "0.1.2"
 amino = "0.1.4"
-bio = { git = "https://github.com/rust-bio/rust-bio.git", rev = "792d3e21296d85a711f1a383db513924528b6da5" }
+bio = ">=0.32"
 debruijn = "0.3.2"
 exons = "0.1.2"
 fasta_tools = "0.1.2"
