@@ -715,9 +715,15 @@ fn force_pretty_trace_fancy(
 
         // Gather tracebacks.
 
+        let pid = std::process::id();
+        let donefile = format!("/tmp/done_from_process_{}", pid);
+        if path_exists(&donefile) {
+            remove_file(&donefile).unwrap();
+        }
         thread::spawn(move || {
             let pid = std::process::id();
             let tracefile = format!("/tmp/traceback_from_process_{}", pid);
+            let donefile = format!("/tmp/done_from_process_{}", pid);
             let mut traces = Vec::<String>::new();
             let (mut interrupts, mut tracebacks) = (0, 0);
             loop {
@@ -759,7 +765,10 @@ fn force_pretty_trace_fancy(
                     traces.push(trace);
                     tracebacks += 1;
                 }
-                if traces.len() == hcount {
+                if traces.len() == hcount || path_exists(&donefile) {
+                    if path_exists(&donefile) {
+                        remove_file(&donefile).unwrap();
+                    }
                     traces.sort();
                     let mut freq = Vec::<(u32, String)>::new();
                     make_freq(&traces, &mut freq);
