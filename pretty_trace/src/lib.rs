@@ -515,7 +515,7 @@ fn test_in_allocator() -> bool {
     trace(|frame| {
         resolve(frame.ip() as *mut _, |symbol| {
             if verbose && in_alloc {
-                // For unknown reasons, this happens on a mac.
+                // For unknown reasons, this happens on a mac.  (Don't know if this is still true.)
                 eprintln!("should not be here");
             }
             if verbose {
@@ -535,8 +535,9 @@ fn test_in_allocator() -> bool {
                     || x.as_str().unwrap().contains( "alloc::alloc" )
                     // hideous additions reflecting funny encoding:
                     || x.as_str().unwrap().contains( "alloc5alloc" )
-                    // added because this causes crashes
-                    || x.as_str().unwrap().starts_with("pthread_cond_wait")
+                    // The following condition was added supposedly because otherwise one gets
+                    // crashes, but it kills many good tracebacks.  It is a disaster.
+                    // || x.as_str().unwrap().starts_with("pthread_cond_wait")
                 {
                     if verbose {
                         eprintln!("in allocator");
