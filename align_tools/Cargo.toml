@@ -1,13 +1,13 @@
 [package]
 name = "align_tools"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
 repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
-bio = ">=0.31"
+bio = { git = "https://github.com/rust-bio/rust-bio.git", rev = "792d3e21296d85a711f1a383db513924528b6da5" }
 debruijn = "0.3.2"
 itertools = ">= 0.8, <= 0.11"
 vector_utils = "0.1.3"
