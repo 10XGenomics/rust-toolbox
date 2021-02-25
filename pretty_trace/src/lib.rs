@@ -1237,7 +1237,7 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
         "start_thread",
         "__clone",
         "call_once",
-        "<unknown>",
+        // "<unknown>",
         "/panic.rs",
         "/panicking.rs",
         "catch_unwind",
@@ -1303,7 +1303,7 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
                 to_delete[j] = true;
             }
         }
-        // erase_if(&mut x, &to_delete);
+        erase_if(&mut x, &to_delete);
     }
 
     // Remove any block having length zero.
