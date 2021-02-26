@@ -1,6 +1,6 @@
 [package]
 name = "kmer_lookup"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
@@ -8,5 +8,5 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
 debruijn = "0.3.2"
-rayon = "1.0.2"
+rayon = "1.4"
 vector_utils = "0.1.3"
