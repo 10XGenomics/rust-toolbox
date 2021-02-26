@@ -1055,15 +1055,17 @@ fn force_pretty_trace_fancy(
 
         // Dump traceback to file descriptor.
 
+        let mut failed = false;
         if fd >= 0 {
             unsafe {
                 let mut err_file = File::from_raw_fd(fd);
                 let x = err_file.write(out.as_bytes());
                 if x.is_err() {
                     eprintln!("\nProblem in PrettyTrace writing to file descriptor.\n");
-                    std::process::exit(1);
+                    failed = true;
+                } else {
+                    let _ = x.unwrap();
                 }
-                let _ = x.unwrap();
             }
         }
 
@@ -1115,7 +1117,7 @@ fn force_pretty_trace_fancy(
         // in general.  If your code fails in a parallel loop, without the exit, you may
         // be flooded with tracebacks, one per thread.
 
-        if !noexit {
+        if !noexit || failed {
             std::process::exit(101);
         }
     }));
