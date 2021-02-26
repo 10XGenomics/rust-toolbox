@@ -424,6 +424,10 @@ impl PrettyTrace {
     /// This is printed if a traceback is triggered by a panic, and where
     /// code is traversing data in a loop, can be used to determine not only where
     /// execution is in the code, but also where it is in the data.
+    ///
+    /// This may only be set from the main thread of a process.  We disallow setting it from
+    /// other threads because `PrettyTrace` works by setting the panic hook, which is global,
+    /// and a value for `message` set by one thread might not be valid for another.
 
     /// # Example
     /// <pre>
@@ -440,6 +444,13 @@ impl PrettyTrace {
 
     pub fn message(&mut self, message: &'static CHashMap<ThreadId, String>) -> &mut PrettyTrace {
         self.message = Some(message);
+        if thread::current().name().unwrap() != "main" {
+            panic!(
+                "PrettyTrace::message was called from a non-main thread.  This is not\n\
+                allowed because PrettyTrace works by setting the panic hook, which is global.\n\
+                A value set by one thread might not be valid for another."
+            );
+        }
         self
     }
 
