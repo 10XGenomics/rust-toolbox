@@ -1061,7 +1061,10 @@ fn force_pretty_trace_fancy(
                 let mut err_file = File::from_raw_fd(fd);
                 let x = err_file.write(out.as_bytes());
                 if x.is_err() {
-                    eprintln!("\nProblem in PrettyTrace writing to file descriptor.\n");
+                    eprintln!(
+                        "\nProblem in PrettyTrace writing to file descriptor {}.\n",
+                        fd
+                    );
                     failed = true;
                 } else {
                     let _ = x.unwrap();
