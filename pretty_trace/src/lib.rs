@@ -878,7 +878,7 @@ fn force_pretty_trace_fancy(
         HAPS_RAW.store(true, SeqCst);
     }
 
-    // Setup panic hook. If we panic, this code gets run.
+    // Set up panic hook. If we panic, this code gets run.
 
     let _ = panic::take_hook();
     panic::set_hook(Box::new(move |info| {
@@ -890,22 +890,13 @@ fn force_pretty_trace_fancy(
 
         let mut tm = String::new();
         let this_thread = thread::current().id();
-        if thread_message
-            .map
-            .read()
-            .unwrap()
-            .contains_key(&this_thread)
-        {
-            tm = format!(
-                "{}\n\n",
-                thread_message
-                    .map
-                    .read()
-                    .unwrap()
-                    .get(&this_thread)
-                    .unwrap()
-                    .deref()
-            );
+        let tmx = thread_message.map.read();
+        if tmx.is_err() {
+            eprintln!("\nProblem processing thread message in PrettyTrace.\n");
+            std::process::exit(1);
+        }
+        if tmx.as_ref().unwrap().contains_key(&this_thread) {
+            tm = format!("{}\n\n", tmx.unwrap().get(&this_thread).unwrap().deref());
         }
 
         // Handle verbose mode.
@@ -1056,7 +1047,12 @@ fn force_pretty_trace_fancy(
         if fd >= 0 {
             unsafe {
                 let mut err_file = File::from_raw_fd(fd);
-                let _ = err_file.write(out.as_bytes()).unwrap();
+                let x = err_file.write(out.as_bytes());
+                if x.is_err() {
+                    eprintln!("\nProblem in PrettyTrace writing to file descriptor.\n");
+                    std::process::exit(1);
+                }
+                let _ = x.unwrap();
             }
         }
 
