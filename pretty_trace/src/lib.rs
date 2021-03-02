@@ -246,28 +246,44 @@ pub fn start_profiling(sep: f32, whitelist: &Option<Vec<String>>) {
 pub fn stop_profiling() {
     unsafe {
         if let Ok(report) = GUARD.as_ref().unwrap().report().build() {
+            let mut bt = Vec::<u8>::new();
             for (frames, count) in report.data.iter() {
                 println!("\n{}-fold traceback", count);
-                println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
                 let m = &frames.frames;
                 for i in 0..m.len() {
                     for j in 0..m[i].len() {
                         let s = &m[i][j]; // symbol
-                        print!("{}.{}: ", i+1, j+1);
-                        print!("name = {} ", s.name());
+                        let name = s.name();
+                        let filename;
                         if s.filename.is_some() {
-                            print!("in {:?} ", s.filename.as_ref().unwrap());
+                            filename = s.filename.as_ref().unwrap().to_str().unwrap().to_string();
                         } else {
-                            print!("in unknown ");
+                            filename = "unknown".to_string();
                         }
+                        let lineno;
                         if s.lineno.is_some() {
-                            print!("at line {}", s.lineno.unwrap());
+                            lineno = format!("{}", s.lineno.unwrap());
                         } else {
-                            print!("at line unknown");
+                            lineno = "unknown".to_string();
                         }
-                        println!("");
+                        if i == 0 {
+                            fwriteln!(bt, "{:>4}: {}\n             at {}:{}:?",
+                                i, name, filename, lineno);
+                        } else {
+                            fwriteln!(bt, "      {}\n             at {}:{}:?",
+                                name, filename, lineno);
+                        }
                     }
                 }
+                println!("\nTRACEBACK WITH MULTIPLICITY {}", count);
+                println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
+                let whitelist;
+                if WHITELIST.is_some() {
+                    whitelist = WHITELIST.clone().unwrap();
+                } else {
+                    whitelist = Vec::<String>::new();
+                }
+                println!("{}", prettify_traceback(&bt, &whitelist, true));
             }
         };
     }
@@ -1186,7 +1202,6 @@ fn force_pretty_trace_fancy(
 fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String {
     // Parse the backtrace into lines.
 
-    println!("bt = \"{}\"", strme(&bt)); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     let mut btlines = Vec::<Vec<u8>>::new();
     let mut line = Vec::<u8>::new();
     for z in bt {
