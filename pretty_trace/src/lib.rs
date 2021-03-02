@@ -237,6 +237,9 @@ pub fn start_profiling(sep: f32, whitelist: &Option<Vec<String>>) {
     let sep = (sep * 1_000_000.0).round() as i32;
     unsafe {
         WHITELIST = whitelist.clone();
+        println!("starting profiling with sep = {}", sep); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        use itertools::Itertools; // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        println!("and whitelist = {}", whitelist.as_ref().unwrap().iter().format(",")); // XXXXXXXX
         GUARD = Some(pprof::ProfilerGuard::new(sep).unwrap());
     }
 }
@@ -248,7 +251,6 @@ pub fn stop_profiling() {
         if let Ok(report) = GUARD.as_ref().unwrap().report().build() {
             let mut bt = Vec::<u8>::new();
             for (frames, count) in report.data.iter() {
-                println!("\n{}-fold traceback", count);
                 let m = &frames.frames;
                 for i in 0..m.len() {
                     for j in 0..m[i].len() {
