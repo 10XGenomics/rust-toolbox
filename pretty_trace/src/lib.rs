@@ -251,6 +251,7 @@ pub fn stop_profiling() {
         println!("begin profiling summary"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         if let Ok(report) = GUARD.as_ref().unwrap().report().build() {
             println!("starting"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+            println!("there are {} frames", report.data.len()); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             let mut bt = Vec::<u8>::new();
             for (frames, count) in report.data.iter() {
                 let m = &frames.frames;
