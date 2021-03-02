@@ -248,7 +248,9 @@ pub fn start_profiling(sep: f32, whitelist: &Option<Vec<String>>) {
 
 pub fn stop_profiling() {
     unsafe {
+        println!("begin profiling summary"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         if let Ok(report) = GUARD.as_ref().unwrap().report().build() {
+            println!("starting"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             let mut bt = Vec::<u8>::new();
             for (frames, count) in report.data.iter() {
                 let m = &frames.frames;
