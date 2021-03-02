@@ -201,6 +201,7 @@ use io_utils::*;
 use lazy_static::lazy_static;
 use libc::{kill, SIGINT, SIGKILL, SIGUSR1};
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
+use pprof::ProfilerGuard;
 use stats_utils::*;
 use std::{
     collections::HashMap,
@@ -221,9 +222,60 @@ use std::{
 use string_utils::*;
 use vector_utils::*;
 
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// PROFILING
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+static mut GUARD: Option<ProfilerGuard<'static>> = None;
+
+static mut WHITELIST: Option<Vec<String>> = None;
+
+/// Start profiling, using a separation of `sep` seconds between events, and whitelisting
+/// the given strings.
+
+pub fn start_profiling(sep: f32, whitelist: &Option<Vec<String>>) {
+    let sep = (sep * 1_000_000.0).round() as i32;
+    unsafe {
+        WHITELIST = whitelist.clone();
+        GUARD = Some(pprof::ProfilerGuard::new(sep).unwrap());
+    }
+}
+
+/// Stop profiling and dump tracebacks.
+
+pub fn stop_profiling() {
+    unsafe {
+        if let Ok(report) = GUARD.as_ref().unwrap().report().build() {
+            for (frames, count) in report.data.iter() {
+                println!("\n{}-fold traceback", count);
+                println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
+                let m = &frames.frames;
+                for i in 0..m.len() {
+                    for j in 0..m[i].len() {
+                        let s = &m[i][j]; // symbol
+                        print!("{}.{}: ", i+1, j+1);
+                        print!("name = {} ", s.name());
+                        if s.filename.is_some() {
+                            print!("in {:?} ", s.filename.as_ref().unwrap());
+                        } else {
+                            print!("in unknown ");
+                        }
+                        if s.lineno.is_some() {
+                            print!("at line {}", s.lineno.unwrap());
+                        } else {
+                            print!("at line unknown");
+                        }
+                        println!("");
+                    }
+                }
+            }
+        };
+    }
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // PRETTY TRACE STRUCTURE
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 /// A `PrettyTrace` is the working structure for this crate.  See also the top-level
 /// crate documentation.
@@ -242,7 +294,7 @@ pub struct PrettyTrace {
     pub profile: bool,
     // count for profile mode
     pub count: Option<usize>,
-    // separation for profile mode
+    // separation in seconds for profile mode
     pub sep: f32,
     // whitelist for profile mode
     pub whitelist: Option<Vec<String>>,
@@ -1134,6 +1186,7 @@ fn force_pretty_trace_fancy(
 fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String {
     // Parse the backtrace into lines.
 
+    println!("bt = \"{}\"", strme(&bt)); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     let mut btlines = Vec::<Vec<u8>>::new();
     let mut line = Vec::<u8>::new();
     for z in bt {
