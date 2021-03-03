@@ -262,8 +262,10 @@ pub fn stop_profiling() {
         if let Ok(report) = GUARD.as_ref().unwrap().report().build() {
             let mut traces = Vec::<String>::new();
             let blacklist = &BLACKLIST;
+            let mut n = 0;
             for (frames, count) in report.data.iter() {
                 let m = &frames.frames;
+                n += count;
                 let mut symv = Vec::<Vec<String>>::new();
                 for i in 0..m.len() {
                     for j in 0..m[i].len() {
@@ -360,7 +362,9 @@ pub fn stop_profiling() {
             let mut freq = Vec::<(u32, String)>::new();
             make_freq(&traces, &mut freq);
             let mut report = String::new();
-            report += &format!("\nPRETTY TRACE PROFILE\n\nTOTAL = {}\n\n", traces.len());
+            let traced = 100.0 * traces.len() as f64 / n as f64;
+            report += &format!("\nPRETTY TRACE PROFILE\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n", 
+                traced, traces.len());
             let mut total = 0;
             for (i, x) in freq.iter().enumerate() {
                 total += x.0 as usize;
