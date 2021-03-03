@@ -237,9 +237,6 @@ pub fn start_profiling(sep: f32, whitelist: &Option<Vec<String>>) {
     let sep = (sep * 1_000_000.0).round() as i32;
     unsafe {
         WHITELIST = whitelist.clone();
-        println!("starting profiling with sep = {}", sep); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-        use itertools::Itertools; // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-        println!("and whitelist = {}", whitelist.as_ref().unwrap().iter().format(",")); // XXXXXXXX
         GUARD = Some(pprof::ProfilerGuard::new(sep).unwrap());
     }
 }
@@ -248,10 +245,7 @@ pub fn start_profiling(sep: f32, whitelist: &Option<Vec<String>>) {
 
 pub fn stop_profiling() {
     unsafe {
-        println!("begin profiling summary"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         if let Ok(report) = GUARD.as_ref().unwrap().report().build() {
-            println!("starting"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            println!("there are {} frames", report.data.len()); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             for (frames, count) in report.data.iter() {
                 let mut bt = Vec::<u8>::new();
                 let m = &frames.frames;
@@ -280,22 +274,7 @@ pub fn stop_profiling() {
                         }
                     }
                 }
-
-                // XXX:
-                let mut symbols = Vec::<String>::new();
-                for i in 0..m.len() {
-                    for j in 0..m[i].len() {
-                        let s = &m[i][j]; // symbol
-                        symbols.push(s.name().clone());
-                    }
-                }
-
                 println!("\nTRACEBACK WITH MULTIPLICITY {}", count);
-                use itertools::Itertools; // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                /*
-                println!("symbols = {}", symbols.iter().format(",")); // XXXXXXXXXXXXXXXXXXXXXXXXXX
-                println!("bt = {}", strme(&bt)); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                */
                 println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
                 let whitelist;
                 if WHITELIST.is_some() {
