@@ -1254,7 +1254,8 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
                     x2 = x2.replace(&format!("{}{}", srcgit, y), "/<stuff>");
                 }
             }
-            if x.contains("/src/") && x.before("/src/").contains("/") {
+            if x2.contains("/src/") && x.before("/src/").contains("/") {
+                println!("x2 = {}", x2); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
                 x2 = format!(
                     "{}/src/{}",
                     x2.before("/src/").rev_after("/"),
