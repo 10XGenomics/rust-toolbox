@@ -257,44 +257,7 @@ pub fn stop_profiling() {
             }
             */
             for (frames, count) in report.data.iter() {
-                let mut bt = Vec::<u8>::new();
                 let m = &frames.frames;
-                for i in 0..m.len() {
-                    for j in 0..m[i].len() {
-                        let s = &m[i][j]; // symbol
-                        let name = s.name();
-                        let filename;
-                        if s.filename.is_some() {
-                            filename = s.filename.as_ref().unwrap().to_str().unwrap().to_string();
-                        } else {
-                            filename = "unknown".to_string();
-                        }
-                        let lineno;
-                        if s.lineno.is_some() {
-                            lineno = format!("{}", s.lineno.unwrap());
-                        } else {
-                            lineno = "unknown".to_string();
-                        }
-                        if i == 0 {
-                            fwriteln!(
-                                bt,
-                                "{:>4}: {}\n             at {}:{}",
-                                i,
-                                name,
-                                filename,
-                                lineno
-                            );
-                        } else {
-                            fwriteln!(
-                                bt,
-                                "      {}\n             at {}:{}",
-                                name,
-                                filename,
-                                lineno
-                            );
-                        }
-                    }
-                }
                 let mut sym = Vec::<String>::new();
                 let mut symv = Vec::<Vec<String>>::new();
                 let blacklist = [
@@ -307,8 +270,8 @@ pub fn stop_profiling() {
                     "ndarray",
                     "rayon", 
                     "rayon-core", 
-                    // "serde",
-                    // "serde_json",
+                    "serde",
+                    "serde_json",
                     "std",
                     "superslice",
                     "unknown",
