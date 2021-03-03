@@ -401,7 +401,6 @@ pub struct PrettyTrace {
     // convert Ctrl-Cs to panics
     pub ctrlc: bool,
     pub ctrlc_debug: bool,
-    pub haps_debug: bool,
     pub haps_raw: bool,
     pub noexit: bool,
 }
@@ -459,7 +458,6 @@ impl PrettyTrace {
                 &haps,
                 self.ctrlc,
                 self.ctrlc_debug,
-                self.haps_debug,
                 self.haps_raw,
                 self.noexit,
             );
@@ -473,7 +471,6 @@ impl PrettyTrace {
                 &haps,
                 self.ctrlc,
                 self.ctrlc_debug,
-                self.haps_debug,
                 self.haps_raw,
                 self.noexit,
             );
@@ -631,7 +628,6 @@ impl Happening {
 }
 
 static CTRLC_DEBUG: AtomicBool = AtomicBool::new(false);
-static HAPS_DEBUG: AtomicBool = AtomicBool::new(false);
 static HAPS_RAW: AtomicBool = AtomicBool::new(false);
 
 lazy_static! {
@@ -650,10 +646,7 @@ lazy_static! {
 // names, and it is hard to believe that this works, but it appears to do so.
 
 fn test_in_allocator() -> bool {
-    let mut verbose = false;
-    if HAPS_DEBUG.load(SeqCst) {
-        verbose = true;
-    }
+    let verbose = false;
     if verbose {
         eprintln!("\nTESTING FOR ALLOCATOR");
     }
@@ -854,7 +847,6 @@ fn force_pretty_trace_fancy(
     happening: &Happening,
     ctrlc: bool,
     ctrlc_debug: bool,
-    haps_debug: bool,
     haps_raw: bool,
     noexit: bool,
 ) {
@@ -976,9 +968,6 @@ fn force_pretty_trace_fancy(
     let _ = install_signal_handler(happening.on, ctrlc);
     if ctrlc_debug {
         CTRLC_DEBUG.store(true, SeqCst);
-    }
-    if haps_debug {
-        HAPS_DEBUG.store(true, SeqCst);
     }
     if haps_raw {
         HAPS_RAW.store(true, SeqCst);
