@@ -246,6 +246,13 @@ pub fn start_profiling(sep: f32, whitelist: &Option<Vec<String>>) {
 pub fn stop_profiling() {
     unsafe {
         if let Ok(report) = GUARD.as_ref().unwrap().report().build() {
+            let mut traces = Vec::<String>::new();
+            let whitelist;
+            if WHITELIST.is_some() {
+                whitelist = WHITELIST.clone().unwrap();
+            } else {
+                whitelist = Vec::<String>::new();
+            }
             for (frames, count) in report.data.iter() {
                 let mut bt = Vec::<u8>::new();
                 let m = &frames.frames;
@@ -274,16 +281,27 @@ pub fn stop_profiling() {
                         }
                     }
                 }
+                /*
                 println!("\nTRACEBACK WITH MULTIPLICITY {}", count);
                 println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
-                let whitelist;
-                if WHITELIST.is_some() {
-                    whitelist = WHITELIST.clone().unwrap();
-                } else {
-                    whitelist = Vec::<String>::new();
-                }
                 println!("{}", prettify_traceback(&bt, &whitelist, true));
+                */
+                for _ in 0..*count {
+               	    traces.push(prettify_traceback(&bt, &whitelist, true));
+                }
             }
+            traces.sort();
+            let mut freq = Vec::<(u32, String)>::new();
+            make_freq(&traces, &mut freq);
+            let mut report = String::new();
+            report += &format!(
+                "\nPRETTY TRACE PROFILE\n\nTOTAL = {}\n\n",
+                traces.len()
+            );
+            for (i, x) in freq.iter().enumerate() {
+                report += &format!("[{}] COUNT = {}\n{}", i + 1, x.0, x.1);
+            }
+            print!("{}", report);
         };
     }
 }
