@@ -399,13 +399,15 @@ pub fn stop_profiling() {
                         }
                     }
                 }
-                let mut log = String::new();
-                print_tabular_vbox(&mut log, &symv, 1, &b"l|l|l|l|l".to_vec(), false, false);
-                // use itertools::Itertools;
-                for _ in 0..*count {
-                    // let x = format!("\n{}\n", sym.iter().format("\n"));
-                    let x = format!("\n{}\n", log);
-                    traces.push(x);
+                if !symv.is_empty() {
+                    let mut log = String::new();
+                    print_tabular_vbox(&mut log, &symv, 1, &b"l|l|l|l|l".to_vec(), false, false);
+                    // use itertools::Itertools;
+                    for _ in 0..*count {
+                        // let x = format!("\n{}\n", sym.iter().format("\n"));
+                        let x = format!("\n{}\n", log);
+                        traces.push(x);
+                    }
                 }
             }
             traces.sort();
