@@ -66,13 +66,9 @@
 //!
 //! # A brief guide for using pretty trace
 //!
-//! First make sure that you have rust debug on: if you're using release mode, add these lines
-//! <pre>
-//! [profile.release]
-//! debug = true</pre>
-//! to your top-level <code>Cargo.toml</code>.  This adds debugging info to executables, thus
-//! enabling meaningful tracebacks (whether or not you use <code>pretty_trace</code>).  It will
-//! increase the size of executables.  It might also increase run time, but probably not by much.  
+//! First make sure that you have rust debug on: it seems to be enough to have 
+//! <code>debug = 1</code> set in <code>Cargo.toml</code> for debug and/or release mode,
+//! depending on which youre using.
 //!
 //! <br> Now to access pretty trace, put this in your <code>Cargo.toml</code>
 //! <pre>
@@ -122,10 +118,6 @@
 //! ◼ The code has only been confirmed to work under linux.  The code has been
 //!   used under OS X, but tracebacks can be incomplete.  An example is provided
 //!   of this behavior.
-//!
-//! ◼ The code will only work properly if you have set <code>debug = true</code>
-//!   in your top-level <code>Cargo.toml</code>.  Using <code>debug = 1</code>
-//!   will not work.
 //!
 //! ◼ Ideally out-of-memory events would be caught and converted to panics so
 //!   we could trace them, but we don't.  This is a general rust problem that no one

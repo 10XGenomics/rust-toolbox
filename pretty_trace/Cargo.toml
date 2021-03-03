@@ -1,6 +1,6 @@
 [package]
 name = "pretty_trace"
-version = "0.5.2"
+version = "0.5.3"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "Tools for generating pretty tracebacks and for profiling."
