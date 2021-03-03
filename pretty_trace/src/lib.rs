@@ -401,7 +401,6 @@ pub struct PrettyTrace {
     // convert Ctrl-Cs to panics
     pub ctrlc: bool,
     pub ctrlc_debug: bool,
-    pub haps_raw: bool,
     pub noexit: bool,
 }
 
@@ -458,7 +457,6 @@ impl PrettyTrace {
                 &haps,
                 self.ctrlc,
                 self.ctrlc_debug,
-                self.haps_raw,
                 self.noexit,
             );
         } else {
@@ -471,7 +469,6 @@ impl PrettyTrace {
                 &haps,
                 self.ctrlc,
                 self.ctrlc_debug,
-                self.haps_raw,
                 self.noexit,
             );
         }
@@ -628,7 +625,6 @@ impl Happening {
 }
 
 static CTRLC_DEBUG: AtomicBool = AtomicBool::new(false);
-static HAPS_RAW: AtomicBool = AtomicBool::new(false);
 
 lazy_static! {
     static ref HAPPENING: Mutex<Happening> = Mutex::new(Happening::new());
@@ -777,11 +773,6 @@ extern "C" fn handler(sig: i32) {
         let bt: Vec<u8> = format!("{:?}", backtrace).into_bytes();
         let tracefile = format!("/tmp/traceback_from_process_{}", process::id());
         let mut tf = open_for_write_new![&tracefile];
-        if HAPS_RAW.load(SeqCst) {
-            fwriteln!(tf, "RAW BACKTRACE\n");
-            fwriteln!(tf, "{}", strme(&bt));
-            fwriteln!(tf, "\nPRETTIFIED BACKTRACE\n");
-        }
         let mut whitelist = Vec::<String>::new();
         for x in HAPPENING.lock().unwrap().whitelist.iter() {
             whitelist.push(x.clone());
@@ -847,7 +838,6 @@ fn force_pretty_trace_fancy(
     happening: &Happening,
     ctrlc: bool,
     ctrlc_debug: bool,
-    haps_raw: bool,
     noexit: bool,
 ) {
     // Launch happening thread, which imits SIGUSR1 interrupts.  Usually, it will
@@ -968,9 +958,6 @@ fn force_pretty_trace_fancy(
     let _ = install_signal_handler(happening.on, ctrlc);
     if ctrlc_debug {
         CTRLC_DEBUG.store(true, SeqCst);
-    }
-    if haps_raw {
-        HAPS_RAW.store(true, SeqCst);
     }
 
     // Set up panic hook. If we panic, this code gets run.
