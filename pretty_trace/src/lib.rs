@@ -273,35 +273,41 @@ pub fn stop_profiling() {
                             lineno = "unknown".to_string();
                         }
                         if i == 0 {
-                            fwriteln!(bt, "{:>4}: {}\n             at {}:{}:?",
-                                i, name, filename, lineno);
+                            fwriteln!(
+                                bt,
+                                "{:>4}: {}\n             at {}:{}",
+                                i,
+                                name,
+                                filename,
+                                lineno
+                            );
                         } else {
-                            fwriteln!(bt, "      {}\n             at {}:{}:?",
-                                name, filename, lineno);
+                            fwriteln!(
+                                bt,
+                                "      {}\n             at {}:{}",
+                                name,
+                                filename,
+                                lineno
+                            );
                         }
                     }
                 }
                 /*
-                println!("\nTRACEBACK WITH MULTIPLICITY {}", count);
                 println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
-                println!("{}", prettify_traceback(&bt, &whitelist, true));
                 */
                 for _ in 0..*count {
-               	    traces.push(prettify_traceback(&bt, &whitelist, true));
+                    traces.push(prettify_traceback(&bt, &whitelist, true));
                 }
             }
             traces.sort();
             let mut freq = Vec::<(u32, String)>::new();
             make_freq(&traces, &mut freq);
             let mut report = String::new();
-            report += &format!(
-                "\nPRETTY TRACE PROFILE\n\nTOTAL = {}\n\n",
-                traces.len()
-            );
+            report += &format!("\nPRETTY TRACE PROFILE\n\nTOTAL = {}\n\n", traces.len());
             for (i, x) in freq.iter().enumerate() {
                 report += &format!("[{}] COUNT = {}\n{}", i + 1, x.0, x.1);
             }
-            print!("{}", report);
+            println!("{}", report);
         };
     }
 }
