@@ -252,12 +252,23 @@ pub fn stop_profiling() {
                 "alloc", 
                 "build",
                 "core", 
+                "core-arch",
+                "crossbeam-deque",
+                "crossbeam-epoch",
                 "debruijn",
+                "float-ord",
                 "hashbrown",
                 "hdf5-rust",
+                "hdf5-types",
+                "lock_api",
+                "lz4",
                 "ndarray",
+                "parking_lot",
+                "parking_lot_core",
                 "rayon", 
                 "rayon-core", 
+                "regex",
+                "regex-syntax",
                 "serde",
                 "serde_json",
                 "std",
@@ -283,6 +294,7 @@ pub fn stop_profiling() {
                         } else {
                             filename = "unknown".to_string();
                         }
+                        if filename.contains("xhash") || name.contains("xhash") { println!("filename = {}, name = {}", filename, name); }
                         let mut cratex;
                         let mut cratey; // crate without version
                         let mut version = String::new(); // crate version
@@ -322,7 +334,7 @@ pub fn stop_profiling() {
                         if s.lineno.is_some() {
                             lineno = format!("{}", s.lineno.unwrap());
                         } else {
-                            lineno = "unknown".to_string();
+                            lineno = "?".to_string();
                         }
 
                         if cratex.contains("-") && version == "" {
