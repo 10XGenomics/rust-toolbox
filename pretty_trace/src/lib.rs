@@ -185,7 +185,6 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 use backtrace::Backtrace;
-use backtrace::*;
 use failure::Error;
 use io_utils::*;
 use lazy_static::lazy_static;
@@ -631,66 +630,6 @@ lazy_static! {
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-// TEST TO SEE IF CODE WAS INTERRUPTED WHILE IN THE MEMORY ALLOCATOR
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-
-// If you catch an interrupt, the code may have been in the memory allocator
-// at the time it was interrupted.  In such cases, almost any memory allocation,
-// e.g. pushing back onto a vector, may cause a hang or crash.  The following code
-// attempts to test for the "in allocator" state and can be used to avoid
-// dangerous operations.  The code works by comparing to a hardcoded list of
-// names, and it is hard to believe that this works, but it appears to do so.
-
-fn test_in_allocator() -> bool {
-    let verbose = false;
-    if verbose {
-        eprintln!("\nTESTING FOR ALLOCATOR");
-    }
-    let mut in_alloc = false;
-    // The following lock line (copied from the Backtrace crate) doesn't
-    // seem necessary here (and would require plumbing to compile anyway).
-    // let _guard = ::lock::lock();
-    trace(|frame| {
-        resolve(frame.ip() as *mut _, |symbol| {
-            if verbose && in_alloc {
-                // For unknown reasons, this happens on a mac.  (Don't know if this is still true.)
-                eprintln!("should not be here");
-            }
-            if verbose {
-                eprintln!("symbol name = {:?}", symbol.name());
-                if symbol.name().is_some() {
-                    eprintln!("= {}", symbol.name().unwrap().as_str().unwrap());
-                }
-            }
-            if let Some(x) = symbol.name() {
-                if x.as_str().unwrap() == "realloc"
-                    || x.as_str().unwrap() == "malloc_consolidate"
-                    || x.as_str().unwrap() == "_int_free"
-                    || x.as_str().unwrap() == "calloc"
-                    || x.as_str().unwrap() == "__calloc"
-                    || x.as_str().unwrap().contains( "_malloc" )
-                    || x.as_str().unwrap().contains( "_realloc" )
-                    || x.as_str().unwrap().contains( "alloc::alloc" )
-                    // hideous additions reflecting funny encoding:
-                    || x.as_str().unwrap().contains( "alloc5alloc" )
-                // The following condition was added supposedly because otherwise one gets
-                // crashes, but it kills many good tracebacks.  It is a disaster.
-                // || x.as_str().unwrap().starts_with("pthread_cond_wait")
-                {
-                    if verbose {
-                        eprintln!("in allocator");
-                    }
-                    in_alloc = true;
-                    return;
-                }
-            }
-        });
-        !in_alloc
-    });
-    in_alloc
-}
-
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // SIGNAL HANDLING
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
@@ -759,12 +698,6 @@ extern "C" fn handler(sig: i32) {
 
         unsafe {
             PROCESSING_SIGUSR1 = true;
-        }
-        if test_in_allocator() {
-            unsafe {
-                PROCESSING_SIGUSR1 = false;
-            }
-            return;
         }
 
         // Now do the backtrace.
