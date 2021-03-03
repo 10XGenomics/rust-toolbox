@@ -332,25 +332,20 @@ pub fn stop_profiling() {
                         } else {
                             filename = "unknown".to_string();
                         }
-                        let cratex;
+                        let mut cratex;
                         let mut cratey; // crate without version
                         let mut version = String::new(); // crate version
                         let file;
-
                         if filename.contains("/cargo/git/checkouts/") {
                             let post = filename.after("/cargo/git/checkouts/");
-                            if post.contains("/") && post.before("/").contains("-")
-                                && post.contains("/src/") {
-                                cratex = post.before("/").rev_before("-").to_string();
-                                cratey = cratex.clone();
+                            if post.contains("/src/") && post.rev_before("/src/").contains("/") {
+                                version = post.rev_before("/src/").rev_after("/").to_string();
                                 file = post.after("/src/").to_string();
-                            } else if post.contains("/src/") {
-                                cratex = post.before("/src/").to_string();
-                                cratey = cratex.clone();
-                                file = post.after("/src/").to_string();
-                                if post.before("/src/").contains("/") {
-                                    version = post.before("/src/").rev_after("/").to_string();
+                                cratex = post.before("/").to_string();
+                                if cratex.contains("-") {
+                                    cratex = cratex.rev_before("-").to_string();
                                 }
+                                cratey = cratex.clone();
                             } else {
                                 cratex = "unknown".to_string();
                                 cratey = "unknown".to_string();
@@ -376,15 +371,12 @@ pub fn stop_profiling() {
                         if cratex.contains("-") && version == "" {
                             let c = cratex.rev_before("-");
                             let d = cratex.rev_after("-");
-                            if filename.contains("hdf5") { println!("file = {}", filename); }
-                            if filename.contains("hdf5") { println!("d = {}", d); }
                             if d.contains(".") && d.after(".").contains(".") {
                                 if d.before(".").parse::<usize>().is_ok()
                                     && d.between(".", ".").parse::<usize>().is_ok()
                                     && d.rev_after(".").parse::<usize>().is_ok() {
                                     cratey = c.to_string();
                                     version = d.to_string();
-                                    if filename.contains("hdf5") { println!("version = {}", version); }
                                 }
                             }
                         }
