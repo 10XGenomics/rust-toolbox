@@ -295,8 +295,22 @@ pub fn stop_profiling() {
                 /*
                 println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
                 */
+                let mut make_table = false;
+                for i in 0..m.len() {
+                    for j in 0..m[i].len() {
+                        let s = &m[i][j]; // symbol
+                        let name = s.name();
+                        if name.contains("make_table") {
+                            make_table = true;
+                        }
+                    }
+                }
                 for _ in 0..*count {
-                    traces.push(prettify_traceback(&bt, &whitelist, true));
+                    let mut s = prettify_traceback(&bt, &whitelist, true);
+                    if make_table {
+                        s = format!("*** make_table {}", s);
+                    }
+                    traces.push(s);
                 }
             }
             traces.sort();
