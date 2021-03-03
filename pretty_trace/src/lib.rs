@@ -39,14 +39,18 @@
 //! this should be directly visible from a modest sample of tracebacks chosen at
 //! random.  And these tracebacks can be generated for any main program by adding a
 //! simple command-line option to it that causes it to enter a special 'profile'
-//! mode, gathering tracebacks and then terminating.  
+//! mode, gathering tracebacks and then terminating.  This uses the <code>pprof</code>
+//! crate to gather tracebacks.
 //!
 //! For example this command-line option might be
-//! <code>PROF=100</code> to profile 100 events.  It's your choice how to specify
+//! <code>PROFILE</code> to turn on profiling.  It's your choice how to specify
 //! this command-line option, but this crate makes it trivial to do so.
-//! <font color="red">With about one minute's work,
+//! <font color="red">With a few minutes' work,
 //! you can make it possible to profile your code with essentially zero work,
-//! whenever you like.</font>
+//! whenever you like.</font>  
+//! See the functions <code>start_profiling</code> and <code>stop_profiling</code>.
+//! Note that to produce useful output, one needs to specify a list of blacklisted crates, such
+//! as <code>std</code>.  The entries from these crates are removed from the tracebacks.
 //!
 //! # Example of pretty trace profiling output
 //!
@@ -240,6 +244,8 @@ static mut BLACKLIST: Vec<String> = Vec::new();
 ///
 /// It is not clear how the timing of the profiling is handled.  There is a parameter `frequency`
 /// that is passed to the profiling machinery, but we don't know what it does.
+///
+/// Profiling <i>appears</i> to correctly represent wallclock in parallel loops.
 
 pub fn start_profiling(blacklist: &Vec<String>) {
     let frequency = 1000;
