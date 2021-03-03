@@ -179,6 +179,11 @@
 //! # More
 //!
 //! See the documentation for <code>PrettyTrace</code>, linked to below.
+//!
+//! # To do
+//!
+//! ◼ Rewrite so that tracebacks are formatted in the same way in all cases, in the fashion
+//!   that carried out by profiling.  And reuse the same code.
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // EXTERNAL DEPENDENCIES
