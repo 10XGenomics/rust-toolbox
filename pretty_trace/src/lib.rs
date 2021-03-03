@@ -294,7 +294,6 @@ pub fn stop_profiling() {
                         } else {
                             filename = "unknown".to_string();
                         }
-                        if filename.contains("registry") { println!("filename = {}, name = {}", filename, name); }
                         let mut cratex;
                         let mut cratey; // crate without version
                         let mut version = String::new(); // crate version
@@ -356,7 +355,7 @@ pub fn stop_profiling() {
                                 blacklisted = true;
                             }
                         }
-                        if !blacklisted {
+                        if !blacklisted && file.ends_with(".rs") {
                             symv.push(vec![name, cratey, version, file, lineno]);
                         }
                     }
