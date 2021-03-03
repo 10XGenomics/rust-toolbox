@@ -188,7 +188,7 @@ use backtrace::Backtrace;
 use failure::Error;
 use io_utils::*;
 use lazy_static::lazy_static;
-use libc::{SIGINT, SIGUSR1};
+use libc::SIGINT;
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
 use pprof::ProfilerGuard;
 use stats_utils::*;
@@ -199,7 +199,7 @@ use std::{
     io::{BufWriter, Write},
     ops::Deref,
     os::unix::io::FromRawFd,
-    panic, process,
+    panic,
     str::from_utf8,
     sync::atomic::AtomicBool,
     sync::atomic::Ordering::SeqCst,
@@ -654,7 +654,6 @@ fn install_signal_handler(happening: bool, ctrlc: bool) -> Result<(), Error> {
 }
 
 static mut HEARD_CTRLC: usize = 0;
-static mut PROCESSING_SIGUSR1: bool = false;
 
 extern "C" fn handler(sig: i32) {
     let sep = HAPPENING.lock().unwrap().sep;
@@ -687,33 +686,6 @@ extern "C" fn handler(sig: i32) {
              multithreading, you may need to turn that off to obtain \
              a meaningful traceback."
         );
-    }
-    if sig == SIGUSR1 {
-        // Test to see if we appear to have interrupted the allocator.  In that
-        // case, give up.  If we were to instead try to create a backtrace, the
-        // backtrace code would push stuff onto a vector, and with high probability
-        // something bad would happen in the allocator, and the kernel would kill
-        // the process.  Of course this means that the stack traces we see are
-        // somewhat biased.
-
-        unsafe {
-            PROCESSING_SIGUSR1 = true;
-        }
-
-        // Now do the backtrace.
-
-        let backtrace = Backtrace::new();
-        let bt: Vec<u8> = format!("{:?}", backtrace).into_bytes();
-        let tracefile = format!("/tmp/traceback_from_process_{}", process::id());
-        let mut tf = open_for_write_new![&tracefile];
-        let mut whitelist = Vec::<String>::new();
-        for x in HAPPENING.lock().unwrap().whitelist.iter() {
-            whitelist.push(x.clone());
-        }
-        fwriteln!(tf, "{}", prettify_traceback(&bt, &whitelist, true));
-        unsafe {
-            PROCESSING_SIGUSR1 = false;
-        }
     }
 }
 
