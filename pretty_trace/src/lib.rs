@@ -306,7 +306,7 @@ pub fn stop_profiling() {
                     "core", 
                     "debruijn",
                     "hashbrown",
-                    // "hdf5-rust",
+                    "hdf5-rust",
                     "ndarray",
                     "rayon", 
                     "rayon-core", 
@@ -332,6 +332,7 @@ pub fn stop_profiling() {
                         } else {
                             filename = "unknown".to_string();
                         }
+                        if filename.contains("vdj-ann") { println!("filename = {}", filename); }
                         let mut cratex;
                         let mut cratey; // crate without version
                         let mut version = String::new(); // crate version
