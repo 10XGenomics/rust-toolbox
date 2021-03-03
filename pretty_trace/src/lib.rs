@@ -364,6 +364,7 @@ pub fn stop_profiling(pager: bool) {
                     percent_ratio(total, traces.len()), x.1);
             }
             if pager {
+                drop(GUARD.as_ref().unwrap());
                 Pager::with_pager("less -R -F -X").setup();
             }
             print!("{}", report);
