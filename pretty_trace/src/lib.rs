@@ -280,7 +280,19 @@ pub fn stop_profiling() {
                         }
                     }
                 }
+
+                // XXX:
+                let mut symbols = Vec::<String>::new();
+                for i in 0..m.len() {
+                    for j in 0..m[i].len() {
+                        let s = &m[i][j]; // symbol
+                        symbols.push(s.name().clone());
+                    }
+                }
+
                 println!("\nTRACEBACK WITH MULTIPLICITY {}", count);
+                use itertools::Itertools; // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                println!("symbols = {}", symbols.iter().format(",")); // XXXXXXXXXXXXXXXXXXXXXXXXXX
                 println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
                 let whitelist;
                 if WHITELIST.is_some() {
