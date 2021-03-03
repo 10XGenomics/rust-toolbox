@@ -47,10 +47,10 @@
 //! this command-line option, but this crate makes it trivial to do so.
 //! <font color="red">With a few minutes' work,
 //! you can make it possible to profile your code with essentially zero work,
-//! whenever you like.</font>  
-//! See the functions <code>start_profiling</code> and <code>stop_profiling</code>.
-//! Note that to produce useful output, one needs to specify a list of blacklisted crates, such
-//! as <code>std</code>.  The entries from these crates are removed from the tracebacks.
+//! whenever you like.</font> See the functions <code>start_profiling</code> and 
+//! <code>stop_profiling</code>.  Note that to produce useful output, one needs to specify a list 
+//! of blacklisted crates, such as <code>std</code>.  The entries from these crates are removed 
+//! from the tracebacks.
 //!
 //! # Example of pretty trace profiling output
 //!
@@ -121,23 +121,15 @@
 //! at the beginning of your main program.  And you're good to go!  Any panic
 //! will cause a pretty traceback to be generated.  
 //!
-//! <br> To instead profile, e.g. for 100 events, do this
-//! <pre>
-//!     PrettyTrace::new().profile(100).on();
-//!     ... (your code) ...
-//!     complete_profiling();
-//! </pre>
-//!
-//! Several other useful features are described below.  This include the capability
+//! Several other useful features are described below.  These include the capability
 //! of tracing to know where you are in your data (and not just your code), and
 //! for focusing profiling on a key set of crates that you're optimizing.
 //!
 //! # Credit
 //!
-//! This code was developed at 10x Genomics, and is based in part on C++ code
-//! developed at the Whitehead Institute Center for Genome
-//! Research / Broad Institute starting in 2000, and included in
-//! <https://github.com/CompRD/BroadCRD>.
+//! This code was developed at 10x Genomics, and is based in part on C++ code developed at the
+//! Whitehead Institute Center for Genome Research / Broad Institute starting in 2000, and 
+//! included in <https://github.com/CompRD/BroadCRD>.
 //!
 //! # FAQ
 //!
@@ -185,7 +177,7 @@
 //! # To do
 //!
 //! ◼ Rewrite so that tracebacks are formatted in the same way in all cases, in the fashion
-//!   that carried out by profiling.  And reuse the same code.
+//!   carried out by profiling.  And reuse the same code.
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // EXTERNAL DEPENDENCIES
@@ -193,7 +185,6 @@
 
 use backtrace::Backtrace;
 use failure::Error;
-use io_utils::*;
 use lazy_static::lazy_static;
 use libc::SIGINT;
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
@@ -730,16 +721,6 @@ pub fn new_thread_message() -> &'static CHashMap<ThreadId, String> {
 }
 
 /// See <code>PrettyTrace</code> documentation for how this is used.
-
-pub fn complete_profiling() {
-    let pid = std::process::id();
-    let donefile = format!("/tmp/done_from_process_{}", pid);
-    {
-        let mut f = open_for_write_new![&donefile];
-        fwriteln!(f, "done");
-    }
-    thread::sleep(time::Duration::from_millis(2000));
-}
 
 fn force_pretty_trace_fancy(
     log_file_name: String,
