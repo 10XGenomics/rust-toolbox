@@ -294,7 +294,7 @@ pub fn stop_profiling() {
                         } else {
                             filename = "unknown".to_string();
                         }
-                        if filename.contains("xhash") || name.contains("xhash") { println!("filename = {}, name = {}", filename, name); }
+                        if filename.contains("registry") { println!("filename = {}, name = {}", filename, name); }
                         let mut cratex;
                         let mut cratey; // crate without version
                         let mut version = String::new(); // crate version
