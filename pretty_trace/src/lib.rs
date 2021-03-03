@@ -500,20 +500,6 @@ impl PrettyTrace {
         self
     }
 
-    /// Turn on some debugging for profiling.  For development purposes.
-
-    pub fn haps_debug(&mut self) -> &mut PrettyTrace {
-        self.haps_debug = true;
-        self
-    }
-
-    /// Turn on some debugging for profiling.  For development purposes.
-
-    pub fn haps_raw(&mut self) -> &mut PrettyTrace {
-        self.haps_raw = true;
-        self
-    }
-
     /// Turn off call to <code>std::process::exit(101)</code>, which is normally triggered after
     /// printing a traceback (on panic).  This could be useful if you want to run a bunch of
     /// tests, some of which fail, but you want to see the outcome of all of them.  Note that
@@ -606,49 +592,6 @@ impl PrettyTrace {
         self
     }
 
-    /// Request that a profile consisting of `count` traces be generated, at separation `1` second.
-    /// If you use this, consider calling `whitelist` too.
-
-    pub fn profile(&mut self, count: usize) -> &mut PrettyTrace {
-        self.profile = true;
-        self.count = Some(count);
-        self.sep = 1.0;
-        self
-    }
-
-    /// Request that a profile consisting of `count` traces be generated, at separation `sep`
-    /// seconds.  Values of `sep` lower than about `0.01` probably do about the same thing as
-    /// `0.01`.  If you use this, consider calling `whitelist` too.
-
-    pub fn profile2(&mut self, count: usize, sep: f32) -> &mut PrettyTrace {
-        self.profile = true;
-        self.count = Some(count);
-        self.sep = sep;
-        self
-    }
-
-    /// Define the whitelist for profile mode.  It is a list of strings that
-    /// profile traces are matched against.  Only traces matching at least one of
-    /// the strings are shown.  This allows tracebacks to be focused on a fixed set
-    /// of crates that you're trying to optimize.  Setting this option can greatly
-    /// increase the utility of profile mode.
-
-    /// # Example
-    /// <pre>
-    ///    PrettyTrace::new()
-    ///        .profile(100)
-    ///        .whitelist( &vec![ "gerbilizer", "creampuff" ] )
-    ///        .on();
-    /// </pre>
-
-    pub fn whitelist(&mut self, whitelist: &[&str]) -> &mut PrettyTrace {
-        let mut x = Vec::<String>::new();
-        for y in whitelist {
-            x.push(y.to_string());
-        }
-        self.whitelist = Some(x);
-        self
-    }
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
