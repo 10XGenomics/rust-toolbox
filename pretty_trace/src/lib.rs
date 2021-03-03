@@ -376,12 +376,15 @@ pub fn stop_profiling() {
                         if cratex.contains("-") && version == "" {
                             let c = cratex.rev_before("-");
                             let d = cratex.rev_after("-");
+                            if filename.contains("hdf5") { println!("file = {}", filename); }
+                            if filename.contains("hdf5") { println!("d = {}", d); }
                             if d.contains(".") && d.after(".").contains(".") {
                                 if d.before(".").parse::<usize>().is_ok()
                                     && d.between(".", ".").parse::<usize>().is_ok()
                                     && d.rev_after(".").parse::<usize>().is_ok() {
                                     cratey = c.to_string();
                                     version = d.to_string();
+                                    if filename.contains("hdf5") { println!("version = {}", version); }
                                 }
                             }
                         }
@@ -405,7 +408,7 @@ pub fn stop_profiling() {
                     // use itertools::Itertools;
                     for _ in 0..*count {
                         // let x = format!("\n{}\n", sym.iter().format("\n"));
-                        let x = format!("\n{}", log);
+                        let x = format!("{}", log);
                         traces.push(x);
                     }
                 }
