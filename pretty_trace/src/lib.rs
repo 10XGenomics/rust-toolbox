@@ -296,33 +296,19 @@ pub fn stop_profiling() {
                 println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
                 */
                 let mut sym = Vec::<String>::new();
-                /*
-                for i in 0..m.len() {
-                    let mut x = Vec::<String>::new();
-                    for j in 0..m[i].len() {
-                        let s = &m[i][j]; // symbol
-                        let name = s.name();
-                        x.push(name);
-                    }
-                    sym.push(format!("{}", x.iter().format(",")));
-                }
-                */
                 let blacklist = [
                     "alloc", 
                     "build",
                     "core", 
+                    "debruijn",
                     "d1d0c6f",
-                    // "hashbrown-0.9.0",
                     "hashbrown",
-                    // "rayon-1.5.0", 
                     "rayon", 
-                    // "rayon-core-1.9.0", 
                     "rayon-core", 
-                    // "serde-1.0.123",
                     "serde",
-                    // "serde_json-1.0.63",
                     "serde_json",
                     "std",
+                    "superslice",
                     "unknown",
                 ];
                 for i in 0..m.len() {
@@ -379,6 +365,8 @@ pub fn stop_profiling() {
                         }
                         if !blacklisted {
                             sym.push(format!("{} ⮕ {} ⮕ {} ⮕ {}", name, cratex, file, lineno));
+                        } else {
+                            sym.push(format!("{} -- BLACKLISTED", filename));
                         }
                     }
                 }
