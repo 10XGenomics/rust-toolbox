@@ -176,6 +176,8 @@
 //! ◼ There is an ugly blacklist of strings that is fragile.  This may
 //!   be an intrinsic feature of the approach.
 //!
+//! ◼ In general, tracebacks in parallel code do not go back to the main program.
+//!
 //! # More
 //!
 //! See the documentation for <code>PrettyTrace</code>, linked to below.
