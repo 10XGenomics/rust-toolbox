@@ -247,12 +247,14 @@ pub fn stop_profiling() {
     unsafe {
         if let Ok(report) = GUARD.as_ref().unwrap().report().build() {
             let mut traces = Vec::<String>::new();
+            /*
             let whitelist;
             if WHITELIST.is_some() {
                 whitelist = WHITELIST.clone().unwrap();
             } else {
                 whitelist = Vec::<String>::new();
             }
+            */
             for (frames, count) in report.data.iter() {
                 let mut bt = Vec::<u8>::new();
                 let m = &frames.frames;
@@ -301,7 +303,6 @@ pub fn stop_profiling() {
                     "build",
                     "core", 
                     "debruijn",
-                    // "d1d0c6f",
                     "hashbrown",
                     // "hdf5-rust",
                     "ndarray",
@@ -370,7 +371,7 @@ pub fn stop_profiling() {
                             lineno = "unknown".to_string();
                         }
 
-                        if cratex.contains("-") {
+                        if cratex.contains("-") && version == "" {
                             let c = cratex.rev_before("-");
                             let d = cratex.rev_after("-");
                             if d.contains(".") && d.after(".").contains(".") {
@@ -397,9 +398,9 @@ pub fn stop_profiling() {
                 }
                 use itertools::Itertools;
                 for _ in 0..*count {
-                    let x = format!("\n{}\n\n{}", 
+                    let x = format!("\n{}\n", 
                         sym.iter().format("\n"),
-                        prettify_traceback(&bt, &whitelist, true),
+                        // prettify_traceback(&bt, &whitelist, true),
                     );
                     traces.push(x);
                 }
