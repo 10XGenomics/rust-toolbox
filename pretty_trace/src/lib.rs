@@ -413,9 +413,12 @@ pub fn stop_profiling() {
             make_freq(&traces, &mut freq);
             let mut report = String::new();
             report += &format!("\nPRETTY TRACE PROFILE\n\nTOTAL = {}\n\n", traces.len());
+            let mut total = 0;
             for (i, x) in freq.iter().enumerate() {
-                report += &format!("[{}] COUNT = {} = {:.2}%\n{}\n", 
-                    i + 1, x.0, percent_ratio(x.0 as usize, traces.len()), x.1);
+                total += x.0 as usize;
+                report += &format!("[{}] COUNT = {} = {:.2}% ⮕ {:.2}%\n{}\n", 
+                    i + 1, x.0, percent_ratio(x.0 as usize, traces.len()), 
+                    percent_ratio(total, traces.len()), x.1);
             }
             print!("{}", report);
         };
