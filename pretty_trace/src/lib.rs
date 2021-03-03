@@ -335,17 +335,17 @@ pub fn stop_profiling() {
                         let mut cratex;
                         let mut cratey; // crate without version
                         let mut version = String::new(); // crate version
-                        let mut file = String::new();
+                        let file;
                         if filename.contains("/cargo/git/checkouts/") {
                             let post = filename.after("/cargo/git/checkouts/");
                             if post.contains("/src/") && post.rev_before("/src/").contains("/") {
                                 let mid = post.rev_before("/src/");
+                                file = post.after("/src/").to_string();
                                 if mid.after("/").contains("/") {
                                     version = mid.between("/", "/").to_string();
                                     cratex = mid.rev_after("/").to_string();
                                 } else {
                                     version = mid.rev_after("/").to_string();
-                                    file = post.after("/src/").to_string();
                                     cratex = post.before("/").to_string();
                                     if cratex.contains("-") {
                                         cratex = cratex.rev_before("-").to_string();
