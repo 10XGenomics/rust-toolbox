@@ -297,11 +297,13 @@ pub fn stop_profiling() {
                 */
                 let mut sym = Vec::<String>::new();
                 for i in 0..m.len() {
+                    let mut x = Vec::<String>::new();
                     for j in 0..m[i].len() {
                         let s = &m[i][j]; // symbol
                         let name = s.name();
-                        sym.push(name);
+                        x.push(name);
                     }
+                    sym.push(format!("{}", x.iter().format(",")));
                 }
                 use itertools::Itertools;
                 for _ in 0..*count {
