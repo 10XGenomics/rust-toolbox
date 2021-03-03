@@ -220,6 +220,7 @@ use std::{
     time,
 };
 use string_utils::*;
+use tables::*;
 use vector_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -298,6 +299,7 @@ pub fn stop_profiling() {
                 println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
                 */
                 let mut sym = Vec::<String>::new();
+                let mut symv = Vec::<Vec<String>>::new();
                 let blacklist = [
                     "alloc", 
                     "build",
@@ -393,15 +395,16 @@ pub fn stop_profiling() {
                         if !blacklisted {
                             sym.push(format!("{} ⮕ {} {} ⮕ {} ⮕ {}", 
                                 name, cratey, version, file, lineno));
+                            symv.push(vec![name, cratey, version, file, lineno]);
                         }
                     }
                 }
-                use itertools::Itertools;
+                let mut log = String::new();
+                print_tabular_vbox(&mut log, &symv, 1, &b"l|l|l|l|l".to_vec(), false, false);
+                // use itertools::Itertools;
                 for _ in 0..*count {
-                    let x = format!("\n{}\n", 
-                        sym.iter().format("\n"),
-                        // prettify_traceback(&bt, &whitelist, true),
-                    );
+                    // let x = format!("\n{}\n", sym.iter().format("\n"));
+                    let x = format!("\n{}\n", log);
                     traces.push(x);
                 }
             }
