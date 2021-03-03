@@ -305,9 +305,9 @@ pub fn stop_profiling() {
             let mut report = String::new();
             report += &format!("\nPRETTY TRACE PROFILE\n\nTOTAL = {}\n\n", traces.len());
             for (i, x) in freq.iter().enumerate() {
-                report += &format!("[{}] COUNT = {}\n{}", i + 1, x.0, x.1);
+                report += &format!("[{}] COUNT = {}\n{}\n", i + 1, x.0, x.1);
             }
-            println!("{}", report);
+            print!("{}", report);
         };
     }
 }
