@@ -312,20 +312,25 @@ pub fn stop_profiling() {
                     "build",
                     "core", 
                     "d1d0c6f",
+                    "hashbrown-0.9.0",
                     "rayon-1.5.0", 
                     "rayon-core-1.9.0", 
+                    "serde-1.0.123",
+                    "serde_json-1.0.63",
                     "std",
                     "unknown",
                 ];
                 for i in 0..m.len() {
-                    let mut x = Vec::<String>::new();
                     for j in 0..m[i].len() {
                         let s = &m[i][j];
                         let mut name = s.name();
                         if name.contains("::") {
                             name = name.after("::").to_string();
                         }
-                        let mut filename;
+                        if name.ends_with("::{{closure}}") {
+                            name = name.rev_before("::{{closure}}").to_string();
+                        }
+                        let filename;
                         if s.filename.is_some() {
                             filename = s.filename.as_ref().unwrap().to_str().unwrap().to_string();
                         } else {
@@ -360,7 +365,7 @@ pub fn stop_profiling() {
                 }
                 use itertools::Itertools;
                 for _ in 0..*count {
-                    let x = format!("{}\n\n{}", 
+                    let x = format!("\n{}\n\n{}", 
                         sym.iter().format("\n"),
                         prettify_traceback(&bt, &whitelist, true),
                     );
