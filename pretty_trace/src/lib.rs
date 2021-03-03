@@ -296,6 +296,7 @@ pub fn stop_profiling() {
                 println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
                 */
                 let mut sym = Vec::<String>::new();
+                /*
                 for i in 0..m.len() {
                     let mut x = Vec::<String>::new();
                     for j in 0..m[i].len() {
@@ -304,6 +305,25 @@ pub fn stop_profiling() {
                         x.push(name);
                     }
                     sym.push(format!("{}", x.iter().format(",")));
+                }
+                */
+                for i in 0..m.len() {
+                    let mut x = Vec::<String>::new();
+                    let s = &m[i].last().unwrap();
+                    let name = s.name();
+                    let filename;
+                    if s.filename.is_some() {
+                        filename = s.filename.as_ref().unwrap().to_str().unwrap().to_string();
+                    } else {
+                        filename = "unknown".to_string();
+                    }
+                    let lineno;
+                    if s.lineno.is_some() {
+                        lineno = format!("{}", s.lineno.unwrap());
+                    } else {
+                        lineno = "unknown".to_string();
+                    }
+                    sym.push(format!("{} ⮕ {} ⮕ {}", name, filename, lineno));
                 }
                 use itertools::Itertools;
                 for _ in 0..*count {
