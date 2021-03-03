@@ -1259,7 +1259,7 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
                     "{} {}/src/{}",
                     x2.rev_before(" "),
                     x2.before("/src/").rev_after("/"),
-                    x.after("/src/")
+                    x2.after("/src/")
                 );
             }
             btlines.push(x2.as_bytes().to_vec());
