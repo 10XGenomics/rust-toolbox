@@ -1254,6 +1254,13 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
                     x2 = x2.replace(&format!("{}{}", srcgit, y), "/<stuff>");
                 }
             }
+            if x.contains("/src/") && x.before("/src/").contains("/") {
+                x2 = format!(
+                    "{}/src/{}",
+                    x2.before("/src/").rev_after("/"),
+                    x.after("/src/")
+                );
+            }
             btlines.push(x2.as_bytes().to_vec());
 
             // Reset line.
