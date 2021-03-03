@@ -295,9 +295,6 @@ pub fn stop_profiling() {
                         }
                     }
                 }
-                /*
-                println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
-                */
                 let mut sym = Vec::<String>::new();
                 let mut symv = Vec::<Vec<String>>::new();
                 let blacklist = [
@@ -418,7 +415,7 @@ pub fn stop_profiling() {
             report += &format!("\nPRETTY TRACE PROFILE\n\nTOTAL = {}\n\n", traces.len());
             for (i, x) in freq.iter().enumerate() {
                 report += &format!("[{}] COUNT = {} = {:.2}%\n{}\n", 
-                    i + 1, x.0, x.1, percent_ratio(x.0 as usize, traces.len()));
+                    i + 1, x.0, percent_ratio(x.0 as usize, traces.len()), x.1);
             }
             print!("{}", report);
         };
