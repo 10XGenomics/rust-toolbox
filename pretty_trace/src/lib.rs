@@ -54,41 +54,11 @@
 //!
 //! # Example of pretty trace profiling output
 //!
-//! <p style="line-height:0.7">
-//! <code>
-//! <br>PRETTY TRACE PROFILE
-//! <br>
-//! <br>TRACED = 97.8%
-//! <br>
-//! <br>TOTAL = 358
-//! <br>
-//! <br>[1] COUNT = 200 = 55.87% ⮕ 55.87%
-//! <br>┌────────────────────────────┬────────────┬─────┬───────────────┬───┐
-//! <br>│read_vector_entry_from_json │io_utils    │0.2.9│lib.rs         │303│
-//! <br>│read_json                   │enclone     │     │read_json.rs   │653│
-//! <br>│parse_json_annotations_files│enclone     │     │read_json.rs   │794│
-//! <br>│parse_json_annotations_files│enclone     │     │read_json.rs   │786│
-//! <br>│main_enclone                │enclone_main│     │main_enclone.rs│952│
-//! <br>│main                        │enclone_main│     │bin/enclone.rs │9  │
-//! <br>└────────────────────────────┴────────────┴─────┴───────────────┴───┘
-//! <br>
-//! <br>[2] COUNT = 79 = 22.07% ⮕ 77.93%
-//! <br>┌────────────────────────────┬────────────┬─────┬───────────────┬───┐
-//! <br>│read_vector_entry_from_json │io_utils    │0.2.9│lib.rs         │306│
-//! <br>│read_json                   │enclone     │     │read_json.rs   │653│
-//! <br>│parse_json_annotations_files│enclone     │     │read_json.rs   │794│
-//! <br>│parse_json_annotations_files│enclone     │     │read_json.rs   │786│
-//! <br>│main_enclone                │enclone_main│     │main_enclone.rs│952│
-//! <br>│main                        │enclone_main│     │bin/enclone.rs │9  │
-//! <br>└────────────────────────────┴────────────┴─────┴───────────────┴───┘
-//! <br>...
-//! <br>
-//! </code>
-//! </p>
+//! ![profiling output](https://raw.githubusercontent.com/10XGenomics/rust-toolbox/master/pretty_trace/images/profile.png)
 //!
 //! Here pretty trace profiling reveals exactly what some code was doing at
 //! random instances; we show the first of the collated tracebacks.  More were
-//! attempted: of attempted tracebacks, 97.8% are reported.  Unreported tracebacks
+//! attempted: of attempted tracebacks, 95.8% are reported.  Unreported tracebacks
 //! would be those lying entirely in blacklisted crates.
 //!
 //! Each line shows a function name, the crate it is in, the version of the crate (if known),
