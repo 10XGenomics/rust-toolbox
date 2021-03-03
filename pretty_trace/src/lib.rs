@@ -301,8 +301,9 @@ pub fn stop_profiling() {
                     "build",
                     "core", 
                     "debruijn",
-                    "d1d0c6f",
+                    // "d1d0c6f",
                     "hashbrown",
+                    "hdf5-rust",
                     "rayon", 
                     "rayon-core", 
                     "serde",
@@ -328,13 +329,39 @@ pub fn stop_profiling() {
                             filename = "unknown".to_string();
                         }
                         let cratex;
+                        let mut cratey; // crate without version
+                        let mut version = String::new(); // crate version
                         let file;
-                        if filename.contains("/src/") 
+
+                        if filename.contains("/cargo/git/checkouts/") {
+                            let post = filename.after("/cargo/git/checkouts/");
+                            if post.contains("/") && post.before("/").contains("-")
+                                && post.contains("/src/") {
+                                cratex = post.before("/").rev_before("-").to_string();
+                                cratey = cratex.clone();
+                                file = post.after("/src/").to_string();
+                            } else if post.contains("/src/") {
+                                cratex = post.before("/src/").to_string();
+                                cratey = cratex.clone();
+                                file = post.after("/src/").to_string();
+                                if post.before("/src/").contains("/") {
+                                    version = post.before("/src/").rev_after("/").to_string();
+                                }
+                            } else {
+                                cratex = "unknown".to_string();
+                                cratey = "unknown".to_string();
+                                file = "unknown".to_string();
+                            }
+                        }
+
+                        else if filename.contains("/src/") 
                             && filename.rev_before("/src/").contains("/") {
                             cratex = filename.rev_before("/src/").rev_after("/").to_string();
+                            cratey = cratex.clone();
                             file = filename.rev_after("/src/").to_string();
                         } else {
                             cratex = "unknown".to_string();
+                            cratey = "unknown".to_string();
                             file = "unknown".to_string();
                         }
                         let lineno;
@@ -344,7 +371,6 @@ pub fn stop_profiling() {
                             lineno = "unknown".to_string();
                         }
 
-                        let mut cratey = cratex.clone();
                         if cratex.contains("-") {
                             let c = cratex.rev_before("-");
                             let d = cratex.rev_after("-");
@@ -353,6 +379,7 @@ pub fn stop_profiling() {
                                     && d.between(".", ".").parse::<usize>().is_ok()
                                     && d.rev_after(".").parse::<usize>().is_ok() {
                                     cratey = c.to_string();
+                                    version = d.to_string();
                                 }
                             }
                         }
@@ -364,7 +391,8 @@ pub fn stop_profiling() {
                             }
                         }
                         if !blacklisted {
-                            sym.push(format!("{} ⮕ {} ⮕ {} ⮕ {}", name, cratex, file, lineno));
+                            sym.push(format!("{} ⮕ {} {} ⮕ {} ⮕ {}", 
+                                name, cratey, version, file, lineno));
                         } else {
                             sym.push(format!("{} -- BLACKLISTED", filename));
                         }
