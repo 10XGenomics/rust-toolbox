@@ -292,8 +292,10 @@ pub fn stop_profiling() {
 
                 println!("\nTRACEBACK WITH MULTIPLICITY {}", count);
                 use itertools::Itertools; // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                /*
                 println!("symbols = {}", symbols.iter().format(",")); // XXXXXXXXXXXXXXXXXXXXXXXXXX
                 println!("bt = {}", strme(&bt)); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                */
                 println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
                 let whitelist;
                 if WHITELIST.is_some() {
