@@ -309,31 +309,34 @@ pub fn stop_profiling() {
                 */
                 for i in 0..m.len() {
                     let mut x = Vec::<String>::new();
-                    let s = &m[i].last().unwrap();
-                    let mut name = s.name();
-                    if name.contains("::") {
-                        name = name.after("::").to_string();
+                    for j in 0..m[i].len() {
+                        let s = &m[i][j];
+                        let mut name = s.name();
+                        if name.contains("::") {
+                            name = name.after("::").to_string();
+                        }
+                        let mut filename;
+                        if s.filename.is_some() {
+                            filename = s.filename.as_ref().unwrap().to_str().unwrap().to_string();
+                        } else {
+                            filename = "unknown".to_string();
+                        }
+                        if filename.contains("/src/") && filename.rev_before("/src/").contains("/") {
+                            filename = format!(
+                                "{} ⮕ {}",
+                                filename.rev_before("/src/").rev_after("/"),
+                                filename.rev_after("/src/"),
+                            );
+                        }
+                        let lineno;
+                        if s.lineno.is_some() {
+                            lineno = format!("{}", s.lineno.unwrap());
+                        } else {
+                            lineno = "unknown".to_string();
+                        }
+                        sym.push(format!("{} ⮕ {} ⮕ {}", name, filename, lineno));
                     }
-                    let mut filename;
-                    if s.filename.is_some() {
-                        filename = s.filename.as_ref().unwrap().to_str().unwrap().to_string();
-                    } else {
-                        filename = "unknown".to_string();
-                    }
-                    if filename.contains("/src/") && filename.rev_before("/src/").contains("/") {
-                        filename = format!(
-                            "{} ⮕ {}",
-                            filename.rev_before("/src/").rev_after("/"),
-                            filename.rev_after("/src/"),
-                        );
-                    }
-                    let lineno;
-                    if s.lineno.is_some() {
-                        lineno = format!("{}", s.lineno.unwrap());
-                    } else {
-                        lineno = "unknown".to_string();
-                    }
-                    sym.push(format!("{} ⮕ {} ⮕ {}", name, filename, lineno));
+                    sym.push("\n".to_string());
                 }
                 use itertools::Itertools;
                 for _ in 0..*count {
