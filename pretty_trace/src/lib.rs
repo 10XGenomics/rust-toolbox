@@ -307,6 +307,7 @@ pub fn stop_profiling() {
                     sym.push(format!("{}", x.iter().format(",")));
                 }
                 */
+                let blacklist = ["alloc", "core", "rayon-1.5.0", "rayon-core-1.9.0", "std"];
                 for i in 0..m.len() {
                     let mut x = Vec::<String>::new();
                     for j in 0..m[i].len() {
@@ -321,12 +322,15 @@ pub fn stop_profiling() {
                         } else {
                             filename = "unknown".to_string();
                         }
-                        if filename.contains("/src/") && filename.rev_before("/src/").contains("/") {
-                            filename = format!(
-                                "{} ⮕ {}",
-                                filename.rev_before("/src/").rev_after("/"),
-                                filename.rev_after("/src/"),
-                            );
+                        let cratex;
+                        let file;
+                        if filename.contains("/src/") 
+                            && filename.rev_before("/src/").contains("/") {
+                            cratex = filename.rev_before("/src/").rev_after("/").to_string();
+                            file = filename.rev_after("/src/").to_string();
+                        } else {
+                            cratex = "unknown".to_string();
+                            file = "unknown".to_string();
                         }
                         let lineno;
                         if s.lineno.is_some() {
@@ -334,9 +338,16 @@ pub fn stop_profiling() {
                         } else {
                             lineno = "unknown".to_string();
                         }
-                        sym.push(format!("{} ⮕ {} ⮕ {}", name, filename, lineno));
+                        let mut blacklisted = false;
+                        for b in blacklist.iter() {
+                            if *b == cratex {
+                                blacklisted = true;
+                            }
+                        }
+                        if !blacklisted {
+                            sym.push(format!("{} ⮕ {} ⮕ {} ⮕ {}", name, cratex, file, lineno));
+                        }
                     }
-                    sym.push("\n".to_string());
                 }
                 use itertools::Itertools;
                 for _ in 0..*count {
