@@ -248,34 +248,25 @@ pub fn stop_profiling() {
     unsafe {
         if let Ok(report) = GUARD.as_ref().unwrap().report().build() {
             let mut traces = Vec::<String>::new();
-            /*
-            let whitelist;
-            if WHITELIST.is_some() {
-                whitelist = WHITELIST.clone().unwrap();
-            } else {
-                whitelist = Vec::<String>::new();
-            }
-            */
+            let blacklist = [
+                "alloc", 
+                "build",
+                "core", 
+                "debruijn",
+                "hashbrown",
+                "hdf5-rust",
+                "ndarray",
+                "rayon", 
+                "rayon-core", 
+                "serde",
+                "serde_json",
+                "std",
+                "superslice",
+                "unknown",
+            ];
             for (frames, count) in report.data.iter() {
                 let m = &frames.frames;
-                let mut sym = Vec::<String>::new();
                 let mut symv = Vec::<Vec<String>>::new();
-                let blacklist = [
-                    "alloc", 
-                    "build",
-                    "core", 
-                    "debruijn",
-                    "hashbrown",
-                    "hdf5-rust",
-                    "ndarray",
-                    "rayon", 
-                    "rayon-core", 
-                    "serde",
-                    "serde_json",
-                    "std",
-                    "superslice",
-                    "unknown",
-                ];
                 for i in 0..m.len() {
                     for j in 0..m[i].len() {
                         let s = &m[i][j];
@@ -348,16 +339,12 @@ pub fn stop_profiling() {
                         }
 
                         let mut blacklisted = false;
-                        /*
                         for b in blacklist.iter() {
                             if *b == cratey {
                                 blacklisted = true;
                             }
                         }
-                        */
                         if !blacklisted {
-                            sym.push(format!("{} ⮕ {} {} ⮕ {} ⮕ {}", 
-                                name, cratey, version, file, lineno));
                             symv.push(vec![name, cratey, version, file, lineno]);
                         }
                     }
@@ -365,9 +352,7 @@ pub fn stop_profiling() {
                 if !symv.is_empty() {
                     let mut log = String::new();
                     print_tabular_vbox(&mut log, &symv, 0, &b"l|l|l|l|l".to_vec(), false, false);
-                    // use itertools::Itertools;
                     for _ in 0..*count {
-                        // let x = format!("\n{}\n", sym.iter().format("\n"));
                         let x = format!("{}", log);
                         traces.push(x);
                     }
