@@ -295,8 +295,21 @@ pub fn stop_profiling() {
                 /*
                 println!("thread name = {}, thread id = {}", frames.thread_name, frames.thread_id);
                 */
+                let mut sym = Vec::<String>::new();
+                for i in 0..m.len() {
+                    for j in 0..m[i].len() {
+                        let s = &m[i][j]; // symbol
+                        let name = s.name();
+                        sym.push(name);
+                    }
+                }
+                use itertools::Itertools;
                 for _ in 0..*count {
-                    traces.push(prettify_traceback(&bt, &whitelist, true));
+                    let x = format!("{}\n{}", 
+                        sym.iter().format("\n"),
+                        prettify_traceback(&bt, &whitelist, true),
+                    );
+                    traces.push(x);
                 }
             }
             traces.sort();
