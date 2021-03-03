@@ -312,11 +312,16 @@ pub fn stop_profiling() {
                     "build",
                     "core", 
                     "d1d0c6f",
-                    "hashbrown-0.9.0",
-                    "rayon-1.5.0", 
-                    "rayon-core-1.9.0", 
-                    "serde-1.0.123",
-                    "serde_json-1.0.63",
+                    // "hashbrown-0.9.0",
+                    "hashbrown",
+                    // "rayon-1.5.0", 
+                    "rayon", 
+                    // "rayon-core-1.9.0", 
+                    "rayon-core", 
+                    // "serde-1.0.123",
+                    "serde",
+                    // "serde_json-1.0.63",
+                    "serde_json",
                     "std",
                     "unknown",
                 ];
@@ -324,11 +329,11 @@ pub fn stop_profiling() {
                     for j in 0..m[i].len() {
                         let s = &m[i][j];
                         let mut name = s.name();
-                        if name.contains("::") {
-                            name = name.after("::").to_string();
-                        }
                         if name.ends_with("::{{closure}}") {
                             name = name.rev_before("::{{closure}}").to_string();
+                        }
+                        if name.contains("::") {
+                            name = name.rev_after("::").to_string();
                         }
                         let filename;
                         if s.filename.is_some() {
@@ -352,9 +357,23 @@ pub fn stop_profiling() {
                         } else {
                             lineno = "unknown".to_string();
                         }
+
+                        let mut cratey = cratex.clone();
+                        if cratex.contains("-") {
+                            let c = cratex.rev_before("-");
+                            let d = cratex.rev_after("-");
+                            if d.contains(".") && d.after(".").contains(".") {
+                                if d.before(".").parse::<usize>().is_ok()
+                                    && d.between(".", ".").parse::<usize>().is_ok()
+                                    && d.rev_after(".").parse::<usize>().is_ok() {
+                                    cratey = c.to_string();
+                                }
+                            }
+                        }
+
                         let mut blacklisted = false;
                         for b in blacklist.iter() {
-                            if *b == cratex {
+                            if *b == cratey {
                                 blacklisted = true;
                             }
                         }
