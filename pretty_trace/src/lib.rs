@@ -303,7 +303,8 @@ pub fn stop_profiling() {
                     "debruijn",
                     // "d1d0c6f",
                     "hashbrown",
-                    "hdf5-rust",
+                    // "hdf5-rust",
+                    "ndarray",
                     "rayon", 
                     "rayon-core", 
                     "serde",
@@ -352,9 +353,7 @@ pub fn stop_profiling() {
                                 cratey = "unknown".to_string();
                                 file = "unknown".to_string();
                             }
-                        }
-
-                        else if filename.contains("/src/") 
+                        } else if filename.contains("/src/") 
                             && filename.rev_before("/src/").contains("/") {
                             cratex = filename.rev_before("/src/").rev_after("/").to_string();
                             cratey = cratex.clone();
@@ -393,8 +392,6 @@ pub fn stop_profiling() {
                         if !blacklisted {
                             sym.push(format!("{} ⮕ {} {} ⮕ {} ⮕ {}", 
                                 name, cratey, version, file, lineno));
-                        } else {
-                            sym.push(format!("{} -- BLACKLISTED", filename));
                         }
                     }
                 }
