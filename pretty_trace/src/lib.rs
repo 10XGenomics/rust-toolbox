@@ -307,7 +307,16 @@ pub fn stop_profiling() {
                     sym.push(format!("{}", x.iter().format(",")));
                 }
                 */
-                let blacklist = ["alloc", "core", "rayon-1.5.0", "rayon-core-1.9.0", "std"];
+                let blacklist = [
+                    "alloc", 
+                    "build",
+                    "core", 
+                    "d1d0c6f",
+                    "rayon-1.5.0", 
+                    "rayon-core-1.9.0", 
+                    "std",
+                    "unknown",
+                ];
                 for i in 0..m.len() {
                     let mut x = Vec::<String>::new();
                     for j in 0..m[i].len() {
@@ -351,7 +360,7 @@ pub fn stop_profiling() {
                 }
                 use itertools::Itertools;
                 for _ in 0..*count {
-                    let x = format!("{}\n{}", 
+                    let x = format!("{}\n\n{}", 
                         sym.iter().format("\n"),
                         prettify_traceback(&bt, &whitelist, true),
                     );
