@@ -188,15 +188,15 @@ use backtrace::Backtrace;
 use failure::Error;
 use io_utils::*;
 use lazy_static::lazy_static;
-use libc::{kill, SIGINT, SIGKILL, SIGUSR1};
+use libc::{SIGINT, SIGUSR1};
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
 use pprof::ProfilerGuard;
 use stats_utils::*;
 use std::{
     collections::HashMap,
     env,
-    fs::{remove_file, File},
-    io::{BufRead, BufReader, BufWriter, Write},
+    fs::File,
+    io::{BufWriter, Write},
     ops::Deref,
     os::unix::io::FromRawFd,
     panic, process,
@@ -773,119 +773,6 @@ fn force_pretty_trace_fancy(
     ctrlc_debug: bool,
     noexit: bool,
 ) {
-    // Launch happening thread, which imits SIGUSR1 interrupts.  Usually, it will
-    // hang after some number of iterations, and at that point we kill ourself,
-    // because exiting won't stop the hang.
-
-    if happening.on {
-        // Set HAPPENING.  The following doesn't work so copying by hand.
-        // *HAPPENING.get_mut().unwrap() = happening.clone();
-
-        HAPPENING.lock().unwrap().on = happening.on;
-        HAPPENING
-            .lock()
-            .unwrap()
-            .whitelist
-            .append(&mut happening.whitelist.clone());
-        HAPPENING.lock().unwrap().hcount = happening.hcount;
-        HAPPENING.lock().unwrap().sep = happening.sep;
-        let hcount = happening.hcount;
-        let sep = happening.sep;
-        let sleep_time = (sep * 1000.0).round() as u64;
-
-        // Gather tracebacks.
-
-        let pid = std::process::id();
-        let donefile = format!("/tmp/done_from_process_{}", pid);
-        if path_exists(&donefile) {
-            remove_file(&donefile).unwrap();
-        }
-        thread::spawn(move || {
-            let pid = std::process::id();
-            let tracefile = format!("/tmp/traceback_from_process_{}", pid);
-            let donefile = format!("/tmp/done_from_process_{}", pid);
-            let mut traces = Vec::<String>::new();
-            let (mut interrupts, mut tracebacks) = (0, 0);
-            loop {
-                thread::sleep(time::Duration::from_millis(sleep_time));
-                if path_exists(&tracefile) {
-                    remove_file(&tracefile).unwrap();
-                }
-                unsafe {
-                    if kill(pid as i32, SIGUSR1) != 0 {
-                        break;
-                    }
-                }
-                interrupts += 1;
-                for _ in 0..100 {
-                    // wait briefly for tracefile
-                    if !path_exists(&tracefile) {
-                        thread::sleep(time::Duration::from_millis(10));
-                    }
-                }
-                if !path_exists(&tracefile) {
-                    unsafe {
-                        thread::sleep(time::Duration::from_millis(sleep_time));
-                        if PROCESSING_SIGUSR1 {
-                            thread::sleep(time::Duration::from_millis(5000));
-                            eprintln!(
-                                "\nProfiling has gotten confused, printing summary \
-                                and terminating prematurely by killing process."
-                            );
-                            // NOTE DUPLICATED CODE ...............................................
-                            traces.sort();
-                            let mut freq = Vec::<(u32, String)>::new();
-                            make_freq(&traces, &mut freq);
-                            let mut report = String::new();
-                            report += &format!(
-                                "\nPRETTY TRACE PROFILE\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n",
-                                percent_ratio(tracebacks, interrupts),
-                                traces.len()
-                            );
-                            for (i, x) in freq.iter().enumerate() {
-                                report += &format!("[{}] COUNT = {}\n{}", i + 1, x.0, x.1);
-                            }
-                            print!("{}", report);
-                            kill(pid as i32, SIGKILL);
-                        }
-                    }
-                }
-                if !path_exists(&tracefile) {
-                    continue;
-                } // or should we break?
-                let f = open_for_read![&tracefile];
-                let mut trace = String::new();
-                for line in f.lines() {
-                    let s = line.unwrap();
-                    trace += &format!("{}\n", s);
-                }
-                if !trace.is_empty() {
-                    traces.push(trace);
-                    tracebacks += 1;
-                }
-                if traces.len() == hcount || path_exists(&donefile) {
-                    if path_exists(&donefile) {
-                        remove_file(&donefile).unwrap();
-                    }
-                    traces.sort();
-                    let mut freq = Vec::<(u32, String)>::new();
-                    make_freq(&traces, &mut freq);
-                    let mut report = String::new();
-                    report += &format!(
-                        "\nPRETTY TRACE PROFILE\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n",
-                        percent_ratio(tracebacks, interrupts),
-                        traces.len()
-                    );
-                    for (i, x) in freq.iter().enumerate() {
-                        report += &format!("[{}] COUNT = {}\n{}", i + 1, x.0, x.1);
-                    }
-                    print!("{}", report);
-                    std::process::exit(0);
-                }
-            }
-        });
-    }
-
     // Set up to catch SIGNINT and SIGUSR1 interrupts.
 
     let _ = install_signal_handler(happening.on, ctrlc);
