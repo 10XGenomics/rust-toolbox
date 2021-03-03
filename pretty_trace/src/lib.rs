@@ -39,54 +39,60 @@
 //! this should be directly visible from a modest sample of tracebacks chosen at
 //! random.  And these tracebacks can be generated for any main program by adding a
 //! simple command-line option to it that causes it to enter a special 'profile'
-//! mode, gathering tracebacks and then terminating.  
+//! mode, gathering tracebacks and then terminating.  This uses the <code>pprof</code>
+//! crate to gather tracebacks.
 //!
 //! For example this command-line option might be
-//! <code>PROF=100</code> to profile 100 events.  It's your choice how to specify
+//! <code>PROFILE</code> to turn on profiling.  It's your choice how to specify
 //! this command-line option, but this crate makes it trivial to do so.
-//! <font color="red">With about one minute's work,
+//! <font color="red">With a few minutes' work,
 //! you can make it possible to profile your code with essentially zero work,
-//! whenever you like.</font>
+//! whenever you like.</font> See the functions <code>start_profiling</code> and 
+//! <code>stop_profiling</code>.  Note that to produce useful output, one needs to specify a list 
+//! of blacklisted crates, such as <code>std</code>.  The entries from these crates are removed 
+//! from the tracebacks.
 //!
 //! # Example of pretty trace profiling output
 //!
-//! <p style="line-height:1.0">
-//! <font size="2" face="courier">
-//! PRETTY TRACE PROFILE
-//! <br><br>TRACED = 81.3%
-//! <br><br>TOTAL = 100
-//! <br><br>[1] COUNT = 13
-//! <br>1: vdj_asm_tools::contigs::make_contigs
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/contigs.rs:494
-//! <br>2: vdj_asm_tools::process::process_barcode
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/process.rs:1388
-//! <br>3: vdj_asm_demo::process_project_core
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:202
-//! <br>4: vdj_asm_demo::main
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:890
-//! <br>&nbsp&nbsp vdj_asm_demo::main
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:854
+//! <p style="line-height:0.7">
+//! <code>
+//! <br>PRETTY TRACE PROFILE
 //! <br>
-//! <br>[2] COUNT = 6
-//! <br>1: tenkit2::hyper::Hyper::build_from_reads
-//! <br>&nbsp&nbsp ◼ tenkit2/src/hyper.rs:325
-//! <br>2: vdj_asm_tools::process::process_barcode
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/process.rs:851
-//! <br>3: vdj_asm_demo::process_project_core
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:202
-//! <br>4: vdj_asm_demo::main
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:890
-//! <br>&nbsp&nbsp vdj_asm_demo::main
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:854
+//! <br>TRACED = 97.8%
+//! <br>
+//! <br>TOTAL = 358
+//! <br>
+//! <br>[1] COUNT = 200 = 55.87% ⮕ 55.87%
+//! <br>┌────────────────────────────┬────────────┬─────┬───────────────┬───┐
+//! <br>│read_vector_entry_from_json │io_utils    │0.2.9│lib.rs         │303│
+//! <br>│read_json                   │enclone     │     │read_json.rs   │653│
+//! <br>│parse_json_annotations_files│enclone     │     │read_json.rs   │794│
+//! <br>│parse_json_annotations_files│enclone     │     │read_json.rs   │786│
+//! <br>│main_enclone                │enclone_main│     │main_enclone.rs│952│
+//! <br>│main                        │enclone_main│     │bin/enclone.rs │9  │
+//! <br>└────────────────────────────┴────────────┴─────┴───────────────┴───┘
+//! <br>
+//! <br>[2] COUNT = 79 = 22.07% ⮕ 77.93%
+//! <br>┌────────────────────────────┬────────────┬─────┬───────────────┬───┐
+//! <br>│read_vector_entry_from_json │io_utils    │0.2.9│lib.rs         │306│
+//! <br>│read_json                   │enclone     │     │read_json.rs   │653│
+//! <br>│parse_json_annotations_files│enclone     │     │read_json.rs   │794│
+//! <br>│parse_json_annotations_files│enclone     │     │read_json.rs   │786│
+//! <br>│main_enclone                │enclone_main│     │main_enclone.rs│952│
+//! <br>│main                        │enclone_main│     │bin/enclone.rs │9  │
+//! <br>└────────────────────────────┴────────────┴─────┴───────────────┴───┘
 //! <br>...
-//! </font>
+//! <br>
+//! </code>
 //! </p>
 //!
-//! Here pretty trace profiling reveals exactly what some code was doing at 100
-//! random instances; we show the first 19 of 100 collated tracebacks.  More were
-//! attempted: of attempted tracebacks, 81.3% were successful.  Most fails are
-//! due to cases where the stack trace would have 'walked' into the allocator, as
-//! discussed at "Full Disclosure" below.
+//! Here pretty trace profiling reveals exactly what some code was doing at
+//! random instances; we show the first of the collated tracebacks.  More were
+//! attempted: of attempted tracebacks, 97.8% are reported.  Unreported tracebacks
+//! would be those lying entirely in blacklisted crates.
+//!
+//! Each line shows a function name, the crate it is in, the version of the crate (if known),
+//! the file name in the crate, and the line number.
 //!
 //! # A brief guide for using pretty trace
 //!
@@ -115,23 +121,15 @@
 //! at the beginning of your main program.  And you're good to go!  Any panic
 //! will cause a pretty traceback to be generated.  
 //!
-//! <br> To instead profile, e.g. for 100 events, do this
-//! <pre>
-//!     PrettyTrace::new().profile(100).on();
-//!     ... (your code) ...
-//!     complete_profiling();
-//! </pre>
-//!
-//! Several other useful features are described below.  This include the capability
+//! Several other useful features are described below.  These include the capability
 //! of tracing to know where you are in your data (and not just your code), and
 //! for focusing profiling on a key set of crates that you're optimizing.
 //!
 //! # Credit
 //!
-//! This code was developed at 10x Genomics, and is based in part on C++ code
-//! developed at the Whitehead Institute Center for Genome
-//! Research / Broad Institute starting in 2000, and included in
-//! <https://github.com/CompRD/BroadCRD>.
+//! This code was developed at 10x Genomics, and is based in part on C++ code developed at the
+//! Whitehead Institute Center for Genome Research / Broad Institute starting in 2000, and 
+//! included in <https://github.com/CompRD/BroadCRD>.
 //!
 //! # FAQ
 //!
@@ -159,22 +157,6 @@
 //!   in your top-level <code>Cargo.toml</code>.  Using <code>debug = 1</code>
 //!   will not work.
 //!
-//! ◼ Profile mode only sees the main thread.  This seems intrinsic to the
-//!   approach.  So you may need to modify your code to run single-threaded to
-//!   effectively use this mode.
-//!
-//! ◼ Profile mode does not yield a stack trace if the code is executing inside
-//!   the allocator.  In our test cases this is around 15% of the time.
-//!
-//! ◼ Profile mode tests for whether it is inside the allocator by comparing to a fixed
-//!   list of symbols such as <code>_int_free</code>.  This list could be incomplete,
-//!   or could become incomplete.  When it is incomplete, typically what you'll see is that
-//!   the profiling process is killed.  Generally what is missing from the list can be
-//!   determined by setting <code>haps_debug()</code>, and looking at the trace right before
-//!   the process was killed.  Under development, this was needed once over a one year period.
-//!   <b>However, subsequently we have found instances where the process is killed, and we have
-//!   been unable to determine the cause.</b>
-//!
 //! ◼ Ideally out-of-memory events would be caught and converted to panics so
 //!   we could trace them, but we don't.  This is a general rust problem that no one
 //!   has figured out how to solve.  See <a href="https://github.com/rust-lang/rust/issues/43596">issue 43596</a> and <a href="https://internals.rust-lang.org/t/could-we-support-unwinding-from-oom-at-least-for-collections/3673">internals 3673</a>.
@@ -186,30 +168,36 @@
 //! ◼ There is an ugly blacklist of strings that is fragile.  This may
 //!   be an intrinsic feature of the approach.
 //!
+//! ◼ In general, tracebacks in parallel code do not go back to the main program.
+//!
 //! # More
 //!
 //! See the documentation for <code>PrettyTrace</code>, linked to below.
+//!
+//! # To do
+//!
+//! ◼ Rewrite so that tracebacks are formatted in the same way in all cases, in the fashion
+//!   carried out by profiling.  And reuse the same code.
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // EXTERNAL DEPENDENCIES
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 use backtrace::Backtrace;
-use backtrace::*;
 use failure::Error;
-use io_utils::*;
 use lazy_static::lazy_static;
-use libc::{kill, SIGINT, SIGKILL, SIGUSR1};
+use libc::SIGINT;
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
+use pprof::ProfilerGuard;
 use stats_utils::*;
 use std::{
     collections::HashMap,
     env,
-    fs::{remove_file, File},
-    io::{BufRead, BufReader, BufWriter, Write},
+    fs::File,
+    io::{BufWriter, Write},
     ops::Deref,
     os::unix::io::FromRawFd,
-    panic, process,
+    panic,
     str::from_utf8,
     sync::atomic::AtomicBool,
     sync::atomic::Ordering::SeqCst,
@@ -219,11 +207,172 @@ use std::{
     time,
 };
 use string_utils::*;
+use tables::*;
 use vector_utils::*;
 
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// PROFILING
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+static mut GUARD: Option<ProfilerGuard<'static>> = None;
+
+static mut BLACKLIST: Vec<String> = Vec::new();
+
+/// Start profiling, blacklisting the given crates.  
+///
+/// Without blacklisting, profiling can be extremely verbose.  We recommend blackisting at least
+/// `alloc`, `build`, `core`, `rayon`, `rayon-core`, `serde`, `serde-json`, `std` and
+/// `unknown`.  However what should be blacklisted depends on what you're trying to understand.
+/// If you examine the tracebacks generated by profiling, you can tune the list appropriately.
+///
+/// It is not clear how the timing of the profiling is handled.  There is a parameter `frequency`
+/// that is passed to the profiling machinery, but we don't know what it does.
+///
+/// Profiling <i>appears</i> to correctly represent wallclock in parallel loops.
+
+pub fn start_profiling(blacklist: &Vec<String>) {
+    let frequency = 1000;
+    unsafe {
+        BLACKLIST = blacklist.clone();
+        GUARD = Some(pprof::ProfilerGuard::new(frequency).unwrap());
+    }
+}
+
+/// Stop profiling and dump tracebacks.  
+
+pub fn stop_profiling() {
+    unsafe {
+        if let Ok(report) = GUARD.as_ref().unwrap().report().build() {
+            let mut traces = Vec::<String>::new();
+            let blacklist = &BLACKLIST;
+            let mut n = 0;
+            for (frames, count) in report.data.iter() {
+                let m = &frames.frames;
+                n += count;
+                let mut symv = Vec::<Vec<String>>::new();
+                for i in 0..m.len() {
+                    for j in 0..m[i].len() {
+                        let s = &m[i][j];
+                        let mut name = s.name();
+                        if name.ends_with("::{{closure}}") {
+                            name = name.rev_before("::{{closure}}").to_string();
+                        }
+                        if name.contains("::") {
+                            name = name.rev_after("::").to_string();
+                        }
+                        let filename;
+                        if s.filename.is_some() {
+                            filename = s.filename.as_ref().unwrap().to_str().unwrap().to_string();
+                        } else {
+                            filename = "unknown".to_string();
+                        }
+                        let mut cratex;
+                        let mut cratey; // crate without version
+                        let mut version = String::new(); // crate version
+                        let file;
+                        if filename.contains("/cargo/git/checkouts/") {
+                            let post = filename.after("/cargo/git/checkouts/");
+                            if post.contains("/src/") && post.rev_before("/src/").contains("/") {
+                                let mid = post.rev_before("/src/");
+                                file = post.after("/src/").to_string();
+                                if mid.after("/").contains("/") {
+                                    version = mid.between("/", "/").to_string();
+                                    cratex = mid.rev_after("/").to_string();
+                                } else {
+                                    version = mid.rev_after("/").to_string();
+                                    cratex = post.before("/").to_string();
+                                    if cratex.contains("-") {
+                                        cratex = cratex.rev_before("-").to_string();
+                                    }
+                                }
+                                cratey = cratex.clone();
+                            } else {
+                                cratex = "unknown".to_string();
+                                cratey = "unknown".to_string();
+                                file = "unknown".to_string();
+                            }
+                        } else if filename.contains("/src/")
+                            && filename.rev_before("/src/").contains("/")
+                        {
+                            cratex = filename.rev_before("/src/").rev_after("/").to_string();
+                            cratey = cratex.clone();
+                            file = filename.rev_after("/src/").to_string();
+                        } else {
+                            cratex = "unknown".to_string();
+                            cratey = "unknown".to_string();
+                            file = "unknown".to_string();
+                        }
+                        let lineno;
+                        if s.lineno.is_some() {
+                            lineno = format!("{}", s.lineno.unwrap());
+                        } else {
+                            lineno = "?".to_string();
+                        }
+
+                        if cratex.contains("-") && version == "" {
+                            let c = cratex.rev_before("-");
+                            let d = cratex.rev_after("-");
+                            if d.contains(".") && d.after(".").contains(".") {
+                                if d.before(".").parse::<usize>().is_ok()
+                                    && d.between(".", ".").parse::<usize>().is_ok()
+                                    && d.rev_after(".").parse::<usize>().is_ok()
+                                {
+                                    cratey = c.to_string();
+                                    version = d.to_string();
+                                }
+                            }
+                        }
+
+                        let mut blacklisted = false;
+                        for b in blacklist.iter() {
+                            if *b == cratey {
+                                blacklisted = true;
+                            }
+                        }
+                        if !blacklisted && file.ends_with(".rs") {
+                            symv.push(vec![name, cratey, version, file, lineno]);
+                        }
+                    }
+                }
+                if !symv.is_empty() {
+                    let mut log = String::new();
+                    print_tabular_vbox(&mut log, &symv, 0, &b"l|l|l|l|l".to_vec(), false, false);
+                    for _ in 0..*count {
+                        let x = format!("{}", log);
+                        traces.push(x);
+                    }
+                }
+            }
+            traces.sort();
+            let mut freq = Vec::<(u32, String)>::new();
+            make_freq(&traces, &mut freq);
+            let mut report = String::new();
+            let traced = 100.0 * traces.len() as f64 / n as f64;
+            report += &format!(
+                "\nPRETTY TRACE PROFILE\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n",
+                traced,
+                traces.len()
+            );
+            let mut total = 0;
+            for (i, x) in freq.iter().enumerate() {
+                total += x.0 as usize;
+                report += &format!(
+                    "[{}] COUNT = {} = {:.2}% ⮕ {:.2}%\n{}\n",
+                    i + 1,
+                    x.0,
+                    percent_ratio(x.0 as usize, traces.len()),
+                    percent_ratio(total, traces.len()),
+                    x.1
+                );
+            }
+            print!("{}", report);
+        };
+    }
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // PRETTY TRACE STRUCTURE
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 /// A `PrettyTrace` is the working structure for this crate.  See also the top-level
 /// crate documentation.
@@ -242,15 +391,13 @@ pub struct PrettyTrace {
     pub profile: bool,
     // count for profile mode
     pub count: Option<usize>,
-    // separation for profile mode
+    // separation in seconds for profile mode
     pub sep: f32,
     // whitelist for profile mode
     pub whitelist: Option<Vec<String>>,
     // convert Ctrl-Cs to panics
     pub ctrlc: bool,
     pub ctrlc_debug: bool,
-    pub haps_debug: bool,
-    pub haps_raw: bool,
     pub noexit: bool,
 }
 
@@ -307,8 +454,6 @@ impl PrettyTrace {
                 &haps,
                 self.ctrlc,
                 self.ctrlc_debug,
-                self.haps_debug,
-                self.haps_raw,
                 self.noexit,
             );
         } else {
@@ -321,8 +466,6 @@ impl PrettyTrace {
                 &haps,
                 self.ctrlc,
                 self.ctrlc_debug,
-                self.haps_debug,
-                self.haps_raw,
                 self.noexit,
             );
         }
@@ -345,20 +488,6 @@ impl PrettyTrace {
     pub fn ctrlc_debug(&mut self) -> &mut PrettyTrace {
         self.ctrlc = true;
         self.ctrlc_debug = true;
-        self
-    }
-
-    /// Turn on some debugging for profiling.  For development purposes.
-
-    pub fn haps_debug(&mut self) -> &mut PrettyTrace {
-        self.haps_debug = true;
-        self
-    }
-
-    /// Turn on some debugging for profiling.  For development purposes.
-
-    pub fn haps_raw(&mut self) -> &mut PrettyTrace {
-        self.haps_raw = true;
         self
     }
 
@@ -453,50 +582,6 @@ impl PrettyTrace {
         }
         self
     }
-
-    /// Request that a profile consisting of `count` traces be generated, at separation `1` second.
-    /// If you use this, consider calling `whitelist` too.
-
-    pub fn profile(&mut self, count: usize) -> &mut PrettyTrace {
-        self.profile = true;
-        self.count = Some(count);
-        self.sep = 1.0;
-        self
-    }
-
-    /// Request that a profile consisting of `count` traces be generated, at separation `sep`
-    /// seconds.  Values of `sep` lower than about `0.01` probably do about the same thing as
-    /// `0.01`.  If you use this, consider calling `whitelist` too.
-
-    pub fn profile2(&mut self, count: usize, sep: f32) -> &mut PrettyTrace {
-        self.profile = true;
-        self.count = Some(count);
-        self.sep = sep;
-        self
-    }
-
-    /// Define the whitelist for profile mode.  It is a list of strings that
-    /// profile traces are matched against.  Only traces matching at least one of
-    /// the strings are shown.  This allows tracebacks to be focused on a fixed set
-    /// of crates that you're trying to optimize.  Setting this option can greatly
-    /// increase the utility of profile mode.
-
-    /// # Example
-    /// <pre>
-    ///    PrettyTrace::new()
-    ///        .profile(100)
-    ///        .whitelist( &vec![ "gerbilizer", "creampuff" ] )
-    ///        .on();
-    /// </pre>
-
-    pub fn whitelist(&mut self, whitelist: &[&str]) -> &mut PrettyTrace {
-        let mut x = Vec::<String>::new();
-        for y in whitelist {
-            x.push(y.to_string());
-        }
-        self.whitelist = Some(x);
-        self
-    }
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -536,74 +621,9 @@ impl Happening {
 }
 
 static CTRLC_DEBUG: AtomicBool = AtomicBool::new(false);
-static HAPS_DEBUG: AtomicBool = AtomicBool::new(false);
-static HAPS_RAW: AtomicBool = AtomicBool::new(false);
 
 lazy_static! {
     static ref HAPPENING: Mutex<Happening> = Mutex::new(Happening::new());
-}
-
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-// TEST TO SEE IF CODE WAS INTERRUPTED WHILE IN THE MEMORY ALLOCATOR
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-
-// If you catch an interrupt, the code may have been in the memory allocator
-// at the time it was interrupted.  In such cases, almost any memory allocation,
-// e.g. pushing back onto a vector, may cause a hang or crash.  The following code
-// attempts to test for the "in allocator" state and can be used to avoid
-// dangerous operations.  The code works by comparing to a hardcoded list of
-// names, and it is hard to believe that this works, but it appears to do so.
-
-fn test_in_allocator() -> bool {
-    let mut verbose = false;
-    if HAPS_DEBUG.load(SeqCst) {
-        verbose = true;
-    }
-    if verbose {
-        eprintln!("\nTESTING FOR ALLOCATOR");
-    }
-    let mut in_alloc = false;
-    // The following lock line (copied from the Backtrace crate) doesn't
-    // seem necessary here (and would require plumbing to compile anyway).
-    // let _guard = ::lock::lock();
-    trace(|frame| {
-        resolve(frame.ip() as *mut _, |symbol| {
-            if verbose && in_alloc {
-                // For unknown reasons, this happens on a mac.  (Don't know if this is still true.)
-                eprintln!("should not be here");
-            }
-            if verbose {
-                eprintln!("symbol name = {:?}", symbol.name());
-                if symbol.name().is_some() {
-                    eprintln!("= {}", symbol.name().unwrap().as_str().unwrap());
-                }
-            }
-            if let Some(x) = symbol.name() {
-                if x.as_str().unwrap() == "realloc"
-                    || x.as_str().unwrap() == "malloc_consolidate"
-                    || x.as_str().unwrap() == "_int_free"
-                    || x.as_str().unwrap() == "calloc"
-                    || x.as_str().unwrap() == "__calloc"
-                    || x.as_str().unwrap().contains( "_malloc" )
-                    || x.as_str().unwrap().contains( "_realloc" )
-                    || x.as_str().unwrap().contains( "alloc::alloc" )
-                    // hideous additions reflecting funny encoding:
-                    || x.as_str().unwrap().contains( "alloc5alloc" )
-                // The following condition was added supposedly because otherwise one gets
-                // crashes, but it kills many good tracebacks.  It is a disaster.
-                // || x.as_str().unwrap().starts_with("pthread_cond_wait")
-                {
-                    if verbose {
-                        eprintln!("in allocator");
-                    }
-                    in_alloc = true;
-                    return;
-                }
-            }
-        });
-        !in_alloc
-    });
-    in_alloc
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -631,7 +651,6 @@ fn install_signal_handler(happening: bool, ctrlc: bool) -> Result<(), Error> {
 }
 
 static mut HEARD_CTRLC: usize = 0;
-static mut PROCESSING_SIGUSR1: bool = false;
 
 extern "C" fn handler(sig: i32) {
     let sep = HAPPENING.lock().unwrap().sep;
@@ -664,44 +683,6 @@ extern "C" fn handler(sig: i32) {
              multithreading, you may need to turn that off to obtain \
              a meaningful traceback."
         );
-    }
-    if sig == SIGUSR1 {
-        // Test to see if we appear to have interrupted the allocator.  In that
-        // case, give up.  If we were to instead try to create a backtrace, the
-        // backtrace code would push stuff onto a vector, and with high probability
-        // something bad would happen in the allocator, and the kernel would kill
-        // the process.  Of course this means that the stack traces we see are
-        // somewhat biased.
-
-        unsafe {
-            PROCESSING_SIGUSR1 = true;
-        }
-        if test_in_allocator() {
-            unsafe {
-                PROCESSING_SIGUSR1 = false;
-            }
-            return;
-        }
-
-        // Now do the backtrace.
-
-        let backtrace = Backtrace::new();
-        let bt: Vec<u8> = format!("{:?}", backtrace).into_bytes();
-        let tracefile = format!("/tmp/traceback_from_process_{}", process::id());
-        let mut tf = open_for_write_new![&tracefile];
-        if HAPS_RAW.load(SeqCst) {
-            fwriteln!(tf, "RAW BACKTRACE\n");
-            fwriteln!(tf, "{}", strme(&bt));
-            fwriteln!(tf, "\nPRETTIFIED BACKTRACE\n");
-        }
-        let mut whitelist = Vec::<String>::new();
-        for x in HAPPENING.lock().unwrap().whitelist.iter() {
-            whitelist.push(x.clone());
-        }
-        fwriteln!(tf, "{}", prettify_traceback(&bt, &whitelist, true));
-        unsafe {
-            PROCESSING_SIGUSR1 = false;
-        }
     }
 }
 
@@ -741,16 +722,6 @@ pub fn new_thread_message() -> &'static CHashMap<ThreadId, String> {
 
 /// See <code>PrettyTrace</code> documentation for how this is used.
 
-pub fn complete_profiling() {
-    let pid = std::process::id();
-    let donefile = format!("/tmp/done_from_process_{}", pid);
-    {
-        let mut f = open_for_write_new![&donefile];
-        fwriteln!(f, "done");
-    }
-    thread::sleep(time::Duration::from_millis(2000));
-}
-
 fn force_pretty_trace_fancy(
     log_file_name: String,
     fd: i32,
@@ -759,134 +730,13 @@ fn force_pretty_trace_fancy(
     happening: &Happening,
     ctrlc: bool,
     ctrlc_debug: bool,
-    haps_debug: bool,
-    haps_raw: bool,
     noexit: bool,
 ) {
-    // Launch happening thread, which imits SIGUSR1 interrupts.  Usually, it will
-    // hang after some number of iterations, and at that point we kill ourself,
-    // because exiting won't stop the hang.
-
-    if happening.on {
-        // Set HAPPENING.  The following doesn't work so copying by hand.
-        // *HAPPENING.get_mut().unwrap() = happening.clone();
-
-        HAPPENING.lock().unwrap().on = happening.on;
-        HAPPENING
-            .lock()
-            .unwrap()
-            .whitelist
-            .append(&mut happening.whitelist.clone());
-        HAPPENING.lock().unwrap().hcount = happening.hcount;
-        HAPPENING.lock().unwrap().sep = happening.sep;
-        let hcount = happening.hcount;
-        let sep = happening.sep;
-        let sleep_time = (sep * 1000.0).round() as u64;
-
-        // Gather tracebacks.
-
-        let pid = std::process::id();
-        let donefile = format!("/tmp/done_from_process_{}", pid);
-        if path_exists(&donefile) {
-            remove_file(&donefile).unwrap();
-        }
-        thread::spawn(move || {
-            let pid = std::process::id();
-            let tracefile = format!("/tmp/traceback_from_process_{}", pid);
-            let donefile = format!("/tmp/done_from_process_{}", pid);
-            let mut traces = Vec::<String>::new();
-            let (mut interrupts, mut tracebacks) = (0, 0);
-            loop {
-                thread::sleep(time::Duration::from_millis(sleep_time));
-                if path_exists(&tracefile) {
-                    remove_file(&tracefile).unwrap();
-                }
-                unsafe {
-                    if kill(pid as i32, SIGUSR1) != 0 {
-                        break;
-                    }
-                }
-                interrupts += 1;
-                for _ in 0..100 {
-                    // wait briefly for tracefile
-                    if !path_exists(&tracefile) {
-                        thread::sleep(time::Duration::from_millis(10));
-                    }
-                }
-                if !path_exists(&tracefile) {
-                    unsafe {
-                        thread::sleep(time::Duration::from_millis(sleep_time));
-                        if PROCESSING_SIGUSR1 {
-                            thread::sleep(time::Duration::from_millis(5000));
-                            eprintln!(
-                                "\nProfiling has gotten confused, printing summary \
-                                and terminating prematurely by killing process."
-                            );
-                            // NOTE DUPLICATED CODE ...............................................
-                            traces.sort();
-                            let mut freq = Vec::<(u32, String)>::new();
-                            make_freq(&traces, &mut freq);
-                            let mut report = String::new();
-                            report += &format!(
-                                "\nPRETTY TRACE PROFILE\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n",
-                                percent_ratio(tracebacks, interrupts),
-                                traces.len()
-                            );
-                            for (i, x) in freq.iter().enumerate() {
-                                report += &format!("[{}] COUNT = {}\n{}", i + 1, x.0, x.1);
-                            }
-                            print!("{}", report);
-                            kill(pid as i32, SIGKILL);
-                        }
-                    }
-                }
-                if !path_exists(&tracefile) {
-                    continue;
-                } // or should we break?
-                let f = open_for_read![&tracefile];
-                let mut trace = String::new();
-                for line in f.lines() {
-                    let s = line.unwrap();
-                    trace += &format!("{}\n", s);
-                }
-                if !trace.is_empty() {
-                    traces.push(trace);
-                    tracebacks += 1;
-                }
-                if traces.len() == hcount || path_exists(&donefile) {
-                    if path_exists(&donefile) {
-                        remove_file(&donefile).unwrap();
-                    }
-                    traces.sort();
-                    let mut freq = Vec::<(u32, String)>::new();
-                    make_freq(&traces, &mut freq);
-                    let mut report = String::new();
-                    report += &format!(
-                        "\nPRETTY TRACE PROFILE\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n",
-                        percent_ratio(tracebacks, interrupts),
-                        traces.len()
-                    );
-                    for (i, x) in freq.iter().enumerate() {
-                        report += &format!("[{}] COUNT = {}\n{}", i + 1, x.0, x.1);
-                    }
-                    print!("{}", report);
-                    std::process::exit(0);
-                }
-            }
-        });
-    }
-
     // Set up to catch SIGNINT and SIGUSR1 interrupts.
 
     let _ = install_signal_handler(happening.on, ctrlc);
     if ctrlc_debug {
         CTRLC_DEBUG.store(true, SeqCst);
-    }
-    if haps_debug {
-        HAPS_DEBUG.store(true, SeqCst);
-    }
-    if haps_raw {
-        HAPS_RAW.store(true, SeqCst);
     }
 
     // Set up panic hook. If we panic, this code gets run.
@@ -1162,6 +1012,14 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
                 if y.len() > 10 {
                     x2 = x2.replace(&format!("{}{}", srcgit, y), "/<stuff>");
                 }
+            }
+            if x2.contains("/src/") && x2.before("/src/").contains("/") && x2.contains(" ") {
+                x2 = format!(
+                    "{} {}/src/{}",
+                    x2.rev_before(" "),
+                    x2.before("/src/").rev_after("/"),
+                    x2.after("/src/")
+                );
             }
             btlines.push(x2.as_bytes().to_vec());
 
