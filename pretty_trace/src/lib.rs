@@ -201,7 +201,6 @@ use io_utils::*;
 use lazy_static::lazy_static;
 use libc::{kill, SIGINT, SIGKILL, SIGUSR1};
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
-use pager::Pager;
 use pprof::ProfilerGuard;
 use stats_utils::*;
 use std::{
@@ -250,9 +249,9 @@ pub fn start_profiling(blacklist: &Vec<String>) {
     }
 }
 
-/// Stop profiling and dump tracebacks.  If `pager` is `true`, then the output is paged.
+/// Stop profiling and dump tracebacks.  
 
-pub fn stop_profiling(pager: bool) {
+pub fn stop_profiling() {
     unsafe {
         if let Ok(report) = GUARD.as_ref().unwrap().report().build() {
             let mut traces = Vec::<String>::new();
@@ -362,10 +361,6 @@ pub fn stop_profiling(pager: bool) {
                 report += &format!("[{}] COUNT = {} = {:.2}% ⮕ {:.2}%\n{}\n", 
                     i + 1, x.0, percent_ratio(x.0 as usize, traces.len()), 
                     percent_ratio(total, traces.len()), x.1);
-            }
-            if pager {
-                drop(GUARD.as_ref().unwrap());
-                Pager::with_pager("less -R -F -X").setup();
             }
             print!("{}", report);
         };
