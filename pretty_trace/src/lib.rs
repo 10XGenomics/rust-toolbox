@@ -311,11 +311,18 @@ pub fn stop_profiling() {
                     let mut x = Vec::<String>::new();
                     let s = &m[i].last().unwrap();
                     let name = s.name();
-                    let filename;
+                    let mut filename;
                     if s.filename.is_some() {
                         filename = s.filename.as_ref().unwrap().to_str().unwrap().to_string();
                     } else {
                         filename = "unknown".to_string();
+                    }
+                    if filename.contains("/src/") && filename.before("/src/").contains("/") {
+                        filename = format!(
+                            "{} ⮕ {}",
+                            filename.before("/src/").rev_after("/"),
+                            filename.after("/src/"),
+                        );
                     }
                     let lineno;
                     if s.lineno.is_some() {
