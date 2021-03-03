@@ -348,11 +348,13 @@ pub fn stop_profiling() {
                         }
 
                         let mut blacklisted = false;
+                        /*
                         for b in blacklist.iter() {
                             if *b == cratey {
                                 blacklisted = true;
                             }
                         }
+                        */
                         if !blacklisted {
                             sym.push(format!("{} ⮕ {} {} ⮕ {} ⮕ {}", 
                                 name, cratey, version, file, lineno));
