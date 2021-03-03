@@ -332,7 +332,7 @@ pub fn stop_profiling() {
                         } else {
                             filename = "unknown".to_string();
                         }
-                        if filename.contains("vdj-ann") { println!("filename = {}", filename); }
+                        if filename.contains("vdj_ann") { println!("filename = {}", filename); }
                         let mut cratex;
                         let mut cratey; // crate without version
                         let mut version = String::new(); // crate version
