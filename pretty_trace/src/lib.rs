@@ -54,43 +54,45 @@
 //!
 //! # Example of pretty trace profiling output
 //!
-//! <p style="line-height:1.0">
-//! <font size="2" face="courier">
-//! PRETTY TRACE PROFILE
-//! <br><br>TRACED = 81.3%
-//! <br><br>TOTAL = 100
-//! <br><br>[1] COUNT = 13
-//! <br>1: vdj_asm_tools::contigs::make_contigs
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/contigs.rs:494
-//! <br>2: vdj_asm_tools::process::process_barcode
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/process.rs:1388
-//! <br>3: vdj_asm_demo::process_project_core
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:202
-//! <br>4: vdj_asm_demo::main
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:890
-//! <br>&nbsp&nbsp vdj_asm_demo::main
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:854
+//! <p style="line-height:0.7">
+//! <code>
+//! <br>PRETTY TRACE PROFILE
 //! <br>
-//! <br>[2] COUNT = 6
-//! <br>1: tenkit2::hyper::Hyper::build_from_reads
-//! <br>&nbsp&nbsp ◼ tenkit2/src/hyper.rs:325
-//! <br>2: vdj_asm_tools::process::process_barcode
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/process.rs:851
-//! <br>3: vdj_asm_demo::process_project_core
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:202
-//! <br>4: vdj_asm_demo::main
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:890
-//! <br>&nbsp&nbsp vdj_asm_demo::main
-//! <br>&nbsp&nbsp ◼ vdj_asm_tools/src/bin/vdj_asm_demo.rs:854
+//! <br>TRACED = 97.8%
+//! <br>
+//! <br>TOTAL = 358
+//! <br>
+//! <br>[1] COUNT = 200 = 55.87% ⮕ 55.87%
+//! <br>┌────────────────────────────┬────────────┬─────┬───────────────┬───┐
+//! <br>│read_vector_entry_from_json │io_utils    │0.2.9│lib.rs         │303│
+//! <br>│read_json                   │enclone     │     │read_json.rs   │653│
+//! <br>│parse_json_annotations_files│enclone     │     │read_json.rs   │794│
+//! <br>│parse_json_annotations_files│enclone     │     │read_json.rs   │786│
+//! <br>│main_enclone                │enclone_main│     │main_enclone.rs│952│
+//! <br>│main                        │enclone_main│     │bin/enclone.rs │9  │
+//! <br>└────────────────────────────┴────────────┴─────┴───────────────┴───┘
+//! <br>
+//! <br>[2] COUNT = 79 = 22.07% ⮕ 77.93%
+//! <br>┌────────────────────────────┬────────────┬─────┬───────────────┬───┐
+//! <br>│read_vector_entry_from_json │io_utils    │0.2.9│lib.rs         │306│
+//! <br>│read_json                   │enclone     │     │read_json.rs   │653│
+//! <br>│parse_json_annotations_files│enclone     │     │read_json.rs   │794│
+//! <br>│parse_json_annotations_files│enclone     │     │read_json.rs   │786│
+//! <br>│main_enclone                │enclone_main│     │main_enclone.rs│952│
+//! <br>│main                        │enclone_main│     │bin/enclone.rs │9  │
+//! <br>└────────────────────────────┴────────────┴─────┴───────────────┴───┘
 //! <br>...
-//! </font>
+//! <br>
+//! </code>
 //! </p>
 //!
-//! Here pretty trace profiling reveals exactly what some code was doing at 100
-//! random instances; we show the first 19 of 100 collated tracebacks.  More were
-//! attempted: of attempted tracebacks, 81.3% were successful.  Most fails are
-//! due to cases where the stack trace would have 'walked' into the allocator, as
-//! discussed at "Full Disclosure" below.
+//! Here pretty trace profiling reveals exactly what some code was doing at
+//! random instances; we show the first of the collated tracebacks.  More were
+//! attempted: of attempted tracebacks, 97.8% are reported.  Unreported tracebacks
+//! would be those lying entirely in blacklisted crates.
+//!
+//! Each line shows a function name, the crate it is in, the version of the crate (if known),
+//! the file name in the crate, and the line number.
 //!
 //! # A brief guide for using pretty trace
 //!
@@ -162,22 +164,6 @@
 //! ◼ The code will only work properly if you have set <code>debug = true</code>
 //!   in your top-level <code>Cargo.toml</code>.  Using <code>debug = 1</code>
 //!   will not work.
-//!
-//! ◼ Profile mode only sees the main thread.  This seems intrinsic to the
-//!   approach.  So you may need to modify your code to run single-threaded to
-//!   effectively use this mode.
-//!
-//! ◼ Profile mode does not yield a stack trace if the code is executing inside
-//!   the allocator.  In our test cases this is around 15% of the time.
-//!
-//! ◼ Profile mode tests for whether it is inside the allocator by comparing to a fixed
-//!   list of symbols such as <code>_int_free</code>.  This list could be incomplete,
-//!   or could become incomplete.  When it is incomplete, typically what you'll see is that
-//!   the profiling process is killed.  Generally what is missing from the list can be
-//!   determined by setting <code>haps_debug()</code>, and looking at the trace right before
-//!   the process was killed.  Under development, this was needed once over a one year period.
-//!   <b>However, subsequently we have found instances where the process is killed, and we have
-//!   been unable to determine the cause.</b>
 //!
 //! ◼ Ideally out-of-memory events would be caught and converted to panics so
 //!   we could trace them, but we don't.  This is a general rust problem that no one
@@ -308,8 +294,9 @@ pub fn stop_profiling() {
                                 cratey = "unknown".to_string();
                                 file = "unknown".to_string();
                             }
-                        } else if filename.contains("/src/") 
-                            && filename.rev_before("/src/").contains("/") {
+                        } else if filename.contains("/src/")
+                            && filename.rev_before("/src/").contains("/")
+                        {
                             cratex = filename.rev_before("/src/").rev_after("/").to_string();
                             cratey = cratex.clone();
                             file = filename.rev_after("/src/").to_string();
@@ -331,7 +318,8 @@ pub fn stop_profiling() {
                             if d.contains(".") && d.after(".").contains(".") {
                                 if d.before(".").parse::<usize>().is_ok()
                                     && d.between(".", ".").parse::<usize>().is_ok()
-                                    && d.rev_after(".").parse::<usize>().is_ok() {
+                                    && d.rev_after(".").parse::<usize>().is_ok()
+                                {
                                     cratey = c.to_string();
                                     version = d.to_string();
                                 }
@@ -363,14 +351,22 @@ pub fn stop_profiling() {
             make_freq(&traces, &mut freq);
             let mut report = String::new();
             let traced = 100.0 * traces.len() as f64 / n as f64;
-            report += &format!("\nPRETTY TRACE PROFILE\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n", 
-                traced, traces.len());
+            report += &format!(
+                "\nPRETTY TRACE PROFILE\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n",
+                traced,
+                traces.len()
+            );
             let mut total = 0;
             for (i, x) in freq.iter().enumerate() {
                 total += x.0 as usize;
-                report += &format!("[{}] COUNT = {} = {:.2}% ⮕ {:.2}%\n{}\n", 
-                    i + 1, x.0, percent_ratio(x.0 as usize, traces.len()), 
-                    percent_ratio(total, traces.len()), x.1);
+                report += &format!(
+                    "[{}] COUNT = {} = {:.2}% ⮕ {:.2}%\n{}\n",
+                    i + 1,
+                    x.0,
+                    percent_ratio(x.0 as usize, traces.len()),
+                    percent_ratio(total, traces.len()),
+                    x.1
+                );
             }
             print!("{}", report);
         };
