@@ -47,9 +47,9 @@
 //! this command-line option, but this crate makes it trivial to do so.
 //! <font color="red">With a few minutes' work,
 //! you can make it possible to profile your code with essentially zero work,
-//! whenever you like.</font> See the functions <code>start_profiling</code> and 
-//! <code>stop_profiling</code>.  Note that to produce useful output, one needs to specify a list 
-//! of blacklisted crates, such as <code>std</code>.  The entries from these crates are removed 
+//! whenever you like.</font> See the functions <code>start_profiling</code> and
+//! <code>stop_profiling</code>.  Note that to produce useful output, one needs to specify a list
+//! of blacklisted crates, such as <code>std</code>.  The entries from these crates are removed
 //! from the tracebacks.
 //!
 //! # Example of pretty trace profiling output
@@ -66,7 +66,7 @@
 //!
 //! # A brief guide for using pretty trace
 //!
-//! First make sure that you have rust debug on: it seems to be enough to have 
+//! First make sure that you have rust debug on: it seems to be enough to have
 //! <code>debug = 1</code> set in <code>Cargo.toml</code> for debug and/or release mode,
 //! depending on which youre using.
 //!
@@ -94,7 +94,7 @@
 //! # Credit
 //!
 //! This code was developed at 10x Genomics, and is based in part on C++ code developed at the
-//! Whitehead Institute Center for Genome Research / Broad Institute starting in 2000, and 
+//! Whitehead Institute Center for Genome Research / Broad Institute starting in 2000, and
 //! included in <https://github.com/CompRD/BroadCRD>.
 //!
 //! # FAQ
@@ -228,8 +228,7 @@ pub fn stop_profiling() {
                         } else {
                             filename = "unknown".to_string();
                         }
-                        let mut cratex;
-                        let mut cratey; // crate without version
+                        let mut cratex; // crate without version
                         let mut version = String::new(); // crate version
                         let file;
                         if filename.contains("/cargo/git/checkouts/") {
@@ -247,21 +246,17 @@ pub fn stop_profiling() {
                                         cratex = cratex.rev_before("-").to_string();
                                     }
                                 }
-                                cratey = cratex.clone();
                             } else {
                                 cratex = "unknown".to_string();
-                                cratey = "unknown".to_string();
                                 file = "unknown".to_string();
                             }
                         } else if filename.contains("/src/")
                             && filename.rev_before("/src/").contains("/")
                         {
                             cratex = filename.rev_before("/src/").rev_after("/").to_string();
-                            cratey = cratex.clone();
                             file = filename.rev_after("/src/").to_string();
                         } else {
                             cratex = "unknown".to_string();
-                            cratey = "unknown".to_string();
                             file = "unknown".to_string();
                         }
                         let lineno;
@@ -270,29 +265,28 @@ pub fn stop_profiling() {
                         } else {
                             lineno = "?".to_string();
                         }
-
                         if cratex.contains("-") && version == "" {
                             let c = cratex.rev_before("-");
-                            let d = cratex.rev_after("-");
+                            let d = cratex.rev_after("-").to_string();
+                            // check to see if d = x.y.z for some nonnegative integers x, y, z
                             if d.contains(".") && d.after(".").contains(".") {
                                 if d.before(".").parse::<usize>().is_ok()
                                     && d.between(".", ".").parse::<usize>().is_ok()
                                     && d.rev_after(".").parse::<usize>().is_ok()
                                 {
-                                    cratey = c.to_string();
+                                    cratex = c.to_string();
                                     version = d.to_string();
                                 }
                             }
                         }
-
                         let mut blacklisted = false;
                         for b in blacklist.iter() {
-                            if *b == cratey {
+                            if *b == cratex {
                                 blacklisted = true;
                             }
                         }
                         if !blacklisted && file.ends_with(".rs") {
-                            symv.push(vec![name, cratey, version, file, lineno]);
+                            symv.push(vec![name, cratex, version, file, lineno]);
                         }
                     }
                 }
