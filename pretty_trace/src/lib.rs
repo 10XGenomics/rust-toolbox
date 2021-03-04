@@ -147,9 +147,11 @@
 
 use backtrace::Backtrace;
 use failure::Error;
+use io_utils::*;
 use lazy_static::lazy_static;
 use libc::SIGINT;
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
+use pprof::protos::Message;
 use pprof::ProfilerGuard;
 use stats_utils::*;
 use std::{
@@ -203,133 +205,159 @@ pub fn start_profiling(blacklist: &Vec<String>) {
 }
 
 /// Stop profiling and dump tracebacks.  
+/// This assumes that you have called start_profiling.
+/// The functions stop_profiling and dump_profiling_as_proto can both be run, in either order.
 
 pub fn stop_profiling() {
     unsafe {
-        let report = GUARD.as_ref().unwrap().report().build();
-        if report.is_err() {
-            panic!("Failed to build profiling report.");
-        } else {
+        if REPORT.is_none() {
+            let report = GUARD.as_ref().unwrap().report().build();
+            if report.is_err() {
+                panic!("Failed to build profiling report.");
+            }
             REPORT = Some(report.unwrap());
-            let report = REPORT.as_ref().unwrap();
-            let mut traces = Vec::<String>::new();
-            let blacklist = &BLACKLIST;
-            let mut n = 0;
-            for (frames, count) in report.data.iter() {
-                let m = &frames.frames;
-                n += count;
-                let mut symv = Vec::<Vec<String>>::new();
-                for i in 0..m.len() {
-                    for j in 0..m[i].len() {
-                        let s = &m[i][j];
-                        let mut name = s.name();
-                        if name.ends_with("::{{closure}}") {
-                            name = name.rev_before("::{{closure}}").to_string();
-                        }
-                        if name.contains("::") {
-                            name = name.rev_after("::").to_string();
-                        }
-                        let filename;
-                        if s.filename.is_some() {
-                            filename = s.filename.as_ref().unwrap().to_str().unwrap().to_string();
-                        } else {
-                            filename = "unknown".to_string();
-                        }
-                        let mut cratex; // crate without version
-                        let mut version = String::new(); // crate version
-                        let file;
-                        if filename.contains("/cargo/git/checkouts/") {
-                            let post = filename.after("/cargo/git/checkouts/");
-                            if post.contains("/src/") && post.rev_before("/src/").contains("/") {
-                                let mid = post.rev_before("/src/");
-                                file = post.after("/src/").to_string();
-                                if mid.after("/").contains("/") {
-                                    version = mid.between("/", "/").to_string();
-                                    cratex = mid.rev_after("/").to_string();
-                                } else {
-                                    version = mid.rev_after("/").to_string();
-                                    cratex = post.before("/").to_string();
-                                    if cratex.contains("-") {
-                                        cratex = cratex.rev_before("-").to_string();
-                                    }
-                                }
+        }
+        let report = REPORT.as_ref().unwrap();
+        let mut traces = Vec::<String>::new();
+        let blacklist = &BLACKLIST;
+        let mut n = 0;
+        for (frames, count) in report.data.iter() {
+            let m = &frames.frames;
+            n += count;
+            let mut symv = Vec::<Vec<String>>::new();
+            for i in 0..m.len() {
+                for j in 0..m[i].len() {
+                    let s = &m[i][j];
+                    let mut name = s.name();
+                    if name.ends_with("::{{closure}}") {
+                        name = name.rev_before("::{{closure}}").to_string();
+                    }
+                    if name.contains("::") {
+                        name = name.rev_after("::").to_string();
+                    }
+                    let filename;
+                    if s.filename.is_some() {
+                        filename = s.filename.as_ref().unwrap().to_str().unwrap().to_string();
+                    } else {
+                        filename = "unknown".to_string();
+                    }
+                    let mut cratex; // crate without version
+                    let mut version = String::new(); // crate version
+                    let file;
+                    if filename.contains("/cargo/git/checkouts/") {
+                        let post = filename.after("/cargo/git/checkouts/");
+                        if post.contains("/src/") && post.rev_before("/src/").contains("/") {
+                            let mid = post.rev_before("/src/");
+                            file = post.after("/src/").to_string();
+                            if mid.after("/").contains("/") {
+                                version = mid.between("/", "/").to_string();
+                                cratex = mid.rev_after("/").to_string();
                             } else {
-                                cratex = "unknown".to_string();
-                                file = "unknown".to_string();
+                                version = mid.rev_after("/").to_string();
+                                cratex = post.before("/").to_string();
+                                if cratex.contains("-") {
+                                    cratex = cratex.rev_before("-").to_string();
+                                }
                             }
-                        } else if filename.contains("/src/")
-                            && filename.rev_before("/src/").contains("/")
-                        {
-                            cratex = filename.rev_before("/src/").rev_after("/").to_string();
-                            file = filename.rev_after("/src/").to_string();
                         } else {
                             cratex = "unknown".to_string();
                             file = "unknown".to_string();
                         }
-                        let lineno;
-                        if s.lineno.is_some() {
-                            lineno = format!("{}", s.lineno.unwrap());
-                        } else {
-                            lineno = "?".to_string();
-                        }
-                        if cratex.contains("-") && version == "" {
-                            let c = cratex.rev_before("-");
-                            let d = cratex.rev_after("-").to_string();
-                            // check to see if d = x.y.z for some nonnegative integers x, y, z
-                            if d.contains(".") && d.after(".").contains(".") {
-                                if d.before(".").parse::<usize>().is_ok()
-                                    && d.between(".", ".").parse::<usize>().is_ok()
-                                    && d.rev_after(".").parse::<usize>().is_ok()
-                                {
-                                    cratex = c.to_string();
-                                    version = d.to_string();
-                                }
+                    } else if filename.contains("/src/")
+                        && filename.rev_before("/src/").contains("/")
+                    {
+                        cratex = filename.rev_before("/src/").rev_after("/").to_string();
+                        file = filename.rev_after("/src/").to_string();
+                    } else {
+                        cratex = "unknown".to_string();
+                        file = "unknown".to_string();
+                    }
+                    let lineno;
+                    if s.lineno.is_some() {
+                        lineno = format!("{}", s.lineno.unwrap());
+                    } else {
+                        lineno = "?".to_string();
+                    }
+                    if cratex.contains("-") && version == "" {
+                        let c = cratex.rev_before("-");
+                        let d = cratex.rev_after("-").to_string();
+                        // check to see if d = x.y.z for some nonnegative integers x, y, z
+                        if d.contains(".") && d.after(".").contains(".") {
+                            if d.before(".").parse::<usize>().is_ok()
+                                && d.between(".", ".").parse::<usize>().is_ok()
+                                && d.rev_after(".").parse::<usize>().is_ok()
+                            {
+                                cratex = c.to_string();
+                                version = d.to_string();
                             }
-                        }
-                        let mut blacklisted = false;
-                        for b in blacklist.iter() {
-                            if *b == cratex {
-                                blacklisted = true;
-                            }
-                        }
-                        if !blacklisted && file.ends_with(".rs") {
-                            symv.push(vec![name, cratex, version, file, lineno]);
                         }
                     }
-                }
-                if !symv.is_empty() {
-                    let mut log = String::new();
-                    print_tabular_vbox(&mut log, &symv, 0, &b"l|l|l|l|l".to_vec(), false, false);
-                    for _ in 0..*count {
-                        let x = format!("{}", log);
-                        traces.push(x);
+                    let mut blacklisted = false;
+                    for b in blacklist.iter() {
+                        if *b == cratex {
+                            blacklisted = true;
+                        }
+                    }
+                    if !blacklisted && file.ends_with(".rs") {
+                        symv.push(vec![name, cratex, version, file, lineno]);
                     }
                 }
             }
-            traces.sort();
-            let mut freq = Vec::<(u32, String)>::new();
-            make_freq(&traces, &mut freq);
-            let mut report = String::new();
-            let traced = 100.0 * traces.len() as f64 / n as f64;
+            if !symv.is_empty() {
+                let mut log = String::new();
+                print_tabular_vbox(&mut log, &symv, 0, &b"l|l|l|l|l".to_vec(), false, false);
+                for _ in 0..*count {
+                    let x = format!("{}", log);
+                    traces.push(x);
+                }
+            }
+        }
+        traces.sort();
+        let mut freq = Vec::<(u32, String)>::new();
+        make_freq(&traces, &mut freq);
+        let mut report = String::new();
+        let traced = 100.0 * traces.len() as f64 / n as f64;
+        report += &format!(
+            "\nPRETTY TRACE PROFILE\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n",
+            traced,
+            traces.len()
+        );
+        let mut total = 0;
+        for (i, x) in freq.iter().enumerate() {
+            total += x.0 as usize;
             report += &format!(
-                "\nPRETTY TRACE PROFILE\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n",
-                traced,
-                traces.len()
+                "[{}] COUNT = {} = {:.2}% ⮕ {:.2}%\n{}\n",
+                i + 1,
+                x.0,
+                percent_ratio(x.0 as usize, traces.len()),
+                percent_ratio(total, traces.len()),
+                x.1
             );
-            let mut total = 0;
-            for (i, x) in freq.iter().enumerate() {
-                total += x.0 as usize;
-                report += &format!(
-                    "[{}] COUNT = {} = {:.2}% ⮕ {:.2}%\n{}\n",
-                    i + 1,
-                    x.0,
-                    percent_ratio(x.0 as usize, traces.len()),
-                    percent_ratio(total, traces.len()),
-                    x.1
-                );
+        }
+        print!("{}", report);
+    };
+}
+
+/// Call this to dump a proto file containing the profiling information.  
+/// This assumes that you have called start_profiling.
+/// The functions stop_profiling and dump_profiling_as_proto can both be run, in either order.
+
+pub fn dump_profiling_as_proto(f: &str) {
+    unsafe {
+        if REPORT.is_none() {
+            let report = GUARD.as_ref().unwrap().report().build();
+            if report.is_err() {
+                panic!("Failed to build profiling report.");
+            } else {
+                REPORT = Some(report.unwrap());
             }
-            print!("{}", report);
-        };
+        }
+        let report = REPORT.as_ref().unwrap();
+        let profile = report.pprof().unwrap();
+        let mut y = Vec::new();
+        profile.encode(&mut y).unwrap();
+        let mut out = open_for_write_new![&f];
+        out.write_all(&y).unwrap();
     }
 }
 
