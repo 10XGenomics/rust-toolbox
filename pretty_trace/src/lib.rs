@@ -178,6 +178,8 @@ use vector_utils::*;
 
 static mut GUARD: Option<ProfilerGuard<'static>> = None;
 
+static mut REPORT: Option<pprof::Report> = None;
+
 static mut BLACKLIST: Vec<String> = Vec::new();
 
 /// Start profiling, blacklisting the given crates.  
@@ -204,7 +206,12 @@ pub fn start_profiling(blacklist: &Vec<String>) {
 
 pub fn stop_profiling() {
     unsafe {
-        if let Ok(report) = GUARD.as_ref().unwrap().report().build() {
+        let report = GUARD.as_ref().unwrap().report().build();
+        if report.is_err() {
+            panic!("Failed to build profiling report.");
+        } else {
+            REPORT = Some(report.unwrap());
+            let report = REPORT.as_ref().unwrap();
             let mut traces = Vec::<String>::new();
             let blacklist = &BLACKLIST;
             let mut n = 0;
