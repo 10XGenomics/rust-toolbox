@@ -2586,6 +2586,7 @@ pub struct ContigAnnotation {
     // state of the contig
     pub high_confidence: bool,               // declared high confidence?
     pub validated_umis: Option<Vec<String>>, // validated UMIs
+    pub non_validated_umis: Option<Vec<String>>, // non-validated UMIs
     pub is_cell: bool,                       // was the barcode declared a cell?
     pub productive: Option<bool>,            // productive?  (null means not full length)
     pub filtered: bool,                      // true and never changed (unused field)
@@ -2612,6 +2613,7 @@ impl ContigAnnotation {
         numis: usize,                         // number of umis assigned to contig
         high_confidencex: bool,               // declared high confidence?
         validated_umis: Option<Vec<String>>,  // validated UMIs
+        non_validated_umis: Option<Vec<String>>,  // non-validated UMIs
         is_cellx: bool,                       // was the barcode declared a cell?
         productivex: bool,                    // productive?
     ) -> ContigAnnotation {
@@ -2698,6 +2700,7 @@ impl ContigAnnotation {
             info: ClonotypeInfo::empty(),
             high_confidence: high_confidencex,
             validated_umis: validated_umis,
+            non_validated_umis: non_validated_umis,
             is_cell: is_cellx,
             productive: Some(productivex),
             filtered: true,
@@ -2728,6 +2731,7 @@ impl ContigAnnotation {
         numis: usize,                        // number of umis assigned to contig
         high_confidence: bool,               // declared high confidence?
         validated_umis: Option<Vec<String>>, // validated UMIs
+        non_validated_umis: Option<Vec<String>>, // non-validated UMIs
         is_cell: bool,                       // was the barcode declared a cell?
     ) -> ContigAnnotation {
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
@@ -2744,6 +2748,7 @@ impl ContigAnnotation {
             numis,
             high_confidence,
             validated_umis,
+            non_validated_umis,
             is_cell,
             productive,
         )
