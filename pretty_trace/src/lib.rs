@@ -1331,67 +1331,70 @@ mod tests {
 
         // State what we're doing.
 
-        let bar = "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓";
-        println!("\n{}", bar);
+        const BAR: &str = "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓";
+        println!("\n{}", BAR);
         println!("DELIBERATELY PROVOKING A PANIC USING A CTRL-C");
-        print!("{}", bar);
+        print!("{}", BAR);
         std::io::stdout().flush().unwrap();
 
         // Fork, and inside the fork, give separate execution paths for parent and child.
 
-        match fork() {
-            // PARENT:
-            Ok(ForkResult::Parent { child: _, .. }) => {
-                // Sleep to let the child finish, then read enough bytes from pipe
-                // so that we get the traceback.
+        fn parent_loop(pipefd0: i32) {
+            // Sleep to let the child finish, then read enough bytes from pipe
+            // so that we get the traceback.
 
-                thread::sleep(time::Duration::from_millis(2000));
-                let mut buffer = [0; 2000];
+            thread::sleep(time::Duration::from_millis(2000));
+            let mut buffer = [0; 2000];
+            unsafe {
+                let mut err_file = File::from_raw_fd(pipefd0);
+                let _ = err_file.read(&mut buffer).unwrap();
+            }
+
+            // Evaluate the traceback.  We check only whether the traceback
+            // points to the inner loop.
+
+            println!("{}", BAR);
+            println!("TESTING THE PANIC FOR CORRECTNESS");
+            println!("{}", BAR);
+            let s = strme(&buffer);
+            let mut have_main = false;
+            let lines: Vec<&str> = s.split_terminator('\n').collect();
+            for i in 0..lines.len() {
+                // Test relaxed here because on an AWS box, we did not see the ::looper part.
+                // if lines[i].contains("pretty_trace::tests::looper") {
+                if lines[i].contains("pretty_trace::tests") {
+                    have_main = true;
+                }
+            }
+            if have_main {
+                println!("\ngood: found inner loop\n");
+            } else {
+                assert!(0 == 1, "FAIL: DID NOT FIND INNER LOOP");
+            }
+        }
+        fn child_loop(mut results: &mut Vec<(usize, usize)>) {
+            // Spawn a thread to kill the child.
+
+            thread::spawn(|| {
+                thread::sleep(time::Duration::from_millis(100));
+                let pid = std::process::id() as i32;
                 unsafe {
-                    let mut err_file = File::from_raw_fd(pipefd.0);
-                    let _ = err_file.read(&mut buffer).unwrap();
+                    kill(pid, SIGINT);
                 }
+            });
 
-                // Evaluate the traceback.  We check only whether the traceback
-                // points to the inner loop.
+            // Do the actual work that the ctrl-c is going to interrupt.
 
-                println!("{}", bar);
-                println!("TESTING THE PANIC FOR CORRECTNESS");
-                println!("{}", bar);
-                let s = strme(&buffer);
-                let mut have_main = false;
-                let lines: Vec<&str> = s.split_terminator('\n').collect();
-                for i in 0..lines.len() {
-                    // Test relaxed here because on an AWS box, we did not see the ::looper part.
-                    // if lines[i].contains("pretty_trace::tests::looper") {
-                    if lines[i].contains("pretty_trace::tests") {
-                        have_main = true;
-                    }
-                }
-                if have_main {
-                    println!("\ngood: found inner loop\n");
-                } else {
-                    assert!(0 == 1, "FAIL: DID NOT FIND INNER LOOP");
-                }
+            looper(&mut results);
+        }
+        unsafe {
+            match fork() {
+                // PARENT:
+                Ok(ForkResult::Parent { child: _, .. }) => parent_loop(pipefd.0),
+                // CHILD:
+                Ok(ForkResult::Child) => child_loop(&mut results),
+                Err(_) => println!("Fork failed"),
             }
-
-            // CHILD:
-            Ok(ForkResult::Child) => {
-                // Spawn a thread to kill the child.
-
-                thread::spawn(|| {
-                    thread::sleep(time::Duration::from_millis(100));
-                    let pid = std::process::id() as i32;
-                    unsafe {
-                        kill(pid, SIGINT);
-                    }
-                });
-
-                // Do the actual work that the ctrl-c is going to interrupt.
-
-                looper(&mut results);
-            }
-            Err(_) => println!("Fork failed"),
         }
     }
 }
