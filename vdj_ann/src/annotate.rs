@@ -2604,18 +2604,18 @@ impl ContigAnnotation {
     // collapsed in this process.
 
     pub fn from_annotate_seq(
-        b: &DnaString,                        // the contig
-        q: &[u8],                             // qual scores for the contig
-        tigname: &String,                     // name of the contig
-        refdata: &RefData,                    // reference data
-        ann: &Vec<(i32, i32, i32, i32, i32)>, // output of annotate_seq
-        nreads: usize,                        // number of reads assigned to contig
-        numis: usize,                         // number of umis assigned to contig
-        high_confidencex: bool,               // declared high confidence?
-        validated_umis: Option<Vec<String>>,  // validated UMIs
-        non_validated_umis: Option<Vec<String>>,  // non-validated UMIs
-        is_cellx: bool,                       // was the barcode declared a cell?
-        productivex: bool,                    // productive?
+        b: &DnaString,                           // the contig
+        q: &[u8],                                // qual scores for the contig
+        tigname: &String,                        // name of the contig
+        refdata: &RefData,                       // reference data
+        ann: &Vec<(i32, i32, i32, i32, i32)>,    // output of annotate_seq
+        nreads: usize,                           // number of reads assigned to contig
+        numis: usize,                            // number of umis assigned to contig
+        high_confidencex: bool,                  // declared high confidence?
+        validated_umis: Option<Vec<String>>,     // validated UMIs
+        non_validated_umis: Option<Vec<String>>, // non-validated UMIs
+        is_cellx: bool,                          // was the barcode declared a cell?
+        productivex: bool,                       // productive?
     ) -> ContigAnnotation {
         let mut vstart = -1 as i32;
         for i in 0..ann.len() {
@@ -2723,16 +2723,16 @@ impl ContigAnnotation {
     // Produce a ContigAnnotation from a sequence.
 
     pub fn from_seq(
-        b: &DnaString,                       // the contig
-        q: &[u8],                            // qual scores for the contig
-        tigname: &String,                    // name of the contig
-        refdata: &RefData,                   // reference data
-        nreads: usize,                       // number of reads assigned to contig
-        numis: usize,                        // number of umis assigned to contig
-        high_confidence: bool,               // declared high confidence?
-        validated_umis: Option<Vec<String>>, // validated UMIs
+        b: &DnaString,                           // the contig
+        q: &[u8],                                // qual scores for the contig
+        tigname: &String,                        // name of the contig
+        refdata: &RefData,                       // reference data
+        nreads: usize,                           // number of reads assigned to contig
+        numis: usize,                            // number of umis assigned to contig
+        high_confidence: bool,                   // declared high confidence?
+        validated_umis: Option<Vec<String>>,     // validated UMIs
         non_validated_umis: Option<Vec<String>>, // non-validated UMIs
-        is_cell: bool,                       // was the barcode declared a cell?
+        is_cell: bool,                           // was the barcode declared a cell?
     ) -> ContigAnnotation {
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
         annotate_seq(&b, &refdata, &mut ann, true, false, true);
