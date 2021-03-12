@@ -150,6 +150,9 @@ pub fn parse_csv(x: &str) -> Vec<String> {
         y.push(s);
         i = j + 1;
     }
+    if w.len() > 0 && *w.last().unwrap() == ',' {
+        y.push(String::new());
+    }
     y
 }
 
