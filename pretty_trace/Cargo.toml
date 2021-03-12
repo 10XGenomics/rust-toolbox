@@ -1,6 +1,6 @@
 [package]
 name = "pretty_trace"
-version = "0.5.6"
+version = "0.5.7"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "Tools for generating pretty tracebacks and for profiling."
@@ -20,5 +20,5 @@ pprof = { version = "0.4.2", features = ["protobuf"] }
 rayon = "1.4"
 stats_utils = "0.1"
 tables = "0.1.2"
-string_utils = "0.1.1"
+string_utils = "0.1"
 vector_utils = "0.1.3"
