@@ -711,6 +711,8 @@ pub fn new_thread_message() -> &'static CHashMap<ThreadId, String> {
     thread_message
 }
 
+static TRACING: AtomicBool = AtomicBool::new(false);
+
 /// See <code>PrettyTrace</code> documentation for how this is used.
 
 fn force_pretty_trace_fancy(
@@ -734,6 +736,13 @@ fn force_pretty_trace_fancy(
 
     let _ = panic::take_hook();
     panic::set_hook(Box::new(move |info| {
+        // Prevent multiple threads from issuing tracebacks.
+
+        if TRACING.load(SeqCst) {
+            return;
+        }
+        TRACING.store(true, SeqCst);
+
         // Get backtrace.
 
         let backtrace = Backtrace::new();
@@ -1345,15 +1354,15 @@ mod tests {
                 Ok(ForkResult::Parent { child: _, .. }) => {
                     // Sleep to let the child finish, then read enough bytes from pipe
                     // so that we get the traceback.
-    
+
                     thread::sleep(time::Duration::from_millis(2000));
                     let mut buffer = [0; 2000];
                     let mut err_file = File::from_raw_fd(pipefd.0);
                     let _ = err_file.read(&mut buffer).unwrap();
-    
+
                     // Evaluate the traceback.  We check only whether the traceback
                     // points to the inner loop.
-    
+
                     println!("{}", bar);
                     println!("TESTING THE PANIC FOR CORRECTNESS");
                     println!("{}", bar);
@@ -1373,19 +1382,19 @@ mod tests {
                         assert!(0 == 1, "FAIL: DID NOT FIND INNER LOOP");
                     }
                 }
-    
+
                 // CHILD:
                 Ok(ForkResult::Child) => {
                     // Spawn a thread to kill the child.
-    
+
                     thread::spawn(|| {
                         thread::sleep(time::Duration::from_millis(100));
                         let pid = std::process::id() as i32;
                         kill(pid, SIGINT);
                     });
-    
+
                     // Do the actual work that the ctrl-c is going to interrupt.
-    
+
                     looper(&mut results);
                 }
                 Err(_) => println!("Fork failed"),
