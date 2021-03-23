@@ -1,8 +1,8 @@
-align_tools = { git = "https://github.com/10XGenomics/rust-toolbox.git", rev="591b502c92a7d3825fbe7bb20994e0787cc29a9d" }
+align_tools = "0.1.2"
 amino = "0.1"
 ansi_escape = "0.1"
 binary_vec_io = "0.1.8"
-bio = { git = "https://github.com/rust-bio/rust-bio.git", rev = "792d3e21296d85a711f1a383db513924528b6da5" }
+bio = ">=0.33"
 debruijn = "0.3.2"
 dna = "0.1.1"
 enum-iterator = "0.6.0"
