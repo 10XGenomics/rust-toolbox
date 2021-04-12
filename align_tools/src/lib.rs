@@ -1,16 +1,19 @@
-// Copyright (c) 2019 10x Genomics, Inc. All rights reserved.
-
+// Copyright (c) 2021 10x Genomics, Inc. All rights reserved.
+//
 // Some alignment tools.
 
 extern crate bio;
 extern crate debruijn;
 extern crate itertools;
+extern crate string_utils;
 extern crate vector_utils;
 
 use bio::alignment::pairwise::*;
 use bio::alignment::{Alignment, AlignmentOperation::*};
 use debruijn::dna_string::*;
 use itertools::Itertools;
+use std::cmp::min;
+use string_utils::*;
 use vector_utils::*;
 
 // Define the complexity of an alignment to be its number of mismatches plus
@@ -191,4 +194,55 @@ pub fn affine_align(x: &DnaString, y: &DnaString) -> Alignment {
     let score = |a: u8, b: u8| if a == b { 1i32 } else { -1i32 };
     let mut aligner = Aligner::new(-6, -1, &score);
     aligner.semiglobal(&x.to_ascii_vec(), &y.to_ascii_vec())
+}
+
+// Exhibit a "visual" version of an alignment.  This assumes that only certain alignment operations
+// are used and would need to be tweaked if other operations are present.  You can set width to
+// the expected terminal width.
+
+pub fn vis_align(s1: &[u8], s2: &[u8], a: &Alignment, width: usize) -> String {
+    let ops = &a.operations;
+    let (mut pos1, mut pos2) = (0, 0);
+    let (mut t1, mut t2) = (Vec::<u8>::new(), Vec::<u8>::new());
+    let mut d = Vec::<u8>::new();
+    for i in 0..ops.len() {
+        if ops[i] == Match || ops[i] == Subst {
+            t1.push(s1[pos1]);
+            t2.push(s2[pos2]);
+            pos1 += 1;
+            pos2 += 1;
+            if ops[i] == Match {
+                d.push(b' ');
+            } else {
+                d.push(b'*');
+            }
+        } else if ops[i] == Del {
+            pos2 += 1;
+            t1.push(s1[pos1]);
+            t2.push(b' ');
+            d.push(b'|');
+        } else if ops[i] == Ins {
+            pos1 += 1;
+            t1.push(b' ');
+            t2.push(s2[pos2]);
+            d.push(b'|');
+        } else {
+            panic!("unknown operation {:?}", ops[i]);
+        }
+    }
+    let n = t1.len(); // = t2.len()
+    let mut x = Vec::<u8>::new();
+    let mut start = 0;
+    while start < n {
+        let stop = min(start + width, n);
+        for seq in [&d, &t1, &t2].iter() {
+            x.append(&mut seq[start..stop].to_vec().clone());
+            x.push(b'\n');
+        }
+        if stop < n {
+            x.push(b'\n');
+        }
+        start = stop;
+    }
+    stringme(&x)
 }
