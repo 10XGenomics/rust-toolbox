@@ -68,7 +68,7 @@ pub fn binary_read_to_ref<T>(f: &mut std::fs::File, p: &mut T, n: usize) -> Resu
                 metadata.len(),
                 metadata.ino(),
             );
-            panic!(msg);
+            panic!("{}", msg);
         }
     }
     Ok(())
