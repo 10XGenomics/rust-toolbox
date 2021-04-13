@@ -217,14 +217,14 @@ pub fn vis_align(s1: &[u8], s2: &[u8], a: &Alignment, width: usize) -> String {
                 d.push(b'*');
             }
         } else if ops[i] == Del {
-            pos2 += 1;
-            t1.push(s1[pos1]);
-            t2.push(b' ');
-            d.push(b'|');
-        } else if ops[i] == Ins {
-            pos1 += 1;
             t1.push(b' ');
             t2.push(s2[pos2]);
+            pos2 += 1;
+            d.push(b'|');
+        } else if ops[i] == Ins {
+            t1.push(s1[pos1]);
+            t2.push(b' ');
+            pos1 += 1;
             d.push(b'|');
         } else {
             panic!("unknown operation {:?}", ops[i]);
