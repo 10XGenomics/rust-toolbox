@@ -10,7 +10,7 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 # This crate is not published because it is too big.
 
 [dependencies]
-align_tools = "0.1.3"
+align_tools = "0.1"
 amino = "0.1"
 bio = ">=0.33"
 debruijn = "0.3.2"
