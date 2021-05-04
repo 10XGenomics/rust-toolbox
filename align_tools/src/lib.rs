@@ -207,6 +207,15 @@ pub fn vis_align(s1: &[u8], s2: &[u8], ops: &Vec<AlignmentOperation>, width: usi
     let mut d = Vec::<u8>::new();
     for i in 0..ops.len() {
         if ops[i] == Match || ops[i] == Subst {
+            if pos1 >= s1.len() {
+                eprintln!(
+                    "\nIn vis_align, something wrong with ops.\n\
+                    s1 = {}\ns2 = {}\nops = {:?}\n",
+                    strme(&s1),
+                    strme(&s2),
+                    ops
+                );
+            }
             t1.push(s1[pos1]);
             t2.push(s2[pos2]);
             pos1 += 1;
