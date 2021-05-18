@@ -7,7 +7,7 @@ description = "Some tools that are 'internal' for now because they are insuffici
 repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
-bio = ">=0.33"
+bio = { git = "https://github.com/rust-bio/rust-bio", rev = "9f1452b128fbdbeb54d0823f6da17f40e3cc1575" }
 debruijn = "0.3.2"
 itertools = ">= 0.8, <= 0.11"
 string_utils = "0.1"
