@@ -12,6 +12,8 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 [dependencies]
 align_tools = "0.1"
 amino = "0.1"
+# to bump to 0.35 when released
+# bio = ">=0.33"
 bio = ">=0.33"
 debruijn = "0.3.2"
 exons = "0.1"
