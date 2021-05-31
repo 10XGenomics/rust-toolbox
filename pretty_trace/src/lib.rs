@@ -169,6 +169,7 @@ use std::{
     thread,
     thread::ThreadId,
     time,
+    time::Instant,
 };
 use string_utils::*;
 use tables::*;
@@ -732,6 +733,10 @@ fn force_pretty_trace_fancy(
         CTRLC_DEBUG.store(true, SeqCst);
     }
 
+    // Get time so we can report time used.
+
+    let t = Instant::now();
+
     // Set up panic hook. If we panic, this code gets run.
 
     let _ = panic::take_hook();
@@ -901,6 +906,7 @@ fn force_pretty_trace_fancy(
         }
         out += &all_out;
         out += &em;
+        out += &mut format!("panic occurred after {} seconds\n\n", t.elapsed().as_secs());
         eprint!("{}", out);
 
         // Dump traceback to file descriptor.
