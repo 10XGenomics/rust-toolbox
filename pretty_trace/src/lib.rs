@@ -1130,6 +1130,8 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
         "catch_unwind",
         "lang_start_internal",
         "libstd/rt.rs",
+        "tokio",
+        "future",
     ];
 
     // Remove certain 'unwanted' blocklets.
