@@ -1132,6 +1132,8 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
         "libstd/rt.rs",
         "tokio",
         "future",
+        "tonic::server",
+        "hyper::proto",
     ];
 
     // Remove certain 'unwanted' blocklets.
