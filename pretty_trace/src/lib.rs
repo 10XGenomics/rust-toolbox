@@ -391,6 +391,7 @@ pub struct PrettyTrace {
     pub ctrlc: bool,
     pub ctrlc_debug: bool,
     pub noexit: bool,
+    pub function_to_run: Option<fn(&str) -> ()>,
 }
 
 /// Normal usage of `PrettyTrace` is to call
@@ -447,6 +448,7 @@ impl PrettyTrace {
                 self.ctrlc,
                 self.ctrlc_debug,
                 self.noexit,
+                self.function_to_run,
             );
         } else {
             let tm = new_thread_message();
@@ -459,6 +461,7 @@ impl PrettyTrace {
                 self.ctrlc,
                 self.ctrlc_debug,
                 self.noexit,
+                self.function_to_run,
             );
         }
     }
@@ -493,6 +496,14 @@ impl PrettyTrace {
 
     pub fn noexit(&mut self) -> &mut PrettyTrace {
         self.noexit = true;
+        self
+    }
+
+    /// After print a traceback, pass the traceback contents to the given function.  For example,
+    /// this could be used to send a bug report.
+
+    pub fn run_this(&mut self, f: fn(&str) -> ()) -> &mut PrettyTrace {
+        self.function_to_run = Some(f);
         self
     }
 
@@ -725,6 +736,7 @@ fn force_pretty_trace_fancy(
     ctrlc: bool,
     ctrlc_debug: bool,
     noexit: bool,
+    function_to_run: Option<fn(&str) -> ()>,
 ) {
     // Set up to catch SIGNINT and SIGUSR1 interrupts.
 
@@ -970,6 +982,12 @@ fn force_pretty_trace_fancy(
                     em
                 ))
                 .unwrap();
+        }
+
+        // Run function.
+
+        if function_to_run.is_some() {
+            function_to_run.unwrap()(&out);
         }
 
         // Exit.  Turning this off would seem to have no effect, but this is not the case
