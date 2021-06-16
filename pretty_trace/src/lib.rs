@@ -874,9 +874,9 @@ fn force_pretty_trace_fancy(
                     format!("Full traceback is at {}.", log_file_name)
                 };
                 format!(
-                    "RUST PROGRAM PANIC\n\n(Shortened traceback.  \
+                    "RUST PROGRAM PANIC AFTER {} SECONDS\n\n(Shortened traceback.  \
                      {})\n\n{}{}{}",
-                    long_msg, tm, msg, prex
+                    t.elapsed().as_secs(), long_msg, tm, msg, prex
                 )
             }
             None => format!("RUST PROGRAM PANIC\n\n{}", msg),
@@ -918,7 +918,6 @@ fn force_pretty_trace_fancy(
         }
         out += &all_out;
         out += &em;
-        out += &mut format!("panic occurred after {} seconds\n\n", t.elapsed().as_secs());
         eprint!("{}", out);
 
         // Dump traceback to file descriptor.
