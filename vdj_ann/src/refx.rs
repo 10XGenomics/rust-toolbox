@@ -55,6 +55,7 @@ pub fn mouse_ref_4_0() -> String {
 
 // RefData: this is a packaging of reference data appropriate for VDJ analysis.
 
+#[derive(Default)]
 pub struct RefData {
     pub refs: Vec<DnaString>,
     pub rheaders: Vec<String>,
