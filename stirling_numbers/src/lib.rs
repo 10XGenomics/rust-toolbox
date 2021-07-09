@@ -212,6 +212,8 @@ mod tests {
     fn test_stirling_stuff() {
         use num_bigint::{BigInt, BigUint, ToBigUint};
         use num_rational::Ratio;
+        use rand::distributions::uniform::Uniform;
+        use rand::distributions::Distribution;
         use rand::rngs::StdRng;
         use rand::{Rng, SeedableRng};
         use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
@@ -231,13 +233,15 @@ mod tests {
             assert!(count % group == 0);
             let mut rng: StdRng = SeedableRng::from_seed([0 as u8; 32]);
             let mut seeds = Vec::<[u8; 32]>::new();
+            let byte_range = Uniform::new(0, 255);
             for _ in 0..group {
                 let mut x = [0 as u8; 32];
                 for j in 0..x.len() {
-                    x[j] = rng.gen_range(0, 255);
+                    x[j] = byte_range.sample(&mut rng);
                 }
                 seeds.push(x);
             }
+            let n_range = Uniform::new(0, n);
             let goods: Vec<_> = seeds
                 .par_iter()
                 .map(|seed| {
@@ -246,7 +250,7 @@ mod tests {
                     for _ in 0..count / group {
                         let mut sample = Vec::<usize>::new();
                         for _ in 0..x {
-                            sample.push(rng.gen_range(0, n));
+                            sample.push(n_range.sample(&mut rng));
                         }
                         unique_sort(&mut sample);
                         if sample.len() <= m {

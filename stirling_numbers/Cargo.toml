@@ -12,6 +12,6 @@ num-traits = "^0.2"
 [dev-dependencies]
 num-bigint = "^0.3"
 num-rational = "^0.3"
-rand = "0.7.3"
+rand = ">=0.7.3, <0.9"
 rayon = "1.4"
 vector_utils = "0.1.3"

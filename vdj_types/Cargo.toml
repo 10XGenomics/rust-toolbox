@@ -10,5 +10,5 @@ description = "Some tools that are 'internal' for now because they are insuffici
 enum-iterator = "0.6.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.62"
-strum = ">=0.18.0, <0.21"
-strum_macros = ">=0.18.0, <0.21"
+strum = ">=0.18.0, <0.22"
+strum_macros = ">=0.18.0, <0.22"
