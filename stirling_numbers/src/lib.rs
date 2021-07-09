@@ -234,7 +234,7 @@ mod tests {
             for _ in 0..group {
                 let mut x = [0 as u8; 32];
                 for j in 0..x.len() {
-                    x[j] = rng.gen_range(0, 255);
+                    x[j] = rng.gen_range(0..255);
                 }
                 seeds.push(x);
             }
@@ -246,7 +246,7 @@ mod tests {
                     for _ in 0..count / group {
                         let mut sample = Vec::<usize>::new();
                         for _ in 0..x {
-                            sample.push(rng.gen_range(0, n));
+                            sample.push(rng.gen_range(0..n));
                         }
                         unique_sort(&mut sample);
                         if sample.len() <= m {
@@ -342,6 +342,8 @@ mod tests {
         let p1 = p_at_most_m_distinct_in_sample_of_x_from_n(m, x, n, &sr);
         let p2 = simulate_p_at_most_m_distinct_in_sample_of_x_from_n(m, x, n, 100_000_000);
         assert_eq!(format!("{:.7}", p1), "0.0005953");
-        assert_eq!(format!("{:.7}", p2), "0.0005952");
+        // This used to be 0.0005952.  We allowed the value to change when we updated rand from
+        // rand 0.7.3 to 0.8.0.
+        assert_eq!(format!("{:.7}", p2), "0.0005943");
     }
 }
