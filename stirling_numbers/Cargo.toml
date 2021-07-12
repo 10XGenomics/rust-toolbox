@@ -10,7 +10,7 @@ homepage = "https://github.com/10XGenomics/rust-toolbox/tree/master/stirling_num
 num-traits = "^0.2"
 
 [dev-dependencies]
-num-bigint = "^0.3"
+num-bigint = "^0.4"
 num-rational = "^0.3"
 rand = ">=0.7.3, <0.9"
 rayon = "1.4"
