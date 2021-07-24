@@ -1,0 +1,25 @@
+[package]
+
+# This is a modified version of rust-bio, https://github.com/rust-bio/rust-bio.
+# version = "0.33.1-alpha.0"
+#
+# Copied at
+# commit b6cb8699fb7f16e741a7840f5bcc2d850938a37a
+# Date:   Thu Apr 1 17:11:19 2021 +0200
+#
+# Modifications:
+# 1. Add a function custom_with_gap_fns that is a copy of custom, with fixed gap penalties
+#    replaced by functions.
+# 2. Delete many parts of the codebase, for the immediate purpose of using custom_with_gap_fns.  
+
+name = "bio_edit"
+version = "0.1.1"
+authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
+license = "MIT"
+edition = "2018"
+description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
+repository = "https://github.com/10XGenomics/rust-toolbox"
+
+[dependencies]
+bio-types = "0.12"
+bit-set = "0.5"
