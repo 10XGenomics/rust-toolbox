@@ -7,7 +7,7 @@ use crate::refx::*;
 use crate::transcript::*;
 use align_tools::*;
 use amino::*;
-use bio::alignment::AlignmentOperation::*;
+use bio_edit::alignment::AlignmentOperation::*;
 use debruijn::{dna_string::*, kmer::*, *};
 use io_utils::{fwrite, fwriteln};
 use itertools::*;

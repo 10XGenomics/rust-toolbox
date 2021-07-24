@@ -10,11 +10,9 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 # This crate is not published because it is too big.
 
 [dependencies]
-# when bio is released again, publish align_tools, and restore this
-# align_tools = "0.1"
 align_tools = "0.1"
 amino = "0.1"
-bio = ">=0.35"
+bio_edit = "0.1"
 debruijn = "0.3.2"
 exons = "0.1"
 fasta_tools = "0.1"
