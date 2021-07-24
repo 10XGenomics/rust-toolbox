@@ -2,15 +2,15 @@
 //
 // Some alignment tools.
 
-extern crate bio;
+extern crate bio_edit;
 extern crate debruijn;
 extern crate itertools;
 extern crate string_utils;
 extern crate vector_utils;
 
-use bio::alignment::pairwise::*;
-use bio::alignment::AlignmentOperation;
-use bio::alignment::{Alignment, AlignmentOperation::*};
+use bio_edit::alignment::pairwise::*;
+use bio_edit::alignment::AlignmentOperation;
+use bio_edit::alignment::{Alignment, AlignmentOperation::*};
 use debruijn::dna_string::*;
 use itertools::Itertools;
 use std::cmp::min;
