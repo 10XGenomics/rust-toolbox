@@ -876,7 +876,11 @@ fn force_pretty_trace_fancy(
                 format!(
                     "RUST PROGRAM PANIC AFTER {} SECONDS\n\n(Shortened traceback.  \
                      {})\n\n{}{}{}",
-                    t.elapsed().as_secs(), long_msg, tm, msg, prex
+                    t.elapsed().as_secs(),
+                    long_msg,
+                    tm,
+                    msg,
+                    prex
                 )
             }
             None => format!("RUST PROGRAM PANIC\n\n{}", msg),
