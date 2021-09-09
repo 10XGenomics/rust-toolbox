@@ -9,13 +9,13 @@
 // ◼ create a reference for a new species will know the conventions used by the
 // ◼ code.
 
-use debruijn::{dna_string::*, kmer::*};
-use fasta_tools::*;
-use io_utils::*;
-use kmer_lookup::*;
+use debruijn::{dna_string::DnaString, kmer::Kmer12};
+use fasta_tools::read_fasta_contents_into_vec_dna_string_plus_headers;
+use io_utils::read_to_string_safe;
+use kmer_lookup::make_kmer_lookup_12_single;
 use std::collections::{HashMap, HashSet};
-use string_utils::*;
-use vector_utils::*;
+use string_utils::TextUtils;
+use vector_utils::erase_if;
 
 pub fn human_ref() -> String {
     include_str!["../vdj_refs/human/fasta/regions.fa"].to_string()

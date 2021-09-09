@@ -8,14 +8,14 @@ extern crate itertools;
 extern crate string_utils;
 extern crate vector_utils;
 
-use bio_edit::alignment::pairwise::*;
+use bio_edit::alignment::pairwise::Aligner;
 use bio_edit::alignment::AlignmentOperation;
 use bio_edit::alignment::{Alignment, AlignmentOperation::*};
-use debruijn::dna_string::*;
+use debruijn::dna_string::DnaString;
 use itertools::Itertools;
 use std::cmp::min;
-use string_utils::*;
-use vector_utils::*;
+use string_utils::{stringme, strme};
+use vector_utils::reverse_sort;
 
 // Define the complexity of an alignment to be its number of mismatches plus
 // its number of indel operations, where an indel is a deletion or insertion of
@@ -71,10 +71,10 @@ pub fn summary(a: &Alignment) -> String {
     let mut x = Vec::<String>::new();
     reverse_sort(&mut del);
     reverse_sort(&mut ins);
-    if del.len() > 0 {
+    if !del.is_empty() {
         x.push(format!("del({})", del.iter().format(",")));
     }
-    if ins.len() > 0 {
+    if !ins.is_empty() {
         x.push(format!("ins({})", ins.iter().format(",")));
     }
     if sub > 0 {
@@ -211,8 +211,8 @@ pub fn vis_align(s1: &[u8], s2: &[u8], ops: &Vec<AlignmentOperation>, width: usi
                 eprintln!(
                     "\nIn vis_align, something wrong with ops.\n\
                     s1 = {}\ns2 = {}\nops = {:?}\n",
-                    strme(&s1),
-                    strme(&s2),
+                    strme(s1),
+                    strme(s2),
                     ops
                 );
             }

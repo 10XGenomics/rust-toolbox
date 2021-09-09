@@ -147,13 +147,13 @@
 
 use backtrace::Backtrace;
 use failure::Error;
-use io_utils::*;
+use io_utils::open_for_write_new;
 use lazy_static::lazy_static;
 use libc::SIGINT;
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
 use pprof::protos::Message;
 use pprof::ProfilerGuard;
-use stats_utils::*;
+use stats_utils::percent_ratio;
 use std::{
     collections::HashMap,
     env,
@@ -171,9 +171,9 @@ use std::{
     time,
     time::Instant,
 };
-use string_utils::*;
-use tables::*;
-use vector_utils::*;
+use string_utils::{stringme, strme, TextUtils};
+use tables::print_tabular_vbox;
+use vector_utils::{contains_at, erase_if, make_freq};
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // PROFILING
@@ -247,16 +247,16 @@ pub fn stop_profiling() {
                     let file;
                     if filename.contains("/cargo/git/checkouts/") {
                         let post = filename.after("/cargo/git/checkouts/");
-                        if post.contains("/src/") && post.rev_before("/src/").contains("/") {
+                        if post.contains("/src/") && post.rev_before("/src/").contains('/') {
                             let mid = post.rev_before("/src/");
                             file = post.after("/src/").to_string();
-                            if mid.after("/").contains("/") {
+                            if mid.after("/").contains('/') {
                                 version = mid.between("/", "/").to_string();
                                 cratex = mid.rev_after("/").to_string();
                             } else {
                                 version = mid.rev_after("/").to_string();
                                 cratex = post.before("/").to_string();
-                                if cratex.contains("-") {
+                                if cratex.contains('-') {
                                     cratex = cratex.rev_before("-").to_string();
                                 }
                             }
@@ -265,7 +265,7 @@ pub fn stop_profiling() {
                             file = "unknown".to_string();
                         }
                     } else if filename.contains("/src/")
-                        && filename.rev_before("/src/").contains("/")
+                        && filename.rev_before("/src/").contains('/')
                     {
                         cratex = filename.rev_before("/src/").rev_after("/").to_string();
                         file = filename.rev_after("/src/").to_string();
@@ -279,18 +279,18 @@ pub fn stop_profiling() {
                     } else {
                         lineno = "?".to_string();
                     }
-                    if cratex.contains("-") && version == "" {
+                    if cratex.contains('-') && version.is_empty() {
                         let c = cratex.rev_before("-");
                         let d = cratex.rev_after("-").to_string();
                         // check to see if d = x.y.z for some nonnegative integers x, y, z
-                        if d.contains(".") && d.after(".").contains(".") {
-                            if d.before(".").parse::<usize>().is_ok()
-                                && d.between(".", ".").parse::<usize>().is_ok()
-                                && d.rev_after(".").parse::<usize>().is_ok()
-                            {
-                                cratex = c.to_string();
-                                version = d.to_string();
-                            }
+                        if d.contains('.')
+                            && d.after(".").contains('.')
+                            && d.before(".").parse::<usize>().is_ok()
+                            && d.between(".", ".").parse::<usize>().is_ok()
+                            && d.rev_after(".").parse::<usize>().is_ok()
+                        {
+                            cratex = c.to_string();
+                            version = d.to_string();
                         }
                     }
                     let mut blacklisted = false;
@@ -308,7 +308,7 @@ pub fn stop_profiling() {
                 let mut log = String::new();
                 print_tabular_vbox(&mut log, &symv, 0, &b"l|l|l|l|l".to_vec(), false, false);
                 for _ in 0..*count {
-                    let x = format!("{}", log);
+                    let x = log.to_string();
                     traces.push(x);
                 }
             }
@@ -420,7 +420,7 @@ impl PrettyTrace {
         let fd = if self.fd.is_some() {
             self.fd.unwrap() as i32
         } else {
-            -1 as i32
+            -1_i32
         };
         let mut haps = Happening::new();
         if self.profile {
@@ -443,7 +443,7 @@ impl PrettyTrace {
                 full_file,
                 fd,
                 self.exit_message.clone(),
-                &self.message.unwrap(),
+                self.message.unwrap(),
                 &haps,
                 self.ctrlc,
                 self.ctrlc_debug,
@@ -456,7 +456,7 @@ impl PrettyTrace {
                 full_file,
                 fd,
                 self.exit_message.clone(),
-                &tm,
+                tm,
                 &haps,
                 self.ctrlc,
                 self.ctrlc_debug,
@@ -679,7 +679,7 @@ extern "C" fn handler(sig: i32) {
                 std::process::exit(0);
             }
         }
-        eprintln!("");
+        eprintln!();
         panic!(
             "Ctrl-C (SIGINT) interrupt detected\n\nThe traceback below only \
              shows the master thread.  If your code includes\n\
@@ -896,27 +896,24 @@ fn force_pretty_trace_fancy(
         let mut out = format!("\n{}\n\n", &msg);
         let ex = std::env::current_exe();
         if ex.is_err() {
-            out += &format!(
-                "█ WARNING.  It was not possible to get the path of your executable.\n\
+            out += &"█ WARNING.  It was not possible to get the path of your executable.\n\
                  █ This may result in a defective traceback.\n\n"
-            );
+                .to_string();
         } else {
             let ex = ex.unwrap();
             let ex = ex.to_str();
             if ex.is_none() {
-                out += &format!(
-                    "█ WARNING.  The path of your executable could not be converted into\n\
+                out += &"█ WARNING.  The path of your executable could not be converted into\n\
                      █ a string.  This is weird and might result in a defective traceback.\n\n"
-                );
+                    .to_string();
             } else {
                 let ex = ex.unwrap();
                 let f = File::open(&ex);
                 if f.is_err() {
-                    out += &format!(
-                        "█ WARNING.  Your executable file could not be opened for reading.\n\
+                    out += &"█ WARNING.  Your executable file could not be opened for reading.\n\
                          █ This might be because it does not have read permission set for you.\n\
                          █ This may result in a defective traceback.\n\n"
-                    );
+                        .to_string();
                 }
             }
         }
@@ -945,7 +942,7 @@ fn force_pretty_trace_fancy(
 
         // Dump full traceback to log file.
 
-        if log_file_name != "" {
+        if !log_file_name.is_empty() {
             let f = File::create(&log_file_name);
             if f.is_err() {
                 eprintln!(
@@ -1040,7 +1037,7 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
                     x2 = x2.replace(&format!("{}{}", srcgit, y), "/<stuff>");
                 }
             }
-            if x2.contains("/src/") && x2.before("/src/").contains("/") && x2.contains(" ") {
+            if x2.contains("/src/") && x2.before("/src/").contains('/') && x2.contains(' ') {
                 x2 = format!(
                     "{} {}/src/{}",
                     x2.rev_before(" "),
@@ -1211,7 +1208,7 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
             // Don't allow blocklets whose first line has the form ... main(...).
 
             let m = " main (";
-            if s.contains(&m) && s.after(&m).contains(')') && !s.between(&m, ")").contains('(') {
+            if s.contains(&m) && s.after(m).contains(')') && !s.between(m, ")").contains('(') {
                 to_delete[j] = true;
             }
         }
@@ -1277,7 +1274,7 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
     let mut all_out = String::new();
     for (i, x) in blocks.iter().enumerate() {
         let num = format!("{}: ", i + 1);
-        let sub = stringme(&vec![b' '; num.len()].as_slice());
+        let sub = stringme(vec![b' '; num.len()].as_slice());
         for (j, y) in x.iter().enumerate() {
             for (k, z) in y.iter().enumerate() {
                 if j == 0 && k == 0 {
@@ -1288,7 +1285,7 @@ fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String 
                 if k > 0 {
                     all_out += "◼ ";
                 }
-                let mut s = stringme(&z);
+                let mut s = stringme(z);
                 if k == 0 && s.contains("::") {
                     let cc = s.rfind("::").unwrap();
                     s.truncate(cc);
@@ -1334,7 +1331,7 @@ mod tests {
         use std::io::{Read, Write};
         use std::os::unix::io::FromRawFd;
         use std::{thread, time};
-        use string_utils::*;
+        use string_utils::strme;
 
         // Create a pipe.
 
@@ -1359,7 +1356,7 @@ mod tests {
 
         let message = "Dang it, you found a bug!  Please call us at (999) 123-4567.";
         PrettyTrace::new()
-            .exit_message(&message)
+            .exit_message(message)
             .ctrlc()
             .fd(pipefd.1)
             .on();
@@ -1367,7 +1364,7 @@ mod tests {
 
         // Create stuff needed for computation we're going to interrupt.
 
-        let mut results = vec![(1 as usize, 0 as usize); 100_000_000];
+        let mut results = vec![(1_usize, 0_usize); 100_000_000];
 
         // State what we're doing.
 

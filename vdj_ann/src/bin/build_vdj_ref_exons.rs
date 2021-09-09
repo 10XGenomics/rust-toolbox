@@ -11,22 +11,23 @@
 // build_vdj_ref_exons HUMAN > filename
 // build_vdj_ref_exons MOUSE > filename
 
-use debruijn::dna_string::*;
+use debruijn::dna_string::DnaString;
 use flate2::read::MultiGzDecoder;
 use pretty_trace::PrettyTrace;
 use process::Command;
-use sha2::*;
+use sha2::{Digest, Sha256};
 use std::io::copy;
 use std::io::Write;
 use std::{
     collections::HashMap,
-    env, fs,
+    env, eprintln, format, fs,
     fs::File,
+    i32,
     io::{BufRead, BufReader, BufWriter},
-    *,
+    print, println, process, str, u8, usize, vec, write, writeln,
 };
-use string_utils::*;
-use vector_utils::*;
+use string_utils::{cap1, strme, TextUtils};
+use vector_utils::{bin_member, erase_if, unique_sort};
 
 use io_utils::{fwrite, fwriteln, open_for_read, open_for_write_new};
 
@@ -217,7 +218,7 @@ fn main() {
 
     // Define root output directory.
 
-    let root = format!("vdj_ann/vdj_refs");
+    let root = "vdj_ann/vdj_refs".to_string();
 
     // Define release.  If this is ever changed, the effect on the fasta output
     // files should be very carefully examined.  Specify sequence source.
@@ -552,10 +553,10 @@ fn main() {
 
     // Normalize exceptions.
 
-    deleted_genes.sort();
-    allowed_pseudogenes.sort();
-    left_trims.sort();
-    right_trims.sort();
+    deleted_genes.sort_unstable();
+    allowed_pseudogenes.sort_unstable();
+    left_trims.sort_unstable();
+    right_trims.sort_unstable();
 
     // Define a function that returns the ensembl path for a particular dataset.
     // Note that these are for the ungzipped versions.
@@ -626,7 +627,7 @@ fn main() {
     if download {
         fn fetch(species: &str, ftype: &str, release: i32) {
             println!("fetching {}.{}", species, ftype);
-            let path = ensembl_path(&species, &ftype, release);
+            let path = ensembl_path(species, ftype, release);
             let external = "ftp://ftp.ensembl.org/pub";
             let internal = "/mnt/opt/meowmix_git/ensembl";
             let dir = format!("{}/{}", internal, path.rev_before("/"));
@@ -819,10 +820,10 @@ fn main() {
         gene2 = gene2.replace("region ", "");
         gene2 = gene2.replace("novel ", "");
         gene2 = gene2.replace("chain ", "");
-        if gene2.contains("[") {
+        if gene2.contains('[') {
             gene2 = gene2.before("[").to_string();
         }
-        if gene2.contains("(") {
+        if gene2.contains('(') {
             gene2 = gene2.before("(").to_string();
         }
         gene2 = gene2.replace(" ", "");
@@ -875,7 +876,7 @@ fn main() {
     let mut using = false;
     for line in f.lines() {
         let s = line.unwrap();
-        if s.starts_with(">") {
+        if s.starts_with('>') {
             if using {
                 refs.push(DnaString::from_dna_string(&last));
                 last.clear();
@@ -884,7 +885,7 @@ fn main() {
                 break;
             }
             let mut h = s.get(1..).unwrap().to_string();
-            if h.contains(" ") {
+            if h.contains(' ') {
                 h = h.before(" ").to_string();
             }
             if bin_member(&all_chrs, &h) {
@@ -964,7 +965,7 @@ fn main() {
 
     // Build modified fasta.
 
-    println!("");
+    println!();
     for i in 0..exons.len() {
         let mut x = dna[i].to_ascii_vec();
         if !exons[i].6 {
@@ -972,7 +973,7 @@ fn main() {
         }
         let n = x.len();
         if i > 0 && exons[i].1 != exons[i - 1].1 {
-            println!("");
+            println!();
         }
         print!(
             ">{}, transcript = {}, len = {} = {} % 3",

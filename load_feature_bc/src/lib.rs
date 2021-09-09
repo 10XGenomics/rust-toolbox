@@ -7,13 +7,13 @@ extern crate io_utils;
 extern crate string_utils;
 
 use flate2::read::MultiGzDecoder;
-use io_utils::*;
-use std::*;
+use io_utils::{open_for_read, path_exists, read_maybe_unzipped};
+use std::{format, i32, str, usize};
 use std::{
     fs::File,
     io::{BufRead, BufReader},
 };
-use string_utils::*;
+use string_utils::TextUtils;
 
 // Load the raw feature barcode matrix from a cellranger run.  This
 // returns the features, the barcodes, and a sparse matrix, like this:

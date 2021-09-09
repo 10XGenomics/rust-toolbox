@@ -13,7 +13,7 @@ extern crate vector_utils;
 
 use petgraph::{prelude::*, EdgeType};
 use std::collections::HashSet;
-use vector_utils::*;
+use vector_utils::meet;
 
 pub trait GraphSimple<T> {
     // =============================================================================
@@ -198,7 +198,7 @@ where
         for v in tov {
             x.push(v);
         }
-        x.sort();
+        x.sort_unstable();
     }
 
     fn get_predecessors1(&self, v: i32, x: &mut Vec<u32>) {
@@ -230,7 +230,7 @@ where
         for v in fromv {
             x.push(v);
         }
-        x.sort();
+        x.sort_unstable();
     }
 
     fn get_successors1(&self, v: i32, x: &mut Vec<u32>) {
@@ -258,7 +258,7 @@ where
             c.clear();
             cnext.clear();
             cnext.push(v as u32);
-            while cnext.len() > 0 {
+            while !cnext.is_empty() {
                 let w = cnext.pop().unwrap();
                 if used[w as usize] {
                     continue;
@@ -274,7 +274,7 @@ where
                     cnext.push(self.v_to(w as usize, j) as u32);
                 }
             }
-            c.sort();
+            c.sort_unstable();
             comp.push(c.clone());
         }
     }

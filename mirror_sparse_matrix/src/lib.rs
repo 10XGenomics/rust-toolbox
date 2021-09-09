@@ -70,7 +70,7 @@ pub struct MirrorSparseMatrix {
 pub fn get_code_version_from_file(f: &str) -> u32 {
     assert_eq!(std::mem::size_of::<usize>(), 8); // for the usize at the beginning of the file
     let mut ff = std::fs::File::open(&f).unwrap();
-    let mut x = vec![0 as u32; 11];
+    let mut x = vec![0_u32; 11];
     binary_read_to_ref::<u32>(&mut ff, &mut x[0], 11).unwrap();
     x[10]
 }
@@ -94,7 +94,8 @@ pub fn read_from_file(s: &mut MirrorSparseMatrix, f: &str) {
 
 pub fn write_to_file(s: &MirrorSparseMatrix, f: &str) {
     assert!(s.code_version() > 0);
-    let mut ff = std::fs::File::create(&f).expect(&format!("Failed to create file {}.", f));
+    let mut ff =
+        std::fs::File::create(&f).unwrap_or_else(|_| panic!("Failed to create file {}.", f));
     binary_write_vec::<u8>(&mut ff, &s.x).unwrap();
 }
 
@@ -103,7 +104,7 @@ fn get_u8_at_pos(v: &Vec<u8>, pos: usize) -> u8 {
 }
 
 fn get_u16_at_pos(v: &Vec<u8>, pos: usize) -> u16 {
-    let mut z = [0 as u8; 2];
+    let mut z = [0_u8; 2];
     for i in 0..2 {
         z[i] = v[pos + i];
     }
@@ -111,7 +112,7 @@ fn get_u16_at_pos(v: &Vec<u8>, pos: usize) -> u16 {
 }
 
 fn get_u32_at_pos(v: &Vec<u8>, pos: usize) -> u32 {
-    let mut z = [0 as u8; 4];
+    let mut z = [0_u8; 4];
     for i in 0..4 {
         z[i] = v[pos + i];
     }
@@ -185,15 +186,15 @@ impl MirrorSparseMatrix {
         row_labels: &Vec<String>,
         col_labels: &Vec<String>,
     ) -> MirrorSparseMatrix {
-        let mut max_col = 0 as i32;
+        let mut max_col = 0_i32;
         for i in 0..x.len() {
             for j in 0..x[i].len() {
                 max_col = max(max_col, x[i][j].0);
             }
         }
-        let mut storage_version = 0 as u32;
+        let mut storage_version = 0_u32;
         if max_col >= 65536 {
-            storage_version = 1 as u32;
+            storage_version = 1_u32;
         }
         let hs = MirrorSparseMatrix::header_size();
         let mut v = Vec::<u8>::new();
@@ -238,7 +239,7 @@ impl MirrorSparseMatrix {
         push_u32(&mut v, k as u32);
         assert_eq!(v.len(), hs);
         for _ in 0..n {
-            push_u32(&mut v, 0 as u32);
+            push_u32(&mut v, 0_u32);
         }
 
         // Define row and column label starts.
@@ -411,7 +412,7 @@ impl MirrorSparseMatrix {
                 all.push((col, entry));
             }
         }
-        all.sort();
+        all.sort_unstable();
         all
     }
 
@@ -581,8 +582,8 @@ mod tests {
     // test with: cargo test --release -p mirror_sparse_matrix  -- --nocapture
 
     use super::*;
-    use io_utils::*;
-    use pretty_trace::*;
+    use io_utils::printme;
+    use pretty_trace::PrettyTrace;
 
     #[test]
     fn test_mirror_sparse_matrix() {

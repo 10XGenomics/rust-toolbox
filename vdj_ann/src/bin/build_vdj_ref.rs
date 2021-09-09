@@ -78,29 +78,34 @@
 // For both: this code has the advantage of producing reproducible results from
 // defined external files.
 
-use debruijn::{dna_string::*, *};
-use fasta_tools::*;
+use debruijn::{
+    dna_string::{DnaString, DnaStringSlice},
+    Mer,
+};
+use fasta_tools::load_genbank_accession;
 use flate2::read::MultiGzDecoder;
 use pretty_trace::PrettyTrace;
 use process::Command;
-use sha2::*;
+use sha2::{Digest, Sha256};
 use std::io::copy;
 use std::io::Write;
 use std::{
+    assert, char,
     collections::HashMap,
-    env, fs,
+    env, eprintln, format, fs,
     fs::File,
+    i32,
     io::{BufRead, BufReader, BufWriter},
-    *,
+    println, process, str, usize, vec, write, writeln,
 };
-use string_utils::*;
-use vector_utils::*;
+use string_utils::{cap1, TextUtils};
+use vector_utils::{bin_member, bin_position1_2, erase_if, next_diff12_8, unique_sort};
 
 use io_utils::{fwrite, fwriteln, open_for_read, open_for_write_new};
 
 fn header_from_gene(gene: &str, is_utr: bool, record: &mut usize, source: &str) -> String {
     let mut gene = gene.to_string();
-    if gene.ends_with(" ") {
+    if gene.ends_with(' ') {
         gene = gene.rev_before(" ").to_string();
     }
     let genev = gene.as_bytes();
@@ -192,7 +197,7 @@ fn add_gene<R: Write>(
     }
     let chrid = to_chr[chr];
     let seq = refs[chrid].slice(start - 1, stop);
-    let header = header_from_gene(&gene, is_utr, record, source);
+    let header = header_from_gene(gene, is_utr, record, source);
     print_fasta(out, &header, &seq.slice(0, seq.len()), none);
 }
 
@@ -226,7 +231,7 @@ fn add_gene2<R: Write>(
     if !fw {
         seq = seq.rc();
     }
-    let header = header_from_gene(&gene, false, record, source);
+    let header = header_from_gene(gene, false, record, source);
     print_fasta(out, &header, &seq.slice(0, seq.len()), none);
 }
 
@@ -405,7 +410,7 @@ fn main() {
 
     // Define root output directory.
 
-    let root = format!("vdj_ann/vdj_refs");
+    let root = "vdj_ann/vdj_refs".to_string();
     let mut out = open_for_write_new![&format!("{}/{}/fasta/regions.fa", root, species)];
 
     // Define release.  If this is ever changed, the effect on the fasta output
@@ -417,10 +422,10 @@ fn main() {
     let source2: String;
     if species == "human" {
         source = format!("GRCh38-release{}", release);
-        source2 = format!("vdj_GRCh38_alts_ensembl");
+        source2 = "vdj_GRCh38_alts_ensembl".to_string();
     } else if species == "mouse" {
         source = format!("GRCm38-release{}", release);
-        source2 = format!("vdj_GRCm38_alts_ensembl");
+        source2 = "vdj_GRCm38_alts_ensembl".to_string();
     } else {
         source = format!("BALB_cJ_v1.{}", release);
         source2 = source.clone();
@@ -869,10 +874,10 @@ fn main() {
 
     // Normalize exceptions.
 
-    deleted_genes.sort();
-    allowed_pseudogenes.sort();
-    left_trims.sort();
-    right_trims.sort();
+    deleted_genes.sort_unstable();
+    allowed_pseudogenes.sort_unstable();
+    left_trims.sort_unstable();
+    right_trims.sort_unstable();
 
     // Define a function that returns the ensembl path for a particular dataset.
     // Note that these are for the ungzipped versions.
@@ -943,7 +948,7 @@ fn main() {
     if download {
         fn fetch(species: &str, ftype: &str, release: i32) {
             println!("fetching {}.{}", species, ftype);
-            let path = ensembl_path(&species, &ftype, release);
+            let path = ensembl_path(species, ftype, release);
             let external = "ftp://ftp.ensembl.org/pub";
             let internal = "/mnt/opt/meowmix_git/ensembl";
             let dir = format!("{}/{}", internal, path.rev_before("/"));
@@ -1136,10 +1141,10 @@ fn main() {
         gene2 = gene2.replace("region ", "");
         gene2 = gene2.replace("novel ", "");
         gene2 = gene2.replace("chain ", "");
-        if gene2.contains("[") {
+        if gene2.contains('[') {
             gene2 = gene2.before("[").to_string();
         }
-        if gene2.contains("(") {
+        if gene2.contains('(') {
             gene2 = gene2.before("(").to_string();
         }
         gene2 = gene2.replace(" ", "");
@@ -1192,7 +1197,7 @@ fn main() {
     let mut using = false;
     for line in f.lines() {
         let s = line.unwrap();
-        if s.starts_with(">") {
+        if s.starts_with('>') {
             if using {
                 refs.push(DnaString::from_dna_string(&last));
                 last.clear();
@@ -1201,7 +1206,7 @@ fn main() {
                 break;
             }
             let mut h = s.get(1..).unwrap().to_string();
-            if h.contains(" ") {
+            if h.contains(' ') {
                 h = h.before(" ").to_string();
             }
             if bin_member(&all_chrs, &h) {
@@ -1309,8 +1314,8 @@ fn main() {
                 }
             }
         }
-        if seq.len() > 0 {
-            let header = header_from_gene(&gene, true, &mut record, trid);
+        if !seq.is_empty() {
+            let header = header_from_gene(gene, true, &mut record, trid);
             print_oriented_fasta(&mut out, &header, &seq.slice(0, seq.len()), fw, none);
         }
 
@@ -1341,8 +1346,8 @@ fn main() {
                     }
                 }
             }
-            if seq.len() > 0 {
-                let header = header_from_gene(&gene, false, &mut record, trid);
+            if !seq.is_empty() {
+                let header = header_from_gene(gene, false, &mut record, trid);
                 let mut seqx = seq.clone();
                 if !fw {
                     seqx = seqx.rc();
@@ -1416,7 +1421,7 @@ fn main() {
             if p >= 0 {
                 m = left_trims[p as usize].1;
             }
-            let header = header_from_gene(&gene, false, &mut record, trid);
+            let header = header_from_gene(gene, false, &mut record, trid);
             let seqx = seq.clone();
             print_oriented_fasta(&mut out, &header, &seqx.slice(m, n as usize), fw, none);
         }
@@ -1451,7 +1456,7 @@ fn main() {
             if p >= 0 {
                 m = left_trims[p as usize].1;
             }
-            let header = header_from_gene(&gene, false, &mut record, trid);
+            let header = header_from_gene(gene, false, &mut record, trid);
             if fw {
                 print_oriented_fasta(&mut out, &header, &seq.slice(m, seq.len()), fw, none);
             } else {
@@ -1469,9 +1474,9 @@ fn main() {
     for i in 0..added_genes.len() {
         add_gene(
             &mut out,
-            &added_genes[i].0,
+            added_genes[i].0,
             &mut record,
-            &added_genes[i].1,
+            added_genes[i].1,
             added_genes[i].2,
             added_genes[i].3,
             &to_chr,
@@ -1484,9 +1489,9 @@ fn main() {
     for i in 0..added_genes2.len() {
         add_gene2(
             &mut out,
-            &added_genes2[i].0,
+            added_genes2[i].0,
             &mut record,
-            &added_genes2[i].1,
+            added_genes2[i].1,
             added_genes2[i].2,
             added_genes2[i].3,
             added_genes2[i].4,
@@ -1517,13 +1522,13 @@ fn main() {
         if !fw {
             seq = seq.rc();
         }
-        let header = header_from_gene(&gene, false, &mut record, source);
+        let header = header_from_gene(gene, false, &mut record, source);
         print_fasta(&mut out, &header, &seq.slice(0, seq.len()), none);
     }
     for i in 0..added_genes_seq.len() {
         let gene = &added_genes_seq[i].0;
-        let seq = DnaString::from_dna_string(&added_genes_seq[i].1);
-        let header = header_from_gene(&gene, false, &mut record, &source);
+        let seq = DnaString::from_dna_string(added_genes_seq[i].1);
+        let header = header_from_gene(gene, false, &mut record, &source);
         print_fasta(&mut out, &header, &seq.slice(0, seq.len()), none);
     }
 }

@@ -6,10 +6,16 @@ extern crate debruijn;
 extern crate rayon;
 extern crate vector_utils;
 
-use debruijn::{dna_string::*, kmer::*, Vmer, *};
+use debruijn::{
+    dna_string::DnaString,
+    kmer::{Kmer12, Kmer20},
+    Kmer, Mer, Vmer,
+};
 use rayon::prelude::*;
 use std::iter::Extend;
-use vector_utils::*;
+use vector_utils::{
+    lower_bound1_3, resize_without_setting, unique_sort, upper_bound, upper_bound1_3,
+};
 
 /// Given a vector of DnaStrings dv, create a sorted vector whose entries are
 /// (kmer, e, estart), where the kmer starts at position estart on dv[e].
@@ -98,7 +104,7 @@ pub fn make_kmer_lookup_20_parallel(dv: &Vec<DnaString>, x: &mut Vec<(Kmer20, i3
             s.0 = b.get_kmer(i);
             s.1 = spos as i32;
             s.2 = i as i32;
-            i = i + 1;
+            i += 1;
         }
     });
     /* this is faster in C++, at least for k=48: */
@@ -188,8 +194,8 @@ pub fn make_kmer_lookup_oriented_single(dv: &Vec<DnaString>, x: &mut Vec<(Kmer20
 
 pub fn match_12(b: &DnaString, dv: &Vec<DnaString>, x: &Vec<(Kmer12, i32, i32)>) -> bool {
     let y: Kmer12 = b.get_kmer(0);
-    let low = lower_bound1_3(&x, &y);
-    let high = upper_bound1_3(&x, &y);
+    let low = lower_bound1_3(x, &y);
+    let high = upper_bound1_3(x, &y);
     for m in low..high {
         let mut l = 12;
         let t = x[m as usize].1 as usize;

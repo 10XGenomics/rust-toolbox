@@ -20,7 +20,7 @@ pub fn n50(v: &[i32]) -> i32 {
         sum += i64::from(*n);
     }
     let mut vs = v.to_owned();
-    vs.sort();
+    vs.sort_unstable();
     for i in 0..vs.len() {
         half += i64::from(vs[i]);
         if 2 * half == sum && i < vs.len() - 1 {
@@ -46,7 +46,7 @@ pub fn n90(v: &[i32]) -> i32 {
         sum += i64::from(*n);
     }
     let mut vs = v.to_owned();
-    vs.sort();
+    vs.sort_unstable();
     for i in 0..vs.len() {
         part += i64::from(vs[i]);
         if 10 * (part as i64) == 9 * sum as i64 && i < vs.len() - 1 {
@@ -108,7 +108,7 @@ pub fn cv(v: &[f64]) -> f64 {
         x += (y - mean) * (y - mean);
     }
     x = (x / n).sqrt();
-    100.0 as f64 * x / mean
+    100.0_f64 * x / mean
 }
 
 // Compute absolute value of difference between two numbers.

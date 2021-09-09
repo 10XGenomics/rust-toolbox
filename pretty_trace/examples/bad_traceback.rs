@@ -9,7 +9,7 @@
 
 extern crate pretty_trace;
 
-use pretty_trace::*;
+use pretty_trace::PrettyTrace;
 use std::fs;
 
 fn main() {

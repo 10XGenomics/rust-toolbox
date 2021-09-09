@@ -5,7 +5,7 @@
 extern crate vector_utils;
 
 use std::cmp::max;
-use vector_utils::*;
+use vector_utils::next_diff;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // THINGS USED A LOT: SHORTHAND EXPRESSIONS FOR COMMON FUNCTIONALITY
@@ -150,7 +150,7 @@ pub fn parse_csv(x: &str) -> Vec<String> {
         y.push(s);
         i = j + 1;
     }
-    if w.len() > 0 && *w.last().unwrap() == ',' {
+    if !w.is_empty() && *w.last().unwrap() == ',' {
         y.push(String::new());
     }
     y
@@ -175,7 +175,7 @@ pub fn abbrev_list<T: Eq + std::fmt::Display>(x: &[T]) -> String {
         if i > 0 {
             s.push_str(", ");
         }
-        let j = next_diff(&x, i);
+        let j = next_diff(x, i);
         if j - i == 1 {
             s.push_str(&format!("{}", x[i]));
         } else {

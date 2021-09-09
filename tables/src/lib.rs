@@ -6,10 +6,10 @@ extern crate io_utils;
 extern crate itertools;
 extern crate string_utils;
 
-use io_utils::*;
+use io_utils::eprintme;
 use itertools::Itertools;
 use std::cmp::{max, min};
-use string_utils::*;
+use string_utils::strme;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
@@ -241,7 +241,7 @@ pub fn print_tabular_vbox(
     }
     let mut vert = vec![false; ncols];
     let mut just = Vec::<u8>::new();
-    let mut count = 0 as isize;
+    let mut count = 0_isize;
     for i in 0..justify.len() {
         if justify[i] == b'|' {
             assert!(count > 0);
@@ -263,7 +263,7 @@ pub fn print_tabular_vbox(
             ncols,
             just.len()
         );
-        eprintln!("justify = {}", strme(&justify));
+        eprintln!("justify = {}", strme(justify));
         for i in 0..rows.len() {
             eprintln!(
                 "row {} = {} = {}",
@@ -278,10 +278,10 @@ pub fn print_tabular_vbox(
     let mut ext = vec![0; ncols];
     for i in 0..rrr.len() {
         for j in 0..rrr[i].len() {
-            if j < rrr[i].len() - 1 && rrr[i][j + 1] == "\\ext".to_string() {
+            if j < rrr[i].len() - 1 && rrr[i][j + 1] == *"\\ext" {
                 continue;
             }
-            if rrr[i][j] == "\\ext".to_string() || rrr[i][j] == "\\hline".to_string() {
+            if rrr[i][j] == *"\\ext" || rrr[i][j] == *"\\hline" {
                 continue;
             }
             maxcol[j] = max(maxcol[j], visible_width(&rrr[i][j]));
@@ -295,13 +295,10 @@ pub fn print_tabular_vbox(
 
     for i in 0..rrr.len() {
         for j in 0..rrr[i].len() {
-            if j < rrr[i].len() - 1
-                && rrr[i][j + 1] == "\\ext".to_string()
-                && rrr[i][j] != "\\ext".to_string()
-            {
+            if j < rrr[i].len() - 1 && rrr[i][j + 1] == *"\\ext" && rrr[i][j] != *"\\ext" {
                 let mut k = j + 1;
                 while k < rrr[i].len() {
-                    if rrr[i][k] != "\\ext".to_string() {
+                    if rrr[i][k] != *"\\ext" {
                         break;
                     }
                     k += 1;
@@ -344,7 +341,7 @@ pub fn print_tabular_vbox(
                     if j >= rrr[u].len() {
                         eprintln!("\nProblem with line {}, not enough fields.\n", u);
                     }
-                    if rrr[u][j] != "\\ext".to_string() {
+                    if rrr[u][j] != *"\\ext" {
                         m = max(m, visible_width(&rrr[u][j]));
                     }
                 }
@@ -394,7 +391,7 @@ pub fn print_tabular_vbox(
                 for _ in 0..maxcol[j] {
                     x.push(' ');
                 }
-            } else if rrr[i][j] == "\\hline".to_string() {
+            } else if rrr[i][j] == *"\\hline" {
                 for _ in 0..maxcol[j] {
                     x.push(dash);
                 }
@@ -402,7 +399,7 @@ pub fn print_tabular_vbox(
                 let r = rrr[i][j].clone();
                 let rlen = visible_width(&r);
                 let mut xlen = 0;
-                if r != "\\ext".to_string() {
+                if r != *"\\ext" {
                     if just[j] == b'r' {
                         for _ in rlen..(maxcol[j] - ext[j]) {
                             x.push(' ');
@@ -433,18 +430,18 @@ pub fn print_tabular_vbox(
             // Add separations and separators.
 
             let mut add_sep = true;
-            if j + 1 < rrr[i].len() && rrr[i][j + 1] == "\\ext".to_string() {
+            if j + 1 < rrr[i].len() && rrr[i][j + 1] == *"\\ext" {
                 add_sep = false;
             }
             let mut jp = j;
             while jp + 1 < rrr[i].len() {
-                if rrr[i][jp + 1] != "\\ext".to_string() {
+                if rrr[i][jp + 1] != *"\\ext" {
                     break;
                 }
                 jp += 1;
             }
             if add_sep && jp < ncols - 1 {
-                if rrr[i][j] == "\\hline".to_string() {
+                if rrr[i][j] == *"\\hline" {
                     for _ in 0..sep {
                         log.push(dash);
                     }
@@ -459,7 +456,7 @@ pub fn print_tabular_vbox(
                     println!("1 - pushing {} onto row {}, j = {}", verty, i, j);
                 }
                 log.push(verty);
-                if rrr[i][j + 1] == "\\hline".to_string() {
+                if rrr[i][j + 1] == *"\\hline" {
                     for _ in 0..sep {
                         log.push(dash);
                     }
@@ -576,7 +573,7 @@ pub fn print_tabular_vbox(
     // Finish.
 
     if debug_print {
-        println!("");
+        println!();
     }
 }
 

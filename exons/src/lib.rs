@@ -7,14 +7,16 @@ extern crate io_utils;
 extern crate string_utils;
 extern crate vector_utils;
 
-use io_utils::*;
+use io_utils::open_for_read;
 use std::{
+    assert, format,
     fs::File,
+    i32,
     io::{BufRead, BufReader},
-    *,
+    str,
 };
-use string_utils::*;
-use vector_utils::*;
+use string_utils::TextUtils;
+use vector_utils::unique_sort;
 
 pub fn fetch_exons(species: &String, exons: &mut Vec<(String, i32, i32, bool, String, i32)>) {
     assert!(species == "human" || species == "mouse");

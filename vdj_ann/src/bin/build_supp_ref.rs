@@ -28,9 +28,12 @@
 // extern crate vdj_asm_utils;
 // use vdj_asm_utils::*;
 
-use debruijn::{dna_string::*, *};
-use exons::*;
-use fasta_tools::*;
+use debruijn::{
+    dna_string::{DnaString, DnaStringSlice},
+    Mer,
+};
+use exons::fetch_exons;
+use fasta_tools::read_fasta_into_vec_dna_string_plus_headers;
 use pretty_trace::PrettyTrace;
 use std::{collections::HashMap, env};
 use string_utils::TextUtils;

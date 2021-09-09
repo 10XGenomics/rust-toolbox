@@ -3,24 +3,31 @@
 // This file contains code to annotate a contig, in the sense of finding alignments
 // to VDJ reference contigs.  Also to find CDR3 sequences.  And some related things.
 
-use crate::refx::*;
-use crate::transcript::*;
-use align_tools::*;
-use amino::*;
+use crate::refx::RefData;
+use crate::transcript::is_valid;
+use align_tools::affine_align;
+use amino::{aa_seq, have_start};
 use bio_edit::alignment::AlignmentOperation::*;
-use debruijn::{dna_string::*, kmer::*, *};
+use debruijn::{
+    dna_string::{DnaString, DnaStringSlice},
+    kmer::{Kmer12, Kmer20},
+    Mer, Vmer,
+};
 use io_utils::{fwrite, fwriteln};
-use itertools::*;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use stats_utils::*;
+use stats_utils::percent_ratio;
 use std::{
     cmp::{max, min},
     fs::File,
     io::{BufWriter, Write},
 };
-use string_utils::*;
+use string_utils::{stringme, strme, TextUtils};
 use vdj_types::{VdjChain, VdjRegion};
-use vector_utils::*;
+use vector_utils::{
+    bin_member, erase_if, lower_bound1_3, next_diff12_4, next_diff1_2, next_diff1_3, next_diff1_5,
+    reverse_sort, unique_sort, VecUtils,
+};
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // START CODONS
@@ -2873,6 +2880,7 @@ pub fn make_annotation_units(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::refx::{human_ref, make_vdj_ref_data_core};
     use crate::{annotate, refx};
 
     // The following test checks for alignment of a D region.  This example was fixed by code
