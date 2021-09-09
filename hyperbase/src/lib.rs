@@ -11,16 +11,18 @@ extern crate petgraph;
 extern crate vector_utils;
 
 use debruijn::compression::{compress_kmers, SimpleCompress};
-use debruijn::dna_string::*;
+use debruijn::dna_string::DnaString;
 use debruijn::graph::DebruijnGraph;
-use debruijn::kmer::*;
-use debruijn::*;
+use debruijn::kmer::Kmer20;
+use debruijn::{filter, kmer, Exts, Kmer, Mer, Vmer};
 use equiv::EquivRel;
 use graph_simple::GraphSimple;
-use kmer_lookup::*;
+use kmer_lookup::make_kmer_lookup_20_single;
 use petgraph::prelude::*;
 use std::cmp::max;
-use vector_utils::*;
+use vector_utils::{
+    bin_position, bin_position1_3, next_diff, next_diff1_3, reverse_sort, unique_sort,
+};
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // CONVERT FROM DEBRUIJN GRAPH TO PET GRAPH
@@ -309,7 +311,7 @@ impl Hyper {
             let mut have_ann = false;
             for i in 0..comp[j].len() {
                 let e = comp[j][i] as usize;
-                if ann[e].len() > 0 {
+                if !ann[e].is_empty() {
                     have_ann = true;
                 }
             }
@@ -331,10 +333,10 @@ impl Hyper {
                     self.supp(e),
                     w
                 );
-                if ann[e].len() > 0 {
+                if !ann[e].is_empty() {
                     print!("{}", ann[e]);
                     if !hide_seq {
-                        println!("");
+                        println!();
                     }
                 }
                 if !hide_seq || ann[e].is_empty() {
@@ -396,7 +398,7 @@ impl Hyper {
         valid_kmers.sort();
         let cmp = SimpleCompress::new(|mut a: Vec<u32>, b: &Vec<u32>| {
             a.extend(b);
-            a.sort();
+            a.sort_unstable();
             a.dedup();
             a
         });
@@ -555,7 +557,7 @@ impl Hyper {
     pub fn kill_edges(&mut self, dels: &Vec<u32>) {
         // Kill the edges.
 
-        self.kill_edges_raw(&dels);
+        self.kill_edges_raw(dels);
 
         // Find max read id.
 
@@ -598,7 +600,7 @@ impl Hyper {
         // This is complicated.
 
         let mut bound = Vec::<(u32, u32)>::new();
-        while vertex_queue.len() > 0 {
+        while !vertex_queue.is_empty() {
             let v = vertex_queue.pop().unwrap();
             if !vertex_kill[v.index()] {
                 continue;
@@ -645,7 +647,7 @@ impl Hyper {
         let mut have: Vec<u32>;
         let mut havex: Vec<bool> = vec![false; (maxread + 1) as usize];
         self.ids.reserve(bound.len());
-        while bound.len() > 0 {
+        while !bound.is_empty() {
             let bounds = bound.pop().unwrap();
             let new_edge_no: usize = self.h.g.edge_count();
             let mut new_edge = self.h.g.edge_obj(bounds.0).clone();
@@ -704,7 +706,7 @@ impl Hyper {
                 .unwrap()
                 .1;
             self.h.g.add_edge(v, w, new_edge);
-            have.sort();
+            have.sort_unstable();
             for j in 0..have.len() {
                 havex[have[j] as usize] = false;
             }

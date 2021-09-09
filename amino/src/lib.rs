@@ -3,9 +3,9 @@
 extern crate debruijn;
 extern crate string_utils;
 
-use debruijn::dna_string::*;
-use debruijn::*;
-use string_utils::*;
+use debruijn::dna_string::DnaString;
+use debruijn::Mer;
+use string_utils::strme;
 
 // Test to see if a given DnaString has a start or stop codon at a given position.
 
@@ -56,9 +56,9 @@ pub fn aa3_to_aa(aa3: &[u8]) -> u8 {
         b"TRP" => b'W',
         b"TYR" => b'Y',
         b"VAL" => b'V',
-        _ => panic!("Unexpected three-letter amino acid code {}.", strme(&aa3)),
+        _ => panic!("Unexpected three-letter amino acid code {}.", strme(aa3)),
     };
-    return aa;
+    aa
 }
 
 pub fn codon_to_aa(codon: &[u8]) -> u8 {
@@ -128,9 +128,9 @@ pub fn codon_to_aa(codon: &[u8]) -> u8 {
         b"TAG" => b'*',
         b"TAA" => b'*',
         b"TGA" => b'*',
-        _ => panic!("Unexpected codon {}.", strme(&codon)),
+        _ => panic!("Unexpected codon {}.", strme(codon)),
     };
-    return aa;
+    aa
 }
 
 // Convert a given DNA sequence to amino acids, starting at a given position.

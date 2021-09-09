@@ -223,7 +223,7 @@ pub fn make_freq<T: Ord + Clone>(x: &[T], freq: &mut Vec<(u32, T)>) {
 // Test to see if a sorted vector contains a given element.
 
 pub fn bin_member<T: Ord>(x: &[T], d: &T) -> bool {
-    x.binary_search(&d).is_ok()
+    x.binary_search(d).is_ok()
 }
 
 // Return the position of an element in an unsorted vector.
@@ -235,35 +235,35 @@ pub fn position<T: Ord>(x: &[T], d: &T) -> i32 {
             return i as i32;
         }
     }
-    -1 as i32
+    -1_i32
 }
 
 // Return the position of an element in a sorted vector, or using just the first
 // position.  Returns -1 if not present.
 
 pub fn bin_position<T: Ord>(x: &[T], d: &T) -> i32 {
-    match x.binary_search(&d) {
+    match x.binary_search(d) {
         Ok(p) => p as i32,
         Err(_e) => -1,
     }
 }
 
 pub fn bin_position1_2<S: Ord, T: Ord>(x: &[(S, T)], d: &S) -> i32 {
-    match x.binary_search_by_key(&d, |&(ref a, ref _b)| &a) {
+    match x.binary_search_by_key(&d, |&(ref a, ref _b)| a) {
         Ok(p) => p as i32,
         Err(_e) => -1,
     }
 }
 
 pub fn bin_position1_3<S: Ord, T: Ord, U: Ord>(x: &[(S, T, U)], d: &S) -> i32 {
-    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c)| &a) {
+    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c)| a) {
         Ok(p) => p as i32,
         Err(_e) => -1,
     }
 }
 
 pub fn bin_position1_4<S: Ord, T: Ord, U: Ord, V: Ord>(x: &[(S, T, U, V)], d: &S) -> i32 {
-    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c, ref _d)| &a) {
+    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c, ref _d)| a) {
         Ok(p) => p as i32,
         Err(_e) => -1,
     }
@@ -273,7 +273,7 @@ pub fn bin_position1_5<S: Ord, T: Ord, U: Ord, V: Ord, W: Ord>(
     x: &[(S, T, U, V, W)],
     d: &S,
 ) -> i32 {
-    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c, ref _d, ref _e)| &a) {
+    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c, ref _d, ref _e)| a) {
         Ok(p) => p as i32,
         Err(_e) => -1,
     }

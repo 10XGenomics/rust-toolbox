@@ -7,15 +7,15 @@ extern crate flate2;
 extern crate io_utils;
 extern crate string_utils;
 
-use debruijn::dna_string::*;
+use debruijn::dna_string::DnaString;
 use flate2::read::MultiGzDecoder;
-use io_utils::*;
+use io_utils::open_for_read;
 use std::process::Command;
 use std::{
     fs::File,
     io::{prelude::*, BufReader},
 };
-use string_utils::*;
+use string_utils::TextUtils;
 
 // Read a fasta file or gzipped fasta file and convert to a Vec<Vec<u8>>, in which
 // outer vec entries alternate between header lines and base lines.
@@ -29,19 +29,17 @@ pub fn read_fasta_to_vec_vec_u8(f: &str) -> Vec<Vec<u8>> {
         for line in fin.lines() {
             let s = line.unwrap();
             if first {
-                if !s.starts_with(">") {
+                if !s.starts_with('>') {
                     panic!("fasta format failure reading {}", f);
                 }
                 first = false;
                 x.push(s.get(1..).unwrap().as_bytes().to_vec());
+            } else if s.starts_with('>') {
+                x.push(last.as_bytes().to_vec());
+                last.clear();
+                x.push(s.get(1..).unwrap().as_bytes().to_vec());
             } else {
-                if s.starts_with(">") {
-                    x.push(last.as_bytes().to_vec());
-                    last.clear();
-                    x.push(s.get(1..).unwrap().as_bytes().to_vec());
-                } else {
-                    last += &s;
-                }
+                last += &s;
             }
         }
         x.push(last.as_bytes().to_vec());
@@ -53,19 +51,17 @@ pub fn read_fasta_to_vec_vec_u8(f: &str) -> Vec<Vec<u8>> {
         for line in fin.lines() {
             let s = line.unwrap();
             if first {
-                if !s.starts_with(">") {
+                if !s.starts_with('>') {
                     panic!("fasta format failure");
                 }
                 first = false;
                 x.push(s.get(1..).unwrap().as_bytes().to_vec());
+            } else if s.starts_with('>') {
+                x.push(last.as_bytes().to_vec());
+                last.clear();
+                x.push(s.get(1..).unwrap().as_bytes().to_vec());
             } else {
-                if s.starts_with(">") {
-                    x.push(last.as_bytes().to_vec());
-                    last.clear();
-                    x.push(s.get(1..).unwrap().as_bytes().to_vec());
-                } else {
-                    last += &s;
-                }
+                last += &s;
             }
         }
         x.push(last.as_bytes().to_vec());
@@ -89,19 +85,17 @@ pub fn read_fasta_into_vec_dna_string_plus_headers(
         for line in fin.lines() {
             let s = line.unwrap();
             if first {
-                if !s.starts_with(">") {
+                if !s.starts_with('>') {
                     panic!("fasta format failure reading {}", f);
                 }
                 first = false;
                 headers.push(s.get(1..).unwrap().to_string());
+            } else if s.starts_with('>') {
+                dv.push(DnaString::from_dna_string(&last));
+                last.clear();
+                headers.push(s.get(1..).unwrap().to_string());
             } else {
-                if s.starts_with(">") {
-                    dv.push(DnaString::from_dna_string(&last));
-                    last.clear();
-                    headers.push(s.get(1..).unwrap().to_string());
-                } else {
-                    last += &s;
-                }
+                last += &s;
             }
         }
         dv.push(DnaString::from_dna_string(&last));
@@ -113,19 +107,17 @@ pub fn read_fasta_into_vec_dna_string_plus_headers(
         for line in fin.lines() {
             let s = line.unwrap();
             if first {
-                if !s.starts_with(">") {
+                if !s.starts_with('>') {
                     panic!("fasta format failure");
                 }
                 first = false;
                 headers.push(s.get(1..).unwrap().to_string());
+            } else if s.starts_with('>') {
+                dv.push(DnaString::from_dna_string(&last));
+                last.clear();
+                headers.push(s.get(1..).unwrap().to_string());
             } else {
-                if s.starts_with(">") {
-                    dv.push(DnaString::from_dna_string(&last));
-                    last.clear();
-                    headers.push(s.get(1..).unwrap().to_string());
-                } else {
-                    last += &s;
-                }
+                last += &s;
             }
         }
         dv.push(DnaString::from_dna_string(&last));
@@ -143,19 +135,17 @@ pub fn read_fasta_contents_into_vec_dna_string_plus_headers(
     for i in 0..lines.len() {
         let s = &lines[i];
         if first {
-            if !s.starts_with(">") {
+            if !s.starts_with('>') {
                 panic!("fasta format failure reading {}", f);
             }
             first = false;
             headers.push(s.get(1..).unwrap().to_string());
+        } else if s.starts_with('>') {
+            dv.push(DnaString::from_dna_string(&last));
+            last.clear();
+            headers.push(s.get(1..).unwrap().to_string());
         } else {
-            if s.starts_with(">") {
-                dv.push(DnaString::from_dna_string(&last));
-                last.clear();
-                headers.push(s.get(1..).unwrap().to_string());
-            } else {
-                last += &s;
-            }
+            last += s;
         }
     }
     dv.push(DnaString::from_dna_string(&last));
@@ -170,18 +160,16 @@ pub fn read_fasta_headers(f: &String, headers: &mut Vec<String>) {
     for line in fin.lines() {
         let s = line.unwrap();
         if first {
-            if !s.starts_with(">") {
+            if !s.starts_with('>') {
                 panic!("fasta format failure reading {}", f);
             }
             first = false;
             headers.push(s.get(1..).unwrap().to_string());
+        } else if s.starts_with('>') {
+            last.clear();
+            headers.push(s.get(1..).unwrap().to_string());
         } else {
-            if s.starts_with(">") {
-                last.clear();
-                headers.push(s.get(1..).unwrap().to_string());
-            } else {
-                last += &s;
-            }
+            last += &s;
         }
     }
 }

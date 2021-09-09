@@ -34,8 +34,8 @@
 // svg translation added
 
 use std::cmp::max;
-use string_utils::*;
-use vector_utils::*;
+use string_utils::{strme, TextUtils};
+use vector_utils::VecUtils;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
@@ -140,7 +140,7 @@ pub fn convert_text_with_ansi_escapes_to_html(
     font_size: usize,
 ) -> String {
     let y: Vec<char> = x.chars().collect();
-    let mut html = html_head(&source, &title, &html_text, &font_family, font_size);
+    let mut html = html_head(source, title, html_text, font_family, font_size);
     let mut states = Vec::<ColorState>::new();
     let mut current_state = ColorState::default();
     let mut i = 0;
@@ -223,9 +223,9 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                         let mut reset = false;
                         if on
                             && ((old_state.bold && !new_state.bold)
-                                || (old_state.color.len() > 0 && new_state.color.len() == 0)
-                                || (old_state.background.len() > 0
-                                    && new_state.background.len() == 0))
+                                || (!old_state.color.is_empty() && new_state.color.is_empty())
+                                || (!old_state.background.is_empty()
+                                    && new_state.background.is_empty()))
                         {
                             out += "[0m";
                             reset = true;
@@ -237,7 +237,7 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                         for e in escapes.iter() {
                             if e.solo() && e[0] == 1 {
                                 if reset || new_state.bold != old_state.bold {
-                                    out += &format!("{}", strme(&pack_ansi_escape(&e)));
+                                    out += &strme(&pack_ansi_escape(e)).to_string();
                                 }
                                 break;
                             }
@@ -248,7 +248,7 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                                 || (y.len() == 3 && y[0] == 38 && y[1] == 5)
                             {
                                 if reset || new_state.color != old_state.color {
-                                    out += &format!("{}", strme(&pack_ansi_escape(&y)));
+                                    out += &strme(&pack_ansi_escape(y)).to_string();
                                 }
                                 break;
                             }
@@ -259,7 +259,7 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                                 || (y.len() == 3 && y[0] == 48 && y[1] == 5)
                             {
                                 if reset || new_state.background != old_state.background {
-                                    out += &format!("{}", strme(&pack_ansi_escape(&y)));
+                                    out += &strme(&pack_ansi_escape(y)).to_string();
                                 }
                                 break;
                             }
@@ -321,7 +321,7 @@ fn html_head(
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 fn html_tail() -> String {
-    format!("</span></pre>\n</body>\n</html>\n")
+    "</span></pre>\n</body>\n</html>\n".to_string()
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -344,7 +344,7 @@ fn unpack_ansi_escape(x: &[u8]) -> Vec<u8> {
     let s = x[2..n - 1].split(|c| *c == b';').collect::<Vec<&[u8]>>();
     let mut y = Vec::<u8>::new();
     for i in 0..s.len() {
-        y.push(strme(&s[i]).force_usize() as u8);
+        y.push(strme(s[i]).force_usize() as u8);
     }
     y
 }
@@ -403,7 +403,7 @@ impl ColorState {
                 s += &format!("background-color:{};", self.background);
             }
             if self.bold {
-                s += &format!("font-weight:bold;")
+                s += &"font-weight:bold;".to_string()
             }
             s += "\">";
             s
@@ -421,7 +421,7 @@ impl ColorState {
                 s += &format!("fill: {};", self.color);
             }
             if self.bold {
-                s += &format!("font-weight: bold;")
+                s += &"font-weight: bold;".to_string()
             }
             s += "\">";
             s
@@ -455,7 +455,7 @@ fn merge(s: &Vec<ColorState>) -> ColorState {
 // sequences, but could be generalized.
 
 fn ansi_escape_to_color_state(x: &[u8]) -> ColorState {
-    let y = unpack_ansi_escape(&x);
+    let y = unpack_ansi_escape(x);
     if y.len() == 3 && y[0] == 38 && y[1] == 5 {
         ColorState {
             color: rgb_to_html(&color_256_to_rgb(y[2])),
@@ -495,7 +495,7 @@ fn ansi_escape_to_color_state(x: &[u8]) -> ColorState {
     } else {
         panic!(
             "\nSorry, ANSI escape translation not implemented for {}.\n",
-            strme(&x)
+            strme(x)
         );
     }
 }

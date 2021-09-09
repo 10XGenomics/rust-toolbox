@@ -2,15 +2,15 @@
 
 // Code that analyzes transcripts.
 
-use crate::annotate::*;
-use crate::refx::*;
-use amino::*;
-use debruijn::{dna_string::*, kmer::*, *};
-use hyperbase::*;
+use crate::annotate::get_cdr3_using_ann;
+use crate::refx::RefData;
+use amino::{have_start, have_stop};
+use debruijn::{dna_string::DnaString, kmer::Kmer20, Mer, Vmer};
+use hyperbase::Hyper;
 use io_utils::fwriteln;
-use kmer_lookup::*;
+use kmer_lookup::make_kmer_lookup_20_single;
 use std::{cmp::max, io::prelude::*};
-use vector_utils::*;
+use vector_utils::{lower_bound1_3, unique_sort};
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // TEST FOR VALID VDJ SEQUENCE

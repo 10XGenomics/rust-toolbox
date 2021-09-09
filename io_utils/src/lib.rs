@@ -15,7 +15,7 @@ use std::ffi::OsStr;
 use std::fs;
 use std::io::{BufRead, BufReader};
 use std::{fmt::Debug, fs::File, io::prelude::*, path::Path};
-use string_utils::*;
+use string_utils::TextUtils;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // GET CONTENTS OF DIRECTORY
@@ -86,17 +86,15 @@ macro_rules! open_for_read {
 
 pub fn open_userfile_for_read(f: &str) -> BufReader<File> {
     let g = File::open(&f);
-    if g.is_err() {
-        if g.as_ref().err().unwrap().kind() == std::io::ErrorKind::PermissionDenied {
-            eprintln!(
-                "\nCould not open file \n{}\nfor reading because you \
-                lack read permission on this file.\n",
-                f
-            );
-            std::process::exit(1);
-        }
+    if g.is_err() && g.as_ref().err().unwrap().kind() == std::io::ErrorKind::PermissionDenied {
+        eprintln!(
+            "\nCould not open file \n{}\nfor reading because you \
+            lack read permission on this file.\n",
+            f
+        );
+        std::process::exit(1);
     }
-    BufReader::new(g.expect(&format!("Could not open file \"{}\"", f)))
+    BufReader::new(g.unwrap_or_else(|_| panic!("Could not open file \"{}\"", f)))
 }
 
 #[macro_export]
@@ -133,7 +131,7 @@ pub fn open_maybe_compressed<P: AsRef<Path>>(filename: P) -> Box<dyn Read> {
 
 pub fn read_maybe_unzipped(f: &String, lines: &mut Vec<String>) {
     lines.clear();
-    if path_exists(&f) {
+    if path_exists(f) {
         let gz = MultiGzDecoder::new(File::open(&f).unwrap());
         let b = BufReader::new(gz);
         for line in b.lines() {
@@ -141,7 +139,7 @@ pub fn read_maybe_unzipped(f: &String, lines: &mut Vec<String>) {
         }
     } else {
         let g = f.before(".gz");
-        if path_exists(&g) {
+        if path_exists(g) {
             let b = BufReader::new(File::open(&g).unwrap());
             for line in b.lines() {
                 lines.push(line.unwrap());
@@ -215,17 +213,17 @@ pub fn get_metric_value(f: &String, metric: &String) -> String {
         let metric_string = format!("\"{}\": ", metric);
         if s.contains(&metric_string) {
             let mut t = s.after(&metric_string).to_string();
-            if t.ends_with(" ") {
+            if t.ends_with(' ') {
                 t.pop();
             }
-            if t.ends_with(",") {
+            if t.ends_with(',') {
                 t.pop();
             }
             if t.ends_with(".0") {
                 t.pop();
                 t.pop();
             }
-            if t.starts_with("\"") && t.ends_with("\"") {
+            if t.starts_with('\"') && t.ends_with('\"') {
                 t = t[1..t.len() - 1].to_string();
             }
             return t.to_string();
@@ -247,27 +245,27 @@ pub fn get_metric_value(f: &String, metric: &String) -> String {
 
 pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> {
     let mut line = String::new();
-    if !json.read_line(&mut line).is_ok() || line == "".to_string() || line == "[]".to_string() {
+    if json.read_line(&mut line).is_err() || line == *"" || line == *"[]" {
         return None;
     }
-    if line == "[\n".to_string() {
+    if line == *"[\n" {
         line.clear();
-        if !json.read_line(&mut line).is_ok() {
+        if json.read_line(&mut line).is_err() {
             panic!("json read failure 1");
         }
     }
     let mut entry = Vec::<u8>::new();
-    let (mut curlies, mut bracks, mut quotes) = (0 as isize, 0 as isize, 0 as isize);
+    let (mut curlies, mut bracks, mut quotes) = (0_isize, 0_isize, 0_isize);
     let mut s = line.as_bytes().clone();
     loop {
         if (s == b"]" || s == b"]\n") && curlies == 0 && bracks == 0 && quotes % 2 == 0 {
-            if entry.len() > 0 {
+            if !entry.is_empty() {
                 return Some(entry);
             } else {
                 return None;
             }
         }
-        let mut cpos = -1 as isize;
+        let mut cpos = -1_isize;
         for i in (0..s.len() - 1).rev() {
             if s[i] == b',' {
                 cpos = i as isize;
@@ -303,7 +301,7 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> 
             entry.push(s[i]);
         }
         line.clear();
-        if !json.read_line(&mut line).is_ok() {
+        if json.read_line(&mut line).is_err() {
             panic!("json read failure 2");
         }
         s = line.as_bytes().clone();
@@ -315,8 +313,10 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 pub fn read_to_string_safe<P: AsRef<Path>>(path: P) -> String {
-    fs::read_to_string(&path).expect(&format!(
-        "Could not open file \"{}\".",
-        path.as_ref().to_str().unwrap()
-    ))
+    fs::read_to_string(&path).unwrap_or_else(|_| {
+        panic!(
+            "Could not open file \"{}\".",
+            path.as_ref().to_str().unwrap()
+        )
+    })
 }

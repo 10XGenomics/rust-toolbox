@@ -41,7 +41,7 @@
 
 pub fn tm_nearest_neighbor(s: &str) -> f64 {
     let locked = Vec::<bool>::new();
-    tm_nearest_neighbor_full(&s, 0.00000025, 0.05, &locked)
+    tm_nearest_neighbor_full(s, 0.00000025, 0.05, &locked)
 }
 
 pub fn tm_nearest_neighbor_full(s: &str, s_mol: f64, na_mol: f64, locked: &Vec<bool>) -> f64 {
@@ -73,22 +73,14 @@ pub fn tm_nearest_neighbor_full(s: &str, s_mol: f64, na_mol: f64, locked: &Vec<b
 
     // Validate sequence.
 
-    verify_dna(&s);
+    verify_dna(s);
 
     // Compute thermodynamic sums.
 
     let mut dh_sum = 0.0;
     let mut ds_sum = 0.0;
     let mut dg_sum = 0.0;
-    thermodynamic_sums_dna(
-        &s,
-        &mut dh_sum,
-        &mut ds_sum,
-        &mut dg_sum,
-        true,
-        true,
-        &locked,
-    );
+    thermodynamic_sums_dna(s, &mut dh_sum, &mut ds_sum, &mut dg_sum, true, true, locked);
 
     // Compute melting temperature based on nearest-neighbor model.
 
