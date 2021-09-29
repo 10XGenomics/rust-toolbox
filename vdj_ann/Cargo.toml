@@ -1,6 +1,6 @@
 [package]
 name = "vdj_ann"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com"]
 edition = "2018"
 license = "MIT"
@@ -22,7 +22,7 @@ hyperbase = "0.1.4"
 io_utils = "0.2"
 itertools = ">= 0.8, <= 0.11"
 kmer_lookup = "0.1"
-pretty_trace = "0.5"
+pretty_trace = { version = "0.6", path = "../pretty_trace" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.62"
 sha2 = "0.9.3"
