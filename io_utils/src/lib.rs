@@ -74,7 +74,7 @@ macro_rules! open_for_read {
     ($filename:expr) => {
         BufReader::new(
             File::open(&$filename).expect(&format!("Could not open file \"{}\"", &$filename)),
-        );
+        )
     };
 }
 
@@ -96,7 +96,7 @@ macro_rules! open_for_write_new {
     ($filename:expr) => {
         BufWriter::new(
             File::create(&$filename).expect(&format!("Could not create file \"{}\"", &$filename)),
-        );
+        )
     };
 }
 
