@@ -2,12 +2,6 @@
 
 // This file contains miscellaneous utilities for input and output.
 
-extern crate bincode;
-extern crate flate2;
-extern crate lz4;
-extern crate serde;
-extern crate string_utils;
-
 use bincode::{deserialize_from, serialize_into};
 use flate2::read::MultiGzDecoder;
 use serde::{de::DeserializeOwned, Serialize};

@@ -8,8 +8,6 @@
 //!
 //! This crate consists of a few functions related to these Stirling numbers.
 
-extern crate num_traits;
-
 #[cfg(not(debug_assertions))]
 #[cfg(test)]
 extern crate num_bigint;
@@ -229,10 +227,10 @@ mod tests {
         ) -> f64 {
             let group = 1000;
             assert!(count % group == 0);
-            let mut rng: StdRng = SeedableRng::from_seed([0 as u8; 32]);
+            let mut rng: StdRng = SeedableRng::from_seed([0_u8; 32]);
             let mut seeds = Vec::<[u8; 32]>::new();
             for _ in 0..group {
-                let mut x = [0 as u8; 32];
+                let mut x = [0_u8; 32];
                 for j in 0..x.len() {
                     x[j] = rng.gen_range(0..255);
                 }
@@ -267,7 +265,7 @@ mod tests {
         // last touched 7/7/19: https://github.com/rust-num/num-rational/pull/52.
 
         fn assert_equal_to_d_digits(x1: &BigUint, x2: &BigUint, d: usize) {
-            let mut n = 1 as usize;
+            let mut n = 1_usize;
             for _ in 0..d {
                 n *= 10;
             }

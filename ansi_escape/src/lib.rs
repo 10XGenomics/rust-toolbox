@@ -1,8 +1,5 @@
 // Copyright (c) 2019 10X Genomics, Inc. All rights reserved.
 
-extern crate string_utils;
-extern crate vector_utils;
-
 pub mod ansi_to_html;
 
 // Emit a color-blind-friendly ANSI color escape sequence, as indicated below,

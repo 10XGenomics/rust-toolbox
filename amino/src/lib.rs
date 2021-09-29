@@ -1,8 +1,5 @@
 // Copyright (c) 2019 10x Genomics, Inc. All rights reserved.
 
-extern crate debruijn;
-extern crate string_utils;
-
 use debruijn::dna_string::DnaString;
 use debruijn::Mer;
 use string_utils::strme;

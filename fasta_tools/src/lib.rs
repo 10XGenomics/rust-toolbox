@@ -2,11 +2,6 @@
 
 // Read a fasta file.
 
-extern crate debruijn;
-extern crate flate2;
-extern crate io_utils;
-extern crate string_utils;
-
 use debruijn::dna_string::DnaString;
 use flate2::read::MultiGzDecoder;
 use io_utils::open_for_read;

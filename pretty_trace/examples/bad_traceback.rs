@@ -7,8 +7,6 @@
 // This was observed under macOS Version 10.13.5, and could conceivably be
 // version dependent.
 
-extern crate pretty_trace;
-
 use pretty_trace::PrettyTrace;
 use std::fs;
 

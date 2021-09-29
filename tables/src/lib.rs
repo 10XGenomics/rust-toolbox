@@ -2,10 +2,6 @@
 
 // Functions print_tabular and print_tabular_vbox for making pretty tables.  And related utilities.
 
-extern crate io_utils;
-extern crate itertools;
-extern crate string_utils;
-
 use io_utils::eprintme;
 use itertools::Itertools;
 use std::cmp::{max, min};

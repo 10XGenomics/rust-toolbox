@@ -55,10 +55,6 @@
 // All functions after item 4 above will assert strangely or return garbage.  It would be
 // better to first call get_code_version_from_file.
 
-extern crate binary_vec_io;
-extern crate io_utils;
-extern crate pretty_trace;
-
 use binary_vec_io::{binary_read_to_ref, binary_read_vec, binary_write_vec};
 use std::cmp::max;
 

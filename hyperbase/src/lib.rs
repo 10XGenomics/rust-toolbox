@@ -3,13 +3,6 @@
 // This file defines a HyperBasevector structure, and a Hyper structure, which
 // is a HyperBasevector plus an involution and read ids for each edge.
 
-extern crate debruijn;
-extern crate equiv;
-extern crate graph_simple;
-extern crate kmer_lookup;
-extern crate petgraph;
-extern crate vector_utils;
-
 use debruijn::compression::{compress_kmers, SimpleCompress};
 use debruijn::dna_string::DnaString;
 use debruijn::graph::DebruijnGraph;

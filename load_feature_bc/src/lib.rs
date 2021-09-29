@@ -2,10 +2,6 @@
 
 // This file contains 10x-specific stuff for working with cellranger runs.
 
-extern crate flate2;
-extern crate io_utils;
-extern crate string_utils;
-
 use flate2::read::MultiGzDecoder;
 use io_utils::{open_for_read, path_exists, read_maybe_unzipped};
 use std::{format, i32, str, usize};
