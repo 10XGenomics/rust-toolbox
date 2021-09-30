@@ -3,10 +3,6 @@
 // Extract zero-based human or mouse exon positions from Ensembl gtf file:
 // { { chr-name, start, stop, fw?, gene-name, exon ) }.
 
-extern crate io_utils;
-extern crate string_utils;
-extern crate vector_utils;
-
 use io_utils::open_for_read;
 use std::{
     assert, format,

@@ -2888,7 +2888,7 @@ mod tests {
 
     #[test]
     fn test_d_region_alignment() {
-        use annotate::*;
+        use annotate::{annotate_seq, DnaString, RefData};
         let seq = DnaString::from_acgt_bytes(
             b"GGAGGTGCGAATGACTCTGCTCTCTGTCCTGTCTCCTCATCTGCAAAATTAGGAAGCCTGTCTTGATTATCTCCAGGAA\
             CCTCCCACCTCTTCATTCCAGCCTCTGACAAACTCTGCACATTAGGCCAGGAGAAGCCCCCGAGCCAAGTCTCTTTTCTCATTCTC\

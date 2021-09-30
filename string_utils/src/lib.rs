@@ -2,8 +2,6 @@
 
 // This file contains some miscellaneous string utilities.
 
-extern crate vector_utils;
-
 use std::cmp::max;
 use vector_utils::next_diff;
 

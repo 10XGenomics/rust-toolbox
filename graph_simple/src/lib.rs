@@ -8,9 +8,6 @@
 //
 // These functions seem unnecessarily specialized to u32.
 
-extern crate petgraph;
-extern crate vector_utils;
-
 use petgraph::{prelude::*, EdgeType};
 use std::collections::HashSet;
 use vector_utils::meet;

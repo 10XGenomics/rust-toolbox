@@ -2,10 +2,6 @@
 
 // Kmer lookup.
 
-extern crate debruijn;
-extern crate rayon;
-extern crate vector_utils;
-
 use debruijn::{
     dna_string::DnaString,
     kmer::{Kmer12, Kmer20},

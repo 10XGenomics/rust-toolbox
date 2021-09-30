@@ -2,12 +2,6 @@
 
 // This file contains miscellaneous utilities for input and output.
 
-extern crate bincode;
-extern crate flate2;
-extern crate lz4;
-extern crate serde;
-extern crate string_utils;
-
 use bincode::{deserialize_from, serialize_into};
 use flate2::read::MultiGzDecoder;
 use serde::{de::DeserializeOwned, Serialize};
@@ -80,7 +74,7 @@ macro_rules! open_for_read {
     ($filename:expr) => {
         BufReader::new(
             File::open(&$filename).expect(&format!("Could not open file \"{}\"", &$filename)),
-        );
+        )
     };
 }
 
@@ -102,7 +96,7 @@ macro_rules! open_for_write_new {
     ($filename:expr) => {
         BufWriter::new(
             File::create(&$filename).expect(&format!("Could not create file \"{}\"", &$filename)),
-        );
+        )
     };
 }
 
@@ -256,7 +250,7 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> 
     }
     let mut entry = Vec::<u8>::new();
     let (mut curlies, mut bracks, mut quotes) = (0_isize, 0_isize, 0_isize);
-    let mut s = line.as_bytes().clone();
+    let mut s = line.as_bytes();
     loop {
         if (s == b"]" || s == b"]\n") && curlies == 0 && bracks == 0 && quotes % 2 == 0 {
             if !entry.is_empty() {
@@ -304,7 +298,7 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> 
         if json.read_line(&mut line).is_err() {
             panic!("json read failure 2");
         }
-        s = line.as_bytes().clone();
+        s = line.as_bytes();
     }
 }
 

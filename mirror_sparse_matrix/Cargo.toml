@@ -4,8 +4,11 @@ version = "0.1.14"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
+edition = "2018"
 
 [dependencies]
 binary_vec_io = "0.1"
+
+[dev-dependencies]
 io_utils = "0.2"
 pretty_trace = "0.5"

@@ -5,8 +5,7 @@
 //
 // See also crate memmap.
 
-extern crate failure;
-extern crate itertools;
+use failure;
 
 use self::failure::Error;
 use itertools::Itertools;
