@@ -250,7 +250,7 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> 
     }
     let mut entry = Vec::<u8>::new();
     let (mut curlies, mut bracks, mut quotes) = (0_isize, 0_isize, 0_isize);
-    let mut s = line.as_bytes().clone();
+    let mut s = line.as_bytes();
     loop {
         if (s == b"]" || s == b"]\n") && curlies == 0 && bracks == 0 && quotes % 2 == 0 {
             if !entry.is_empty() {
@@ -298,7 +298,7 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> 
         if json.read_line(&mut line).is_err() {
             panic!("json read failure 2");
         }
-        s = line.as_bytes().clone();
+        s = line.as_bytes();
     }
 }
 
