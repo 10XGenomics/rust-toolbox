@@ -9,6 +9,7 @@ homepage = "https://github.com/10XGenomics/rust-toolbox/tree/master/pretty_trace
 keywords = ["stack", "trace", "traceback", "profiling"]
 edition = "2018"
 include = ["src/lib.rs", "LICENSE", "README.md"]
+repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
 backtrace = "0.3.40"
