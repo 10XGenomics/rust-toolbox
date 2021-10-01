@@ -21,7 +21,6 @@ nix = ">=0.19.1, <0.24"
 pprof = { version = "0.5", features = ["protobuf"] }
 stats_utils = "0.1"
 tables = "0.1"
-thiserror = "1"
 string_utils = "0.1"
 vector_utils = "0.1.3"
 

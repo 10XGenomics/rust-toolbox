@@ -22,11 +22,7 @@ impl BinaryInputOutputSafe for f32 {}
 impl BinaryInputOutputSafe for f64 {}
 // i128, u128?
 
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error(transparent)]
-    Io(#[from] std::io::Error),
-}
+use std::io::Error;
 
 #[allow(dead_code)]
 pub fn binary_write_from_ref<T>(f: &mut std::fs::File, p: &T, n: usize) -> Result<(), Error> {
