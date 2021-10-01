@@ -146,11 +146,11 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 use backtrace::Backtrace;
-use failure::Error;
 use io_utils::open_for_write_new;
 use lazy_static::lazy_static;
 use libc::SIGINT;
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
+use nix::Error;
 use pprof::protos::Message;
 use pprof::ProfilerGuard;
 use stats_utils::percent_ratio;

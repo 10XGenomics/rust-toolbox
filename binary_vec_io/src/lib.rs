@@ -5,9 +5,6 @@
 //
 // See also crate memmap.
 
-use failure;
-
-use self::failure::Error;
 use itertools::Itertools;
 use std::io::Write;
 use std::os::unix::fs::MetadataExt;
@@ -24,6 +21,8 @@ impl BinaryInputOutputSafe for u64 {}
 impl BinaryInputOutputSafe for f32 {}
 impl BinaryInputOutputSafe for f64 {}
 // i128, u128?
+
+use std::io::Error;
 
 #[allow(dead_code)]
 pub fn binary_write_from_ref<T>(f: &mut std::fs::File, p: &T, n: usize) -> Result<(), Error> {
