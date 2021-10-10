@@ -538,7 +538,7 @@ impl MirrorSparseMatrix {
                 let pos = s + 6 + 3 * m1 + 4 * m2 + 6 * i;
                 let f = get_u16_at_pos(&self.x, pos) as usize;
                 if f == col {
-                    return get_u16_at_pos(&self.x, pos + 2) as usize;
+                    return get_u32_at_pos(&self.x, pos + 2) as usize;
                 }
             }
             0
@@ -564,7 +564,7 @@ impl MirrorSparseMatrix {
                 let pos = s + 12 + 5 * m1 + 6 * m2 + 8 * i;
                 let f = get_u32_at_pos(&self.x, pos) as usize;
                 if f == col {
-                    return get_u16_at_pos(&self.x, pos + 4) as usize;
+                    return get_u32_at_pos(&self.x, pos + 4) as usize;
                 }
             }
             0
