@@ -1,6 +1,6 @@
 [package]
 name = "amino"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."

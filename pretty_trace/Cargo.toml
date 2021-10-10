@@ -1,7 +1,7 @@
 [package]
 name = "pretty_trace"
 # When version is bumped, version in README.md also needs to be bumped.
-version = "0.5.19"
+version = "0.5.20"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "Tools for generating pretty tracebacks and for profiling."
