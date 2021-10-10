@@ -9,4 +9,4 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
 string_utils = "0.1"
-vector_utils = "0.1.3"
+vector_utils = "0.1"
