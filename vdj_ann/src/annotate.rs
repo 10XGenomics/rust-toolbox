@@ -1034,14 +1034,9 @@ pub fn annotate_seq_core(
             let t1 = annx[data[i1].2[0]].2 as usize;
             let t2 = annx[data[i2].2[0]].2 as usize;
 
-            let mut same_class = false;
-            if refdata.segtype[t1] == refdata.segtype[t2] {
-                same_class = true;
-            } else if refdata.is_v(t1) && refdata.is_u(t2) {
-                same_class = true;
-            } else if refdata.is_u(t1) && refdata.is_v(t2) {
-                same_class = true;
-            }
+            let same_class = (refdata.segtype[t1] == refdata.segtype[t2])
+                || (refdata.is_v(t1) && refdata.is_u(t2))
+                || (refdata.is_u(t1) && refdata.is_v(t2));
             if !same_class {
                 continue;
             }
@@ -1212,9 +1207,9 @@ pub fn annotate_seq_core(
             let (mut win1, mut win2) = (false, false);
             let c1 = m1 == m2 && !have_utr_align2 && err1_nu == err2_nu && outside1 > outside2;
             let c2 = m2 == m1 && !have_utr_align1 && err2_nu == err1_nu && outside2 > outside1;
-            if zstop1 > zstop2 + 20 && (outside2 <= 10.0 || total2 - share <= 10) {
-                win1 = true;
-            } else if outside1 >= 10.0 && outside2 <= 1.0 && err1 - err2 <= 2.5 {
+            if (zstop1 > zstop2 + 20 && (outside2 <= 10.0 || total2 - share <= 10))
+                || (outside1 >= 10.0 && outside2 <= 1.0 && err1 - err2 <= 2.5)
+            {
                 win1 = true;
             } else if zstop1 == 0 && zstop2 > 0 {
             } else if outside2 <= 10.0 || total2 - share <= 10 {
@@ -1230,9 +1225,9 @@ pub fn annotate_seq_core(
 
             // Symmetrization.
 
-            if zstop2 > zstop1 + 20 && (outside1 <= 10.0 || total1 - share <= 10) {
-                win2 = true;
-            } else if outside2 >= 10.0 && outside1 <= 1.0 && err2 - err1 <= 2.5 {
+            if (zstop2 > zstop1 + 20 && (outside1 <= 10.0 || total1 - share <= 10))
+                || (outside2 >= 10.0 && outside1 <= 1.0 && err2 - err1 <= 2.5)
+            {
                 win2 = true;
             } else if zstop2 == 0 && zstop1 > 0 {
             } else if outside1 <= 10.0 || total1 - share <= 10 {
