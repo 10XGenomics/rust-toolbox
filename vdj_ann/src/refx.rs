@@ -92,26 +92,26 @@ impl<'a> RefData {
         }
     }
     pub fn is_u(&self, i: usize) -> bool {
-        self.segtype[i] == "U".to_string()
+        self.segtype[i] == *"U"
     }
     pub fn is_v(&self, i: usize) -> bool {
-        self.segtype[i] == "V".to_string()
+        self.segtype[i] == *"V"
     }
     pub fn is_d(&self, i: usize) -> bool {
-        self.segtype[i] == "D".to_string()
+        self.segtype[i] == *"D"
     }
     pub fn is_j(&self, i: usize) -> bool {
-        self.segtype[i] == "J".to_string()
+        self.segtype[i] == *"J"
     }
     pub fn is_c(&self, i: usize) -> bool {
-        self.segtype[i] == "C".to_string()
+        self.segtype[i] == *"C"
     }
 
     pub fn from_fasta(path: &String) -> Self {
         // TODO: Use impl AsRef<Path> instead of &String throughout
         let mut refdata = RefData::new();
         let path_contents = read_to_string_safe(path);
-        if path_contents.len() == 0 {
+        if path_contents.is_empty() {
             panic!("Reference file at {} has zero length.", path);
         }
         make_vdj_ref_data_core(
@@ -128,7 +128,7 @@ impl<'a> RefData {
     pub fn from_fasta_with_filter(path: &String, ids_to_use: &HashSet<i32>) -> Self {
         let mut refdata = RefData::new();
         let path_contents = read_to_string_safe(path);
-        if path_contents.len() == 0 {
+        if path_contents.is_empty() {
             panic!("Reference file at {} has zero length.", path);
         }
         make_vdj_ref_data_core(
@@ -164,7 +164,7 @@ pub fn make_vdj_ref_data_core(
 
     refs.clear();
     rheaders.clear();
-    read_fasta_contents_into_vec_dna_string_plus_headers(&ref_fasta, &mut refs, &mut rheaders);
+    read_fasta_contents_into_vec_dna_string_plus_headers(ref_fasta, &mut refs, &mut rheaders);
 
     // Filter by ids if requested.
 
@@ -183,7 +183,7 @@ pub fn make_vdj_ref_data_core(
 
     let mut rheaders2 = Vec::<String>::new();
     let types = vec!["IGH", "IGK", "IGL", "TRA", "TRB", "TRD", "TRG"];
-    refdata.rtype = vec![-1 as i32; refs.len()];
+    refdata.rtype = vec![-1_i32; refs.len()];
     for i in 0..rheaders.len() {
         let v: Vec<&str> = rheaders[i].split_terminator('|').collect();
         let mut s: String = String::new();
@@ -249,13 +249,13 @@ pub fn make_vdj_ref_data_core(
     // Fill in igjs and cs and ds.
 
     for i in 0..rheaders.len() {
-        if refdata.segtype[i] == "J".to_string() && refdata.rtype[i] >= 0 && refdata.rtype[i] < 3 {
+        if refdata.segtype[i] == *"J" && refdata.rtype[i] >= 0 && refdata.rtype[i] < 3 {
             refdata.igjs.push(i);
         }
-        if refdata.segtype[i] == "C".to_string() {
+        if refdata.segtype[i] == *"C" {
             refdata.cs.push(i);
         }
-        if refdata.segtype[i] == "D".to_string() {
+        if refdata.segtype[i] == *"D" {
             refdata.ds.push(i);
         }
     }
@@ -283,7 +283,7 @@ pub fn make_vdj_ref_data_core(
 
     // Make lookup table for reference.
 
-    make_kmer_lookup_12_single(&refs, &mut rkmers_plus);
+    make_kmer_lookup_12_single(refs, &mut rkmers_plus);
 
     // Determine which V segments have matching UTRs in the reference.
 
@@ -339,7 +339,7 @@ pub fn make_vdj_ref_data(
              vdj_IMGT_mouse_20180723-2.2.0/fasta/regions.fa",
         );
     }
-    if refx.len() == 0 {
+    if refx.is_empty() {
         panic!("Reference file has zero length.");
     }
     make_vdj_ref_data_core(refdata, &refx, &ext_refx, is_tcr, is_bcr, None);
