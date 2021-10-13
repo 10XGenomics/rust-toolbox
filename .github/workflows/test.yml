@@ -44,7 +44,16 @@ jobs:
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features --all-targets -- -W clippy::wildcard_imports -W clippy::float_cmp -W future_incompatible -W nonstandard_style
+          args: |
+           --all-features --all-targets --
+           -W clippy::wildcard_imports
+           -W clippy::float_cmp
+           -W future_incompatible
+           -W nonstandard_style
+           -W rust_2018_compatibility
+           -W rust_2021_compatibility
+           -F clippy::unused_io_amount
+           -W unused
       - name: Cargo check
         run: RUSTFLAGS="-D unused -D warnings" cargo check --all-targets
       - name: Run Rust tests
