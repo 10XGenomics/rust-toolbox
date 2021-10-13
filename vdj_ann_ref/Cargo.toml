@@ -11,25 +11,14 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 publish = false
 
 [dependencies]
-align_tools = "0.1"
-amino = "0.1"
-bio_edit = "0.1"
 debruijn = "0.3.2"
 exons = "0.1"
 fasta_tools = "0.1"
 flate2 = "1.0.20"
-hyperbase = "0.1"
 io_utils = "0.2"
-itertools = ">= 0.8, <= 0.11"
 kmer_lookup = "0.1"
 pretty_trace = "0.5"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0.62"
 sha2 = "0.9.3"
-stats_utils = "0.1"
 string_utils = "0.1"
 vector_utils = "0.1"
-strum = ">=0.18.0, <0.22"
-strum_macros = ">=0.18.0, <0.22"
-vdj_types = "0.1"
-vdj_ann = { path = "../vdj_ann" }
+vdj_ann = { version = "0.1", path = "../vdj_ann" }

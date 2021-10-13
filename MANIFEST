@@ -20,6 +20,7 @@ string_utils          string utilities        yes              yes
 stirling_numbers      stirling numbers        yes              no
 tables                table print printing    no               yes
 vdj_ann               vdj annotation          no               yes
+vdj_ann_ref           vdj reference data      no               yes
 vec_utils             vector utilities        yes              yes
 
 Crates labeled INTERNAL are publicly accessible but we discourage relying on their internals 
