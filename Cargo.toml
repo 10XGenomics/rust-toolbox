@@ -22,6 +22,7 @@ members = [
     "string_utils",
     "tables",
     "vdj_ann",
+    "vdj_ann_ref",
     "vdj_types",
     "vector_utils",
 ]

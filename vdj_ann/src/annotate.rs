@@ -482,9 +482,7 @@ pub fn annotate_seq_core(
             let mut mis = semi[i].4.clone();
             let mut mis_count = 0;
             while l > 0 && l + off > 0 {
-                if b.get((l - 1_i32) as usize)
-                    != refs[t as usize].get((l + off - 1_i32) as usize)
-                {
+                if b.get((l - 1_i32) as usize) != refs[t as usize].get((l + off - 1_i32) as usize) {
                     mis.push(l - 1);
                     mis_count += 1;
                 }
@@ -1208,11 +1206,13 @@ pub fn annotate_seq_core(
             {
                 win1 = true;
             } else if zstop1 == 0 && zstop2 > 0 {
-            } else if (outside2 <= 10.0 || total2 - share <= 10) && (m1 < m2
+            } else if (outside2 <= 10.0 || total2 - share <= 10)
+                && (m1 < m2
                     || (m1 == m2 && err1 < err2 && !c2)
                     || (m1 == m2 && err1 == err2 && outside1 > outside2)
                     || (m1 == m2 && err1 == err2 && outside1 == outside2 && t1 < t2)
-                    || c1) {
+                    || c1)
+            {
                 win1 = true;
             }
 
@@ -1223,11 +1223,13 @@ pub fn annotate_seq_core(
             {
                 win2 = true;
             } else if zstop2 == 0 && zstop1 > 0 {
-            } else if (outside1 <= 10.0 || total1 - share <= 10) && (m2 < m1
+            } else if (outside1 <= 10.0 || total1 - share <= 10)
+                && (m2 < m1
                     || (m2 == m1 && err2 < err1 && !c1)
                     || (m2 == m1 && err2 == err1 && outside2 > outside1)
                     || (m2 == m1 && err2 == err1 && outside2 == outside1 && t2 < t1)
-                    || c2) {
+                    || c2)
+            {
                 win2 = true;
             }
             if win2 {
@@ -1307,14 +1309,10 @@ pub fn annotate_seq_core(
                 && err1 == err2
                 && t1 < t2
             {
-                if refdata.name[t1] == *"TRBC1"
-                    && refdata.name[t2] == *"TRBC2"
-                {
+                if refdata.name[t1] == *"TRBC1" && refdata.name[t2] == *"TRBC2" {
                     continue;
                 }
-                if refdata.name[t2] == *"TRBC1"
-                    && refdata.name[t1] == *"TRBC2"
-                {
+                if refdata.name[t2] == *"TRBC1" && refdata.name[t1] == *"TRBC2" {
                     continue;
                 }
                 win1 = true;
@@ -1460,7 +1458,10 @@ pub fn annotate_seq_core(
             let mut have_v = false;
             for i2 in 0..annx.len() {
                 let t2 = annx[i2].2 as usize;
-                if !rheaders[t2].contains("segment") && refdata.segtype[t2] == *"V" && refdata.rtype[t1] == refdata.rtype[t2] {
+                if !rheaders[t2].contains("segment")
+                    && refdata.segtype[t2] == *"V"
+                    && refdata.rtype[t1] == refdata.rtype[t2]
+                {
                     have_v = true;
                 }
             }
@@ -1652,14 +1653,10 @@ pub fn annotate_seq_core(
             }
 
             if mis1 == mis2 {
-                if refdata.name[t1] == *"TRBC1"
-                    && refdata.name[t2] == *"TRBC2"
-                {
+                if refdata.name[t1] == *"TRBC1" && refdata.name[t2] == *"TRBC2" {
                     continue;
                 }
-                if refdata.name[t2] == *"TRBC1"
-                    && refdata.name[t1] == *"TRBC2"
-                {
+                if refdata.name[t2] == *"TRBC1" && refdata.name[t1] == *"TRBC2" {
                     continue;
                 }
             }
@@ -2819,8 +2816,11 @@ pub fn make_annotation_units(
             }
             let mut entries = 1;
             let mut len = ann[j].1;
-            if j < ann.len() - 1 && ann[j + 1].2 as usize == t && ((ann[j].0 + ann[j].1 == ann[j + 1].0 && ann[j].3 + ann[j].1 < ann[j + 1].3)
-                    || (ann[j].0 + ann[j].1 < ann[j + 1].0 && ann[j].3 + ann[j].1 == ann[j + 1].3)) {
+            if j < ann.len() - 1
+                && ann[j + 1].2 as usize == t
+                && ((ann[j].0 + ann[j].1 == ann[j + 1].0 && ann[j].3 + ann[j].1 < ann[j + 1].3)
+                    || (ann[j].0 + ann[j].1 < ann[j + 1].0 && ann[j].3 + ann[j].1 == ann[j + 1].3))
+            {
                 entries = 2;
                 len += ann[j + 1].1;
             }
@@ -2828,8 +2828,7 @@ pub fn make_annotation_units(
             if refdata.segtype[t] == *"V" && ann[j].3 == 0 {
                 score += 1_000_000;
             }
-            if refdata.segtype[t] == *"J"
-                && (ann[j].3 + ann[j].1) as usize == refdata.refs[t].len()
+            if refdata.segtype[t] == *"J" && (ann[j].3 + ann[j].1) as usize == refdata.refs[t].len()
             {
                 score += 1_000_000;
             }
@@ -2852,41 +2851,7 @@ pub fn make_annotation_units(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::refx::{human_ref, make_vdj_ref_data_core};
-    use crate::{annotate, refx};
-
-    // The following test checks for alignment of a D region.  This example was fixed by code
-    // changes in March 2020.
-
-    #[test]
-    fn test_d_region_alignment() {
-        use annotate::{annotate_seq, DnaString, RefData};
-        let seq = DnaString::from_acgt_bytes(
-            b"GGAGGTGCGAATGACTCTGCTCTCTGTCCTGTCTCCTCATCTGCAAAATTAGGAAGCCTGTCTTGATTATCTCCAGGAA\
-            CCTCCCACCTCTTCATTCCAGCCTCTGACAAACTCTGCACATTAGGCCAGGAGAAGCCCCCGAGCCAAGTCTCTTTTCTCATTCTC\
-            TTCCAACAAGTGCTTGGAGCTCCAAGAAGGCCCCCTTTGCACTATGAGCAACCAGGTGCTCTGCTGTGTGGTCCTTTGTCTCCTGG\
-            GAGCAAACACCGTGGATGGTGGAATCACTCAGTCCCCAAAGTACCTGTTCAGAAAGGAAGGACAGAATGTGACCCTGAGTTGTGAA\
-            CAGAATTTGAACCACGATGCCATGTACTGGTACCGACAGGACCCAGGGCAAGGGCTGAGATTGATCTACTACTCACAGATAGTAAA\
-            TGACTTTCAGAAAGGAGATATAGCTGAAGGGTACAGCGTCTCTCGGGAGAAGAAGGAATCCTTTCCTCTCACTGTGACATCGGCCC\
-            AAAAGAACCCGACAGCTTTCTATCTCTGTGCCAGTAGTATTTTTCTTGCCGGGACAGGGGGCTGGAGCGGCACTGAAGCTTTCTTT\
-            GGACAAGGCACCAGACTCACAGTTGTAGAGGACCTGAACAAGGTGTTCCCACCCGAGGTCGCTGTGTTTGAGCCATCAGA",
-        );
-        let (refx, ext_refx) = (human_ref(), String::new());
-        let (is_tcr, is_bcr) = (true, false);
-        let mut refdata = RefData::new();
-        make_vdj_ref_data_core(&mut refdata, &refx, &ext_refx, is_tcr, is_bcr, None);
-        let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
-        annotate_seq(&seq, &refdata, &mut ann, true, false, true);
-        let mut have_d = false;
-        for i in 0..ann.len() {
-            if refdata.is_d(ann[i].2 as usize) {
-                have_d = true;
-            }
-        }
-        if !have_d {
-            panic!("\nFailed to find alignment of D region.\n");
-        }
-    }
+    use crate::refx;
 
     #[test]
     fn test_no_internal_soft_clipping() {

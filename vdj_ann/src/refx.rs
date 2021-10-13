@@ -17,42 +17,6 @@ use std::collections::{HashMap, HashSet};
 use string_utils::TextUtils;
 use vector_utils::erase_if;
 
-pub fn human_ref() -> String {
-    include_str!["../vdj_refs/human/fasta/regions.fa"].to_string()
-}
-
-pub fn human_supp_ref() -> String {
-    include_str!["../vdj_refs/human/fasta/supp_regions.fa"].to_string()
-}
-
-pub fn human_ref_2_0() -> String {
-    include_str!["../vdj_refs_2.0/human/fasta/regions.fa"].to_string()
-}
-
-pub fn human_ref_3_1() -> String {
-    include_str!["../vdj_refs_3.1/human/fasta/regions.fa"].to_string()
-}
-
-pub fn human_ref_4_0() -> String {
-    include_str!["../vdj_refs_4.0/human/fasta/regions.fa"].to_string()
-}
-
-pub fn mouse_ref() -> String {
-    include_str!["../vdj_refs/mouse/fasta/regions.fa"].to_string()
-}
-
-pub fn mouse_supp_ref() -> String {
-    include_str!["../vdj_refs/mouse/fasta/supp_regions.fa"].to_string()
-}
-
-pub fn mouse_ref_3_1() -> String {
-    include_str!["../vdj_refs_3.1/mouse/fasta/regions.fa"].to_string()
-}
-
-pub fn mouse_ref_4_0() -> String {
-    include_str!["../vdj_refs_4.0/mouse/fasta/regions.fa"].to_string()
-}
-
 // RefData: this is a packaging of reference data appropriate for VDJ analysis.
 
 #[derive(Default)]
@@ -303,44 +267,4 @@ pub fn make_vdj_ref_data_core(
             }
         }
     }
-}
-
-pub fn make_vdj_ref_data(
-    refdata: &mut RefData,
-    imgt: bool,
-    species: &String,
-    extended: bool,
-    is_tcr: bool,
-    is_bcr: bool,
-) {
-    let mut refx = String::new();
-    let mut ext_refx = String::new();
-    if !imgt && species == "human" {
-        refx = human_ref();
-        if extended {
-            ext_refx = human_supp_ref();
-        }
-    }
-    if !imgt && species == "mouse" {
-        refx = mouse_ref();
-        if extended {
-            ext_refx = mouse_supp_ref();
-        }
-    }
-    if imgt && species == "human" {
-        refx = read_to_string_safe(
-            "/mnt/opt/refdata_cellranger/vdj/\
-             vdj_IMGT_20170916-2.1.0/fasta/regions.fa",
-        );
-    }
-    if imgt && species == "mouse" {
-        refx = read_to_string_safe(
-            "/mnt/opt/refdata_cellranger/vdj/\
-             vdj_IMGT_mouse_20180723-2.2.0/fasta/regions.fa",
-        );
-    }
-    if refx.is_empty() {
-        panic!("Reference file has zero length.");
-    }
-    make_vdj_ref_data_core(refdata, &refx, &ext_refx, is_tcr, is_bcr, None);
 }
