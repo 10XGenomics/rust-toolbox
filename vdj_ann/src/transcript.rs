@@ -123,7 +123,7 @@ pub fn is_valid(
             }
         }
         let mut cdr3 = Vec::<(usize, Vec<u8>, usize, usize)>::new();
-        get_cdr3_using_ann(&b, &refdata, &ann, &mut cdr3);
+        get_cdr3_using_ann(b, refdata, ann, &mut cdr3);
         if cdr3.is_empty() {
             if logme {
                 fwriteln!(log, "did not find CDR3");
@@ -156,15 +156,12 @@ pub fn is_valid(
             let t1 = ann[j1].2 as usize;
             for j2 in j1 + 1..ann.len() {
                 let t2 = ann[j2].2 as usize;
-                if refdata.is_j(t1) && refdata.is_v(t2) {
-                    misordered = true;
-                } else if refdata.is_j(t1) && refdata.is_u(t2) {
-                    misordered = true;
-                } else if refdata.is_j(t1) && refdata.is_d(t2) {
-                    misordered = true;
-                } else if refdata.is_v(t1) && refdata.is_u(t2) {
-                    misordered = true;
-                } else if refdata.is_c(t1) && !refdata.is_c(t2) {
+                if (refdata.is_j(t1) && refdata.is_v(t2))
+                    || (refdata.is_j(t1) && refdata.is_u(t2))
+                    || (refdata.is_j(t1) && refdata.is_d(t2))
+                    || (refdata.is_v(t1) && refdata.is_u(t2))
+                    || (refdata.is_c(t1) && !refdata.is_c(t2))
+                {
                     misordered = true;
                 }
             }
@@ -204,20 +201,20 @@ pub fn junction_seq(
         let len = ann[j as usize].1 as usize;
         let t = ann[j as usize].2 as usize;
         let p = ann[j as usize].3 as usize;
-        if rheaders[t].contains("TRAJ")
+        if (rheaders[t].contains("TRAJ")
             || rheaders[t].contains("IGHJ")
             || rheaders[t].contains("TRBJ")
             || rheaders[t].contains("IGLJ")
-            || rheaders[t].contains("IGKJ")
+            || rheaders[t].contains("IGKJ"))
+            && p + len == refs[t].len()
+            && l + len >= TAG as usize
         {
-            if p + len == refs[t].len() && l + len >= TAG as usize {
-                jstops.push((l + len) as i32);
-            }
+            jstops.push((l + len) as i32);
         }
     }
     unique_sort(&mut jstops);
     // note: if called on a valid contig, jstops will not be empty
-    assert!(jstops.len() > 0);
+    assert!(!jstops.is_empty());
     // note: at this point is presumably a rare event for jstops to have > 1 element
     let jstop = jstops[0];
     let jstart = jstop - TAG;
@@ -244,7 +241,7 @@ pub fn junction_supp(
     jsupp: &mut (i32, i32),
 ) {
     let mut jseq = DnaString::new();
-    junction_seq(&tig, refdata, &ann, &mut jseq);
+    junction_seq(tig, refdata, ann, &mut jseq);
     junction_supp_core(reads, x, umi_id, &jseq, jsupp);
 }
 
@@ -309,7 +306,7 @@ pub fn junction_supp_core(
                 }
             }
         }
-        mm.sort();
+        mm.sort_unstable();
         let mut cov = true;
         if mm.is_empty() || mm[0].0 > 0 {
             cov = false;

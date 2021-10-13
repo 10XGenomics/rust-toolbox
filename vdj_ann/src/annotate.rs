@@ -7,7 +7,7 @@ use crate::refx::RefData;
 use crate::transcript::is_valid;
 use align_tools::affine_align;
 use amino::{aa_seq, have_start};
-use bio_edit::alignment::AlignmentOperation::*;
+use bio_edit::alignment::AlignmentOperation::{Del, Ins, Match, Subst, Xclip, Yclip};
 use debruijn::{
     dna_string::{DnaString, DnaStringSlice},
     kmer::{Kmer12, Kmer20},
@@ -39,7 +39,7 @@ pub fn print_start_codon_positions(tig: &DnaString, log: &mut Vec<u8>) {
         return;
     }
     for i in 0..tig.len() - 3 {
-        if have_start(&tig, i) {
+        if have_start(tig, i) {
             starts.push(i);
         }
     }
@@ -74,7 +74,7 @@ pub fn chain_type(
     let n = 7;
     let k = 20;
     if b.len() < k {
-        return -1 as i8;
+        return -1_i8;
     }
     let mut count_this = vec![0; 2 * n];
     let brc = b.rc();
@@ -91,7 +91,7 @@ pub fn chain_type(
             } else {
                 x = brc.get_kmer(l);
             }
-            let low = lower_bound1_3(&rkmers_plus_full_20, &x) as usize;
+            let low = lower_bound1_3(rkmers_plus_full_20, &x) as usize;
             for j in low..rkmers_plus_full_20.len() {
                 if rkmers_plus_full_20[j].0 != x {
                     break;
@@ -131,7 +131,7 @@ pub fn chain_type(
     if count_this[0] > count_this[1] {
         best as i8
     } else {
-        -1 as i8
+        -1_i8
     }
 }
 
@@ -226,7 +226,7 @@ pub fn annotate_seq_core(
     }
     for l in 0..(b.len() - K + 1) as usize {
         let x: Kmer12 = b.get_kmer(l);
-        let low = lower_bound1_3(&rkmers_plus, &x) as usize;
+        let low = lower_bound1_3(rkmers_plus, &x) as usize;
         for r in low..rkmers_plus.len() {
             if rkmers_plus[r].0 != x {
                 break;
@@ -276,7 +276,7 @@ pub fn annotate_seq_core(
             }
         }
     }
-    perf.sort();
+    perf.sort_unstable();
 
     // Merge perfect matches.  We track the positions on b of mismatches.
     // semi = {(t, off, pos on b, len, positions on b of mismatches)}
@@ -388,7 +388,7 @@ pub fn annotate_seq_core(
         semi[i].4 = mis;
     }
     for i in 0..semi.len() {
-        semi[i].4.sort();
+        semi[i].4.sort_unstable();
     }
 
     // Add some 40-mers with the same offset having <= 6 mismatches.
@@ -482,9 +482,7 @@ pub fn annotate_seq_core(
             let mut mis = semi[i].4.clone();
             let mut mis_count = 0;
             while l > 0 && l + off > 0 {
-                if b.get((l - 1 as i32) as usize)
-                    != refs[t as usize].get((l + off - 1 as i32) as usize)
-                {
+                if b.get((l - 1_i32) as usize) != refs[t as usize].get((l + off - 1_i32) as usize) {
                     mis.push(l - 1);
                     mis_count += 1;
                 }
@@ -498,7 +496,7 @@ pub fn annotate_seq_core(
             }
         }
         for i in 0..semi.len() {
-            semi[i].4.sort();
+            semi[i].4.sort_unstable();
         }
     }
 
@@ -539,7 +537,7 @@ pub fn annotate_seq_core(
             semi[i1].3 = (l2 + len2) - l1;
             semi[i1].4.append(&mut mis3);
             semi[i1].4.append(&mut mis2.clone());
-            semi[i2].0 = -1 as i32;
+            semi[i2].0 = -1_i32;
             to_delete[i2] = true;
         }
     }
@@ -603,7 +601,7 @@ pub fn annotate_seq_core(
     if verbose {
         fwriteln!(log, "\nINITIAL ALIGNMENTS\n");
         for i in 0..annx.len() {
-            print_alignx(log, &annx[i], &refdata);
+            print_alignx(log, &annx[i], refdata);
         }
     }
 
@@ -643,7 +641,7 @@ pub fn annotate_seq_core(
     if verbose {
         fwriteln!(log, "\nALIGNMENTS ONE\n");
         for i in 0..annx.len() {
-            print_alignx(log, &annx[i], &refdata);
+            print_alignx(log, &annx[i], refdata);
         }
     }
 
@@ -666,7 +664,7 @@ pub fn annotate_seq_core(
     for i in 0..annx.len() {
         ts.push((annx[i].2 as usize, i));
     }
-    ts.sort();
+    ts.sort_unstable();
     let mut i1 = 0;
     while i1 < ts.len() {
         let j1 = next_diff1_2(&ts, i1 as i32) as usize;
@@ -682,7 +680,7 @@ pub fn annotate_seq_core(
                 tlen2 += annx[ts[k].1].1;
             }
             let (mut m1, mut m2) = (0, 0);
-            let mut over = 0 as i64;
+            let mut over = 0_i64;
             let mut offsets1 = Vec::<i32>::new();
             let mut offsets2 = Vec::<i32>::new();
             for k1 in i1..j1 {
@@ -693,8 +691,8 @@ pub fn annotate_seq_core(
                 let u2 = ts[k2].1;
                 offsets2.push(annx[u2].0 - annx[u2].3);
             }
-            offsets1.sort();
-            offsets2.sort();
+            offsets1.sort_unstable();
+            offsets2.sort_unstable();
             m1 += offsets1[offsets1.len() - 1] - offsets1[0];
             m2 += offsets2[offsets2.len() - 1] - offsets2[0];
             for k1 in i1..j1 {
@@ -707,7 +705,7 @@ pub fn annotate_seq_core(
                     let len2 = annx[u2].1;
                     let start = max(l1, l2);
                     let stop = min(l1 + len1, l2 + len2);
-                    if !(start < stop) {
+                    if start >= stop {
                         continue;
                     }
                     over += stop as i64;
@@ -805,7 +803,7 @@ pub fn annotate_seq_core(
     if verbose {
         fwriteln!(log, "\nALIGNMENTS TWO\n");
         for i in 0..annx.len() {
-            print_alignx(log, &annx[i], &refdata);
+            print_alignx(log, &annx[i], refdata);
         }
     }
 
@@ -902,7 +900,7 @@ pub fn annotate_seq_core(
                     fwriteln!(log, "\ntrying to merge\n{}\n{}", rheaders[t1], rheaders[t2]);
                     fwriteln!(log, "|del| = {}, |ins| = {}", del.len(), ins.len());
                 }
-                if del.solo() && ins.len() == 0 {
+                if del.solo() && ins.is_empty() {
                     let (l, p, n) = (del[0].0, del[0].1, del[0].2);
                     if n != (p2 + len2 - p1) - (l2 + len2 - l1) {
                         continue;
@@ -915,7 +913,7 @@ pub fn annotate_seq_core(
                     l2 = l;
                     p2 = p + n;
                 }
-                if del.len() == 0 && ins.solo() {
+                if del.is_empty() && ins.solo() {
                     let (l, p, n) = (ins[0].0, ins[0].1, ins[0].2);
                     // ◼ This is buggy.  It fails if overflow detection is on.
                     if n + l1 + p2 != l2 + p1 {
@@ -968,7 +966,7 @@ pub fn annotate_seq_core(
     if verbose {
         fwriteln!(log, "\nALIGNMENTS THREE\n");
         for i in 0..annx.len() {
-            print_alignx(log, &annx[i], &refdata);
+            print_alignx(log, &annx[i], refdata);
         }
     }
 
@@ -1034,14 +1032,9 @@ pub fn annotate_seq_core(
             let t1 = annx[data[i1].2[0]].2 as usize;
             let t2 = annx[data[i2].2[0]].2 as usize;
 
-            let mut same_class = false;
-            if refdata.segtype[t1] == refdata.segtype[t2] {
-                same_class = true;
-            } else if refdata.is_v(t1) && refdata.is_u(t2) {
-                same_class = true;
-            } else if refdata.is_u(t1) && refdata.is_v(t2) {
-                same_class = true;
-            }
+            let same_class = (refdata.segtype[t1] == refdata.segtype[t2])
+                || (refdata.is_v(t1) && refdata.is_u(t2))
+                || (refdata.is_u(t1) && refdata.is_v(t2));
             if !same_class {
                 continue;
             }
@@ -1191,18 +1184,14 @@ pub fn annotate_seq_core(
             let (mut zstop1, mut zstop2) = (0, 0);
             for l in 0..data[i1].2.len() {
                 let t = annx[data[i1].2[l] as usize].2 as usize;
-                if refdata.is_v(t) {
-                    if data[i1].3[l] == 0 || data[i1].0[l].0 == 0 {
-                        zstop1 = max(zstop1, data[i1].0[l].1);
-                    }
+                if refdata.is_v(t) && (data[i1].3[l] == 0 || data[i1].0[l].0 == 0) {
+                    zstop1 = max(zstop1, data[i1].0[l].1);
                 }
             }
             for l in 0..data[i2].2.len() {
                 let t = annx[data[i2].2[l] as usize].2 as usize;
-                if refdata.is_v(t) {
-                    if data[i2].3[l] == 0 || data[i2].0[l].0 == 0 {
-                        zstop2 = max(zstop2, data[i2].0[l].1);
-                    }
+                if refdata.is_v(t) && (data[i2].3[l] == 0 || data[i2].0[l].0 == 0) {
+                    zstop2 = max(zstop2, data[i2].0[l].1);
                 }
             }
 
@@ -1212,38 +1201,36 @@ pub fn annotate_seq_core(
             let (mut win1, mut win2) = (false, false);
             let c1 = m1 == m2 && !have_utr_align2 && err1_nu == err2_nu && outside1 > outside2;
             let c2 = m2 == m1 && !have_utr_align1 && err2_nu == err1_nu && outside2 > outside1;
-            if zstop1 > zstop2 + 20 && (outside2 <= 10.0 || total2 - share <= 10) {
-                win1 = true;
-            } else if outside1 >= 10.0 && outside2 <= 1.0 && err1 - err2 <= 2.5 {
+            if (zstop1 > zstop2 + 20 && (outside2 <= 10.0 || total2 - share <= 10))
+                || (outside1 >= 10.0 && outside2 <= 1.0 && err1 - err2 <= 2.5)
+            {
                 win1 = true;
             } else if zstop1 == 0 && zstop2 > 0 {
-            } else if outside2 <= 10.0 || total2 - share <= 10 {
-                if m1 < m2
+            } else if (outside2 <= 10.0 || total2 - share <= 10)
+                && (m1 < m2
                     || (m1 == m2 && err1 < err2 && !c2)
                     || (m1 == m2 && err1 == err2 && outside1 > outside2)
                     || (m1 == m2 && err1 == err2 && outside1 == outside2 && t1 < t2)
-                    || c1
-                {
-                    win1 = true;
-                }
+                    || c1)
+            {
+                win1 = true;
             }
 
             // Symmetrization.
 
-            if zstop2 > zstop1 + 20 && (outside1 <= 10.0 || total1 - share <= 10) {
-                win2 = true;
-            } else if outside2 >= 10.0 && outside1 <= 1.0 && err2 - err1 <= 2.5 {
+            if (zstop2 > zstop1 + 20 && (outside1 <= 10.0 || total1 - share <= 10))
+                || (outside2 >= 10.0 && outside1 <= 1.0 && err2 - err1 <= 2.5)
+            {
                 win2 = true;
             } else if zstop2 == 0 && zstop1 > 0 {
-            } else if outside1 <= 10.0 || total1 - share <= 10 {
-                if m2 < m1
+            } else if (outside1 <= 10.0 || total1 - share <= 10)
+                && (m2 < m1
                     || (m2 == m1 && err2 < err1 && !c1)
                     || (m2 == m1 && err2 == err1 && outside2 > outside1)
                     || (m2 == m1 && err2 == err1 && outside2 == outside1 && t2 < t1)
-                    || c2
-                {
-                    win2 = true;
-                }
+                    || c2)
+            {
+                win2 = true;
             }
             if win2 {
                 win1 = false;
@@ -1322,14 +1309,10 @@ pub fn annotate_seq_core(
                 && err1 == err2
                 && t1 < t2
             {
-                if refdata.name[t1] == "TRBC1".to_string()
-                    && refdata.name[t2] == "TRBC2".to_string()
-                {
+                if refdata.name[t1] == *"TRBC1" && refdata.name[t2] == *"TRBC2" {
                     continue;
                 }
-                if refdata.name[t2] == "TRBC1".to_string()
-                    && refdata.name[t1] == "TRBC2".to_string()
-                {
+                if refdata.name[t2] == *"TRBC1" && refdata.name[t1] == *"TRBC2" {
                     continue;
                 }
                 win1 = true;
@@ -1352,7 +1335,7 @@ pub fn annotate_seq_core(
     if verbose {
         fwriteln!(log, "\nALIGNMENTS FOUR\n");
         for i in 0..annx.len() {
-            print_alignx(log, &annx[i], &refdata);
+            print_alignx(log, &annx[i], refdata);
         }
     }
 
@@ -1381,9 +1364,9 @@ pub fn annotate_seq_core(
             if (p2 > 0 && len1 >= len2) || (p2 == 0 && len1 >= len2 + MIN_EXT) {
                 if verbose {
                     fwriteln!(log, "");
-                    print_alignx(log, &annx[i1], &refdata);
+                    print_alignx(log, &annx[i1], refdata);
                     fwriteln!(log, "beats");
-                    print_alignx(log, &annx[i2], &refdata);
+                    print_alignx(log, &annx[i2], refdata);
                 }
                 to_delete[i2] = true;
             }
@@ -1398,7 +1381,7 @@ pub fn annotate_seq_core(
     // most 5 mismatches.
 
     let (mut igv, mut igj) = (false, false);
-    let mut igc = -1 as i32;
+    let mut igc = -1_i32;
     const J_TOT: i32 = 20;
     const J_MIS: i32 = 5;
     for i in 0..annx.len() {
@@ -1407,26 +1390,24 @@ pub fn annotate_seq_core(
             continue;
         }
         let rt = refdata.rtype[t];
-        if rt >= 0 && rt < 3 {
-            if refdata.segtype[t] == "V".to_string() {
+        if (0..3).contains(&rt) {
+            if refdata.segtype[t] == *"V" {
                 igv = true;
-            } else if refdata.segtype[t] == "J".to_string() {
+            } else if refdata.segtype[t] == *"J" {
                 igj = true;
-            } else {
-                if refdata.segtype[t] == "C".to_string()
-                    && annx[i].3 == 0
-                    && annx[i].0 >= J_TOT
-                    && refs[t].len() >= J_TOT as usize
-                {
-                    igc = annx[i].0;
-                }
+            } else if refdata.segtype[t] == *"C"
+                && annx[i].3 == 0
+                && annx[i].0 >= J_TOT
+                && refs[t].len() >= J_TOT as usize
+            {
+                igc = annx[i].0;
             }
         }
     }
     if igc >= 0 && igv && !igj {
-        let mut best_t = -1 as i32;
+        let mut best_t = -1_i32;
         let mut best_mis = 1000000;
-        let mut best_z = -1 as i32;
+        let mut best_z = -1_i32;
         for z in 0..2 {
             for l in 0..refdata.igjs.len() {
                 let t = refdata.igjs[l];
@@ -1445,12 +1426,10 @@ pub fn annotate_seq_core(
                         }
                     }
                 }
-                if total == n as i32 {
-                    if mis < best_mis {
-                        best_t = t as i32;
-                        best_mis = mis;
-                        best_z = z as i32;
-                    }
+                if total == n as i32 && mis < best_mis {
+                    best_t = t as i32;
+                    best_mis = mis;
+                    best_z = z as i32;
                 }
             }
         }
@@ -1464,7 +1443,7 @@ pub fn annotate_seq_core(
                     mis.push(i + j);
                 }
             }
-            annx.push((i, n, best_t, 0 as i32, mis));
+            annx.push((i, n, best_t, 0_i32, mis));
             annx.sort();
         }
     }
@@ -1475,14 +1454,15 @@ pub fn annotate_seq_core(
     let mut to_delete: Vec<bool> = vec![false; annx.len()];
     for i1 in 0..annx.len() {
         let t1 = annx[i1].2 as usize;
-        if !rheaders[t1].contains("segment") && refdata.segtype[t1] == "D".to_string() {
+        if !rheaders[t1].contains("segment") && refdata.segtype[t1] == *"D" {
             let mut have_v = false;
             for i2 in 0..annx.len() {
                 let t2 = annx[i2].2 as usize;
-                if !rheaders[t2].contains("segment") && refdata.segtype[t2] == "V".to_string() {
-                    if refdata.rtype[t1] == refdata.rtype[t2] {
-                        have_v = true;
-                    }
+                if !rheaders[t2].contains("segment")
+                    && refdata.segtype[t2] == *"V"
+                    && refdata.rtype[t1] == refdata.rtype[t2]
+                {
+                    have_v = true;
                 }
             }
             if !have_v {
@@ -1503,19 +1483,19 @@ pub fn annotate_seq_core(
     let (mut v, mut d, mut j) = (false, false, false);
     let (mut vstop, mut jstart) = (0, 0);
     const VJTRIM: i32 = 10;
-    let mut v_rtype = -2 as i32;
+    let mut v_rtype = -2_i32;
     for i in 0..annx.len() {
         let t = annx[i].2 as usize;
         if !rheaders[t].contains("segment") {
             let rt = refdata.rtype[t];
             if rt == 0 || rt == 4 {
-                if refdata.segtype[t] == "V".to_string() {
+                if refdata.segtype[t] == *"V" {
                     v = true;
                     vstop = annx[i].0 + annx[i].1;
                     v_rtype = rt;
-                } else if refdata.segtype[t] == "D".to_string() {
+                } else if refdata.segtype[t] == *"D" {
                     d = true;
-                } else if refdata.segtype[t] == "J".to_string() {
+                } else if refdata.segtype[t] == *"J" {
                     j = true;
                     jstart = annx[i].0;
                 }
@@ -1576,7 +1556,7 @@ pub fn annotate_seq_core(
     if verbose {
         fwriteln!(log, "\nALIGNMENTS FIVE\n");
         for i in 0..annx.len() {
-            print_alignx(log, &annx[i], &refdata);
+            print_alignx(log, &annx[i], refdata);
         }
     }
 
@@ -1673,14 +1653,10 @@ pub fn annotate_seq_core(
             }
 
             if mis1 == mis2 {
-                if refdata.name[t1] == "TRBC1".to_string()
-                    && refdata.name[t2] == "TRBC2".to_string()
-                {
+                if refdata.name[t1] == *"TRBC1" && refdata.name[t2] == *"TRBC2" {
                     continue;
                 }
-                if refdata.name[t2] == "TRBC1".to_string()
-                    && refdata.name[t1] == "TRBC2".to_string()
-                {
+                if refdata.name[t2] == *"TRBC1" && refdata.name[t1] == *"TRBC2" {
                     continue;
                 }
             }
@@ -1791,7 +1767,7 @@ pub fn annotate_seq_core(
     if verbose {
         fwriteln!(log, "\nALIGNMENTS SIX\n");
         for i in 0..annx.len() {
-            print_alignx(log, &annx[i], &refdata);
+            print_alignx(log, &annx[i], refdata);
         }
     }
 
@@ -1808,7 +1784,7 @@ pub fn annotate_seq_core(
         }
         vs.push((t, i));
     }
-    vs.sort();
+    vs.sort_unstable();
     //                     len parts errs  index
     let mut score = Vec::<(i32, usize, usize, usize)>::new();
     let mut j = 0;
@@ -1914,10 +1890,8 @@ pub fn annotate_seq_core(
                 if !rheaders[t1 as usize].contains("J-REGION") {
                     continue;
                 }
-            } else {
-                if !rheaders[t1 as usize].contains("C-REGION") {
-                    continue;
-                }
+            } else if !rheaders[t1 as usize].contains("C-REGION") {
+                continue;
             }
             for i2 in 0..annx.len() {
                 let t2 = annx[i2].2;
@@ -1925,10 +1899,8 @@ pub fn annotate_seq_core(
                     if !rheaders[t2 as usize].contains("J-REGION") {
                         continue;
                     }
-                } else {
-                    if !rheaders[t2 as usize].contains("C-REGION") {
-                        continue;
-                    }
+                } else if !rheaders[t2 as usize].contains("C-REGION") {
+                    continue;
                 }
                 let (l1, l2) = (annx[i1].0, annx[i2].0);
                 let (len1, len2) = (annx[i1].1, annx[i2].1);
@@ -2178,7 +2150,7 @@ pub fn get_cdr3(tig: &DnaStringSlice, cdr3: &mut Vec<(usize, Vec<u8>, usize, usi
                 let first_f = j + (cdr3_min_len() - 3);
                 let last_f = a.len() - 4;
                 for k in first_f..last_f {
-                    if k + right[0].len() - 1 >= a.len() {
+                    if k + right[0].len() > a.len() {
                         break;
                     }
                     let mut rscore = 0;
@@ -2258,7 +2230,7 @@ pub fn get_cdr3(tig: &DnaStringSlice, cdr3: &mut Vec<(usize, Vec<u8>, usize, usi
 
 pub fn print_cdr3(tig: &DnaStringSlice, log: &mut Vec<u8>) {
     let mut cdr3 = Vec::<(usize, Vec<u8>, usize, usize)>::new();
-    get_cdr3(&tig, &mut cdr3);
+    get_cdr3(tig, &mut cdr3);
     for i in 0..cdr3.len() {
         fwriteln!(
             log,
@@ -2287,7 +2259,7 @@ pub fn cdr3_loc<'a>(
     // Given the design of this function, the following bound appears to be optimal
     // except possibly for changes less than ten.
     const LOW_RELV_CDR3: isize = -40;
-    if ann.len() == 0 {
+    if ann.is_empty() {
         return tig.slice(0, 0);
     }
     let mut i = ann.len() - 1;
@@ -2475,7 +2447,7 @@ impl AnnotationUnit {
 
         // Compute alignment score.
 
-        let mut s = 0 as i32;
+        let mut s = 0_i32;
         let t = ann[0].2 as usize;
         let r = &refdata.refs[t];
         for l in 0..na {
@@ -2626,7 +2598,7 @@ impl ContigAnnotation {
         is_cellx: bool,                          // was the barcode declared a cell?
         productivex: bool,                       // productive?
     ) -> ContigAnnotation {
-        let mut vstart = -1 as i32;
+        let mut vstart = -1_i32;
         for i in 0..ann.len() {
             let t = ann[i].2 as usize;
             if refdata.is_v(t) && ann[i].3 == 0 {
@@ -2634,7 +2606,7 @@ impl ContigAnnotation {
             }
         }
         let mut aa = String::new();
-        let mut stop = -1 as i32;
+        let mut stop = -1_i32;
         let x = b.to_owned().to_ascii_vec();
         if vstart >= 0 {
             let y = aa_seq(&x, vstart as usize);
@@ -2647,14 +2619,14 @@ impl ContigAnnotation {
             }
         }
         let (mut cdr3x, mut cdr3x_dna) = (String::new(), String::new());
-        let (mut cdr3x_start, mut cdr3x_stop) = (-1 as i32, -1 as i32);
+        let (mut cdr3x_start, mut cdr3x_stop) = (-1_i32, -1_i32);
         let mut cdr3y = Vec::<(usize, Vec<u8>, usize, usize)>::new();
-        if refdata.refs.len() > 0 {
+        if !refdata.refs.is_empty() {
             get_cdr3_using_ann(b, refdata, ann, &mut cdr3y);
         } else {
             get_cdr3(&b.slice(0, b.len()), &mut cdr3y);
         }
-        if cdr3y.len() > 0 {
+        if !cdr3y.is_empty() {
             cdr3x = stringme(&cdr3y[0].1);
             let start = cdr3y[0].0;
             for i in start..start + 3 * cdr3x.len() {
@@ -2708,9 +2680,9 @@ impl ContigAnnotation {
             clonotype: None,
             info: ClonotypeInfo::empty(),
             high_confidence: high_confidencex,
-            validated_umis: validated_umis,
-            non_validated_umis: non_validated_umis,
-            invalidated_umis: invalidated_umis,
+            validated_umis,
+            non_validated_umis,
+            invalidated_umis,
             is_cell: is_cellx,
             productive: Some(productivex),
             filtered: true,
@@ -2746,9 +2718,9 @@ impl ContigAnnotation {
         is_cell: bool,                           // was the barcode declared a cell?
     ) -> ContigAnnotation {
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
-        annotate_seq(&b, &refdata, &mut ann, true, false, true);
+        annotate_seq(b, refdata, &mut ann, true, false, true);
         let mut log = Vec::<u8>::new();
-        let productive = is_valid(&b, refdata, &ann, false, &mut log);
+        let productive = is_valid(b, refdata, &ann, false, &mut log);
         ContigAnnotation::from_annotate_seq(
             b,
             q,
@@ -2838,26 +2810,25 @@ pub fn make_annotation_units(
         let mut j = 0;
         while j < ann.len() {
             let t = ann[j].2 as usize;
-            if refdata.segtype[t] != rtype[i].to_string() {
+            if refdata.segtype[t] != *rtype[i] {
                 j += 1;
                 continue;
             }
             let mut entries = 1;
             let mut len = ann[j].1;
-            if j < ann.len() - 1 && ann[j + 1].2 as usize == t {
-                if (ann[j].0 + ann[j].1 == ann[j + 1].0 && ann[j].3 + ann[j].1 < ann[j + 1].3)
-                    || (ann[j].0 + ann[j].1 < ann[j + 1].0 && ann[j].3 + ann[j].1 == ann[j + 1].3)
-                {
-                    entries = 2;
-                    len += ann[j + 1].1;
-                }
+            if j < ann.len() - 1
+                && ann[j + 1].2 as usize == t
+                && ((ann[j].0 + ann[j].1 == ann[j + 1].0 && ann[j].3 + ann[j].1 < ann[j + 1].3)
+                    || (ann[j].0 + ann[j].1 < ann[j + 1].0 && ann[j].3 + ann[j].1 == ann[j + 1].3))
+            {
+                entries = 2;
+                len += ann[j + 1].1;
             }
             let mut score = len as usize;
-            if refdata.segtype[t] == "V".to_string() && ann[j].3 == 0 {
+            if refdata.segtype[t] == *"V" && ann[j].3 == 0 {
                 score += 1_000_000;
             }
-            if refdata.segtype[t] == "J".to_string()
-                && (ann[j].3 + ann[j].1) as usize == refdata.refs[t].len()
+            if refdata.segtype[t] == *"J" && (ann[j].3 + ann[j].1) as usize == refdata.refs[t].len()
             {
                 score += 1_000_000;
             }
@@ -2865,11 +2836,11 @@ pub fn make_annotation_units(
             j += entries;
         }
         reverse_sort(&mut locs);
-        if locs.len() > 0 {
+        if !locs.is_empty() {
             let (j, entries) = (locs[0].1, locs[0].2);
             let mut annx = Vec::<(i32, i32, i32, i32, i32)>::new();
             for k in j..j + entries {
-                annx.push(ann[k].clone());
+                annx.push(ann[k]);
             }
             x.push(AnnotationUnit::from_annotate_seq(b, refdata, &annx));
         }
@@ -2880,41 +2851,7 @@ pub fn make_annotation_units(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::refx::{human_ref, make_vdj_ref_data_core};
-    use crate::{annotate, refx};
-
-    // The following test checks for alignment of a D region.  This example was fixed by code
-    // changes in March 2020.
-
-    #[test]
-    fn test_d_region_alignment() {
-        use annotate::{annotate_seq, DnaString, RefData};
-        let seq = DnaString::from_acgt_bytes(
-            b"GGAGGTGCGAATGACTCTGCTCTCTGTCCTGTCTCCTCATCTGCAAAATTAGGAAGCCTGTCTTGATTATCTCCAGGAA\
-            CCTCCCACCTCTTCATTCCAGCCTCTGACAAACTCTGCACATTAGGCCAGGAGAAGCCCCCGAGCCAAGTCTCTTTTCTCATTCTC\
-            TTCCAACAAGTGCTTGGAGCTCCAAGAAGGCCCCCTTTGCACTATGAGCAACCAGGTGCTCTGCTGTGTGGTCCTTTGTCTCCTGG\
-            GAGCAAACACCGTGGATGGTGGAATCACTCAGTCCCCAAAGTACCTGTTCAGAAAGGAAGGACAGAATGTGACCCTGAGTTGTGAA\
-            CAGAATTTGAACCACGATGCCATGTACTGGTACCGACAGGACCCAGGGCAAGGGCTGAGATTGATCTACTACTCACAGATAGTAAA\
-            TGACTTTCAGAAAGGAGATATAGCTGAAGGGTACAGCGTCTCTCGGGAGAAGAAGGAATCCTTTCCTCTCACTGTGACATCGGCCC\
-            AAAAGAACCCGACAGCTTTCTATCTCTGTGCCAGTAGTATTTTTCTTGCCGGGACAGGGGGCTGGAGCGGCACTGAAGCTTTCTTT\
-            GGACAAGGCACCAGACTCACAGTTGTAGAGGACCTGAACAAGGTGTTCCCACCCGAGGTCGCTGTGTTTGAGCCATCAGA",
-        );
-        let (refx, ext_refx) = (human_ref(), String::new());
-        let (is_tcr, is_bcr) = (true, false);
-        let mut refdata = RefData::new();
-        make_vdj_ref_data_core(&mut refdata, &refx, &ext_refx, is_tcr, is_bcr, None);
-        let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
-        annotate_seq(&seq, &refdata, &mut ann, true, false, true);
-        let mut have_d = false;
-        for i in 0..ann.len() {
-            if refdata.is_d(ann[i].2 as usize) {
-                have_d = true;
-            }
-        }
-        if !have_d {
-            panic!("\nFailed to find alignment of D region.\n");
-        }
-    }
+    use crate::refx;
 
     #[test]
     fn test_no_internal_soft_clipping() {
