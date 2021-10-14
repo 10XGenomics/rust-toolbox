@@ -4,7 +4,10 @@
 
 use bio_edit::alignment::pairwise::Aligner;
 use bio_edit::alignment::AlignmentOperation;
-use bio_edit::alignment::{Alignment, AlignmentOperation::*};
+use bio_edit::alignment::{
+    Alignment,
+    AlignmentOperation::{Del, Ins, Match, Subst, Xclip, Yclip},
+};
 use debruijn::dna_string::DnaString;
 use itertools::Itertools;
 use std::cmp::min;
