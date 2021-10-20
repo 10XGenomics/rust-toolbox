@@ -46,7 +46,10 @@ pub fn is_valid(
                 igh = true;
             }
             if !rheaders[t].contains("5'UTR")
-                && ((m == "A" && (rheaders[t].contains("TRAV") || rheaders[t].contains("TRGV") || rheaders[t].contains("IGHV")))
+                && ((m == "A"
+                    && (rheaders[t].contains("TRAV")
+                        || rheaders[t].contains("TRGV")
+                        || rheaders[t].contains("IGHV")))
                     || (m == "B"
                         && (rheaders[t].contains("TRBV")
                             || rheaders[t].contains("TRDV")
@@ -61,7 +64,10 @@ pub fn is_valid(
                     vstarts.push(l as i32);
                 }
             }
-            if (m == "A" && (rheaders[t].contains("TRAJ") || rheaders[t].contains("TRGJ") || rheaders[t].contains("IGHJ")))
+            if (m == "A"
+                && (rheaders[t].contains("TRAJ")
+                    || rheaders[t].contains("TRGJ")
+                    || rheaders[t].contains("IGHJ")))
                 || (m == "B"
                     && (rheaders[t].contains("TRBJ")
                         || rheaders[t].contains("TRDJ")
