@@ -9,7 +9,7 @@ use evalexpr::{ContextWithMutableFunctions, ContextWithMutableVariables, HashMap
 use evalexpr::{Function, Value};
 use statrs::distribution::ContinuousCDF;
 use string_utils::*;
-use vector_utils::bin_member;
+use vector_utils::{bin_member, unique_sort};
 
 // ================================================================================================
 
@@ -30,6 +30,7 @@ pub fn vars_of_node(n: &evalexpr::Node) -> Vec<String> {
     for i in n.iter_variable_identifiers() {
         x.push((*i).to_string());
     }
+    unique_sort(&mut x);
     x
 }
 
