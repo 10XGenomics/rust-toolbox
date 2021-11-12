@@ -136,12 +136,7 @@ pub fn make_vdj_ref_data_core(
 
     refs.clear();
     rheaders.clear();
-    // TODO: Don't convert to string.
-    read_fasta_contents_into_vec_dna_string_plus_headers(
-        &ref_fasta.to_string(),
-        &mut refs,
-        &mut rheaders,
-    );
+    read_fasta_contents_into_vec_dna_string_plus_headers(ref_fasta, &mut refs, &mut rheaders);
 
     // Filter by ids if requested.
 
@@ -248,9 +243,8 @@ pub fn make_vdj_ref_data_core(
     if !extended_ref_fasta.is_empty() {
         let mut refs2 = Vec::<DnaString>::new();
         let mut rheaders2 = Vec::<String>::new();
-        // TODO: Don't convert to String.
         read_fasta_contents_into_vec_dna_string_plus_headers(
-            &extended_ref_fasta.to_string(),
+            extended_ref_fasta,
             &mut refs2,
             &mut rheaders2,
         );

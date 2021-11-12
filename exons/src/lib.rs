@@ -4,13 +4,7 @@
 // { { chr-name, start, stop, fw?, gene-name, exon ) }.
 
 use io_utils::open_for_read;
-use std::{
-    assert, format,
-    fs::File,
-    i32,
-    io::{BufRead, BufReader},
-    str,
-};
+use std::{assert, format, i32, io::BufRead, str};
 use string_utils::TextUtils;
 use vector_utils::unique_sort;
 

@@ -6,11 +6,7 @@ use debruijn::dna_string::DnaString;
 use flate2::read::MultiGzDecoder;
 use io_utils::open_for_read;
 use std::process::Command;
-use std::{
-    fs::File,
-    io::{prelude::*, BufReader},
-    path::Path,
-};
+use std::{io::prelude::*, path::Path};
 use string_utils::TextUtils;
 
 // Read a fasta file or gzipped fasta file and convert to a Vec<Vec<u8>>, in which
@@ -21,8 +17,7 @@ pub fn read_fasta_to_vec_vec_u8(f: impl AsRef<Path>) -> Vec<Vec<u8>> {
     let f = f.as_ref();
     match f.extension() {
         Some(ex) if ex == "gz" => {
-            // TODO: pass `&Path` directly rather than `&str` once io_utils is updated.
-            let fin = open_for_read![f.to_str().unwrap()];
+            let fin = open_for_read![f];
             let mut last: String = String::new();
             let mut first = true;
             for line in fin.lines() {
@@ -82,8 +77,7 @@ pub fn read_fasta_into_vec_dna_string_plus_headers(
     let f = f.as_ref();
     match f.extension() {
         Some(ex) if ex == "gz" => {
-            // TODO: pass `&Path` directly rather than `&str` once io_utils is updated.
-            let fin = open_for_read![f.to_str().unwrap()];
+            let fin = open_for_read![f];
             let mut last: String = String::new();
             let mut first = true;
             for line in fin.lines() {
@@ -161,8 +155,7 @@ pub fn read_fasta_contents_into_vec_dna_string_plus_headers(
 
 pub fn read_fasta_headers(f: impl AsRef<Path>, headers: &mut Vec<String>) {
     let f = f.as_ref();
-    // TODO: Don't convert to str.
-    let fin = open_for_read![f.to_str().unwrap()];
+    let fin = open_for_read![f];
     let mut last: String = String::new();
     let mut first = true;
     for line in fin.lines() {

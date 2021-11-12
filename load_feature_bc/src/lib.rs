@@ -5,11 +5,11 @@
 use flate2::read::MultiGzDecoder;
 use io_utils::{open_for_read, read_maybe_unzipped};
 use std::path::Path;
-use std::{format, i32, str, usize};
 use std::{
     fs::File,
     io::{BufRead, BufReader},
 };
+use std::{i32, str, usize};
 use string_utils::TextUtils;
 
 // Load the raw feature barcode matrix from a cellranger run.  This
@@ -35,10 +35,9 @@ pub fn load_feature_bc_matrix(
         dir.pop();
         dir.push("features.tsv.gz");
     }
-    // TODO: don't convert to String.
-    read_maybe_unzipped(&dir.to_str().unwrap().to_string(), features);
+    read_maybe_unzipped(&dir, features);
     dir.set_file_name("barcodes.tsv.gz");
-    read_maybe_unzipped(&dir.to_str().unwrap().to_string(), barcodes);
+    read_maybe_unzipped(&dir, barcodes);
     dir.set_file_name("matrix.mtx.gz");
     let mut matrix_file = dir;
 
@@ -47,12 +46,7 @@ pub fn load_feature_bc_matrix(
         _load_feature_bc_matrix(BufReader::new(gz), barcodes, gex_sparse_matrix);
     } else {
         matrix_file.set_extension("");
-        // TODO: don't convert to String.
-        _load_feature_bc_matrix(
-            open_for_read![matrix_file.to_str().unwrap()],
-            barcodes,
-            gex_sparse_matrix,
-        );
+        _load_feature_bc_matrix(open_for_read![&matrix_file], barcodes, gex_sparse_matrix);
     };
     fn _load_feature_bc_matrix(
         f: impl BufRead,
