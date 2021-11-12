@@ -41,6 +41,11 @@ pub trait TextUtils<'a> {
 
     fn between(&'a self, t: &str, u: &str) -> &'a str;
 
+    // s.between2(t,u): return the part of s after the first instance of t and
+    // before the last instance of u after that
+
+    fn between2(&'a self, t: &str, u: &str) -> &'a str;
+
     // s.rev_before(t): start from the end s, find the first instance of t, and
     // return what's before that
 
@@ -94,6 +99,17 @@ impl<'a> TextUtils<'a> for str {
         let r = a.find(u).unwrap_or_else(|| {
             panic!(
                 "between( \"{}\", \"{}\", \"{}\" ) failed at second part",
+                self, t, u
+            )
+        });
+        &a[0..r]
+    }
+
+    fn between2(&'a self, t: &str, u: &str) -> &'a str {
+        let a = self.after(t);
+        let r = a.rfind(u).unwrap_or_else(|| {
+            panic!(
+                "between2( \"{}\", \"{}\", \"{}\" ) failed at second part",
                 self, t, u
             )
         });

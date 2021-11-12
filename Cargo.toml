@@ -8,6 +8,7 @@ members = [
     "dna",
     "equiv",
     "exons",
+    "expr_tools",
     "fasta_tools",
     "graph_simple",
     "hyperbase",
