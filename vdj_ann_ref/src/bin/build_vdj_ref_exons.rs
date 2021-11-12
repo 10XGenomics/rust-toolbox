@@ -23,7 +23,7 @@ use std::{
     env, eprintln, format, fs,
     fs::File,
     i32,
-    io::{BufRead, BufReader, BufWriter},
+    io::{BufRead, BufReader},
     print, println, process, str, u8, usize, vec, write, writeln,
 };
 use string_utils::{cap1, strme, TextUtils};

@@ -5,11 +5,11 @@
 use flate2::read::MultiGzDecoder;
 use io_utils::{open_for_read, read_maybe_unzipped};
 use std::path::Path;
-use std::{format, i32, str, usize};
 use std::{
     fs::File,
     io::{BufRead, BufReader},
 };
+use std::{i32, str, usize};
 use string_utils::TextUtils;
 
 // Load the raw feature barcode matrix from a cellranger run.  This

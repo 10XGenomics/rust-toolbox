@@ -6,11 +6,7 @@ use debruijn::dna_string::DnaString;
 use flate2::read::MultiGzDecoder;
 use io_utils::open_for_read;
 use std::process::Command;
-use std::{
-    fs::File,
-    io::{prelude::*, BufReader},
-    path::Path,
-};
+use std::{io::prelude::*, path::Path};
 use string_utils::TextUtils;
 
 // Read a fasta file or gzipped fasta file and convert to a Vec<Vec<u8>>, in which
