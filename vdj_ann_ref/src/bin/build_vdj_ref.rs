@@ -184,7 +184,7 @@ fn add_gene<R: Write>(
     start: usize,
     stop: usize,
     to_chr: &HashMap<String, usize>,
-    refs: &Vec<DnaString>,
+    refs: &[DnaString],
     none: bool,
     is_utr: bool,
     source: &str,
@@ -213,7 +213,7 @@ fn add_gene2<R: Write>(
     start2: usize,
     stop2: usize,
     to_chr: &HashMap<String, usize>,
-    refs: &Vec<DnaString>,
+    refs: &[DnaString],
     none: bool,
     fw: bool,
     source: &str,
@@ -235,11 +235,9 @@ fn add_gene2<R: Write>(
     print_fasta(out, &header, &seq.slice(0, seq.len()), none);
 }
 
-fn parse_gtf_file(
-    gtf: &str,
-    demangle: &HashMap<String, String>,
-    exons: &mut Vec<(String, String, String, i32, i32, String, bool, String)>,
-) {
+type ExonSpec = (String, String, String, i32, i32, String, bool, String);
+
+fn parse_gtf_file(gtf: &str, demangle: &HashMap<String, String>, exons: &mut Vec<ExonSpec>) {
     let f = open_for_read![&gtf];
     exons.clear();
     for line in f.lines() {
@@ -384,33 +382,27 @@ fn main() {
     }
     let mut none = false;
     let mut download = false;
-    let mut species = String::new();
-    match args[1].as_str() {
+    let species = match args[1].as_str() {
         "DOWNLOAD" => {
             download = true;
+            ""
         }
-        "HUMAN" => {
-            species = "human".to_string();
-        }
-        "MOUSE" => {
-            species = "mouse".to_string();
-        }
-        "BALBC" => {
-            species = "balbc".to_string();
-        }
+        "HUMAN" => "human",
+        "MOUSE" => "mouse",
+        "BALBC" => "balbc",
         "NONE" => {
             none = true;
-            species = "human".to_string();
+            "human"
         }
         _ => {
             eprintln!("Call with DOWNLOAD or HUMAN or MOUSE or NONE.");
             std::process::exit(1);
         }
-    }
+    };
 
     // Define root output directory.
 
-    let root = "vdj_ann/vdj_refs".to_string();
+    let root = "vdj_ann/vdj_refs";
     let mut out = open_for_write_new![&format!("{}/{}/fasta/regions.fa", root, species)];
 
     // Define release.  If this is ever changed, the effect on the fasta output
@@ -418,18 +410,20 @@ fn main() {
 
     let release = 94;
     let version = "5.0.0";
-    let source: String;
-    let source2: String;
-    if species == "human" {
-        source = format!("GRCh38-release{}", release);
-        source2 = "vdj_GRCh38_alts_ensembl".to_string();
-    } else if species == "mouse" {
-        source = format!("GRCm38-release{}", release);
-        source2 = "vdj_GRCm38_alts_ensembl".to_string();
-    } else {
-        source = format!("BALB_cJ_v1.{}", release);
-        source2 = source.clone();
-    }
+    let (source, source2) = match species {
+        "human" => (
+            format!("GRCh38-release{}", release),
+            "vdj_GRCh38_alts_ensembl".to_string(),
+        ),
+        "mouse" => (
+            format!("GRCm38-release{}", release),
+            "vdj_GRCm38_alts_ensembl".to_string(),
+        ),
+        _ => {
+            let source = format!("BALB_cJ_v1.{}", release);
+            (source.clone(), source)
+        }
+    };
 
     // Define local directory.
 
@@ -989,11 +983,11 @@ fn main() {
 
     // Define input filenames.
 
-    let gtf = format!("{}/{}", internal, ensembl_path(&species, "gtf", release));
+    let gtf = format!("{}/{}", internal, ensembl_path(species, "gtf", release));
     let fasta = format!(
         "{}/{}.gz",
         internal,
-        ensembl_path(&species, "fasta", release)
+        ensembl_path(species, "fasta", release)
     );
 
     // Generate reference.json.  Note version number.
@@ -1012,12 +1006,12 @@ fn main() {
     fwriteln!(
         json,
         r###"    "input_fasta_files": "{}","###,
-        ensembl_path(&species, "fasta", release)
+        ensembl_path(species, "fasta", release)
     );
     fwriteln!(
         json,
         r###"    "input_gtf_files": "{}","###,
-        ensembl_path(&species, "gtf", release)
+        ensembl_path(species, "gtf", release)
     );
     fwriteln!(json, r###"    "mkref_version": "","###);
     fwriteln!(json, r###"    "type": "V(D)J Reference","###);
@@ -1033,7 +1027,7 @@ fn main() {
     //    except that in the gtf file, for genes present only on alternate loci,
     //    only an accession identifier is given (in some and perhaps all cases).
 
-    let gff3 = format!("{}/{}", internal, ensembl_path(&species, "gff3", release));
+    let gff3 = format!("{}/{}", internal, ensembl_path(species, "gff3", release));
     let mut demangle = HashMap::<String, String>::new();
     let f = open_for_read![&gff3];
     for line in f.lines() {

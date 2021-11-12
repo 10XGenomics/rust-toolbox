@@ -95,23 +95,19 @@ pub fn write_to_file(s: &MirrorSparseMatrix, f: &str) {
     binary_write_vec::<u8>(&mut ff, &s.x).unwrap();
 }
 
-fn get_u8_at_pos(v: &Vec<u8>, pos: usize) -> u8 {
+fn get_u8_at_pos(v: &[u8], pos: usize) -> u8 {
     v[pos]
 }
 
-fn get_u16_at_pos(v: &Vec<u8>, pos: usize) -> u16 {
+fn get_u16_at_pos(v: &[u8], pos: usize) -> u16 {
     let mut z = [0_u8; 2];
-    for i in 0..2 {
-        z[i] = v[pos + i];
-    }
+    z.clone_from_slice(&v[pos..(2 + pos)]);
     u16::from_le_bytes(z)
 }
 
-fn get_u32_at_pos(v: &Vec<u8>, pos: usize) -> u32 {
+fn get_u32_at_pos(v: &[u8], pos: usize) -> u32 {
     let mut z = [0_u8; 4];
-    for i in 0..4 {
-        z[i] = v[pos + i];
-    }
+    z.clone_from_slice(&v[pos..(4 + pos)]);
     u32::from_le_bytes(z)
 }
 
@@ -121,16 +117,12 @@ fn _put_u8_at_pos(v: &mut Vec<u8>, pos: usize, val: u8) {
 
 fn _put_u16_at_pos(v: &mut Vec<u8>, pos: usize, val: u16) {
     let z = val.to_le_bytes();
-    for i in 0..2 {
-        v[pos + i] = z[i];
-    }
+    v[pos..(2 + pos)].clone_from_slice(&z[..2]);
 }
 
 fn put_u32_at_pos(v: &mut Vec<u8>, pos: usize, val: u32) {
     let z = val.to_le_bytes();
-    for i in 0..4 {
-        v[pos + i] = z[i];
-    }
+    v[pos..(4 + pos)].clone_from_slice(&z[..4]);
 }
 
 fn push_u8(v: &mut Vec<u8>, val: u8) {
@@ -178,9 +170,9 @@ impl MirrorSparseMatrix {
     }
 
     pub fn build_from_vec(
-        x: &Vec<Vec<(i32, i32)>>,
-        row_labels: &Vec<String>,
-        col_labels: &Vec<String>,
+        x: &[Vec<(i32, i32)>],
+        row_labels: &[String],
+        col_labels: &[String],
     ) -> MirrorSparseMatrix {
         let mut max_col = 0_i32;
         for i in 0..x.len() {
@@ -569,6 +561,12 @@ impl MirrorSparseMatrix {
             }
             0
         }
+    }
+}
+
+impl Default for MirrorSparseMatrix {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

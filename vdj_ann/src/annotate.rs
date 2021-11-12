@@ -66,11 +66,7 @@ pub fn print_start_codon_positions(tig: &DnaString, log: &mut Vec<u8>) {
 //
 // ◼ Ns are incorrectly handled.  See lena 100349 for lots of examples.
 
-pub fn chain_type(
-    b: &DnaString,
-    rkmers_plus_full_20: &Vec<(Kmer20, i32, i32)>,
-    rtype: &Vec<i32>,
-) -> i8 {
+pub fn chain_type(b: &DnaString, rkmers_plus_full_20: &[(Kmer20, i32, i32)], rtype: &[i32]) -> i8 {
     let n = 7;
     let k = 20;
     if b.len() < k {
@@ -1391,11 +1387,11 @@ pub fn annotate_seq_core(
         }
         let rt = refdata.rtype[t];
         if (0..3).contains(&rt) {
-            if refdata.segtype[t] == *"V" {
+            if refdata.segtype[t] == "V" {
                 igv = true;
-            } else if refdata.segtype[t] == *"J" {
+            } else if refdata.segtype[t] == "J" {
                 igj = true;
-            } else if refdata.segtype[t] == *"C"
+            } else if refdata.segtype[t] == "C"
                 && annx[i].3 == 0
                 && annx[i].0 >= J_TOT
                 && refs[t].len() >= J_TOT as usize
@@ -1454,12 +1450,12 @@ pub fn annotate_seq_core(
     let mut to_delete: Vec<bool> = vec![false; annx.len()];
     for i1 in 0..annx.len() {
         let t1 = annx[i1].2 as usize;
-        if !rheaders[t1].contains("segment") && refdata.segtype[t1] == *"D" {
+        if !rheaders[t1].contains("segment") && refdata.segtype[t1] == "D" {
             let mut have_v = false;
             for i2 in 0..annx.len() {
                 let t2 = annx[i2].2 as usize;
                 if !rheaders[t2].contains("segment")
-                    && refdata.segtype[t2] == *"V"
+                    && refdata.segtype[t2] == "V"
                     && refdata.rtype[t1] == refdata.rtype[t2]
                 {
                     have_v = true;
@@ -1484,20 +1480,20 @@ pub fn annotate_seq_core(
     let (mut vstop, mut jstart) = (0, 0);
     const VJTRIM: i32 = 10;
     let mut v_rtype = -2_i32;
-    for i in 0..annx.len() {
-        let t = annx[i].2 as usize;
+    for ann in &annx {
+        let t = ann.2 as usize;
         if !rheaders[t].contains("segment") {
             let rt = refdata.rtype[t];
             if rt == 0 || rt == 4 {
-                if refdata.segtype[t] == *"V" {
+                if refdata.segtype[t] == "V" {
                     v = true;
-                    vstop = annx[i].0 + annx[i].1;
+                    vstop = ann.0 + ann.1;
                     v_rtype = rt;
-                } else if refdata.segtype[t] == *"D" {
+                } else if refdata.segtype[t] == "D" {
                     d = true;
-                } else if refdata.segtype[t] == *"J" {
+                } else if refdata.segtype[t] == "J" {
                     j = true;
-                    jstart = annx[i].0;
+                    jstart = ann.0;
                 }
             }
         }
@@ -1793,7 +1789,7 @@ pub fn annotate_seq_core(
     let max_indel = 27;
     let min_len_gain = 100;
     while j < vs.len() {
-        let k = next_diff1_2(&mut vs, j as i32) as usize;
+        let k = next_diff1_2(&vs, j as i32) as usize;
         if k - j == 1 {
             score.push((annx[j].1, k - j, annx[j].4.len(), vs[j].1));
         } else if k - j == 2 {
@@ -2029,7 +2025,7 @@ pub fn annotate_seq_core(
 
 pub fn print_some_annotations(
     refdata: &RefData,
-    ann: &Vec<(i32, i32, i32, i32, i32)>,
+    ann: &[(i32, i32, i32, i32, i32)],
     log: &mut Vec<u8>,
     verbose: bool,
 ) {
@@ -2254,7 +2250,7 @@ pub fn print_cdr3(tig: &DnaStringSlice, log: &mut Vec<u8>) {
 pub fn cdr3_loc<'a>(
     tig: &'a DnaString,
     refdata: &RefData,
-    ann: &Vec<(i32, i32, i32, i32, i32)>,
+    ann: &[(i32, i32, i32, i32, i32)],
 ) -> DnaStringSlice<'a> {
     // Given the design of this function, the following bound appears to be optimal
     // except possibly for changes less than ten.
@@ -2291,7 +2287,7 @@ pub fn cdr3_loc<'a>(
 pub fn get_cdr3_using_ann(
     tig: &DnaString,
     refdata: &RefData,
-    ann: &Vec<(i32, i32, i32, i32, i32)>,
+    ann: &[(i32, i32, i32, i32, i32)],
     cdr3: &mut Vec<(usize, Vec<u8>, usize, usize)>,
 ) {
     let window = cdr3_loc(tig, refdata, ann);
@@ -2318,7 +2314,7 @@ pub fn get_cdr3_using_ann(
 pub fn print_cdr3_using_ann(
     tig: &DnaString,
     refdata: &RefData,
-    ann: &Vec<(i32, i32, i32, i32, i32)>,
+    ann: &[(i32, i32, i32, i32, i32)],
     log: &mut Vec<u8>,
 ) {
     let mut cdr3 = Vec::<(usize, Vec<u8>, usize, usize)>::new();
@@ -2377,7 +2373,7 @@ impl AnnotationUnit {
     pub fn from_annotate_seq(
         b: &DnaString,
         refdata: &RefData,
-        ann: &Vec<(i32, i32, i32, i32, i32)>,
+        ann: &[(i32, i32, i32, i32, i32)],
     ) -> AnnotationUnit {
         // Sanity check the inputs.  Obviously these conditions should be checked
         // before calling, so that they can never fail.
@@ -2586,9 +2582,9 @@ impl ContigAnnotation {
     pub fn from_annotate_seq(
         b: &DnaString,                           // the contig
         q: &[u8],                                // qual scores for the contig
-        tigname: &String,                        // name of the contig
+        tigname: &str,                           // name of the contig
         refdata: &RefData,                       // reference data
-        ann: &Vec<(i32, i32, i32, i32, i32)>,    // output of annotate_seq
+        ann: &[(i32, i32, i32, i32, i32)],       // output of annotate_seq
         nreads: usize,                           // number of reads assigned to contig
         numis: usize,                            // number of umis assigned to contig
         high_confidencex: bool,                  // declared high confidence?
@@ -2641,7 +2637,7 @@ impl ContigAnnotation {
         }
         let mut ann = ContigAnnotation {
             barcode: tigname.before("_").to_string(),
-            contig_name: tigname.clone(),
+            contig_name: tigname.to_string(),
             sequence: b.to_string(),
             quals: stringme(&qp),
             fraction_of_reads_for_this_barcode_provided_as_input_to_assembly: None,
@@ -2707,7 +2703,7 @@ impl ContigAnnotation {
     pub fn from_seq(
         b: &DnaString,                           // the contig
         q: &[u8],                                // qual scores for the contig
-        tigname: &String,                        // name of the contig
+        tigname: &str,                           // name of the contig
         refdata: &RefData,                       // reference data
         nreads: usize,                           // number of reads assigned to contig
         numis: usize,                            // number of umis assigned to contig
@@ -2771,10 +2767,9 @@ impl ContigAnnotation {
     }
 
     pub fn is_full_length(&self) -> bool {
-        self.full_length.unwrap_or(check_full_length(
-            self.get_region(VdjRegion::V),
-            self.get_region(VdjRegion::J),
-        ))
+        self.full_length.unwrap_or_else(|| {
+            check_full_length(self.get_region(VdjRegion::V), self.get_region(VdjRegion::J))
+        })
     }
 
     /// The chain corresponding to this contig is defined as the chain type of the V-region
@@ -2801,16 +2796,16 @@ fn check_full_length(v_ann: Option<&AnnotationUnit>, j_ann: Option<&AnnotationUn
 pub fn make_annotation_units(
     b: &DnaString,
     refdata: &RefData,
-    ann: &Vec<(i32, i32, i32, i32, i32)>,
+    ann: &[(i32, i32, i32, i32, i32)],
 ) -> Vec<AnnotationUnit> {
     let mut x = Vec::<AnnotationUnit>::new();
-    let rtype = vec!["U", "V", "D", "J", "C"];
-    for i in 0..rtype.len() {
+    let rtype = &["U", "V", "D", "J", "C"];
+    for &rt in rtype {
         let mut locs = Vec::<(usize, usize, usize)>::new();
         let mut j = 0;
         while j < ann.len() {
             let t = ann[j].2 as usize;
-            if refdata.segtype[t] != *rtype[i] {
+            if refdata.segtype[t] != rt {
                 j += 1;
                 continue;
             }
@@ -2825,10 +2820,10 @@ pub fn make_annotation_units(
                 len += ann[j + 1].1;
             }
             let mut score = len as usize;
-            if refdata.segtype[t] == *"V" && ann[j].3 == 0 {
+            if refdata.segtype[t] == "V" && ann[j].3 == 0 {
                 score += 1_000_000;
             }
-            if refdata.segtype[t] == *"J" && (ann[j].3 + ann[j].1) as usize == refdata.refs[t].len()
+            if refdata.segtype[t] == "J" && (ann[j].3 + ann[j].1) as usize == refdata.refs[t].len()
             {
                 score += 1_000_000;
             }

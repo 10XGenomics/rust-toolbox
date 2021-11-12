@@ -30,8 +30,8 @@ pub fn dir_list(d: &str) -> Vec<String> {
 // TEST FOR EXISTENCE OF FILE
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-pub fn path_exists(p: &str) -> bool {
-    Path::new(p).exists()
+pub fn path_exists(p: impl AsRef<Path>) -> bool {
+    p.as_ref().exists()
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -44,11 +44,11 @@ pub fn path_exists(p: &str) -> bool {
 #[macro_export]
 macro_rules! fwriteln {
     ($f:expr, $u:expr) => {
-        writeln!( $f, $u ).expect( &format!( "writeln! failed" ) );
+        writeln!( $f, $u ).expect("writeln! failed")
     };
     ($f:expr, $u:expr, $($x:tt)*) => {
         writeln!( $f, $u, $($x)* )
-            .expect( &format!( "writeln! failed while writing \"{}\"", $u ) );
+            .unwrap_or_else(|_| panic!( "writeln! failed while writing \"{}\"", $u ) )
     };
 }
 
@@ -57,11 +57,11 @@ macro_rules! fwriteln {
 #[macro_export]
 macro_rules! fwrite {
     ($f:expr, $u:expr) => {
-        write!( $f, $u ).expect( &format!( "write! failed" ) );
+        write!( $f, $u ).expect( "write! failed" )
     };
     ($f:expr, $u:expr, $($x:tt)*) => {
         write!( $f, $u, $($x)* )
-            .expect( &format!( "write! failed while writing \"{}\"", $u ) );
+            .unwrap_or_else(|_| panic!( "write! failed while writing \"{}\"", $u ) )
     };
 }
 
@@ -72,30 +72,49 @@ macro_rules! fwrite {
 #[macro_export]
 macro_rules! open_for_read {
     ($filename:expr) => {
-        BufReader::new(
-            File::open(&$filename).expect(&format!("Could not open file \"{}\"", &$filename)),
+        ::std::io::BufReader::new(
+            ::std::fs::File::open(::core::convert::AsRef::<::std::path::Path>::as_ref(
+                $filename,
+            ))
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Could not open file \"{}\"",
+                    ::core::convert::AsRef::<::std::path::Path>::as_ref($filename)
+                        .to_string_lossy(),
+                )
+            }),
         )
     };
 }
 
-pub fn open_userfile_for_read(f: &str) -> BufReader<File> {
-    let g = File::open(&f);
+pub fn open_userfile_for_read(f: impl AsRef<Path>) -> BufReader<File> {
+    let f = f.as_ref();
+    let g = File::open(f);
     if g.is_err() && g.as_ref().err().unwrap().kind() == std::io::ErrorKind::PermissionDenied {
         eprintln!(
             "\nCould not open file \n{}\nfor reading because you \
             lack read permission on this file.\n",
-            f
+            f.to_string_lossy()
         );
         std::process::exit(1);
     }
-    BufReader::new(g.unwrap_or_else(|_| panic!("Could not open file \"{}\"", f)))
+    BufReader::new(g.unwrap_or_else(|_| panic!("Could not open file \"{}\"", f.to_string_lossy())))
 }
 
 #[macro_export]
 macro_rules! open_for_write_new {
     ($filename:expr) => {
-        BufWriter::new(
-            File::create(&$filename).expect(&format!("Could not create file \"{}\"", &$filename)),
+        ::std::io::BufWriter::new(
+            ::std::fs::File::create(::core::convert::AsRef::<::std::path::Path>::as_ref(
+                $filename,
+            ))
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Could not create file \"{}\"",
+                    ::core::convert::AsRef::<::std::path::Path>::as_ref($filename)
+                        .to_string_lossy()
+                )
+            }),
         )
     };
 }
@@ -123,23 +142,29 @@ pub fn open_maybe_compressed<P: AsRef<Path>>(filename: P) -> Box<dyn Read> {
 // read_maybe_unzipped( f, lines ): The filename f should have the form x.gz.
 // If that exists, load it into lines.  Otherwise try to load x.
 
-pub fn read_maybe_unzipped(f: &String, lines: &mut Vec<String>) {
+pub fn read_maybe_unzipped(f: impl AsRef<Path>, lines: &mut Vec<String>) {
+    let f = f.as_ref();
     lines.clear();
     if path_exists(f) {
-        let gz = MultiGzDecoder::new(File::open(&f).unwrap());
+        let gz = MultiGzDecoder::new(File::open(f).unwrap());
         let b = BufReader::new(gz);
         for line in b.lines() {
             lines.push(line.unwrap());
         }
     } else {
-        let g = f.before(".gz");
+        let g = f.with_extension("");
+        let g = g.as_path();
         if path_exists(g) {
-            let b = BufReader::new(File::open(&g).unwrap());
+            let b = BufReader::new(File::open(g).unwrap());
             for line in b.lines() {
                 lines.push(line.unwrap());
             }
         } else {
-            panic!("Could not find {} or {}.", f, g);
+            panic!(
+                "Could not find {} or {}.",
+                f.to_string_lossy(),
+                g.to_string_lossy()
+            );
         }
     }
 }
@@ -180,7 +205,7 @@ pub fn read_obj<T: DeserializeOwned, P: AsRef<Path> + Debug>(filename: P) -> T {
 #[macro_export]
 macro_rules! printme {
         ( $( $x:expr ),* ) => {
-            println!(concat!( $( stringify!($x), " = {}, ", )* ), $($x,)*);
+            println!(concat!( $( stringify!($x), " = {}, ", )* ), $($x,)*)
         }
     }
 
@@ -188,7 +213,7 @@ macro_rules! printme {
 #[macro_export]
 macro_rules! eprintme {
         ( $( $x:expr ),* ) => {
-            eprintln!(concat!( $( stringify!($x), " = {}, ", )* ), $($x,)*);
+            eprintln!(concat!( $( stringify!($x), " = {}, ", )* ), $($x,)*)
         }
     }
 
@@ -200,7 +225,7 @@ macro_rules! eprintme {
 // Removes outer quotes if present.  Panics if file not found, and returns empty
 // string if the metric is not found.
 
-pub fn get_metric_value(f: &String, metric: &String) -> String {
+pub fn get_metric_value(f: impl AsRef<Path>, metric: &str) -> String {
     let buf = open_for_read![&f];
     for line in buf.lines() {
         let s = line.unwrap();
@@ -223,7 +248,7 @@ pub fn get_metric_value(f: &String, metric: &String) -> String {
             return t.to_string();
         }
     }
-    "".to_string()
+    String::default()
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓

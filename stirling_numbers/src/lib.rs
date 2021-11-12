@@ -202,7 +202,7 @@ mod tests {
             "\n\"cargo test\" deliberately fails here because without running in release mode,"
         );
         println!("the test would be too slow.\n");
-        assert!(0 == 1);
+        panic!("aborting");
     }
 
     #[cfg(not(debug_assertions))]

@@ -76,7 +76,7 @@ pub fn binary_read_to_ref<T>(f: &mut std::fs::File, p: &mut T, n: usize) -> Resu
 // in the first case, or to a vector, in the second case.
 
 #[allow(dead_code)]
-pub fn binary_write_vec<T>(f: &mut std::fs::File, x: &Vec<T>) -> Result<(), Error>
+pub fn binary_write_vec<T>(f: &mut std::fs::File, x: &[T]) -> Result<(), Error>
 where
     T: BinaryInputOutputSafe,
 {
@@ -112,7 +112,7 @@ where
     binary_read_to_ref::<T>(f, &mut x[len], n)
 }
 
-pub fn binary_write_vec_vec<T>(f: &mut std::fs::File, x: &Vec<Vec<T>>) -> Result<(), Error>
+pub fn binary_write_vec_vec<T>(f: &mut std::fs::File, x: &[Vec<T>]) -> Result<(), Error>
 where
     T: BinaryInputOutputSafe,
 {

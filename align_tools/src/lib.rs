@@ -198,7 +198,7 @@ pub fn affine_align(x: &DnaString, y: &DnaString) -> Alignment {
 // are used and would need to be tweaked if other operations are present.  You can set width to
 // the expected terminal width.
 
-pub fn vis_align(s1: &[u8], s2: &[u8], ops: &Vec<AlignmentOperation>, width: usize) -> String {
+pub fn vis_align(s1: &[u8], s2: &[u8], ops: &[AlignmentOperation], width: usize) -> String {
     let (mut pos1, mut pos2) = (0, 0);
     let (mut t1, mut t2) = (Vec::<u8>::new(), Vec::<u8>::new());
     let mut d = Vec::<u8>::new();

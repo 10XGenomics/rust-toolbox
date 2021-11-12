@@ -60,12 +60,10 @@ pub fn debruijn_to_petgraph_hyperbasevector<K: Kmer>(
         // Update involution.
 
         let palindrome = seq == seq.rc();
-        if palindrome {
-            inv.push(edges.len() as u32);
-        } else {
+        if !palindrome {
             inv.push((edges.len() + 1) as u32);
-            inv.push(edges.len() as u32);
         }
+        inv.push(edges.len() as u32);
 
         // Save edge.
 
@@ -218,6 +216,12 @@ impl HyperBasevector {
     }
 }
 
+impl Default for HyperBasevector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // HYPER DEFINITION
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -247,7 +251,7 @@ impl Hyper {
     // Return the sequence associated to a path.
     // =============================================================================
 
-    pub fn cat(&self, p: &Vec<i32>) -> DnaString {
+    pub fn cat(&self, p: &[i32]) -> DnaString {
         let mut s = DnaString::new();
         if p.is_empty() {
             return s;
@@ -296,7 +300,7 @@ impl Hyper {
     // hide_seq: if true, and there is an annotation on an edge, don't print the sequence
     // ============================================================================================
 
-    pub fn print_with_annotations(&self, ann: &Vec<String>, require_ann: bool, hide_seq: bool) {
+    pub fn print_with_annotations(&self, ann: &[String], require_ann: bool, hide_seq: bool) {
         let mut comp = Vec::<Vec<u32>>::new();
         self.h.g.components_e(&mut comp);
         let mut n = 0;
@@ -359,7 +363,7 @@ impl Hyper {
     // Create a new Hyper from data.
     // =============================================================================
 
-    pub fn build_from_reads(&mut self, k: i32, reads: &Vec<DnaString>) {
+    pub fn build_from_reads(&mut self, k: i32, reads: &[DnaString]) {
         // Only works if k = 20.
 
         assert_eq!(k, 20);
@@ -503,10 +507,10 @@ impl Hyper {
     // Normally you would want to call kill_edges instead.
     // =============================================================================
 
-    pub fn kill_edges_raw(&mut self, dels: &Vec<u32>) {
+    pub fn kill_edges_raw(&mut self, dels: &[u32]) {
         // Symmetrize and unique sort dels.
 
-        let mut dels2 = dels.clone();
+        let mut dels2 = dels.to_vec();
         for e in dels {
             dels2.push(self.inv[*e as usize]);
         }
@@ -547,7 +551,7 @@ impl Hyper {
     // documentation in those files that describes some of the logic.
     // =============================================================================
 
-    pub fn kill_edges(&mut self, dels: &Vec<u32>) {
+    pub fn kill_edges(&mut self, dels: &[u32]) {
         // Kill the edges.
 
         self.kill_edges_raw(dels);
@@ -940,5 +944,11 @@ impl Hyper {
             }
         }
         z
+    }
+}
+
+impl Default for Hyper {
+    fn default() -> Self {
+        Self::new()
     }
 }

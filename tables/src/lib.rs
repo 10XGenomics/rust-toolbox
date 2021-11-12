@@ -11,7 +11,7 @@ use string_utils::strme;
 
 // Package characters with ANSI escape codes that come before them.
 
-pub fn package_characters_with_escapes(c: &Vec<u8>) -> Vec<Vec<u8>> {
+pub fn package_characters_with_escapes(c: &[u8]) -> Vec<Vec<u8>> {
     let mut x = Vec::<Vec<u8>>::new();
     let mut escaped = false;
     let mut package = Vec::<u8>::new();
@@ -33,7 +33,7 @@ pub fn package_characters_with_escapes(c: &Vec<u8>) -> Vec<Vec<u8>> {
     x
 }
 
-pub fn package_characters_with_escapes_char(c: &Vec<char>) -> Vec<Vec<char>> {
+pub fn package_characters_with_escapes_char(c: &[char]) -> Vec<Vec<char>> {
     let mut x = Vec::<Vec<char>>::new();
     let mut escaped = false;
     let mut package = Vec::<char>::new();
@@ -63,7 +63,7 @@ pub fn package_characters_with_escapes_char(c: &Vec<char>) -> Vec<Vec<char>> {
 
 pub fn print_tabular(
     log: &mut Vec<u8>,
-    rows: &Vec<Vec<String>>,
+    rows: &[Vec<String>],
     sep: usize,
     justify: Option<Vec<u8>>,
 ) {
@@ -152,9 +152,9 @@ pub fn visible_width(s: &str) -> usize {
 
 pub fn print_tabular_vbox(
     log: &mut String,
-    rows: &Vec<Vec<String>>,
+    rows: &[Vec<String>],
     sep: usize,
-    justify: &Vec<u8>,
+    justify: &[u8],
     debug_print: bool,
     bold_box: bool,
 ) {
@@ -229,7 +229,7 @@ pub fn print_tabular_vbox(
 
     // Proceed.
 
-    let mut rrr = rows.clone();
+    let mut rrr = rows.to_owned();
     let nrows = rrr.len();
     let mut ncols = 0;
     for i in 0..nrows {
@@ -611,12 +611,8 @@ mod tests {
         ];
         rows.push(row);
         let mut log = String::new();
-        let mut justify = Vec::<u8>::new();
-        justify.push(b'r');
-        justify.push(b'|');
-        justify.push(b'l');
-        justify.push(b'l');
-        print_tabular_vbox(&mut log, &rows, 2, &justify, false, false);
+        let justify = &[b'r', b'|', b'l', b'l'];
+        print_tabular_vbox(&mut log, &rows, 2, justify, false, false);
         let answer = "┌────────┬─────────────────────────┐\n\
                       │ omega  │  superduperfineexcellent│\n\
                       │  woof  │  snarl      octopus     │\n\
@@ -642,11 +638,8 @@ mod tests {
         let row = vec!["fabulous pumpkins".to_string(), "\\ext".to_string()];
         rows.push(row);
         let mut log = String::new();
-        let mut justify = Vec::<u8>::new();
-        justify.push(b'l');
-        justify.push(b'|');
-        justify.push(b'l');
-        print_tabular_vbox(&mut log, &rows, 2, &justify, false, false);
+        let justify = &[b'l', b'|', b'l'];
+        print_tabular_vbox(&mut log, &rows, 2, justify, false, false);
         let answer = "┌────────┬────────┐\n\
                       │pencil  │  pusher│\n\
                       ├────────┴────────┤\n\

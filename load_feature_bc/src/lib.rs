@@ -3,7 +3,8 @@
 // This file contains 10x-specific stuff for working with cellranger runs.
 
 use flate2::read::MultiGzDecoder;
-use io_utils::{open_for_read, path_exists, read_maybe_unzipped};
+use io_utils::{open_for_read, read_maybe_unzipped};
+use std::path::Path;
 use std::{format, i32, str, usize};
 use std::{
     fs::File,
@@ -17,61 +18,60 @@ use string_utils::TextUtils;
 // where the indices are zero-based.
 
 pub fn load_feature_bc_matrix(
-    outs: &String,
+    outs: impl AsRef<Path>,
     features: &mut Vec<String>,
     barcodes: &mut Vec<String>,
     gex_sparse_matrix: &mut Vec<Vec<(i32, i32)>>,
 ) {
-    let mut dir = format!("{}/raw_feature_bc_matrix", outs);
-    if !path_exists(&dir) {
-        dir = format!("{}/raw_gene_bc_matrices_mex", outs);
+    let outs = outs.as_ref();
+    let mut dir = outs.join("raw_feature_bc_matrix");
+    if dir.exists() {
+        dir.set_file_name("raw_gene_bc_matrices_mex");
     }
-    let mut matrix_file = format!("{}/matrix.mtx.gz", dir);
-    if path_exists(&format!("{}/GRCh38", dir)) {
-        read_maybe_unzipped(&format!("{}/GRCh38/genes.tsv.gz", dir), features);
-        read_maybe_unzipped(&format!("{}/GRCh38/barcodes.tsv.gz", dir), barcodes);
-        matrix_file = format!("{}/GRCh38/matrix.mtx.gz", dir);
+    dir.push("GRCh38");
+    if dir.exists() {
+        dir.push("genes.tsv.gz");
     } else {
-        read_maybe_unzipped(&format!("{}/features.tsv.gz", dir), features);
-        read_maybe_unzipped(&format!("{}/barcodes.tsv.gz", dir), barcodes);
+        dir.pop();
+        dir.push("features.tsv.gz");
     }
+    // TODO: don't convert to String.
+    read_maybe_unzipped(&dir.to_str().unwrap().to_string(), features);
+    dir.set_file_name("barcodes.tsv.gz");
+    read_maybe_unzipped(&dir.to_str().unwrap().to_string(), barcodes);
+    dir.set_file_name("matrix.mtx.gz");
+    let mut matrix_file = dir;
 
-    // ◼ The duplication that follows is horrible.  There must be a better way.
-
-    if path_exists(&matrix_file) {
+    if matrix_file.exists() {
         let gz = MultiGzDecoder::new(File::open(&matrix_file).unwrap());
-        let f = BufReader::new(gz);
-        for _i in 0..barcodes.len() {
-            gex_sparse_matrix.push(Vec::<(i32, i32)>::new());
-        }
-        let mut line_count = 1;
-        for line in f.lines() {
-            let s = line.unwrap();
-            if line_count > 3 {
-                let fields = s.split(' ').collect::<Vec<&str>>();
-                let feature = fields[0].force_i32() - 1;
-                let bc = fields[1].force_i32() - 1;
-                let count = fields[2].force_i32();
-                gex_sparse_matrix[bc as usize].push((feature, count));
-            }
-            line_count += 1;
-        }
+        _load_feature_bc_matrix(BufReader::new(gz), barcodes, gex_sparse_matrix);
     } else {
-        let f = open_for_read![matrix_file.before(".gz")];
-        for _i in 0..barcodes.len() {
-            gex_sparse_matrix.push(Vec::<(i32, i32)>::new());
-        }
-        let mut line_count = 1;
-        for line in f.lines() {
+        matrix_file.set_extension("");
+        // TODO: don't convert to String.
+        _load_feature_bc_matrix(
+            open_for_read![matrix_file.to_str().unwrap()],
+            barcodes,
+            gex_sparse_matrix,
+        );
+    };
+    fn _load_feature_bc_matrix(
+        f: impl BufRead,
+        barcodes: &[String],
+        gex_sparse_matrix: &mut Vec<Vec<(i32, i32)>>,
+    ) {
+        gex_sparse_matrix.resize_with(
+            gex_sparse_matrix.len() + barcodes.len(),
+            Vec::<(i32, i32)>::new,
+        );
+        for (line_num, line) in f.lines().enumerate() {
             let s = line.unwrap();
-            if line_count > 3 {
-                let fields = s.split(' ').collect::<Vec<&str>>();
+            if line_num > 2 {
+                let fields = s.splitn(4, ' ').collect::<Vec<&str>>();
                 let feature = fields[0].force_i32() - 1;
                 let bc = fields[1].force_i32() - 1;
                 let count = fields[2].force_i32();
                 gex_sparse_matrix[bc as usize].push((feature, count));
             }
-            line_count += 1;
         }
     }
 }

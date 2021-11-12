@@ -13,40 +13,40 @@ use io_utils::read_to_string_safe;
 
 use vdj_ann::refx::{make_vdj_ref_data_core, RefData};
 
-pub fn human_ref() -> String {
-    include_str!["../vdj_refs/human/fasta/regions.fa"].to_string()
+pub fn human_ref() -> &'static str {
+    include_str!["../vdj_refs/human/fasta/regions.fa"]
 }
 
-pub fn human_supp_ref() -> String {
-    include_str!["../vdj_refs/human/fasta/supp_regions.fa"].to_string()
+pub fn human_supp_ref() -> &'static str {
+    include_str!["../vdj_refs/human/fasta/supp_regions.fa"]
 }
 
-pub fn human_ref_2_0() -> String {
-    include_str!["../vdj_refs_2.0/human/fasta/regions.fa"].to_string()
+pub fn human_ref_2_0() -> &'static str {
+    include_str!["../vdj_refs_2.0/human/fasta/regions.fa"]
 }
 
-pub fn human_ref_3_1() -> String {
-    include_str!["../vdj_refs_3.1/human/fasta/regions.fa"].to_string()
+pub fn human_ref_3_1() -> &'static str {
+    include_str!["../vdj_refs_3.1/human/fasta/regions.fa"]
 }
 
-pub fn human_ref_4_0() -> String {
-    include_str!["../vdj_refs_4.0/human/fasta/regions.fa"].to_string()
+pub fn human_ref_4_0() -> &'static str {
+    include_str!["../vdj_refs_4.0/human/fasta/regions.fa"]
 }
 
-pub fn mouse_ref() -> String {
-    include_str!["../vdj_refs/mouse/fasta/regions.fa"].to_string()
+pub fn mouse_ref() -> &'static str {
+    include_str!["../vdj_refs/mouse/fasta/regions.fa"]
 }
 
-pub fn mouse_supp_ref() -> String {
-    include_str!["../vdj_refs/mouse/fasta/supp_regions.fa"].to_string()
+pub fn mouse_supp_ref() -> &'static str {
+    include_str!["../vdj_refs/mouse/fasta/supp_regions.fa"]
 }
 
-pub fn mouse_ref_3_1() -> String {
-    include_str!["../vdj_refs_3.1/mouse/fasta/regions.fa"].to_string()
+pub fn mouse_ref_3_1() -> &'static str {
+    include_str!["../vdj_refs_3.1/mouse/fasta/regions.fa"]
 }
 
-pub fn mouse_ref_4_0() -> String {
-    include_str!["../vdj_refs_4.0/mouse/fasta/regions.fa"].to_string()
+pub fn mouse_ref_4_0() -> &'static str {
+    include_str!["../vdj_refs_4.0/mouse/fasta/regions.fa"]
 }
 
 // ids_to_use_opt: Optional hashSet of ids. If specified only reference
@@ -55,41 +55,45 @@ pub fn mouse_ref_4_0() -> String {
 pub fn make_vdj_ref_data(
     refdata: &mut RefData,
     imgt: bool,
-    species: &String,
+    species: &str,
     extended: bool,
     is_tcr: bool,
     is_bcr: bool,
 ) {
-    let mut refx = String::new();
-    let mut ext_refx = String::new();
-    if !imgt && species == "human" {
-        refx = human_ref();
-        if extended {
-            ext_refx = human_supp_ref();
+    // Necessary for lifetime management of results from read_to_string_safe
+    let x: String;
+    let refx = match (imgt, species) {
+        (false, "human") => human_ref(),
+        (false, "mouse") => mouse_ref(),
+        (true, "human") => {
+            x = read_to_string_safe(
+                "/mnt/opt/refdata_cellranger/vdj/\
+            vdj_IMGT_20170916-2.1.0/fasta/regions.fa",
+            );
+            x.as_str()
         }
-    }
-    if !imgt && species == "mouse" {
-        refx = mouse_ref();
-        if extended {
-            ext_refx = mouse_supp_ref();
+        (true, "mouse") => {
+            x = read_to_string_safe(
+                "/mnt/opt/refdata_cellranger/vdj/\
+            vdj_IMGT_mouse_20180723-2.2.0/fasta/regions.fa",
+            );
+            x.as_str()
         }
-    }
-    if imgt && species == "human" {
-        refx = read_to_string_safe(
-            "/mnt/opt/refdata_cellranger/vdj/\
-             vdj_IMGT_20170916-2.1.0/fasta/regions.fa",
-        );
-    }
-    if imgt && species == "mouse" {
-        refx = read_to_string_safe(
-            "/mnt/opt/refdata_cellranger/vdj/\
-             vdj_IMGT_mouse_20180723-2.2.0/fasta/regions.fa",
-        );
-    }
+        _ => panic!("Invalid species {}.", &species),
+    };
+    let ext_refx = if extended && !imgt {
+        match species {
+            "human" => human_supp_ref(),
+            "mouse" => mouse_supp_ref(),
+            _ => unreachable!("Invalid species {}.", &species),
+        }
+    } else {
+        ""
+    };
     if refx.is_empty() {
         panic!("Reference file has zero length.");
     }
-    make_vdj_ref_data_core(refdata, &refx, &ext_refx, is_tcr, is_bcr, None);
+    make_vdj_ref_data_core(refdata, refx, ext_refx, is_tcr, is_bcr, None);
 }
 
 #[cfg(test)]
@@ -116,7 +120,7 @@ mod tests {
         let (refx, ext_refx) = (human_ref(), String::new());
         let (is_tcr, is_bcr) = (true, false);
         let mut refdata = RefData::new();
-        make_vdj_ref_data_core(&mut refdata, &refx, &ext_refx, is_tcr, is_bcr, None);
+        make_vdj_ref_data_core(&mut refdata, refx, &ext_refx, is_tcr, is_bcr, None);
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
         annotate_seq(&seq, &refdata, &mut ann, true, false, true);
         let mut have_d = false;

@@ -8,7 +8,7 @@
 use evalexpr::{ContextWithMutableFunctions, ContextWithMutableVariables, HashMapContext};
 use evalexpr::{Function, Value};
 use statrs::distribution::ContinuousCDF;
-use string_utils::*;
+use string_utils::TextUtils;
 use vector_utils::{bin_member, unique_sort};
 
 // ================================================================================================
@@ -124,7 +124,7 @@ macro_rules! evalexpr_fn3 {
 // to be called on arbitrary strings, but if the strings are not all f64, then the return value is
 // null.
 
-pub fn define_evalexpr_context(vars: &Vec<String>, vals: &Vec<String>) -> evalexpr::HashMapContext {
+pub fn define_evalexpr_context(vars: &[String], vals: &[String]) -> evalexpr::HashMapContext {
     assert_eq!(vars.len(), vals.len());
     let mut c = HashMapContext::new();
 

@@ -14,7 +14,7 @@ use std::{
 use string_utils::TextUtils;
 use vector_utils::unique_sort;
 
-pub fn fetch_exons(species: &String, exons: &mut Vec<(String, i32, i32, bool, String, i32)>) {
+pub fn fetch_exons(species: &str, exons: &mut Vec<(String, i32, i32, bool, String, i32)>) {
     assert!(species == "human" || species == "mouse");
 
     // Define gtf file location.  See notes in bin/build_vdj_ref.fs.
