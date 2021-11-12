@@ -17,7 +17,7 @@ bio_edit = "0.1"
 debruijn = "0.3.2"
 fasta_tools = "0.1"
 hyperbase = "0.1"
-io_utils = "0.2"
+io_utils = "0.3"
 itertools = ">= 0.8, <= 0.11"
 kmer_lookup = "0.1"
 serde = { version = "1.0", features = ["derive"] }

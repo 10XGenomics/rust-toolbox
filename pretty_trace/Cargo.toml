@@ -13,7 +13,7 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
 backtrace = "0.3.40"
-io_utils = "0.2"
+io_utils = "0.3"
 lazy_static = "1.4"
 libc = "0.2.85"
 nix = ">=0.19.1, <0.24"
