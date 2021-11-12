@@ -19,7 +19,7 @@ use vector_utils::{lower_bound1_3, unique_sort};
 pub fn is_valid(
     b: &DnaString,
     refdata: &RefData,
-    ann: &Vec<(i32, i32, i32, i32, i32)>,
+    ann: &[(i32, i32, i32, i32, i32)],
     logme: bool,
     log: &mut Vec<u8>,
 ) -> bool {
@@ -197,7 +197,7 @@ pub fn is_valid(
 pub fn junction_seq(
     tig: &DnaString,
     refdata: &RefData,
-    ann: &Vec<(i32, i32, i32, i32, i32)>,
+    ann: &[(i32, i32, i32, i32, i32)],
     jseq: &mut DnaString,
 ) {
     let refs = &refdata.refs;
@@ -243,11 +243,11 @@ pub fn junction_seq(
 
 pub fn junction_supp(
     tig: &DnaString,
-    reads: &Vec<DnaString>,
+    reads: &[DnaString],
     x: &Hyper,
-    umi_id: &Vec<i32>,
+    umi_id: &[i32],
     refdata: &RefData,
-    ann: &Vec<(i32, i32, i32, i32, i32)>,
+    ann: &[(i32, i32, i32, i32, i32)],
     jsupp: &mut (i32, i32),
 ) {
     let mut jseq = DnaString::new();
@@ -256,9 +256,9 @@ pub fn junction_supp(
 }
 
 pub fn junction_supp_core(
-    reads: &Vec<DnaString>,
+    reads: &[DnaString],
     x: &Hyper,
-    umi_id: &Vec<i32>,
+    umi_id: &[i32],
     jseq: &DnaString,
     jsupp: &mut (i32, i32),
 ) {
@@ -271,8 +271,7 @@ pub fn junction_supp_core(
         }
     }
     unique_sort(&mut ids);
-    let mut tigs = Vec::<DnaString>::new();
-    tigs.push(jseq.clone());
+    let tigs = vec![jseq.clone()];
     let mut kmers_plus = Vec::<(Kmer20, i32, i32)>::new();
     make_kmer_lookup_20_single(&tigs, &mut kmers_plus);
     let mut idi = 0;

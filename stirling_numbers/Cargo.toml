@@ -1,6 +1,6 @@
 [package]
 name = "stirling_numbers"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "A few functions relating to Stirling numbers of the second kind."

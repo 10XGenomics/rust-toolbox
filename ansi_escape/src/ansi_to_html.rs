@@ -55,10 +55,11 @@ pub fn convert_text_with_ansi_escapes_to_svg(
 
     let lines0 = x.split('\n').collect::<Vec<&str>>();
     let height = vsep * (lines0.len() as f64 - 1.2);
-    let mut lines = Vec::<String>::new();
-    lines.push("<svg version=\"1.1\"".to_string());
-    lines.push("".to_string()); // PLACEHOLDER
-    lines.push("xmlns=\"http://www.w3.org/2000/svg\">".to_string());
+    let mut lines = vec![
+        "<svg version=\"1.1\"".to_string(),
+        String::default(), // PLACEHOLDER
+        "xmlns=\"http://www.w3.org/2000/svg\">".to_string(),
+    ];
     let mut max_width = 0;
     for m in 0..lines0.len() {
         let t = &lines0[m];
@@ -211,8 +212,8 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                             end = Some(i);
                         }
                     }
-                    if end.is_some() {
-                        escapes = escapes[end.unwrap() + 1..escapes.len()].to_vec();
+                    if let Some(end) = end {
+                        escapes = escapes[end + 1..escapes.len()].to_vec();
                     }
                     if escapes.is_empty() {
                         // Emit end escape.
@@ -431,7 +432,7 @@ impl ColorState {
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-fn merge(s: &Vec<ColorState>) -> ColorState {
+fn merge(s: &[ColorState]) -> ColorState {
     let mut x = ColorState::default();
     for i in 0..s.len() {
         if s[i].null() {

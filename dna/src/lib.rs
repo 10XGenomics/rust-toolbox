@@ -44,7 +44,7 @@ pub fn tm_nearest_neighbor(s: &str) -> f64 {
     tm_nearest_neighbor_full(s, 0.00000025, 0.05, &locked)
 }
 
-pub fn tm_nearest_neighbor_full(s: &str, s_mol: f64, na_mol: f64, locked: &Vec<bool>) -> f64 {
+pub fn tm_nearest_neighbor_full(s: &str, s_mol: f64, na_mol: f64, locked: &[bool]) -> f64 {
     // Allow for + symbols.
 
     if s.contains('+') {
@@ -52,11 +52,8 @@ pub fn tm_nearest_neighbor_full(s: &str, s_mol: f64, na_mol: f64, locked: &Vec<b
         assert!(!s.contains("++"));
         assert!(!s.ends_with('+'));
         let mut sx = String::new();
-        let mut lockedx = Vec::<bool>::new();
-        let mut schars = Vec::<char>::new();
-        for c in s.chars() {
-            schars.push(c);
-        }
+        let schars: Vec<char> = s.chars().collect();
+        let mut lockedx = Vec::<bool>::with_capacity(schars.len());
         let mut i = 0;
         while i < schars.len() {
             if schars[i] != '+' {
@@ -365,7 +362,7 @@ pub fn thermodynamic_sums_dna(
     dg_sum: &mut f64,
     include_symmetry_correction: bool,
     include_initiation_terms: bool,
-    locked: &Vec<bool>,
+    locked: &[bool],
 ) {
     // defaults for last: true, true, empty
 

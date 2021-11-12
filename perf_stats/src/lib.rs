@@ -27,29 +27,27 @@ pub fn elapsed(start: &Instant) -> f64 {
 // Report number of threads in use.
 
 pub fn nthreads() -> i64 {
-    let procfn = "/proc/self/status".to_string();
+    let procfn = "/proc/self/status";
     let prob1 = "\nWARNING: nthreads() failed to access /proc status file.\n";
     let crap = "This suggests something is badly broken in the \
                 operating environment.\nContinuing nonetheless, by returning -1.";
-    let mut threads: i64 = -1;
     let f = std::fs::File::open(procfn);
-    if f.is_err() {
-        println!("{}{}", prob1, crap);
-    } else {
-        let f = f.unwrap();
-        let f = std::io::BufReader::new(f);
-        for line in f.lines() {
-            let s = line.unwrap();
-            if s.starts_with("Threads:") {
-                let mut s = s.after("Threads:").to_string();
-                s = s.replace("\t", "");
-                s = s.replace(" ", "");
-                threads = s.force_i64();
-                break;
+    match f {
+        Err(_) => println!("{}{}", prob1, crap),
+        Ok(f) => {
+            let f = std::io::BufReader::new(f);
+            for line in f.lines() {
+                let s = line.unwrap();
+                if s.starts_with("Threads:") {
+                    let mut s = s.after("Threads:").to_string();
+                    s = s.replace("\t", "");
+                    s = s.replace(" ", "");
+                    return s.force_i64();
+                }
             }
         }
-    }
-    threads
+    };
+    -1
 }
 
 // Set the maximum number of threads.  This is intended as a debugging thing.
@@ -71,44 +69,43 @@ pub fn set_max_threads(n: u64) {
 
 #[cfg(target_os = "linux")]
 pub fn peak_mem_usage_bytes() -> i64 {
-    let procfn = "/proc/self/status".to_string();
+    let procfn = "/proc/self/status";
     let prob1 = "\nWARNING: peak_mem_usage_bytes( ) failed to \
                  access /proc status file.\n";
     let crap = "This suggests something is badly broken in the \
                 operating environment.\nContinuing nonetheless, by returning -1.";
-    let mut bytes: i64 = -1;
     let f = std::fs::File::open(procfn);
-    if f.is_err() {
-        println!("{}{}", prob1, crap);
-    } else {
-        let f = f.unwrap();
-        let f = std::io::BufReader::new(f);
-        for line in f.lines() {
-            let s = line.unwrap();
-            if s.starts_with("VmHWM") {
-                let split: Vec<&str> = s.split_whitespace().collect();
-                let printfail = |msg| {
-                    println!(
-                        "\nWARNING:\
+    match f {
+        Err(_) => println!("{}{}", prob1, crap),
+        Ok(f) => {
+            let f = std::io::BufReader::new(f);
+            for line in f.lines() {
+                let s = line.unwrap();
+                if s.starts_with("VmHWM") {
+                    let split: Vec<&str> = s.split_whitespace().collect();
+                    let printfail = |msg| {
+                        println!(
+                            "\nWARNING:\
                          peak_mem_usage_bytes( ) encountered broken line in\
                          /proc status file.\n{}\nLine = {}\n{}",
-                        msg, s, crap
-                    )
-                };
-                if split.len() != 3 {
-                    printfail("Field count wrong.");
-                } else if split[2] != "kB" {
-                    printfail("Bad units field.");
-                } else if split[1].parse::<i64>().is_err() {
-                    printfail("Bad count field.");
-                } else {
-                    bytes = split[1].force_i64() * 1024;
+                            msg, s, crap
+                        )
+                    };
+                    if split.len() != 3 {
+                        printfail("Field count wrong.");
+                    } else if split[2] != "kB" {
+                        printfail("Bad units field.");
+                    } else if split[1].parse::<i64>().is_err() {
+                        printfail("Bad count field.");
+                    } else {
+                        return split[1].force_i64() * 1024;
+                    }
+                    break;
                 }
-                break;
             }
         }
-    }
-    bytes
+    };
+    -1
 }
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -130,29 +127,29 @@ pub fn peak_mem_usage_gb() -> f64 {
 // Report available memory gigabytes.
 
 pub fn available_mem_gb() -> Option<f64> {
-    let procfn = "/proc/meminfo".to_string();
+    let procfn = "/proc/meminfo";
     // let mut bytes : i64 = -1;
     let f = std::fs::File::open(procfn);
-    if f.is_err() {
-        return None;
-    } else {
-        let f = f.unwrap();
-        let f = std::io::BufReader::new(f);
-        for line in f.lines() {
-            let s = line.unwrap();
-            if s.starts_with("MemAvailable") {
-                let split: Vec<&str> = s.split_whitespace().collect();
-                if split.len() != 3 || split[2] != "kB" {
-                    return None;
+    match f {
+        Err(_) => None,
+        Ok(f) => {
+            let f = std::io::BufReader::new(f);
+            for line in f.lines() {
+                let s = line.unwrap();
+                if s.starts_with("MemAvailable") {
+                    let split: Vec<&str> = s.split_whitespace().collect();
+                    if split.len() != 3 || split[2] != "kB" {
+                        return None;
+                    }
+                    if split[1].parse::<i64>().is_err() {
+                        return None;
+                    }
+                    return Some(split[1].force_f64() / (1024 * 1024) as f64);
                 }
-                if split[1].parse::<i64>().is_err() {
-                    return None;
-                }
-                return Some(split[1].force_f64() / (1024 * 1024) as f64);
             }
+            None
         }
     }
-    None
 }
 
 // Report getrusage stats.
@@ -171,19 +168,19 @@ pub fn mem_usage_bytes() -> i64 {
     let crap = "This suggests something is badly broken in the \
                 operating environment.\nContinuing nonetheless, by returning -1.";
     let f = std::fs::File::open(procfn);
-    if f.is_err() {
-        println!("{}{}", prob1, crap);
-    } else {
-        let f = f.unwrap();
-        let f = std::io::BufReader::new(f);
-        if let Some(line) = f.lines().next() {
-            let s = line.unwrap();
-            let fields: Vec<&str> = s.split_whitespace().collect();
-            // ◼ The page size should not be hardcoded.
-            let page_size = 4096_i64;
-            return fields[1].force_i64() * page_size;
+    match f {
+        Err(_) => println!("{}{}", prob1, crap),
+        Ok(f) => {
+            let f = std::io::BufReader::new(f);
+            if let Some(line) = f.lines().next() {
+                let s = line.unwrap();
+                let fields: Vec<&str> = s.split_whitespace().collect();
+                // ◼ The page size should not be hardcoded.
+                let page_size = 4096_i64;
+                return fields[1].force_i64() * page_size;
+            }
         }
-    }
+    };
     -1_i64
 }
 

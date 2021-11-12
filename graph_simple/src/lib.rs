@@ -64,9 +64,9 @@ pub trait GraphSimple<T> {
     // get_predecessors1 and get_successors1: start from one vertex
     // =============================================================================
 
-    fn get_predecessors(&self, v: &Vec<i32>, x: &mut Vec<u32>);
+    fn get_predecessors(&self, v: &[i32], x: &mut Vec<u32>);
     fn get_predecessors1(&self, v: i32, x: &mut Vec<u32>);
-    fn get_successors(&self, v: &Vec<i32>, x: &mut Vec<u32>);
+    fn get_successors(&self, v: &[i32], x: &mut Vec<u32>);
     fn get_successors1(&self, v: i32, x: &mut Vec<u32>);
 
     // =============================================================================
@@ -171,7 +171,7 @@ where
         self.edge_obj(self.e_to(v, n) as u32)
     }
 
-    fn get_predecessors(&self, v: &Vec<i32>, x: &mut Vec<u32>) {
+    fn get_predecessors(&self, v: &[i32], x: &mut Vec<u32>) {
         let mut check: Vec<u32> = Vec::new();
         let mut tov: HashSet<u32> = HashSet::new();
         for j in 0..v.len() {
@@ -203,7 +203,7 @@ where
         self.get_predecessors(&vs, x);
     }
 
-    fn get_successors(&self, v: &Vec<i32>, x: &mut Vec<u32>) {
+    fn get_successors(&self, v: &[i32], x: &mut Vec<u32>) {
         let mut check: Vec<u32> = Vec::new();
         let mut fromv: HashSet<u32> = HashSet::new();
         for j in 0..v.len() {

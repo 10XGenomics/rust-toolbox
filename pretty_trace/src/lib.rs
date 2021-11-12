@@ -197,10 +197,10 @@ static mut BLACKLIST: Vec<String> = Vec::new();
 ///
 /// Profiling <i>appears</i> to correctly represent wallclock in parallel loops.
 
-pub fn start_profiling(blacklist: &Vec<String>) {
+pub fn start_profiling(blacklist: &[String]) {
     let frequency = 1000;
     unsafe {
-        BLACKLIST = blacklist.clone();
+        BLACKLIST = blacklist.to_vec();
         GUARD = Some(pprof::ProfilerGuard::new(frequency).unwrap());
     }
 }
@@ -347,11 +347,7 @@ pub fn dump_profiling_as_proto(f: &str) {
     unsafe {
         if REPORT.is_none() {
             let report = GUARD.as_ref().unwrap().report().build();
-            if report.is_err() {
-                panic!("Failed to build profiling report.");
-            } else {
-                REPORT = Some(report.unwrap());
-            }
+            REPORT = Some(report.expect("Failed to build profiling report."));
         }
         let report = REPORT.as_ref().unwrap();
         let profile = report.pprof().unwrap();
@@ -714,6 +710,15 @@ where
     }
 }
 
+impl<K, V> Default for CHashMap<K, V>
+where
+    K: std::hash::Hash + std::cmp::Eq,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// See <code>PrettyTrace</code> documentation for how this is used.
 
 pub fn new_thread_message() -> &'static CHashMap<ThreadId, String> {
@@ -895,28 +900,31 @@ fn force_pretty_trace_fancy(
 
         let mut out = format!("\n{}\n\n", &msg);
         let ex = std::env::current_exe();
-        if ex.is_err() {
-            out += &"█ WARNING.  It was not possible to get the path of your executable.\n\
-                 █ This may result in a defective traceback.\n\n"
-                .to_string();
-        } else {
-            let ex = ex.unwrap();
-            let ex = ex.to_str();
-            if ex.is_none() {
-                out += &"█ WARNING.  The path of your executable could not be converted into\n\
-                     █ a string.  This is weird and might result in a defective traceback.\n\n"
-                    .to_string();
-            } else {
-                let ex = ex.unwrap();
-                let f = File::open(&ex);
-                if f.is_err() {
-                    out += &"█ WARNING.  Your executable file could not be opened for reading.\n\
-                         █ This might be because it does not have read permission set for you.\n\
-                         █ This may result in a defective traceback.\n\n"
-                        .to_string();
-                }
+        match ex {
+            Err(_) => {
+                out += "█ WARNING.  It was not possible to get the path of your executable.\n\
+                 █ This may result in a defective traceback.\n\n";
             }
-        }
+            Ok(ex) => {
+                let ex = ex.to_str();
+                match ex {
+                    None => {
+                        out +=
+                            "█ WARNING.  The path of your executable could not be converted into\n\
+                     █ a string.  This is weird and might result in a defective traceback.\n\n";
+                    }
+                    Some(ex) => {
+                        let f = File::open(&ex);
+                        if f.is_err() {
+                            out +=
+                            "█ WARNING.  Your executable file could not be opened for reading.\n\
+                         █ This might be because it does not have read permission set for you.\n\
+                         █ This may result in a defective traceback.\n\n";
+                        }
+                    }
+                };
+            }
+        };
         out += &all_out;
         out += &em;
         eprint!("{}", out);
@@ -934,8 +942,6 @@ fn force_pretty_trace_fancy(
                         fd
                     );
                     failed = true;
-                } else {
-                    let _ = x.unwrap();
                 }
             }
         }
@@ -986,8 +992,8 @@ fn force_pretty_trace_fancy(
 
         // Run function.
 
-        if function_to_run.is_some() {
-            function_to_run.unwrap()(&out);
+        if let Some(function_to_run) = function_to_run {
+            function_to_run(&out);
         }
 
         // Exit.  Turning this off would seem to have no effect, but this is not the case
@@ -1005,7 +1011,7 @@ fn force_pretty_trace_fancy(
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 #[allow(clippy::cognitive_complexity)]
-fn prettify_traceback(bt: &Vec<u8>, whitelist: &[String], pack: bool) -> String {
+fn prettify_traceback(bt: &[u8], whitelist: &[String], pack: bool) -> String {
     // Parse the backtrace into lines.
 
     let mut btlines = Vec::<Vec<u8>>::new();
@@ -1407,7 +1413,7 @@ mod tests {
                     if have_main {
                         println!("\ngood: found inner loop\n");
                     } else {
-                        assert!(0 == 1, "FAIL: DID NOT FIND INNER LOOP");
+                        panic!("FAIL: DID NOT FIND INNER LOOP");
                     }
                 }
 
