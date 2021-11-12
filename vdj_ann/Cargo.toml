@@ -15,7 +15,7 @@ align_tools = "0.1"
 amino = "0.1"
 bio_edit = "0.1"
 debruijn = "0.3.2"
-fasta_tools = { version = "0.1.6", path = "../fasta_tools" }
+fasta_tools = "0.1.6"
 hyperbase = "0.1"
 io_utils = "0.3"
 itertools = ">= 0.8, <= 0.11"

@@ -13,7 +13,7 @@ publish = false
 [dependencies]
 debruijn = "0.3.2"
 exons = "0.1"
-fasta_tools = { version = "0.1.6", path = "../fasta_tools" }
+fasta_tools = "0.1.6"
 flate2 = "1.0.20"
 io_utils = "0.3"
 kmer_lookup = "0.1"
