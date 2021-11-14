@@ -46,13 +46,9 @@ pub fn is_valid(
                 igh = true;
             }
             if !rheaders[t].contains("5'UTR")
-                && ((m == "A"
-                    && (rheaders[t].contains("TRAV")
-                        || rheaders[t].contains("TRGV")
-                        || rheaders[t].contains("IGHV")))
+                && ((m == "A" && (rheaders[t].contains("TRAV") || rheaders[t].contains("IGHV")))
                     || (m == "B"
                         && (rheaders[t].contains("TRBV")
-                            || rheaders[t].contains("TRDV")
                             || rheaders[t].contains("IGLV")
                             || rheaders[t].contains("IGKV"))))
             {
@@ -64,13 +60,9 @@ pub fn is_valid(
                     vstarts.push(l as i32);
                 }
             }
-            if (m == "A"
-                && (rheaders[t].contains("TRAJ")
-                    || rheaders[t].contains("TRGJ")
-                    || rheaders[t].contains("IGHJ")))
+            if (m == "A" && (rheaders[t].contains("TRAJ") || rheaders[t].contains("IGHJ")))
                 || (m == "B"
                     && (rheaders[t].contains("TRBJ")
-                        || rheaders[t].contains("TRDJ")
                         || rheaders[t].contains("IGLJ")
                         || rheaders[t].contains("IGKJ")))
             {
@@ -213,9 +205,7 @@ pub fn junction_seq(
             || rheaders[t].contains("IGHJ")
             || rheaders[t].contains("TRBJ")
             || rheaders[t].contains("IGLJ")
-            || rheaders[t].contains("IGKJ")
-            || rheaders[t].contains("TRGJ")
-            || rheaders[t].contains("TRDJ"))
+            || rheaders[t].contains("IGKJ"))
             && p + len == refs[t].len()
             && l + len >= TAG as usize
         {
