@@ -46,6 +46,171 @@ pub fn is_valid(
                 igh = true;
             }
             if !rheaders[t].contains("5'UTR")
+                && ((m == "A" && (rheaders[t].contains("TRAV") || rheaders[t].contains("IGHV")))
+                    || (m == "B"
+                        && (rheaders[t].contains("TRBV")
+                            || rheaders[t].contains("IGLV")
+                            || rheaders[t].contains("IGKV"))))
+            {
+                if first_vstart < 0 {
+                    first_vstart = l as i32;
+                    first_vstart_len = (refs[t].len() - p) as i32;
+                }
+                if p == 0 {
+                    vstarts.push(l as i32);
+                }
+            }
+            if (m == "A" && (rheaders[t].contains("TRAJ") || rheaders[t].contains("IGHJ")))
+                || (m == "B"
+                    && (rheaders[t].contains("TRBJ")
+                        || rheaders[t].contains("IGLJ")
+                        || rheaders[t].contains("IGKJ")))
+            {
+                last_jstop = (l + len) as i32;
+                last_jstop_len = (p + len) as i32;
+                if p + len == refs[t].len() {
+                    jstops.push((l + len) as i32);
+                }
+            }
+        }
+        unique_sort(&mut vstarts);
+        unique_sort(&mut jstops);
+        let mut full = false;
+        for pass in 1..3 {
+            if pass == 2 && full {
+                continue;
+            }
+            let mut msg = "";
+            if pass == 2 {
+                msg = "frameshifted ";
+            };
+            for start in vstarts.iter() {
+                if !have_start(b, *start as usize) {
+                    continue;
+                }
+                for stop in jstops.iter() {
+                    let n = stop - start;
+                    if pass == 2 || n % 3 == 1 {
+                        let mut stop_codon = false;
+                        // shouldn't it be stop-3+1????????????????????????????????
+                        for j in (*start..stop - 3).step_by(3) {
+                            if have_stop(b, j as usize) {
+                                stop_codon = true;
+                            }
+                        }
+                        if !stop_codon {
+                            if pass == 1 {
+                                full = true;
+                            }
+                            if logme {
+                                fwriteln!(
+                                    log,
+                                    "{}full length transcript of length {}",
+                                    msg,
+                                    b.len()
+                                );
+                            }
+                        } else if logme {
+                            fwriteln!(
+                                log,
+                                "{}full length stopped transcript of length {}",
+                                msg,
+                                b.len()
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        let mut cdr3 = Vec::<(usize, Vec<u8>, usize, usize)>::new();
+        get_cdr3_using_ann(b, refdata, ann, &mut cdr3);
+        if cdr3.is_empty() {
+            if logme {
+                fwriteln!(log, "did not find CDR3");
+            }
+            return false;
+        }
+        let mut too_large = false;
+        const MIN_DELTA: i32 = -25;
+        const MIN_DELTA_IGH: i32 = -55;
+        const MAX_DELTA: i32 = 35;
+        if first_vstart >= 0 && last_jstop >= 0 {
+            let delta = (last_jstop_len + first_vstart_len + 3 * cdr3[0].1.len() as i32 - 20)
+                - (last_jstop - first_vstart);
+            if logme {
+                fwriteln!(log, "VJ delta = {}", delta);
+            }
+            let mut min_delta = MIN_DELTA;
+            if igh {
+                min_delta = MIN_DELTA_IGH;
+            }
+            if delta < min_delta || delta > MAX_DELTA {
+                too_large = true;
+                if logme {
+                    fwriteln!(log, "delta too large");
+                }
+            }
+        }
+        let mut misordered = false;
+        for j1 in 0..ann.len() {
+            let t1 = ann[j1].2 as usize;
+            for j2 in j1 + 1..ann.len() {
+                let t2 = ann[j2].2 as usize;
+                if (refdata.is_j(t1) && refdata.is_v(t2))
+                    || (refdata.is_j(t1) && refdata.is_u(t2))
+                    || (refdata.is_j(t1) && refdata.is_d(t2))
+                    || (refdata.is_v(t1) && refdata.is_u(t2))
+                    || (refdata.is_c(t1) && !refdata.is_c(t2))
+                {
+                    misordered = true;
+                }
+            }
+        }
+        if misordered && logme {
+            fwriteln!(log, "misordered");
+        }
+        if !full && logme {
+            fwriteln!(log, "not full");
+        }
+        if full && !too_large && !misordered {
+            return true;
+        }
+    }
+    false
+}
+
+// Special version of the function that supports gamma/delta chains
+// Only use this function if in a gamma/delta run
+pub fn is_valid_gd(
+    b: &DnaString,
+    refdata: &RefData,
+    ann: &[(i32, i32, i32, i32, i32)],
+    logme: bool,
+    log: &mut Vec<u8>,
+) -> bool {
+    let refs = &refdata.refs;
+    let rheaders = &refdata.rheaders;
+    for pass in 0..2 {
+        let mut m = "A";
+        if pass == 1 {
+            m = "B";
+        }
+        let mut vstarts = Vec::<i32>::new();
+        let mut jstops = Vec::<i32>::new();
+        let mut first_vstart: i32 = -1;
+        let mut first_vstart_len: i32 = -1;
+        let mut last_jstop: i32 = -1;
+        let mut last_jstop_len: i32 = -1;
+        let mut igh = false;
+        for j in 0..ann.len() {
+            let l = ann[j].0 as usize;
+            let len = ann[j as usize].1 as usize;
+            let t = ann[j as usize].2 as usize;
+            let p = ann[j as usize].3 as usize;
+            if rheaders[t].contains("IGH") {
+                igh = true;
+            }
+            if !rheaders[t].contains("5'UTR")
                 && ((m == "A"
                     && (rheaders[t].contains("TRAV")
                         || rheaders[t].contains("TRGV")
@@ -195,6 +360,42 @@ pub fn is_valid(
 // bases ending where the right end of a J region aligns to the contig.
 
 pub fn junction_seq(
+    tig: &DnaString,
+    refdata: &RefData,
+    ann: &[(i32, i32, i32, i32, i32)],
+    jseq: &mut DnaString,
+) {
+    let refs = &refdata.refs;
+    let rheaders = &refdata.rheaders;
+    const TAG: i32 = 100;
+    let mut jstops = Vec::<i32>::new();
+    for j in 0..ann.len() {
+        let l = ann[j].0 as usize;
+        let len = ann[j as usize].1 as usize;
+        let t = ann[j as usize].2 as usize;
+        let p = ann[j as usize].3 as usize;
+        if (rheaders[t].contains("TRAJ")
+            || rheaders[t].contains("IGHJ")
+            || rheaders[t].contains("TRBJ")
+            || rheaders[t].contains("IGLJ")
+            || rheaders[t].contains("IGKJ"))
+            && p + len == refs[t].len()
+            && l + len >= TAG as usize
+        {
+            jstops.push((l + len) as i32);
+        }
+    }
+    unique_sort(&mut jstops);
+    // note: if called on a valid contig, jstops will not be empty
+    assert!(!jstops.is_empty());
+    // note: at this point is presumably a rare event for jstops to have > 1 element
+    let jstop = jstops[0];
+    let jstart = jstop - TAG;
+    *jseq = tig.slice(jstart as usize, jstop as usize).to_owned();
+}
+
+// Special version of the function that supports gamma/delta
+pub fn junction_seq_gd(
     tig: &DnaString,
     refdata: &RefData,
     ann: &[(i32, i32, i32, i32, i32)],
