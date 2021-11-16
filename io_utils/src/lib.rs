@@ -285,6 +285,10 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> 
             }
         }
         let mut cpos = -1_isize;
+        if s.is_empty() {
+            eprintln!("\nError reading json file.  It is possible that the file was truncated.\n");
+            std::process::exit(1);
+        }
         for i in (0..s.len() - 1).rev() {
             if s[i] == b',' {
                 cpos = i as isize;
