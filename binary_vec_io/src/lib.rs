@@ -24,7 +24,6 @@ impl BinaryInputOutputSafe for f64 {}
 
 use std::io::Error;
 
-#[allow(dead_code)]
 pub fn binary_write_from_ref<T>(f: &mut std::fs::File, p: &T, n: usize) -> Result<(), Error> {
     let raw = p as *const T as *const u8;
     unsafe {
@@ -75,7 +74,6 @@ pub fn binary_read_to_ref<T>(f: &mut std::fs::File, p: &mut T, n: usize) -> Resu
 // The functions binary_write_vec and binary_read_vec append, either to a file,
 // in the first case, or to a vector, in the second case.
 
-#[allow(dead_code)]
 pub fn binary_write_vec<T>(f: &mut std::fs::File, x: &[T]) -> Result<(), Error>
 where
     T: BinaryInputOutputSafe,
@@ -85,7 +83,6 @@ where
     binary_write_from_ref::<T>(f, &x[0], x.len())
 }
 
-#[allow(dead_code)]
 pub fn binary_read_vec<T>(f: &mut std::fs::File, x: &mut Vec<T>) -> Result<(), Error>
 where
     T: BinaryInputOutputSafe,

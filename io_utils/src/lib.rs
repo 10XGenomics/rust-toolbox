@@ -270,9 +270,9 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Result<Option<Ve
     if line == *"[\n" {
         line.clear();
         if json.read_line(&mut line).is_err() {
-            return Err(format!(
-                "\nProblem reading json file, probably due to a defect in it.\n"
-            ));
+            return Err(
+                "\nProblem reading json file, probably due to a defect in it.\n".to_string(),
+            );
         }
     }
     let mut entry = Vec::<u8>::new();
@@ -288,10 +288,9 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Result<Option<Ve
         }
         let mut cpos = -1_isize;
         if s.is_empty() {
-            return Err(format!(
-                "\nError reading json file.  It is possible that the file \
+            return Err("\nError reading json file.  It is possible that the file \
                 was truncated.\n"
-            ));
+                .to_string());
         }
         for i in (0..s.len() - 1).rev() {
             if s[i] == b',' {
@@ -329,9 +328,7 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Result<Option<Ve
         }
         line.clear();
         if json.read_line(&mut line).is_err() {
-            return Err(format!(
-                "\nSomething appears to be defective in a json file.\n"
-            ));
+            return Err("\nSomething appears to be defective in a json file.\n".to_string());
         }
         s = line.as_bytes();
     }
