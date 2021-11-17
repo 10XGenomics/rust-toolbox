@@ -6,6 +6,11 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+  # Write permissions are required in order to produce annotations.
+  checks: write
+
 jobs:
   rust:
     runs-on: ubuntu-20.04
