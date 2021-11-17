@@ -44,6 +44,8 @@ jobs:
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          # TODO: re-enable some the -A lints below once we're clean on other
+          # more important ones.
           args: |
            --all-features --all-targets --
            -W clippy::wildcard_imports
@@ -53,7 +55,10 @@ jobs:
            -W rust_2018_compatibility
            -W rust_2021_compatibility
            -F clippy::unused_io_amount
-           -W unused
+           -D clippy::perf
+           -D unused
+           -A clippy::many_single_char_names
+           -A clippy::comparison_chain
       - name: Cargo check
         run: RUSTFLAGS="-D unused -D warnings" cargo check --all-targets
       - name: Run Rust tests
