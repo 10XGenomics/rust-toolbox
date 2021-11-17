@@ -12,8 +12,8 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 num-traits = "^0.2"
 
 [dev-dependencies]
-num-bigint = "^0.3"
-num-rational = "^0.3"
+num-bigint = "^0.4"
+num-rational = "^0.4"
 rand = ">=0.7.3, <0.9"
 rayon = "1.4"
 vector_utils = "0.1"
