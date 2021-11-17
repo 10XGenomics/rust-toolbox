@@ -262,15 +262,17 @@ pub fn get_metric_value(f: impl AsRef<Path>, metric: &str) -> String {
 // https://martian-lang.github.io/martian-rust/doc/martian_filetypes/json_file/
 // index.html#lazy-readwrite-example
 
-pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> {
+pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Result<Option<Vec<u8>>, String> {
     let mut line = String::new();
     if json.read_line(&mut line).is_err() || line == *"" || line == *"[]" {
-        return None;
+        return Ok(None);
     }
     if line == *"[\n" {
         line.clear();
         if json.read_line(&mut line).is_err() {
-            panic!("json read failure 1");
+            return Err(format!(
+                "\nProblem reading json file, probably due to a defect in it.\n"
+            ));
         }
     }
     let mut entry = Vec::<u8>::new();
@@ -279,12 +281,18 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> 
     loop {
         if (s == b"]" || s == b"]\n") && curlies == 0 && bracks == 0 && quotes % 2 == 0 {
             if !entry.is_empty() {
-                return Some(entry);
+                return Ok(Some(entry));
             } else {
-                return None;
+                return Ok(None);
             }
         }
         let mut cpos = -1_isize;
+        if s.is_empty() {
+            return Err(format!(
+                "\nError reading json file.  It is possible that the file \
+                was truncated.\n"
+            ));
+        }
         for i in (0..s.len() - 1).rev() {
             if s[i] == b',' {
                 cpos = i as isize;
@@ -306,7 +314,7 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> 
                     b']' => bracks -= 1,
                     b',' => {
                         if i as isize == cpos && curlies == 0 && bracks == 0 && quotes % 2 == 0 {
-                            return Some(entry);
+                            return Ok(Some(entry));
                         }
                     }
                     _ => {}
@@ -321,7 +329,9 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Option<Vec<u8>> 
         }
         line.clear();
         if json.read_line(&mut line).is_err() {
-            panic!("json read failure 2");
+            return Err(format!(
+                "\nSomething appears to be defective in a json file.\n"
+            ));
         }
         s = line.as_bytes();
     }
