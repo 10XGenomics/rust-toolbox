@@ -443,7 +443,6 @@ impl MirrorSparseMatrix {
         sum
     }
 
-    #[allow(dead_code)]
     pub fn sum_of_col(&self, col: usize) -> usize {
         let mut sum = 0;
         if self.storage_version() == 0 {
