@@ -22,7 +22,13 @@ pub fn is_valid(
     ann: &[(i32, i32, i32, i32, i32)],
     logme: bool,
     log: &mut Vec<u8>,
+    is_gd: Option<bool>,
 ) -> bool {
+    // Unwrap gamma/delta mode flag
+    let gd_mode = match is_gd {
+        Some(x) => x,
+        None => false,
+    };
     let refs = &refdata.refs;
     let rheaders = &refdata.rheaders;
     for pass in 0..2 {
@@ -45,31 +51,63 @@ pub fn is_valid(
             if rheaders[t].contains("IGH") {
                 igh = true;
             }
-            if !rheaders[t].contains("5'UTR")
-                && ((m == "A" && (rheaders[t].contains("TRAV") || rheaders[t].contains("IGHV")))
+            if gd_mode {
+                if !rheaders[t].contains("5'UTR")
+                && ((m == "A" && (rheaders[t].contains("TRAV") || rheaders[t].contains("TRGV") || rheaders[t].contains("IGHV")))
                     || (m == "B"
                         && (rheaders[t].contains("TRBV")
+                            || rheaders[t].contains("TRDV")
                             || rheaders[t].contains("IGLV")
                             || rheaders[t].contains("IGKV"))))
-            {
-                if first_vstart < 0 {
-                    first_vstart = l as i32;
-                    first_vstart_len = (refs[t].len() - p) as i32;
+                {
+                    if first_vstart < 0 {
+                        first_vstart = l as i32;
+                        first_vstart_len = (refs[t].len() - p) as i32;
+                    }
+                    if p == 0 {
+                        vstarts.push(l as i32);
+                    }
                 }
-                if p == 0 {
-                    vstarts.push(l as i32);
-                }
-            }
-            if (m == "A" && (rheaders[t].contains("TRAJ") || rheaders[t].contains("IGHJ")))
+                if (m == "A" && (rheaders[t].contains("TRAJ") || rheaders[t].contains("TRGJ") || rheaders[t].contains("IGHJ")))
                 || (m == "B"
                     && (rheaders[t].contains("TRBJ")
+                        || rheaders[t].contains("TRDJ")
                         || rheaders[t].contains("IGLJ")
                         || rheaders[t].contains("IGKJ")))
-            {
-                last_jstop = (l + len) as i32;
-                last_jstop_len = (p + len) as i32;
-                if p + len == refs[t].len() {
-                    jstops.push((l + len) as i32);
+                {
+                    last_jstop = (l + len) as i32;
+                    last_jstop_len = (p + len) as i32;
+                    if p + len == refs[t].len() {
+                        jstops.push((l + len) as i32);
+                    }
+                }
+            } else{
+                if !rheaders[t].contains("5'UTR")
+                    && ((m == "A" && (rheaders[t].contains("TRAV") || rheaders[t].contains("IGHV")))
+                        || (m == "B"
+                            && (rheaders[t].contains("TRBV")
+                                || rheaders[t].contains("IGLV")
+                                || rheaders[t].contains("IGKV"))))
+                {
+                    if first_vstart < 0 {
+                        first_vstart = l as i32;
+                        first_vstart_len = (refs[t].len() - p) as i32;
+                    }
+                    if p == 0 {
+                        vstarts.push(l as i32);
+                    }
+                }
+                if (m == "A" && (rheaders[t].contains("TRAJ") || rheaders[t].contains("IGHJ")))
+                    || (m == "B"
+                        && (rheaders[t].contains("TRBJ")
+                            || rheaders[t].contains("IGLJ")
+                            || rheaders[t].contains("IGKJ")))
+                {
+                    last_jstop = (l + len) as i32;
+                    last_jstop_len = (p + len) as i32;
+                    if p + len == refs[t].len() {
+                        jstops.push((l + len) as i32);
+                    }
                 }
             }
         }
@@ -191,7 +229,13 @@ pub fn junction_seq(
     refdata: &RefData,
     ann: &[(i32, i32, i32, i32, i32)],
     jseq: &mut DnaString,
+    is_gd: Option<bool>,
 ) {
+    // Unwrap gamma/delta mode flag
+    let gd_mode = match is_gd {
+        Some(x) => x,
+        None => false,
+    };
     let refs = &refdata.refs;
     let rheaders = &refdata.rheaders;
     const TAG: i32 = 100;
@@ -201,15 +245,31 @@ pub fn junction_seq(
         let len = ann[j as usize].1 as usize;
         let t = ann[j as usize].2 as usize;
         let p = ann[j as usize].3 as usize;
-        if (rheaders[t].contains("TRAJ")
-            || rheaders[t].contains("IGHJ")
-            || rheaders[t].contains("TRBJ")
-            || rheaders[t].contains("IGLJ")
-            || rheaders[t].contains("IGKJ"))
-            && p + len == refs[t].len()
-            && l + len >= TAG as usize
-        {
-            jstops.push((l + len) as i32);
+        if gd_mode {
+            if (rheaders[t].contains("TRAJ")
+                || rheaders[t].contains("IGHJ")
+                || rheaders[t].contains("TRBJ")
+                || rheaders[t].contains("IGLJ")
+                || rheaders[t].contains("IGKJ"))
+                && p + len == refs[t].len()
+                && l + len >= TAG as usize
+            {
+                jstops.push((l + len) as i32);
+            }
+        }
+        else{
+            if (rheaders[t].contains("TRAJ")
+                || rheaders[t].contains("IGHJ")
+                || rheaders[t].contains("TRBJ")
+                || rheaders[t].contains("IGLJ")
+                || rheaders[t].contains("IGKJ")
+                || rheaders[t].contains("TRGJ")
+                || rheaders[t].contains("TRDJ"))
+                && p + len == refs[t].len()
+                && l + len >= TAG as usize
+            {
+                jstops.push((l + len) as i32);
+            }
         }
     }
     unique_sort(&mut jstops);
@@ -239,9 +299,10 @@ pub fn junction_supp(
     refdata: &RefData,
     ann: &[(i32, i32, i32, i32, i32)],
     jsupp: &mut (i32, i32),
+    is_gd: Option<bool>,
 ) {
     let mut jseq = DnaString::new();
-    junction_seq(tig, refdata, ann, &mut jseq);
+    junction_seq(tig, refdata, ann, &mut jseq, is_gd);
     junction_supp_core(reads, x, umi_id, &jseq, jsupp);
 }
 
