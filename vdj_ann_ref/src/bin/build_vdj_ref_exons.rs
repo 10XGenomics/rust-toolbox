@@ -46,11 +46,9 @@ pub fn reverse_complement(x: &mut Vec<u8>) {
     }
 }
 
-fn parse_gtf_file(
-    gtf: &str,
-    demangle: &HashMap<String, String>,
-    exons: &mut Vec<(String, String, String, i32, i32, String, bool, String)>,
-) {
+type ExonInfo = (String, String, String, i32, i32, String, bool, String);
+
+fn parse_gtf_file(gtf: &str, demangle: &HashMap<String, String>, exons: &mut Vec<ExonInfo>) {
     let f = open_for_read![&gtf];
     exons.clear();
     for line in f.lines() {
@@ -853,7 +851,7 @@ fn main() {
 
     // Parse the gtf file.
 
-    let mut exons = Vec::<(String, String, String, i32, i32, String, bool, String)>::new();
+    let mut exons = Vec::<ExonInfo>::new();
     parse_gtf_file(&gtf, &demangle, &mut exons);
 
     // Find the chromosomes that we're using.

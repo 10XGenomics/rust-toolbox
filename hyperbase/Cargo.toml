@@ -1,6 +1,6 @@
 [package]
 name = "hyperbase"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
@@ -10,7 +10,7 @@ edition = "2018"
 [dependencies]
 debruijn = "0.3.2"
 equiv = "0.1"
-graph_simple = "0.1"
+graph_simple = { version = "0.1", path = "../graph_simple" }
 kmer_lookup = "0.1"
 petgraph = ">=0.5,<0.7"
 vector_utils = "0.1"
