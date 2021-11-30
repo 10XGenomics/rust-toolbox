@@ -25,10 +25,7 @@ pub fn is_valid(
     is_gd: Option<bool>,
 ) -> bool {
     // Unwrap gamma/delta mode flag
-    let gd_mode = match is_gd {
-        Some(x) => x,
-        None => false,
-    };
+    let gd_mode = is_gd.unwrap_or(false);
     let refs = &refdata.refs;
     let rheaders = &refdata.rheaders;
     for pass in 0..2 {
@@ -51,63 +48,39 @@ pub fn is_valid(
             if rheaders[t].contains("IGH") {
                 igh = true;
             }
-            if gd_mode {
-                if !rheaders[t].contains("5'UTR")
-                && ((m == "A" && (rheaders[t].contains("TRAV") || rheaders[t].contains("TRGV") || rheaders[t].contains("IGHV")))
+            if !rheaders[t].contains("5'UTR")
+                && ((m == "A"
+                    && (rheaders[t].contains("TRAV")
+                        || (rheaders[t].contains("TRGV") && gd_mode)
+                        || rheaders[t].contains("IGHV")))
                     || (m == "B"
                         && (rheaders[t].contains("TRBV")
-                            || rheaders[t].contains("TRDV")
+                            || (rheaders[t].contains("TRDV") && gd_mode)
                             || rheaders[t].contains("IGLV")
                             || rheaders[t].contains("IGKV"))))
-                {
-                    if first_vstart < 0 {
-                        first_vstart = l as i32;
-                        first_vstart_len = (refs[t].len() - p) as i32;
-                    }
-                    if p == 0 {
-                        vstarts.push(l as i32);
-                    }
+            {
+                if first_vstart < 0 {
+                    first_vstart = l as i32;
+                    first_vstart_len = (refs[t].len() - p) as i32;
                 }
-                if (m == "A" && (rheaders[t].contains("TRAJ") || rheaders[t].contains("TRGJ") || rheaders[t].contains("IGHJ")))
+                if p == 0 {
+                    vstarts.push(l as i32);
+                }
+            }
+            if (m == "A"
+                && (rheaders[t].contains("TRAJ")
+                    || (rheaders[t].contains("TRGJ") && gd_mode)
+                    || rheaders[t].contains("IGHJ")))
                 || (m == "B"
                     && (rheaders[t].contains("TRBJ")
-                        || rheaders[t].contains("TRDJ")
+                        || (rheaders[t].contains("TRDJ") && gd_mode)
                         || rheaders[t].contains("IGLJ")
                         || rheaders[t].contains("IGKJ")))
-                {
-                    last_jstop = (l + len) as i32;
-                    last_jstop_len = (p + len) as i32;
-                    if p + len == refs[t].len() {
-                        jstops.push((l + len) as i32);
-                    }
-                }
-            } else{
-                if !rheaders[t].contains("5'UTR")
-                    && ((m == "A" && (rheaders[t].contains("TRAV") || rheaders[t].contains("IGHV")))
-                        || (m == "B"
-                            && (rheaders[t].contains("TRBV")
-                                || rheaders[t].contains("IGLV")
-                                || rheaders[t].contains("IGKV"))))
-                {
-                    if first_vstart < 0 {
-                        first_vstart = l as i32;
-                        first_vstart_len = (refs[t].len() - p) as i32;
-                    }
-                    if p == 0 {
-                        vstarts.push(l as i32);
-                    }
-                }
-                if (m == "A" && (rheaders[t].contains("TRAJ") || rheaders[t].contains("IGHJ")))
-                    || (m == "B"
-                        && (rheaders[t].contains("TRBJ")
-                            || rheaders[t].contains("IGLJ")
-                            || rheaders[t].contains("IGKJ")))
-                {
-                    last_jstop = (l + len) as i32;
-                    last_jstop_len = (p + len) as i32;
-                    if p + len == refs[t].len() {
-                        jstops.push((l + len) as i32);
-                    }
+            {
+                last_jstop = (l + len) as i32;
+                last_jstop_len = (p + len) as i32;
+                if p + len == refs[t].len() {
+                    jstops.push((l + len) as i32);
                 }
             }
         }
@@ -232,10 +205,7 @@ pub fn junction_seq(
     is_gd: Option<bool>,
 ) {
     // Unwrap gamma/delta mode flag
-    let gd_mode = match is_gd {
-        Some(x) => x,
-        None => false,
-    };
+    let gd_mode = is_gd.unwrap_or(false);
     let refs = &refdata.refs;
     let rheaders = &refdata.rheaders;
     const TAG: i32 = 100;
@@ -256,8 +226,7 @@ pub fn junction_seq(
             {
                 jstops.push((l + len) as i32);
             }
-        }
-        else{
+        } else {
             if (rheaders[t].contains("TRAJ")
                 || rheaders[t].contains("IGHJ")
                 || rheaders[t].contains("TRBJ")
