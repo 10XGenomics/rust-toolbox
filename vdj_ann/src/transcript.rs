@@ -215,30 +215,17 @@ pub fn junction_seq(
         let len = ann[j as usize].1 as usize;
         let t = ann[j as usize].2 as usize;
         let p = ann[j as usize].3 as usize;
-        if gd_mode {
-            if (rheaders[t].contains("TRAJ")
-                || rheaders[t].contains("IGHJ")
-                || rheaders[t].contains("TRBJ")
-                || rheaders[t].contains("IGLJ")
-                || rheaders[t].contains("IGKJ"))
-                && p + len == refs[t].len()
-                && l + len >= TAG as usize
-            {
-                jstops.push((l + len) as i32);
-            }
-        } else {
-            if (rheaders[t].contains("TRAJ")
-                || rheaders[t].contains("IGHJ")
-                || rheaders[t].contains("TRBJ")
-                || rheaders[t].contains("IGLJ")
-                || rheaders[t].contains("IGKJ")
-                || rheaders[t].contains("TRGJ")
-                || rheaders[t].contains("TRDJ"))
-                && p + len == refs[t].len()
-                && l + len >= TAG as usize
-            {
-                jstops.push((l + len) as i32);
-            }
+        if (rheaders[t].contains("TRAJ")
+            || rheaders[t].contains("IGHJ")
+            || rheaders[t].contains("TRBJ")
+            || rheaders[t].contains("IGLJ")
+            || rheaders[t].contains("IGKJ")
+            || (rheaders[t].contains("TRGJ") && gd_mode)
+            || (rheaders[t].contains("TRDJ") && gd_mode))
+            && p + len == refs[t].len()
+            && l + len >= TAG as usize
+        {
+            jstops.push((l + len) as i32);
         }
     }
     unique_sort(&mut jstops);
