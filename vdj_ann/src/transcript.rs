@@ -22,7 +22,10 @@ pub fn is_valid(
     ann: &[(i32, i32, i32, i32, i32)],
     logme: bool,
     log: &mut Vec<u8>,
+    is_gd: Option<bool>,
 ) -> bool {
+    // Unwrap gamma/delta mode flag
+    let gd_mode = is_gd.unwrap_or(false);
     let refs = &refdata.refs;
     let rheaders = &refdata.rheaders;
     for pass in 0..2 {
@@ -46,9 +49,13 @@ pub fn is_valid(
                 igh = true;
             }
             if !rheaders[t].contains("5'UTR")
-                && ((m == "A" && (rheaders[t].contains("TRAV") || rheaders[t].contains("IGHV")))
+                && ((m == "A"
+                    && (rheaders[t].contains("TRAV")
+                        || (rheaders[t].contains("TRGV") && gd_mode)
+                        || rheaders[t].contains("IGHV")))
                     || (m == "B"
                         && (rheaders[t].contains("TRBV")
+                            || (rheaders[t].contains("TRDV") && gd_mode)
                             || rheaders[t].contains("IGLV")
                             || rheaders[t].contains("IGKV"))))
             {
@@ -60,9 +67,13 @@ pub fn is_valid(
                     vstarts.push(l as i32);
                 }
             }
-            if (m == "A" && (rheaders[t].contains("TRAJ") || rheaders[t].contains("IGHJ")))
+            if (m == "A"
+                && (rheaders[t].contains("TRAJ")
+                    || (rheaders[t].contains("TRGJ") && gd_mode)
+                    || rheaders[t].contains("IGHJ")))
                 || (m == "B"
                     && (rheaders[t].contains("TRBJ")
+                        || (rheaders[t].contains("TRDJ") && gd_mode)
                         || rheaders[t].contains("IGLJ")
                         || rheaders[t].contains("IGKJ")))
             {
@@ -191,7 +202,10 @@ pub fn junction_seq(
     refdata: &RefData,
     ann: &[(i32, i32, i32, i32, i32)],
     jseq: &mut DnaString,
+    is_gd: Option<bool>,
 ) {
+    // Unwrap gamma/delta mode flag
+    let gd_mode = is_gd.unwrap_or(false);
     let refs = &refdata.refs;
     let rheaders = &refdata.rheaders;
     const TAG: i32 = 100;
@@ -205,7 +219,9 @@ pub fn junction_seq(
             || rheaders[t].contains("IGHJ")
             || rheaders[t].contains("TRBJ")
             || rheaders[t].contains("IGLJ")
-            || rheaders[t].contains("IGKJ"))
+            || rheaders[t].contains("IGKJ")
+            || (rheaders[t].contains("TRGJ") && gd_mode)
+            || (rheaders[t].contains("TRDJ") && gd_mode))
             && p + len == refs[t].len()
             && l + len >= TAG as usize
         {
@@ -239,9 +255,10 @@ pub fn junction_supp(
     refdata: &RefData,
     ann: &[(i32, i32, i32, i32, i32)],
     jsupp: &mut (i32, i32),
+    is_gd: Option<bool>,
 ) {
     let mut jseq = DnaString::new();
-    junction_seq(tig, refdata, ann, &mut jseq);
+    junction_seq(tig, refdata, ann, &mut jseq, is_gd);
     junction_supp_core(reads, x, umi_id, &jseq, jsupp);
 }
 
