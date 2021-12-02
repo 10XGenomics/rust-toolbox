@@ -26,7 +26,8 @@ pub fn is_valid(
 ) -> bool {
     // Unwrap gamma/delta mode flag
     let gd_mode = is_gd.unwrap_or(false);
-    // assert!(is_gd.unwrap_or(false));
+    assert!(is_gd.unwrap_or(false));
+    assert_eq!(5, 3);
     let refs = &refdata.refs;
     let rheaders = &refdata.rheaders;
     for pass in 0..2 {
