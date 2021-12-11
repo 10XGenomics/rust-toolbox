@@ -201,6 +201,11 @@ pub fn annotate_seq_core(
     log: &mut Vec<u8>,
     verbose: bool,
 ) {
+    // The DNA string representation is inefficient because it stores bases as packed k-mers
+    // which requires a lot of array bounds checks when unpacking which was a hot path
+    // we found when profiling the CI job.  To avoid those in the inner
+    // loop, we unpack it once here:
+    let b_seq = b.to_bytes();
     // Unpack refdata.
 
     let refs = &refdata.refs;
@@ -229,12 +234,12 @@ pub fn annotate_seq_core(
             }
             let t = rkmers_plus[r as usize].1 as usize;
             let p = rkmers_plus[r as usize].2 as usize;
-            if l > 0 && p > 0 && b.get(l - 1) == refs[t].get(p - 1) {
+            if l > 0 && p > 0 && b_seq[l - 1] == refs[t].get(p - 1) {
                 continue;
             }
             let mut len = K;
             while l + len < b.len() && p + len < refs[t].len() {
-                if b.get(l + len) != refs[t].get(p + len) {
+                if b_seq[l + len] != refs[t].get(p + len) {
                     break;
                 }
                 len += 1;
@@ -245,7 +250,7 @@ pub fn annotate_seq_core(
                 let mut lx = l as i32 - 2;
                 let mut px = p as i32 - 2;
                 while lx >= 0 && px >= 0 {
-                    if b.get(lx as usize) != refs[t].get(px as usize) {
+                    if b_seq[lx as usize] != refs[t].get(px as usize) {
                         break;
                     }
                     ext1 += 1;
@@ -256,7 +261,7 @@ pub fn annotate_seq_core(
                 let mut lx = l + len + 1;
                 let mut px = p + len + 1;
                 while lx < b.len() && px < refs[t].len() {
-                    if b.get(lx) != refs[t].get(px) {
+                    if b_seq[lx] != refs[t].get(px) {
                         break;
                     }
                     ext2 += 1;
@@ -292,7 +297,7 @@ pub fn annotate_seq_core(
             let (l1, len1) = (perf[k].2, perf[k].3);
             let (l2, len2) = (perf[k + 1].2, perf[k + 1].3);
             for z in l1 + len1..l2 {
-                if b.get(z as usize) != refs[t as usize].get((z + off) as usize) {
+                if b_seq[z as usize] != refs[t as usize].get((z + off) as usize) {
                     mis[k - i].push(z);
                 }
             }
@@ -336,7 +341,7 @@ pub fn annotate_seq_core(
         while l > MIN_PERF_EXT as i32 && l + off > MIN_PERF_EXT as i32 {
             let mut ok = true;
             for j in 0..MIN_PERF_EXT {
-                if b.get((l - j as i32 - 2) as usize)
+                if b_seq[(l - j as i32 - 2) as usize]
                     != refs[t as usize].get((l + off - j as i32 - 2) as usize)
                 {
                     ok = false;
@@ -349,7 +354,7 @@ pub fn annotate_seq_core(
             l -= MIN_PERF_EXT as i32 + 1;
             len += MIN_PERF_EXT as i32 + 1;
             while l > 0 && l + off > 0 {
-                if b.get(l as usize - 1) != refs[t as usize].get((l + off - 1) as usize) {
+                if b_seq[l as usize - 1] != refs[t as usize].get((l + off - 1) as usize) {
                     break;
                 }
                 l -= 1;
@@ -361,7 +366,7 @@ pub fn annotate_seq_core(
         {
             let mut ok = true;
             for j in 0..MIN_PERF_EXT {
-                if b.get((l + len + j as i32 + 1) as usize)
+                if b_seq[(l + len + j as i32 + 1) as usize]
                     != refs[t as usize].get((l + off + len + j as i32 + 1) as usize)
                 {
                     ok = false;
@@ -373,7 +378,7 @@ pub fn annotate_seq_core(
             mis.push(l + len);
             len += MIN_PERF_EXT as i32 + 1;
             while l + len < b.len() as i32 && l + off + len < refs[t as usize].len() as i32 {
-                if b.get((l + len) as usize) != refs[t as usize].get((l + off + len) as usize) {
+                if b_seq[(l + len) as usize] != refs[t as usize].get((l + off + len) as usize) {
                     break;
                 }
                 len += 1;
@@ -415,12 +420,12 @@ pub fn annotate_seq_core(
         const MAX_DIFFS: usize = 6;
         let p1 = off + semi[i].2;
         // let p2 = off + semi[j-1].2 + semi[j-1].3;
-        if -off >= 0 && p1 - off <= b.len() as i32 {
+        if -off >= 0 && p1 - off <= b_seq.len() as i32 {
             for p in 0..p1 - L {
                 let l = p - off;
                 let mut diffs = 0;
                 for m in 0..L {
-                    if b.get((l + m) as usize) != refs[t as usize].get((p + m) as usize) {
+                    if b_seq[(l + m) as usize] != refs[t as usize].get((p + m) as usize) {
                         diffs += 1;
                         if diffs > MAX_DIFFS {
                             break;
@@ -430,7 +435,7 @@ pub fn annotate_seq_core(
                 if diffs <= MAX_DIFFS {
                     let mut x = Vec::<i32>::new();
                     for m in 0..L {
-                        if b.get((l + m) as usize) != refs[t as usize].get((p + m) as usize) {
+                        if b_seq[(l + m) as usize] != refs[t as usize].get((p + m) as usize) {
                             x.push(l + m);
                         }
                     }
@@ -456,8 +461,8 @@ pub fn annotate_seq_core(
             let mut len = semi[i].3;
             let mut mis = semi[i].4.clone();
             let mut mis_count = 0;
-            while l + len < b.len() as i32 && l + len + off < refs[t as usize].len() as i32 {
-                if b.get((l + len as i32) as usize)
+            while l + len < b_seq.len() as i32 && l + len + off < refs[t as usize].len() as i32 {
+                if b_seq[(l + len as i32) as usize]
                     != refs[t as usize].get((l + off + len as i32) as usize)
                 {
                     mis.push(l + len);
@@ -478,7 +483,7 @@ pub fn annotate_seq_core(
             let mut mis = semi[i].4.clone();
             let mut mis_count = 0;
             while l > 0 && l + off > 0 {
-                if b.get((l - 1_i32) as usize) != refs[t as usize].get((l + off - 1_i32) as usize) {
+                if b_seq[(l - 1_i32) as usize] != refs[t as usize].get((l + off - 1_i32) as usize) {
                     mis.push(l - 1);
                     mis_count += 1;
                 }
@@ -522,7 +527,7 @@ pub fn annotate_seq_core(
             let mis2 = semi[i2].4.clone();
             let mut mis3 = Vec::<i32>::new();
             for l in l1 + len1..l2 {
-                if b.get(l as usize) != refs[t1 as usize].get((l + off1) as usize) {
+                if b_seq[l as usize] != refs[t1 as usize].get((l + off1) as usize) {
                     mis3.push(l);
                 }
             }
@@ -609,9 +614,9 @@ pub fn annotate_seq_core(
         let t = annx[i].2 as usize;
         if !rheaders[t].contains("segment") && refdata.is_v(t) && annx[i].3 == 0 {
             let p = annx[i].0 as usize;
-            if b.get(p) == 0 // A
-                && b.get(p+1) == 3 // T
-                && b.get(p+2) == 2
+            if b_seq[p] == 0 // A
+                && b_seq[p+1] == 3 // T
+                && b_seq[p+2] == 2
             {
                 // G
                 have_starter = true;
@@ -624,7 +629,7 @@ pub fn annotate_seq_core(
             let t = annx[i].2 as usize;
             if !rheaders[t].contains("segment") && refdata.is_v(t) && annx[i].3 == 0 {
                 let p = annx[i].0 as usize;
-                if !(b.get(p) == 0 && b.get(p + 1) == 3 && b.get(p + 2) == 2) {
+                if !(b_seq[p] == 0 && b_seq[p + 1] == 3 && b_seq[p + 2] == 2) {
                     to_delete[i] = true;
                 }
             }
@@ -929,7 +934,7 @@ pub fn annotate_seq_core(
                     annx[i1].1 = len1 as i32;
                     annx[i1].4.truncate(0);
                     for j in 0..len1 {
-                        if b.get(l1 + j) != refs[t1].get(p1 + j) {
+                        if b_seq[l1 + j] != refs[t1].get(p1 + j) {
                             annx[i1].4.push((l1 + j) as i32);
                         }
                     }
@@ -942,12 +947,12 @@ pub fn annotate_seq_core(
                     annx[i1].4.truncate(0);
                     annx[i2].4.truncate(0);
                     for j in 0..len1 {
-                        if b.get(l1 + j) != refs[t1].get(p1 + j) {
+                        if b_seq[l1 + j] != refs[t1].get(p1 + j) {
                             annx[i1].4.push((l1 + j) as i32);
                         }
                     }
                     for j in 0..len2 {
-                        if b.get(l2 + j) != refs[t1].get(p2 + j) {
+                        if b_seq[l2 + j] != refs[t1].get(p2 + j) {
                             annx[i2].4.push((l2 + j) as i32);
                         }
                     }
@@ -1061,7 +1066,7 @@ pub fn annotate_seq_core(
 
             // Now find their mismatch positions.
 
-            let n = b.len();
+            let n = b_seq.len();
             let (mut mis1, mut mis2) = (vec![false; n], vec![false; n]);
             for j in data[i1].2.iter() {
                 for p in annx[*j].4.iter() {
@@ -1415,7 +1420,7 @@ pub fn annotate_seq_core(
                 let (mut total, mut mis) = (0, 0);
                 for j in (0..n).rev() {
                     total += 1;
-                    if b.get(i + j) != refs[t].get(j) {
+                    if b_seq[i + j] != refs[t].get(j) {
                         mis += 1;
                         if total <= J_TOT && mis > J_MIS {
                             break;
@@ -1435,7 +1440,7 @@ pub fn annotate_seq_core(
             let i = igc + best_z - n;
             let mut mis = Vec::<i32>::new();
             for j in 0..n {
-                if b.get((i + j) as usize) != refs[t].get(j as usize) {
+                if b_seq[(i + j) as usize] != refs[t].get(j as usize) {
                     mis.push(i + j);
                 }
             }
@@ -1509,7 +1514,7 @@ pub fn annotate_seq_core(
                 for m in start..=stop - (r.len() as i32) {
                     let mut mismatches = Vec::<i32>::new();
                     for x in 0..r.len() {
-                        if r.get(x) != b.get((m + x as i32) as usize) {
+                        if r.get(x) != b_seq[(m + x as i32) as usize] {
                             mismatches.push(x as i32);
                         }
                     }
@@ -1581,10 +1586,10 @@ pub fn annotate_seq_core(
                 let mut y2 = refs[t2].len() as i32 - 1;
                 let (mut x1, mut x2) = (y1 + l1 - p1, y2 + l2 - p2);
                 loop {
-                    if b.get(x1 as usize) != refs[t1].get(y1 as usize) {
+                    if b_seq[x1 as usize] != refs[t1].get(y1 as usize) {
                         mis1 += 1;
                     }
-                    if b.get(x2 as usize) != refs[t2].get(y2 as usize) {
+                    if b_seq[x2 as usize] != refs[t2].get(y2 as usize) {
                         mis2 += 1;
                     }
                     if x1 == 0 || y1 == 0 || x2 == 0 || y2 == 0 {
@@ -1630,10 +1635,10 @@ pub fn annotate_seq_core(
             let (mut y1, mut y2) = (p1, p2);
             let (mut x1, mut x2) = (l1, l2);
             loop {
-                if b.get(x1 as usize) != refs[t1].get(y1 as usize) {
+                if b_seq[x1 as usize] != refs[t1].get(y1 as usize) {
                     mis1 += 1;
                 }
-                if b.get(x2 as usize) != refs[t2].get(y2 as usize) {
+                if b_seq[x2 as usize] != refs[t2].get(y2 as usize) {
                     mis2 += 1;
                 }
                 x1 += 1;
@@ -1701,10 +1706,10 @@ pub fn annotate_seq_core(
                 let (mut y1, mut y2) = (p1, p2);
                 let (mut x1, mut x2) = (l1, l2);
                 loop {
-                    if b.get(x1 as usize) != refs[t1].get(y1 as usize) {
+                    if b_seq[x1 as usize] != refs[t1].get(y1 as usize) {
                         mis1 += 1;
                     }
-                    if b.get(x2 as usize) != refs[t2].get(y2 as usize) {
+                    if b_seq[x2 as usize] != refs[t2].get(y2 as usize) {
                         mis2 += 1;
                     }
                     x1 += 1;
