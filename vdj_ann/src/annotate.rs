@@ -262,7 +262,7 @@ pub fn annotate_seq_core(
                 let mut lx = l + len + 1;
                 let mut px = p + len + 1;
                 while lx < b.len() && px < refs[t].len() {
-                    if b[lx] != refs[t].get(px) {
+                    if b_seq[lx] != refs[t].get(px) {
                         break;
                     }
                     ext2 += 1;
@@ -367,7 +367,7 @@ pub fn annotate_seq_core(
         {
             let mut ok = true;
             for j in 0..MIN_PERF_EXT {
-                if b[(l + len + j as i32 + 1) as usize]
+                if b_seq[(l + len + j as i32 + 1) as usize]
                     != refs[t as usize].get((l + off + len + j as i32 + 1) as usize)
                 {
                     ok = false;
@@ -484,7 +484,7 @@ pub fn annotate_seq_core(
             let mut mis = semi[i].4.clone();
             let mut mis_count = 0;
             while l > 0 && l + off > 0 {
-                if b[(l - 1_i32) as usize] != refs[t as usize].get((l + off - 1_i32) as usize) {
+                if b_seq[(l - 1_i32) as usize] != refs[t as usize].get((l + off - 1_i32) as usize) {
                     mis.push(l - 1);
                     mis_count += 1;
                 }
