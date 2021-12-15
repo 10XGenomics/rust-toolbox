@@ -411,7 +411,6 @@ pub fn annotate_seq_core(
     while i < semi.len() {
         let mut j = i + 1;
         let t = semi[i].0;
-        let refs_t = refs[t as usize].to_bytes();
         let off = semi[i].1;
 
         while j < semi.len() {
@@ -429,7 +428,7 @@ pub fn annotate_seq_core(
                 let l = p - off;
                 let mut diffs = 0;
                 for m in 0..L {
-                    if b_seq[(l + m) as usize] != refs_t[(p + m) as usize] {
+                    if b_seq[(l + m) as usize] != refs[t as usize].get((p + m) as usize) {
                         diffs += 1;
                         if diffs > MAX_DIFFS {
                             break;
@@ -439,7 +438,7 @@ pub fn annotate_seq_core(
                 if diffs <= MAX_DIFFS {
                     let mut x = Vec::<i32>::new();
                     for m in 0..L {
-                        if b_seq[(l + m) as usize] != refs_t[(p + m) as usize] {
+                        if b_seq[(l + m) as usize] != refs[t as usize].get((p + m) as usize) {
                             x.push(l + m);
                         }
                     }
@@ -460,22 +459,21 @@ pub fn annotate_seq_core(
         let max_mis = 5;
         for i in 0..semi.len() {
             let t = semi[i].0;
-            let ref_t = refs[t as usize].to_bytes();
             let off = semi[i].1;
             let l = semi[i].2;
             let mut len = semi[i].3;
             let mut mis = semi[i].4.clone();
             let mut mis_count = 0;
-            while l + len < b_seq.len() as i32 && l + len + off < ref_t.len() as i32 {
+            while l + len < b_seq.len() as i32 && l + len + off < refs[t as usize].len() as i32 {
                 if b_seq[(l + len as i32) as usize]
-                    != ref_t[(l + off + len as i32) as usize]
+                    != refs[t as usize].get((l + off + len as i32) as usize)
                 {
                     mis.push(l + len);
                     mis_count += 1;
                 }
                 len += 1;
             }
-            if mis_count <= max_mis && l + len + off == ref_t.len() as i32 {
+            if mis_count <= max_mis && l + len + off == refs[t as usize].len() as i32 {
                 semi[i].3 = len;
                 semi[i].4 = mis;
             }
