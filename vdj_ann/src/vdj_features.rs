@@ -36,7 +36,6 @@ use vector_utils::{reverse_sort, sort_sync3};
 pub fn fr1_start(aa: &[u8], chain_type: &str) -> usize {
     // Define PWM.
 
-    #[allow(clippy::vec_init_then_push)]
     let mut pwm = Vec::<Vec<(usize, u8)>>::new();
 
     // #1
@@ -106,7 +105,6 @@ pub fn fr1_start(aa: &[u8], chain_type: &str) -> usize {
 pub fn cdr1_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
     // Define PWM for eight amino acids.
 
-    #[allow(clippy::vec_init_then_push)]
     let mut pwm = Vec::<Vec<(usize, u8)>>::new();
 
     let z = 19;
@@ -172,7 +170,6 @@ pub fn cdr1_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
 pub fn fr2_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
     // Define PWM for six amino acids.
 
-    #[allow(clippy::vec_init_then_push)]
     let mut pwm = Vec::<Vec<(usize, u8)>>::new();
 
     let z = 39;
@@ -275,7 +272,6 @@ pub fn cdr2_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
     if chain_type == "IGH" {
         // Six amino acids preceeding the CDR2 start.
 
-        #[allow(clippy::vec_init_then_push)]
         let mut pwm = Vec::<Vec<(usize, u8)>>::new();
 
         // #50
@@ -330,7 +326,6 @@ pub fn cdr2_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
     } else if chain_type == "TRA" {
         // Six amino acids preceeding the CDR2 start.
 
-        #[allow(clippy::vec_init_then_push)]
         let mut pwm = Vec::<Vec<(usize, u8)>>::new();
 
         // #50
@@ -469,7 +464,6 @@ pub fn fr3_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
     // Do IGK and IGL.
 
     if chain_type == "IGK" || chain_type == "IGL" {
-        #[allow(clippy::vec_init_then_push)]
         let mut pwm = Vec::<Vec<(usize, u8)>>::new();
 
         // x1
@@ -534,7 +528,6 @@ pub fn fr3_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
 
     // Do IGH.
     } else if chain_type == "IGH" {
-        #[allow(clippy::vec_init_then_push)]
         let mut pwm = Vec::<Vec<(usize, u8)>>::new();
 
         // #2
@@ -605,7 +598,6 @@ pub fn fr3_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
 
     // Do TRA.
     } else if chain_type == "TRA" {
-        #[allow(clippy::vec_init_then_push)]
         let mut pwm = Vec::<Vec<(usize, u8)>>::new();
 
         // #m0
@@ -683,7 +675,6 @@ pub fn fr3_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
 
     // Do TRB.
     } else {
-        #[allow(clippy::vec_init_then_push)]
         let mut pwm = Vec::<Vec<(usize, u8)>>::new();
 
         // #m1
