@@ -21,4 +21,4 @@ pretty_trace = "0.5"
 sha2 = ">=0.9.3, <0.11"
 string_utils = "0.1"
 vector_utils = "0.1"
-vdj_ann = { version = "0.3", path = "../vdj_ann" }
+vdj_ann = "0.3"
