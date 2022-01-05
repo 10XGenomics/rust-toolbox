@@ -557,13 +557,9 @@ pub fn annotate_seq_core(
 
     if !allow_improper {
         let mut to_delete: Vec<bool> = vec![false; annx.len()];
-        for i in 0..annx.len() {
-            let tmp = annx[i].0;
-            annx[i].0 = annx[i].2;
-            annx[i].2 = tmp;
-            let tmp = annx[i].1;
-            annx[i].1 = annx[i].3;
-            annx[i].3 = tmp;
+        for annxi in annx.iter_mut() {
+            std::mem::swap(&mut annxi.0, &mut annxi.2);
+            std::mem::swap(&mut annxi.1, &mut annxi.3);
         }
         annx.sort();
         let mut i1 = 0;
@@ -586,13 +582,9 @@ pub fn annotate_seq_core(
             i1 = j1 as usize;
         }
         erase_if(&mut annx, &to_delete);
-        for i in 0..annx.len() {
-            let tmp = annx[i].0;
-            annx[i].0 = annx[i].2;
-            annx[i].2 = tmp;
-            let tmp = annx[i].1;
-            annx[i].1 = annx[i].3;
-            annx[i].3 = tmp;
+        for annxi in annx.iter_mut() {
+            std::mem::swap(&mut annxi.0, &mut annxi.2);
+            std::mem::swap(&mut annxi.1, &mut annxi.3);
         }
         annx.sort();
     }

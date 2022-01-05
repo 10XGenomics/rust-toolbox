@@ -1162,7 +1162,7 @@ fn prettify_traceback(bt: &[u8], whitelist: &[String], pack: bool) -> String {
 
     // Remove certain 'unwanted' blocklets.
 
-    for mut x in blocks.iter_mut() {
+    for x in blocks.iter_mut() {
         let mut to_delete = vec![false; x.len()];
         'block: for j in 0..x.len() {
             // Ugly exemption to make a test work.
@@ -1218,7 +1218,7 @@ fn prettify_traceback(bt: &[u8], whitelist: &[String], pack: bool) -> String {
                 to_delete[j] = true;
             }
         }
-        erase_if(&mut x, &to_delete);
+        erase_if(x, &to_delete);
     }
 
     // Remove any block having length zero.
