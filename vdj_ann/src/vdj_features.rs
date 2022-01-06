@@ -67,7 +67,7 @@ pub fn fr1_start(aa: &[u8], chain_type: &str) -> usize {
     // Score positions.
 
     let end = (aa.len() - pwm.len()).min(40);
-    let mut score_pos = Vec::<(usize, usize)>::with_capacity(end+1);
+    let mut score_pos = Vec::<(usize, usize)>::with_capacity(end + 1);
     for j in 0..=end {
         if chain_type == "IGL" && j > 25 {
             break;
