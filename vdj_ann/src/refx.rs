@@ -128,15 +128,15 @@ pub fn make_vdj_ref_data_core(
 ) {
     // Define convenient abbreviations.
 
-    let mut refs = &mut refdata.refs;
-    let mut rheaders = &mut refdata.rheaders;
-    let mut rkmers_plus = &mut refdata.rkmers_plus;
+    let refs = &mut refdata.refs;
+    let rheaders = &mut refdata.rheaders;
+    let rkmers_plus = &mut refdata.rkmers_plus;
 
     // Parse the fasta file.
 
     refs.clear();
     rheaders.clear();
-    read_fasta_contents_into_vec_dna_string_plus_headers(ref_fasta, &mut refs, &mut rheaders);
+    read_fasta_contents_into_vec_dna_string_plus_headers(ref_fasta, refs, rheaders);
 
     // Filter by ids if requested.
 
@@ -146,8 +146,8 @@ pub fn make_vdj_ref_data_core(
             let id = rheaders[i].before("|").force_i32();
             to_delete[i] = !ids_to_use.contains(&id);
         }
-        erase_if(&mut refs, &to_delete);
-        erase_if(&mut rheaders, &to_delete);
+        erase_if(refs, &to_delete);
+        erase_if(rheaders, &to_delete);
     }
     refdata.rheaders_orig = rheaders.clone();
 
@@ -255,7 +255,7 @@ pub fn make_vdj_ref_data_core(
 
     // Make lookup table for reference.
 
-    make_kmer_lookup_12_single(refs, &mut rkmers_plus);
+    make_kmer_lookup_12_single(refs, rkmers_plus);
 
     // Determine which V segments have matching UTRs in the reference.
 

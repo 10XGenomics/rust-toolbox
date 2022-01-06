@@ -36,45 +36,40 @@ use vector_utils::{reverse_sort, sort_sync3};
 pub fn fr1_start(aa: &[u8], chain_type: &str) -> usize {
     // Define PWM.
 
-    let mut pwm = Vec::<Vec<(usize, u8)>>::new();
+    let mut pwm: [Vec<(usize, u8)>; 23] = Default::default();
 
     // #1
 
-    pwm.push(vec![
+    pwm[0] = vec![
         (150, b'Q'),
         (150, b'E'),
         (150, b'D'),
         (150, b'G'),
         (150, b'K'),
-    ]);
+    ];
 
-    pwm.push(vec![(50, b'V'), (50, b'I'), (50, b'Q'), (50, b'A')]); // #2
-    pwm.push(vec![]); //                                               #3
-    pwm.push(vec![(100, b'L'), (100, b'V'), (100, b'M')]); //          #4
-    pwm.push(vec![]); //                                               #5
-    pwm.push(vec![(250, b'Q'), (250, b'E')]); //                       #6
-
-    for _ in 0..22 - 6 - 1 {
-        pwm.push(vec![]);
-    }
+    pwm[1] = vec![(50, b'V'), (50, b'I'), (50, b'Q'), (50, b'A')]; // #2
+    pwm[3] = vec![(100, b'L'), (100, b'V'), (100, b'M')]; //          #4
+    pwm[5] = vec![(250, b'Q'), (250, b'E')]; //                       #6
 
     // #22
 
-    if chain_type == "IGH" {
-        pwm.push(vec![(500, b'C')]);
+    pwm[21] = if chain_type == "IGH" {
+        vec![(500, b'C')]
     } else {
-        pwm.push(vec![(250, b'C')]);
-    }
+        vec![(250, b'C')]
+    };
 
     // #23
 
-    pwm.push(vec![(250, b'C')]);
+    pwm[22] = vec![(250, b'C')];
 
     // Score positions.
 
-    let mut score_pos = Vec::<(usize, usize)>::new();
-    for j in 0..=aa.len() - pwm.len() {
-        if j > 40 || (chain_type == "IGL" && j > 25) {
+    let end = (aa.len() - pwm.len()).min(40);
+    let mut score_pos = Vec::<(usize, usize)>::with_capacity(end + 1);
+    for j in 0..=end {
+        if chain_type == "IGL" && j > 25 {
             break;
         }
         let mut score = 0;
@@ -105,38 +100,32 @@ pub fn fr1_start(aa: &[u8], chain_type: &str) -> usize {
 pub fn cdr1_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
     // Define PWM for eight amino acids.
 
-    let mut pwm = Vec::<Vec<(usize, u8)>>::new();
-
-    let z = 19;
-
-    /* #19 */
-    pwm.push(vec![(50, b'V')]);
-    /* #20 */
-    pwm.push(vec![(30, b'T')]);
-    /* #21 */
-    pwm.push(vec![(200, b'L'), (200, b'I'), (200, b'V'), (200, b'M')]);
-    /* #22 */
-    pwm.push(vec![(80, b'S'), (80, b'T'), (80, b'R')]);
-    /* #23 */
-    pwm.push(vec![(250, b'C')]);
-    /* #24 */
-    pwm.push(vec![]);
-    /* #25 */
-    pwm.push(vec![]);
-    /* #26 */
-    pwm.push(vec![(100, b'S'), (100, b'I'), (100, b'D')]);
+    const Z: usize = 19;
+    let pwm = [
+        /* #19 */
+        vec![(50, b'V')],
+        /* #20 */
+        vec![(30, b'T')],
+        /* #21 */
+        vec![(200, b'L'), (200, b'I'), (200, b'V'), (200, b'M')],
+        /* #22 */
+        vec![(80, b'S'), (80, b'T'), (80, b'R')],
+        /* #23 */
+        vec![(250, b'C')],
+        /* #24 */
+        Vec::default(),
+        /* #25 */
+        Vec::default(),
+        /* #26 */
+        vec![(100, b'S'), (100, b'I'), (100, b'D')],
+    ];
 
     // Score positions.
 
-    let mut score_pos = Vec::<(usize, usize)>::new();
     let fr1 = fr1_start(aa, chain_type);
-    for j in 0..=aa.len() - pwm.len() {
-        if j + pwm.len() > fr1 + 27 {
-            continue;
-        }
-        if j < 7 + z - 1 {
-            continue;
-        }
+    let end = (fr1 + 27).saturating_sub(pwm.len());
+    let mut score_pos = Vec::<(usize, usize)>::with_capacity(end.saturating_sub(7 + Z - 2));
+    for j in 7 + Z - 1..=(aa.len() - pwm.len()).min(end) {
         let mut score = 0;
         for p in 0..pwm.len() {
             for l in 0..pwm[p].len() {
@@ -170,66 +159,46 @@ pub fn cdr1_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
 pub fn fr2_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
     // Define PWM for six amino acids.
 
-    let mut pwm = Vec::<Vec<(usize, u8)>>::new();
-
-    let z = 39;
-
-    // #39
-
-    pwm.push(vec![(50, b'L'), (50, b'M'), (50, b'V'), (50, b'F')]);
-
-    // #40
-
-    if chain_type == "IGL" {
-        pwm.push(vec![(250, b'Y')]);
-    } else {
-        pwm.push(vec![]);
-    }
-
-    // #41
-
-    pwm.push(vec![(250, b'W')]);
-
-    // #42
-
-    pwm.push(vec![(150, b'Y')]);
-
-    // #43
-
-    pwm.push(vec![(100, b'R')]);
-
-    // #44
-
-    pwm.push(vec![(250, b'Q')]);
-
-    // #45-46
-
-    pwm.push(vec![]);
-    pwm.push(vec![]);
-
-    // #47
-
-    pwm.push(vec![(110, b'G')]);
-
-    // #48
-
-    pwm.push(vec![(60, b'K'), (60, b'Q')]);
-
-    // #49
-
-    pwm.push(vec![(40, b'G'), (40, b'K'), (40, b'A')]);
+    const Z: usize = 39;
+    let pwm = [
+        // #39
+        vec![(50, b'L'), (50, b'M'), (50, b'V'), (50, b'F')],
+        // #40
+        if chain_type == "IGL" {
+            vec![(250, b'Y')]
+        } else {
+            Vec::default()
+        },
+        // #41
+        vec![(250, b'W')],
+        // #42
+        vec![(150, b'Y')],
+        // #43
+        vec![(100, b'R')],
+        // #44
+        vec![(250, b'Q')],
+        // #45-46
+        Vec::default(),
+        Vec::default(),
+        // #47
+        vec![(110, b'G')],
+        // #48
+        vec![(60, b'K'), (60, b'Q')],
+        // #49
+        vec![(40, b'G'), (40, b'K'), (40, b'A')],
+    ];
 
     // Score positions.
 
-    let mut score_pos = Vec::<(usize, usize)>::new();
-    for j in 0..=aa.len() - pwm.len() {
-        let start = 2;
-        let mut stop = 35;
+    const START: usize = 2 + Z - 1;
+    const STOP: usize = 35 + Z - 1;
+    let mut score_pos = Vec::<(usize, usize)>::with_capacity(STOP - START + 1);
+    for j in START..=(aa.len() - pwm.len()).min(STOP) {
         if chain_type == "IGH" {
-            stop = 24;
-        }
-        if j > stop + z - 1 || j < start + z - 1 {
-            continue;
+            const STOP: usize = 24 + Z - 1;
+            if j > STOP {
+                continue;
+            }
         }
         let mut score = 0;
         for p in 0..pwm.len() {
@@ -272,39 +241,25 @@ pub fn cdr2_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
     if chain_type == "IGH" {
         // Six amino acids preceeding the CDR2 start.
 
-        let mut pwm = Vec::<Vec<(usize, u8)>>::new();
-
-        // #50
-
-        pwm.push(vec![(80, b'L')]);
-
-        // #51
-
-        pwm.push(vec![(80, b'E')]);
-
-        // #52
-
-        pwm.push(vec![(80, b'W')]);
-
-        // #53
-
-        pwm.push(vec![(40, b'V'), (40, b'M'), (40, b'I'), (40, b'L')]);
-
-        // #54
-
-        pwm.push(vec![(40, b'G'), (40, b'S'), (40, b'A')]);
-
-        // #55
-
-        pwm.push(vec![]);
+        let pwm = [
+            // #50
+            vec![(80, b'L')],
+            // #51
+            vec![(80, b'E')],
+            // #52
+            vec![(80, b'W')],
+            // #53
+            vec![(40, b'V'), (40, b'M'), (40, b'I'), (40, b'L')],
+            // #54
+            vec![(40, b'G'), (40, b'S'), (40, b'A')],
+            // #55
+            vec![],
+        ];
 
         // Score positions.
 
-        let mut score_pos = Vec::<(usize, usize)>::new();
-        for j in 0..=aa.len() - pwm.len() {
-            if j < s2 + 8 || j > s2 + 13 {
-                continue;
-            }
+        let mut score_pos = Vec::<(usize, usize)>::with_capacity(6);
+        for j in s2 + 8..=(aa.len() - pwm.len()).min(s2 + 13) {
             let mut score = 0;
             for p in 0..pwm.len() {
                 for l in 0..pwm[p].len() {
@@ -326,50 +281,30 @@ pub fn cdr2_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
     } else if chain_type == "TRA" {
         // Six amino acids preceeding the CDR2 start.
 
-        let mut pwm = Vec::<Vec<(usize, u8)>>::new();
-
-        // #50
-
-        pwm.push(vec![(15, b'P'), (15, b'L')]);
-
-        // #51
-
-        pwm.push(vec![
-            (15, b'Q'),
-            (15, b'V'),
-            (15, b'E'),
-            (15, b'T'),
-            (15, b'I'),
-        ]);
-
-        // #52
-
-        pwm.push(vec![(20, b'L'), (20, b'F')]);
-
-        // #53
-
-        pwm.push(vec![(35, b'L')]);
-
-        // #54
-
-        pwm.push(vec![(15, b'L'), (15, b'I')]);
-
-        // #55
-
-        pwm.push(vec![]);
+        let pwm = [
+            // #50
+            vec![(15, b'P'), (15, b'L')],
+            // #51
+            vec![(15, b'Q'), (15, b'V'), (15, b'E'), (15, b'T'), (15, b'I')],
+            // #52
+            vec![(20, b'L'), (20, b'F')],
+            // #53
+            vec![(35, b'L')],
+            // #54
+            vec![(15, b'L'), (15, b'I')],
+            // #55
+            vec![],
+        ];
 
         // Score positions.
 
-        let mut score_pos = Vec::<(usize, usize)>::new();
-        for j in 0..=aa.len() - pwm.len() {
-            if j < s2 + 10 || j > s2 + 12 {
-                continue;
-            }
+        let mut score_pos = Vec::<(usize, usize)>::with_capacity(3);
+        for j in s2 + 10..=(aa.len() - pwm.len()).min(s2 + 12) {
             let mut score = 0;
-            for p in 0..pwm.len() {
-                for l in 0..pwm[p].len() {
-                    if pwm[p][l].1 == aa[j + p] {
-                        score += pwm[p][l].0;
+            for (p, wm) in pwm.iter().enumerate() {
+                for l in wm {
+                    if l.1 == aa[j + p] {
+                        score += l.0;
                     }
                 }
             }
@@ -399,11 +334,7 @@ pub fn cdr3_start(aa: &[u8], _chain_type: &str, _verbose: bool) -> usize {
     let nm = motif[0].len();
     let reach = 18;
     let mut scores = Vec::<(usize, usize)>::new();
-    for j in aa.len() as isize - nm as isize - reach as isize..=aa.len() as isize - nm as isize {
-        if j < 0 {
-            continue;
-        }
-        let j = j as usize;
+    for j in aa.len().saturating_sub(nm + reach)..=aa.len().saturating_sub(nm) {
         let mut score = 0;
         for k in 0..nm {
             for l in 0..motif.len() {
@@ -424,9 +355,9 @@ pub fn cdr3_start(aa: &[u8], _chain_type: &str, _verbose: bool) -> usize {
 pub fn cdr3_score(aa: &[u8], _chain_type: &str, _verbose: bool) -> usize {
     let motif = [b"LQPEDSAVYYC", b"VEASQTGTYFC", b"ATSGQASLYLC"];
     let nm = motif[0].len();
-    let reach = 18;
-    let mut scores = Vec::<(usize, usize)>::new();
-    for j in aa.len() - nm - reach..=aa.len() - nm {
+    const REACH: usize = 18;
+    let mut scores = Vec::<(usize, usize)>::with_capacity(REACH + 1);
+    for j in aa.len().saturating_sub(nm + REACH)..=aa.len().saturating_sub(nm) {
         let mut score = 0;
         for k in 0..nm {
             for l in 0..motif.len() {
@@ -464,53 +395,38 @@ pub fn fr3_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
     // Do IGK and IGL.
 
     if chain_type == "IGK" || chain_type == "IGL" {
-        let mut pwm = Vec::<Vec<(usize, u8)>>::new();
-
-        // x1
-
-        pwm.push(vec![(100, b'G')]);
-
-        // x2
-
-        pwm.push(vec![]);
-
-        // x3
-
-        pwm.push(vec![(100, b'P')]);
-
-        // x4
-
-        pwm.push(vec![]);
-
-        // x5
-
-        pwm.push(vec![(100, b'R')]);
-
-        // x6
-
-        pwm.push(vec![(100, b'F')]);
-
-        // x7
-
-        pwm.push(vec![]);
-
-        // x8
-
-        pwm.push(vec![(100, b'G')]);
+        let pwm = [
+            // x1
+            vec![(100, b'G')],
+            // x2
+            Vec::default(),
+            // x3
+            vec![(100, b'P')],
+            // x4
+            Vec::default(),
+            // x5
+            vec![(100, b'R')],
+            // x6
+            vec![(100, b'F')],
+            // x7
+            Vec::default(),
+            // x8
+            vec![(100, b'G')],
+        ];
 
         // Score positions.
 
         if cdr3_start < 35 {
             return None;
         }
-        let mut score_pos = Vec::<(usize, usize)>::new();
+        let mut score_pos = Vec::<(usize, usize)>::with_capacity(35 - 28 + 1);
         for j in cdr3_start - 35..=cdr3_start - 28 {
             // changed to 39
             let mut score = 0;
-            for p in 0..pwm.len() {
-                for l in 0..pwm[p].len() {
-                    if pwm[p][l].1 == aa[j + p] {
-                        score += pwm[p][l].0;
+            for (p, wm) in pwm.iter().enumerate() {
+                for l in wm {
+                    if l.1 == aa[j + p] {
+                        score += l.0;
                     }
                 }
             }
@@ -528,62 +444,45 @@ pub fn fr3_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
 
     // Do IGH.
     } else if chain_type == "IGH" {
-        let mut pwm = Vec::<Vec<(usize, u8)>>::new();
-
-        // #2
-
-        pwm.push(vec![(600, b'Y'), (600, b'N')]);
-
-        // #3
-
-        pwm.push(vec![(500, b'Y')]);
-
-        // #4-6
-
-        pwm.push(vec![(400, b'A'), (400, b'N')]);
-        pwm.push(vec![]);
-        pwm.push(vec![]);
-
-        // #7
-
-        pwm.push(vec![(850, b'F'), (850, b'L')]);
-
-        // #8
-
-        pwm.push(vec![(800, b'K'), (800, b'Q'), (800, b'R')]);
-
-        // #9
-
-        pwm.push(vec![]);
-
-        // #10
-
-        pwm.push(vec![(1000, b'R'), (1000, b'K')]);
-
-        // #11
-
-        pwm.push(vec![(700, b'F'), (700, b'V'), (700, b'A'), (700, b'L')]);
+        let pwm = [
+            // #2
+            vec![(600, b'Y'), (600, b'N')],
+            // #3
+            vec![(500, b'Y')],
+            // #4-6
+            vec![(400, b'A'), (400, b'N')],
+            Vec::default(),
+            Vec::default(),
+            // #7
+            vec![(850, b'F'), (850, b'L')],
+            // #8
+            vec![(800, b'K'), (800, b'Q'), (800, b'R')],
+            // #9
+            Vec::default(),
+            // #10
+            vec![(1000, b'R'), (1000, b'K')],
+            // #11
+            vec![(700, b'F'), (700, b'V'), (700, b'A'), (700, b'L')],
+        ];
 
         // Score positions.
 
-        let mut score_pos = Vec::<(usize, isize)>::new();
-        for j in cdr3_start as isize - 42 + 2..=cdr3_start as isize - 32 + 2 {
-            if j >= 0 {
-                let mut score = 0;
-                for p in 0..pwm.len() {
-                    for l in 0..pwm[p].len() {
-                        if pwm[p][l].1 == aa[j as usize + p] {
-                            score += pwm[p][l].0;
-                        }
+        let mut score_pos = Vec::<(usize, isize)>::with_capacity(42 - 32 + 1);
+        for j in cdr3_start.saturating_sub(42 - 2)..=cdr3_start.saturating_sub(32 - 2) {
+            let mut score = 0;
+            for (p, wm) in pwm.iter().enumerate() {
+                for l in wm {
+                    if l.1 == aa[j + p] {
+                        score += l.0;
                     }
                 }
-                // use string_utils::*;
-                // println!("score of {} = {}", strme(&aa[j..j + pwm.len()]), score);
-                if verbose {
-                    println!("j = {}, score = {}", j, score);
-                }
-                score_pos.push((score, -(j as isize)));
             }
+            // use string_utils::*;
+            // println!("score of {} = {}", strme(&aa[j..j + pwm.len()]), score);
+            if verbose {
+                println!("j = {}, score = {}", j, score);
+            }
+            score_pos.push((score, -(j as isize)));
         }
         reverse_sort(&mut score_pos);
         if !score_pos.is_empty() {
@@ -598,65 +497,42 @@ pub fn fr3_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
 
     // Do TRA.
     } else if chain_type == "TRA" {
-        let mut pwm = Vec::<Vec<(usize, u8)>>::new();
-
-        // #m0
-
-        pwm.push(vec![(50, b'E'), (50, b'V'), (50, b'N'), (50, b'K')]);
-
-        // #m1
-
-        pwm.push(vec![(50, b'T'), (50, b'K'), (50, b'A'), (50, b'E')]);
-
-        // #m2
-
-        pwm.push(vec![(50, b'E'), (50, b'S')]);
-
-        // #m3
-
-        pwm.push(vec![(50, b'N'), (50, b'D'), (50, b'S')]);
-
-        // #m4
-
-        pwm.push(vec![(50, b'G'), (50, b'N')]);
-
-        // #m5
-
-        pwm.push(vec![(80, b'R'), (80, b'G'), (80, b'M')]);
-
-        // #m6
-
-        pwm.push(vec![(50, b'F'), (50, b'Y'), (50, b'A'), (50, b'I')]);
-
-        // #m7
-
-        pwm.push(vec![(50, b'S'), (50, b'T')]);
-
-        // #m8
-
-        pwm.push(vec![(50, b'A'), (50, b'V')]);
-
-        // #m9
-
-        pwm.push(vec![(50, b'T'), (50, b'E')]);
-
-        // #m10
-
-        pwm.push(vec![]);
-
-        // #m11
-
-        pwm.push(vec![(50, b'N'), (50, b'D')]);
+        let pwm = [
+            // #m0
+            vec![(50, b'E'), (50, b'V'), (50, b'N'), (50, b'K')],
+            // #m1
+            vec![(50, b'T'), (50, b'K'), (50, b'A'), (50, b'E')],
+            // #m2
+            vec![(50, b'E'), (50, b'S')],
+            // #m3
+            vec![(50, b'N'), (50, b'D'), (50, b'S')],
+            // #m4
+            vec![(50, b'G'), (50, b'N')],
+            // #m5
+            vec![(80, b'R'), (80, b'G'), (80, b'M')],
+            // #m6
+            vec![(50, b'F'), (50, b'Y'), (50, b'A'), (50, b'I')],
+            // #m7
+            vec![(50, b'S'), (50, b'T')],
+            // #m8
+            vec![(50, b'A'), (50, b'V')],
+            // #m9
+            vec![(50, b'T'), (50, b'E')],
+            // #m10
+            Vec::default(),
+            // #m11
+            vec![(50, b'N'), (50, b'D')],
+        ];
 
         // Score positions.
 
-        let mut score_pos = Vec::<(usize, usize)>::new();
+        let mut score_pos = Vec::<(usize, usize)>::with_capacity(36 - 33 + 1);
         for j in cdr3_start - 36..=cdr3_start - 33 {
             let mut score = 0;
-            for p in 0..pwm.len() {
-                for l in 0..pwm[p].len() {
-                    if pwm[p][l].1 == aa[j + p] {
-                        score += pwm[p][l].0;
+            for (p, wm) in pwm.iter().enumerate() {
+                for l in wm {
+                    if l.1 == aa[j + p] {
+                        score += l.0;
                     }
                 }
             }
@@ -675,45 +551,32 @@ pub fn fr3_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
 
     // Do TRB.
     } else {
-        let mut pwm = Vec::<Vec<(usize, u8)>>::new();
-
-        // #m1
-
-        pwm.push(vec![]);
-
-        // #m2
-
-        pwm.push(vec![]);
-
-        // #m3
-
-        pwm.push(vec![(50, b'K'), (50, b'E'), (50, b'D')]);
-
-        // #m4
-
-        pwm.push(vec![(200, b'G'), (200, b'S'), (200, b'Q')]);
-
-        // #m5
-
-        pwm.push(vec![(200, b'D'), (200, b'E'), (200, b'G'), (200, b'S')]);
-
-        // #m6
-
-        pwm.push(vec![(200, b'I'), (200, b'V'), (200, b'L'), (200, b'M')]);
-
-        // #m7
-
-        pwm.push(vec![(100, b'P'), (100, b'S')]);
+        let pwm = [
+            // #m1
+            Vec::default(),
+            // #m2
+            Vec::default(),
+            // #m3
+            vec![(50, b'K'), (50, b'E'), (50, b'D')],
+            // #m4
+            vec![(200, b'G'), (200, b'S'), (200, b'Q')],
+            // #m5
+            vec![(200, b'D'), (200, b'E'), (200, b'G'), (200, b'S')],
+            // #m6
+            vec![(200, b'I'), (200, b'V'), (200, b'L'), (200, b'M')],
+            // #m7
+            vec![(100, b'P'), (100, b'S')],
+        ];
 
         // Score positions.
 
-        let mut score_pos = Vec::<(usize, usize)>::new();
+        let mut score_pos = Vec::<(usize, usize)>::with_capacity(38 - 35 + 1);
         for j in cdr3_start - 38..=cdr3_start - 35 {
             let mut score = 0;
-            for p in 0..pwm.len() {
-                for l in 0..pwm[p].len() {
-                    if pwm[p][l].1 == aa[j + p] {
-                        score += pwm[p][l].0;
+            for (p, wm) in pwm.iter().enumerate() {
+                for l in wm {
+                    if l.1 == aa[j + p] {
+                        score += l.0;
                     }
                 }
             }
@@ -803,7 +666,7 @@ pub fn fwr3(aa: &[u8], chain_type: &str, verbose: bool) -> Option<Vec<u8>> {
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-pub fn score_fwr3(aa: &[u8], r: usize, freqs: &Vec<Vec<Vec<(u32, u8)>>>) -> f64 {
+pub fn score_fwr3(aa: &[u8], r: usize, freqs: &[Vec<Vec<(u32, u8)>>]) -> f64 {
     let chain_type;
     if r == 0 {
         chain_type = "IGH";
@@ -836,7 +699,7 @@ pub fn score_fwr3(aa: &[u8], r: usize, freqs: &Vec<Vec<Vec<(u32, u8)>>>) -> f64 
     score
 }
 
-pub fn score_fwr3_at_end(aa: &[u8], r: usize, freqs: &Vec<Vec<Vec<(u32, u8)>>>) -> f64 {
+pub fn score_fwr3_at_end(aa: &[u8], r: usize, freqs: &[Vec<Vec<(u32, u8)>>]) -> f64 {
     let cdr3 = aa.len();
     let motif = freqs[0].len();
     let mut score = 0.0;

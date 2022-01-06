@@ -557,13 +557,9 @@ pub fn annotate_seq_core(
 
     if !allow_improper {
         let mut to_delete: Vec<bool> = vec![false; annx.len()];
-        for i in 0..annx.len() {
-            let tmp = annx[i].0;
-            annx[i].0 = annx[i].2;
-            annx[i].2 = tmp;
-            let tmp = annx[i].1;
-            annx[i].1 = annx[i].3;
-            annx[i].3 = tmp;
+        for annxi in annx.iter_mut() {
+            std::mem::swap(&mut annxi.0, &mut annxi.2);
+            std::mem::swap(&mut annxi.1, &mut annxi.3);
         }
         annx.sort();
         let mut i1 = 0;
@@ -586,13 +582,9 @@ pub fn annotate_seq_core(
             i1 = j1 as usize;
         }
         erase_if(&mut annx, &to_delete);
-        for i in 0..annx.len() {
-            let tmp = annx[i].0;
-            annx[i].0 = annx[i].2;
-            annx[i].2 = tmp;
-            let tmp = annx[i].1;
-            annx[i].1 = annx[i].3;
-            annx[i].3 = tmp;
+        for annxi in annx.iter_mut() {
+            std::mem::swap(&mut annxi.0, &mut annxi.2);
+            std::mem::swap(&mut annxi.1, &mut annxi.3);
         }
         annx.sort();
     }
@@ -601,8 +593,8 @@ pub fn annotate_seq_core(
 
     if verbose {
         fwriteln!(log, "\nINITIAL ALIGNMENTS\n");
-        for i in 0..annx.len() {
-            print_alignx(log, &annx[i], refdata);
+        for annxi in &annx {
+            print_alignx(log, annxi, refdata);
         }
     }
 
@@ -610,30 +602,34 @@ pub fn annotate_seq_core(
     // a start codon, delete the others.
 
     let mut have_starter = false;
-    for i in 0..annx.len() {
-        let t = annx[i].2 as usize;
-        if !rheaders[t].contains("segment") && refdata.is_v(t) && annx[i].3 == 0 {
-            let p = annx[i].0 as usize;
+    for annxi in &annx {
+        let t = annxi.2 as usize;
+        if !rheaders[t].contains("segment") && refdata.is_v(t) && annxi.3 == 0 {
+            let p = annxi.0 as usize;
             if b_seq[p] == 0 // A
                 && b_seq[p+1] == 3 // T
                 && b_seq[p+2] == 2
             {
                 // G
                 have_starter = true;
+                break;
             }
         }
     }
     if have_starter {
-        let mut to_delete: Vec<bool> = vec![false; annx.len()];
-        for i in 0..annx.len() {
-            let t = annx[i].2 as usize;
-            if !rheaders[t].contains("segment") && refdata.is_v(t) && annx[i].3 == 0 {
-                let p = annx[i].0 as usize;
-                if !(b_seq[p] == 0 && b_seq[p + 1] == 3 && b_seq[p + 2] == 2) {
-                    to_delete[i] = true;
+        let to_delete: Vec<bool> = annx
+            .iter()
+            .map(|annxi| {
+                let t = annxi.2 as usize;
+                if !rheaders[t].contains("segment") && refdata.is_v(t) && annxi.3 == 0 {
+                    let p = annxi.0 as usize;
+                    if !(b_seq[p] == 0 && b_seq[p + 1] == 3 && b_seq[p + 2] == 2) {
+                        return true;
+                    }
                 }
-            }
-        }
+                false
+            })
+            .collect();
         erase_if(&mut annx, &to_delete);
     }
 
@@ -661,10 +657,11 @@ pub fn annotate_seq_core(
     // ◼ For efficiency, inner loop should check to see if already deleted.
 
     let mut to_delete: Vec<bool> = vec![false; annx.len()];
-    let mut ts = Vec::<(usize, usize)>::new(); // { ( contig index, annx index ) }
-    for i in 0..annx.len() {
-        ts.push((annx[i].2 as usize, i));
-    }
+    let mut ts: Vec<(usize, usize)> = annx
+        .iter()
+        .enumerate()
+        .map(|(i, annxi)| (annxi.2 as usize, i))
+        .collect(); // { ( contig index, annx index ) }
     ts.sort_unstable();
     let mut i1 = 0;
     while i1 < ts.len() {
