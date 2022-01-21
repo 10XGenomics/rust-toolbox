@@ -1,7 +1,7 @@
 [package]
 name = "pretty_trace"
 # When version is bumped, version in README.md also needs to be bumped.
-version = "0.5.22"
+version = "0.5.23"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "Tools for generating pretty tracebacks and for profiling."
@@ -14,8 +14,8 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 [dependencies]
 backtrace = "0.3.40"
 io_utils = "0.3"
-lazy_static = "1.4"
-libc = "0.2.85"
+lazy_static = "1"
+libc = "0.2"
 nix = ">=0.19.1, <0.24"
 pprof = { version = "0.6", features = ["protobuf"] }
 stats_utils = "0.1"
@@ -24,4 +24,4 @@ string_utils = "0.1"
 vector_utils = "0.1"
 
 [dev-dependencies]
-rayon = "1.4"
+rayon = "1"

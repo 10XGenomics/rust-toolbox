@@ -1,6 +1,6 @@
 [package]
 name = "vector_utils"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "Some tools that are 'internal' for now because they are insufficiently refined and unstable, but which are used by other 'public' crates."
@@ -9,5 +9,5 @@ edition = "2018"
 include = ["src/lib.rs", "LICENSE", "README.md"]
 
 [dependencies]
-permutation = "0.2.5"
-superslice = "1.0.0"
+permutation = "0.2"
+superslice = "1"

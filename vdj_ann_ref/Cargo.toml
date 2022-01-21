@@ -11,10 +11,10 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 publish = false
 
 [dependencies]
-debruijn = "0.3.2"
+debruijn = "0.3"
 exons = "0.1"
-fasta_tools = "0.1.6"
-flate2 = "1.0.20"
+fasta_tools = "0.1"
+flate2 = "1"
 io_utils = "0.3"
 kmer_lookup = "0.1"
 pretty_trace = "0.5"
