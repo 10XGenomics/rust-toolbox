@@ -1,37 +1,107 @@
 // Copyright (c) 2021 10x Genomics, Inc. All rights reserved.
 
-use enum_iterator::IntoEnumIterator;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use std::fmt;
 use std::str::FromStr;
-use strum_macros::{Display, EnumIter, EnumString};
 
-/// All the possible heavy and light chains
-#[derive(
-    Debug,
-    Copy,
-    Clone,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Serialize,
-    Deserialize,
-    EnumString,
-    Display,
-    EnumIter,
-    IntoEnumIterator,
-    Hash,
-)]
-pub enum VdjChain {
-    IGH,
-    IGK,
-    IGL,
-    TRA,
-    TRB,
-    TRD,
-    TRG,
+// From https://danielkeep.github.io/tlborm/book/blk-counting.html
+macro_rules! replace_expr {
+    ($_t:tt $sub:expr) => {
+        $sub
+    };
+}
+
+macro_rules! count_tts {
+    ($($tts:tt)*) => {0usize $(+ replace_expr!($tts 1usize))*};
+}
+
+macro_rules! make_enum {
+    (
+        name: $name:ident,
+        variants:[$( ($field:ident, $lit: literal) ,)*],
+        const_var_name: $const_var_name:ident,
+    ) => {
+        pub const $const_var_name: [&str; count_tts!($($field)*)] = [
+            $($lit,)*
+        ];
+
+        #[derive(
+            Debug,
+            Copy,
+            Clone,
+            PartialEq,
+            Eq,
+            PartialOrd,
+            Ord,
+            Serialize,
+            Deserialize,
+            Hash,
+        )]
+        pub enum $name {
+            $(
+                #[serde(rename = $lit)]
+                $field,
+            )*
+        }
+
+        impl $name {
+            pub fn all() -> [Self; count_tts!($($field)*)] {
+                [
+                    $($name::$field,)*
+                ]
+            }
+        }
+
+        impl std::fmt::Display for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> fmt::Result {
+                write!(f, "{}", match self {
+                    $(
+                        $name::$field => $lit,
+                    )*
+                })
+            }
+        }
+
+        impl From<$name> for &'static str {
+            fn from(src: $name) -> &'static str {
+                match src {
+                    $(
+                        $name::$field => $lit,
+                    )*
+                }
+            }
+        }
+
+        impl std::str::FromStr for $name {
+            type Err = String;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                match s {
+                    $(
+                        $lit => Ok($name::$field),
+                    )*
+                    unknown => Err(
+                        format!("Unknown variant '{}' for {}. Supported variants are: [{}]", unknown, stringify!($name), $const_var_name.join(", "))
+                    )
+                }
+            }
+        }
+    };
+}
+
+make_enum! {
+    name: VdjChain,
+    variants: [
+        (IGH, "IGH"),
+        (IGK, "IGK"),
+        (IGL, "IGL"),
+        (TRA, "TRA"),
+        (TRB, "TRB"),
+        (TRD, "TRD"),
+        (TRG, "TRG"),
+    ],
+    const_var_name: VDJ_CHAINS,
 }
 
 /// A contig could contain different regions that belong to different
@@ -63,7 +133,7 @@ impl From<VdjContigChain> for String {
 }
 
 impl FromStr for VdjContigChain {
-    type Err = strum::ParseError;
+    type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "Multi" => Ok(VdjContigChain::Multi),
@@ -72,55 +142,47 @@ impl FromStr for VdjContigChain {
     }
 }
 impl TryFrom<&str> for VdjContigChain {
-    type Error = strum::ParseError;
+    type Error = String;
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         s.parse()
     }
 }
 
-/// Different segments or regions in a full-length receptor transcript
-#[derive(
-    Debug,
-    Copy,
-    Clone,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Serialize,
-    Deserialize,
-    EnumString,
-    Display,
-    EnumIter,
-    IntoEnumIterator,
-    Hash,
-)]
-pub enum VdjRegion {
-    #[strum(to_string = "5'UTR")]
-    #[serde(rename = "5'UTR")]
-    UTR, // 5′ untranslated region (5′ UTR)
-    #[strum(to_string = "L-REGION+V-REGION")]
-    #[serde(rename = "L-REGION+V-REGION")]
-    V, // Variable region
-    #[strum(to_string = "D-REGION")]
-    #[serde(rename = "D-REGION")]
-    D, // Diversity region
-    #[strum(to_string = "J-REGION")]
-    #[serde(rename = "J-REGION")]
-    J, // Joining region
-    #[strum(to_string = "C-REGION")]
-    #[serde(rename = "C-REGION")]
-    C, // Constant region
+make_enum! {
+    name: VdjRegion,
+    variants: [
+        (UTR, "5'UTR"), // 5′ untranslated region (5′ UTR)
+        (V, "L-REGION+V-REGION"), // Variable region
+        (D, "D-REGION"), // Diversity region
+        (J, "J-REGION"), // Joining region
+        (C, "C-REGION"), // Constant region
+    ],
+    const_var_name: VDJ_REGIONS,
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::str::FromStr;
-    use strum::IntoEnumIterator;
 
     #[test]
-    fn vdj_region_from_str() {
+    fn test_vdj_region_invalid_from_str() {
+        assert_eq!(
+            VdjRegion::from_str("V-REGION").unwrap_err(),
+            "Unknown variant 'V-REGION' for VdjRegion. Supported variants are: [5'UTR, L-REGION+V-REGION, D-REGION, J-REGION, C-REGION]"
+        );
+    }
+
+    #[test]
+    fn test_vdj_chain_invalid_from_str() {
+        assert_eq!(
+            VdjChain::from_str("").unwrap_err(),
+            "Unknown variant '' for VdjChain. Supported variants are: [IGH, IGK, IGL, TRA, TRB, TRD, TRG]"
+        );
+    }
+
+    #[test]
+    fn test_vdj_region_from_str() {
         assert_eq!(VdjRegion::from_str("5'UTR"), Ok(VdjRegion::UTR));
         assert_eq!(VdjRegion::from_str("L-REGION+V-REGION"), Ok(VdjRegion::V));
         assert_eq!(VdjRegion::from_str("D-REGION"), Ok(VdjRegion::D));
@@ -168,8 +230,19 @@ mod tests {
     }
 
     #[test]
+    fn test_vdj_chain_from_str() {
+        assert_eq!(VdjChain::from_str("IGH"), Ok(VdjChain::IGH));
+        assert_eq!(VdjChain::from_str("IGK"), Ok(VdjChain::IGK));
+        assert_eq!(VdjChain::from_str("IGL"), Ok(VdjChain::IGL));
+        assert_eq!(VdjChain::from_str("TRA"), Ok(VdjChain::TRA));
+        assert_eq!(VdjChain::from_str("TRB"), Ok(VdjChain::TRB));
+        assert_eq!(VdjChain::from_str("TRD"), Ok(VdjChain::TRD));
+        assert_eq!(VdjChain::from_str("TRG"), Ok(VdjChain::TRG));
+    }
+
+    #[test]
     fn test_vdj_contig_chain() {
-        for chain in VdjChain::iter() {
+        for chain in VdjChain::all() {
             let contig_chain = VdjContigChain::Single(chain);
             assert_eq!(contig_chain.to_string(), chain.to_string());
             let chain_str = serde_json::to_string(&chain).unwrap();
