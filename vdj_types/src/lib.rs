@@ -7,6 +7,38 @@ use std::fmt;
 use std::str::FromStr;
 use strum_macros::{Display, EnumIter, EnumString};
 
+macro_rules! make_enum {
+    (
+        name: $name:ident,
+        variants:[$( ($field:ident, $lit: literal) ,)*],
+        const_var_name: $const_var_name:ident,
+    ) => {
+        #[derive(
+            Debug,
+            Copy,
+            Clone,
+            PartialEq,
+            Eq,
+            PartialOrd,
+            Ord,
+            Serialize,
+            Deserialize,
+            EnumString,
+            Display,
+            EnumIter,
+            IntoEnumIterator,
+            Hash,
+        )]
+        pub enum $name {
+            $(
+                #[strum(to_string = $lit)]
+                #[serde(rename = $lit)]
+                $field,
+            )*
+        }
+    };
+}
+
 /// All the possible heavy and light chains
 #[derive(
     Debug,
@@ -78,39 +110,16 @@ impl TryFrom<&str> for VdjContigChain {
     }
 }
 
-/// Different segments or regions in a full-length receptor transcript
-#[derive(
-    Debug,
-    Copy,
-    Clone,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Serialize,
-    Deserialize,
-    EnumString,
-    Display,
-    EnumIter,
-    IntoEnumIterator,
-    Hash,
-)]
-pub enum VdjRegion {
-    #[strum(to_string = "5'UTR")]
-    #[serde(rename = "5'UTR")]
-    UTR, // 5′ untranslated region (5′ UTR)
-    #[strum(to_string = "L-REGION+V-REGION")]
-    #[serde(rename = "L-REGION+V-REGION")]
-    V, // Variable region
-    #[strum(to_string = "D-REGION")]
-    #[serde(rename = "D-REGION")]
-    D, // Diversity region
-    #[strum(to_string = "J-REGION")]
-    #[serde(rename = "J-REGION")]
-    J, // Joining region
-    #[strum(to_string = "C-REGION")]
-    #[serde(rename = "C-REGION")]
-    C, // Constant region
+make_enum! {
+    name: VdjRegion,
+    variants: [
+        (UTR, "5'UTR"), // 5′ untranslated region (5′ UTR)
+        (V, "L-REGION+V-REGION"), // Variable region
+        (D, "D-REGION"), // Diversity region
+        (J, "J-REGION"), // Joining region
+        (C, "C-REGION"), // Constant region
+    ],
+    const_var_name: VDJ_REGIONS,
 }
 
 #[cfg(test)]
