@@ -168,8 +168,16 @@ mod tests {
     #[test]
     fn test_vdj_region_invalid_from_str() {
         assert_eq!(
-            VdjRegion::from_str("V-REGION").unwrap_err().to_string(),
+            VdjRegion::from_str("V-REGION").unwrap_err(),
             "Unknown variant 'V-REGION' for VdjRegion. Supported variants are: [5'UTR, L-REGION+V-REGION, D-REGION, J-REGION, C-REGION]"
+        );
+    }
+
+    #[test]
+    fn test_vdj_chain_invalid_from_str() {
+        assert_eq!(
+            VdjChain::from_str("").unwrap_err(),
+            "Unknown variant '' for VdjChain. Supported variants are: [IGH, IGK, IGL, TRA, TRB, TRD, TRG]"
         );
     }
 
