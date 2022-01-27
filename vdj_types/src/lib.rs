@@ -168,7 +168,7 @@ mod tests {
     #[test]
     fn test_vdj_region_invalid_from_str() {
         assert_eq!(
-            format!("{}", VdjRegion::from_str("V-REGION").unwrap_err()),
+            VdjRegion::from_str("V-REGION").unwrap_err().to_string(),
             "Unknown variant 'V-REGION' for VdjRegion. Supported variants are: [5'UTR, L-REGION+V-REGION, D-REGION, J-REGION, C-REGION]"
         );
     }
