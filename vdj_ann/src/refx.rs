@@ -154,20 +154,12 @@ pub fn make_vdj_ref_data_core(
     // Now build stuff.
 
     let mut rheaders2 = Vec::<String>::new();
-    let types = vec!["IGH", "IGK", "IGL", "TRA", "TRB", "TRD", "TRG"];
+    let types = vdj_types::VDJ_CHAINS;
     refdata.rtype = vec![-1_i32; refs.len()];
     for i in 0..rheaders.len() {
         let v: Vec<&str> = rheaders[i].split_terminator('|').collect();
-        let mut s: String = String::new();
-        s.push('|');
-        s.push_str(v[0]);
-        s.push('|');
-        s.push_str(v[2]);
         refdata.name.push(v[2].to_string());
-        s.push('|');
-        s.push_str(v[3]);
-        s.push('|');
-        rheaders2.push(s);
+        rheaders2.push(format!("|{}|{}|{}|", v[0], v[2], v[3]));
         match v[3] {
             "5'UTR" => {
                 refdata.segtype.push("U");
@@ -189,7 +181,7 @@ pub fn make_vdj_ref_data_core(
             }
         }
         for j in 0..types.len() {
-            if rheaders[i].contains(types[j]) {
+            if rheaders2[i].contains(types[j]) {
                 refdata.rtype[i] = j as i32;
             }
         }
