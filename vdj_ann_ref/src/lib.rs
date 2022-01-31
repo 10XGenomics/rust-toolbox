@@ -122,7 +122,7 @@ mod tests {
         let mut refdata = RefData::new();
         make_vdj_ref_data_core(&mut refdata, refx, &ext_refx, is_tcr, is_bcr, None);
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
-        annotate_seq(&seq, &refdata, &mut ann, true, false, true);
+        annotate_seq(&seq, &refdata, &mut ann, true, false, true, None);
         let mut have_d = false;
         for i in 0..ann.len() {
             if refdata.is_d(ann[i].2 as usize) {
