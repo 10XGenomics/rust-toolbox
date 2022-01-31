@@ -159,6 +159,7 @@ pub fn annotate_seq(
     allow_weak: bool,
     allow_improper: bool,
     abut: bool,
+    is_gd: Option<bool>,                     // is gamma/delta mode
 ) {
     let mut log = Vec::<u8>::new();
     annotate_seq_core(
@@ -170,6 +171,7 @@ pub fn annotate_seq(
         abut,
         &mut log,
         false,
+        is_gd,
     );
 }
 
@@ -200,6 +202,7 @@ pub fn annotate_seq_core(
     abut: bool,
     log: &mut Vec<u8>,
     verbose: bool,
+    is_gd: Option<bool>,                     // is gamma/delta mode
 ) {
     // The DNA string representation is inefficient because it stores bases as packed k-mers
     // which requires a lot of array bounds checks when unpacking which was a hot path
@@ -218,6 +221,8 @@ pub fn annotate_seq_core(
     const MIN_PERF_EXT: usize = 5;
     const MAX_RATE: f64 = 0.15;
 
+    // Unwrap gamma/delta mode flag
+    let gd_mode = is_gd.unwrap_or(false);
     // Find maximal perfect matches of length >= 20, or 12 for J regions, so long
     // as we have extension to a 20-mer with only one mismatch.
 
@@ -1470,7 +1475,7 @@ pub fn annotate_seq_core(
     }
     erase_if(&mut annx, &to_delete);
 
-    // For IGH and TRB, if there is a V and J, but no D, look for a D that matches nearly perfectly
+    // For IGH, TRB and TRD in gd_mode, if there is a V and J, but no D, look for a D that matches nearly perfectly
     // between them.  We consider only alignments having no indels.  The following conditions
     // are required:
     // 1. At most three mismatches.
@@ -1486,7 +1491,8 @@ pub fn annotate_seq_core(
         let t = ann.2 as usize;
         if !rheaders[t].contains("segment") {
             let rt = refdata.rtype[t];
-            if rt == 0 || rt == 4 {
+            // IGH, TRB, or TRD in gd_mode
+            if rt == 0 || rt == 4 || (gd_mode && rt == 5){
                 if refdata.segtype[t] == "V" {
                     v = true;
                     vstop = ann.0 + ann.1;
@@ -2078,6 +2084,7 @@ pub fn print_annotations(
     allow_improper: bool,
     abut: bool,
     verbose: bool,
+    is_gd: Option<bool>,                     // is gamma/delta mode
 ) {
     let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
     annotate_seq_core(
@@ -2089,6 +2096,7 @@ pub fn print_annotations(
         abut,
         log,
         verbose,
+        is_gd,
     );
     print_some_annotations(refdata, &ann, log, verbose);
 }
@@ -2717,7 +2725,7 @@ impl ContigAnnotation {
         is_gd: Option<bool>,                     // is gamma/delta mode
     ) -> ContigAnnotation {
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
-        annotate_seq(b, refdata, &mut ann, true, false, true);
+        annotate_seq(b, refdata, &mut ann, true, false, true, is_gd);
         let mut log = Vec::<u8>::new();
         let productive = is_valid(b, refdata, &ann, false, &mut log, is_gd);
         ContigAnnotation::from_annotate_seq(
