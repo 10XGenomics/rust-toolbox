@@ -159,7 +159,7 @@ pub fn annotate_seq(
     allow_weak: bool,
     allow_improper: bool,
     abut: bool,
-    is_gd: Option<bool>,                     // is gamma/delta mode
+    is_gd: Option<bool>, // is gamma/delta mode
 ) {
     let mut log = Vec::<u8>::new();
     annotate_seq_core(
@@ -202,7 +202,7 @@ pub fn annotate_seq_core(
     abut: bool,
     log: &mut Vec<u8>,
     verbose: bool,
-    is_gd: Option<bool>,                     // is gamma/delta mode
+    is_gd: Option<bool>, // is gamma/delta mode
 ) {
     // The DNA string representation is inefficient because it stores bases as packed k-mers
     // which requires a lot of array bounds checks when unpacking which was a hot path
@@ -1492,7 +1492,7 @@ pub fn annotate_seq_core(
         if !rheaders[t].contains("segment") {
             let rt = refdata.rtype[t];
             // IGH, TRB, or TRD in gd_mode
-            if rt == 0 || rt == 4 || (gd_mode && rt == 5){
+            if rt == 0 || rt == 4 || (gd_mode && rt == 5) {
                 if refdata.segtype[t] == "V" {
                     v = true;
                     vstop = ann.0 + ann.1;
@@ -2084,7 +2084,7 @@ pub fn print_annotations(
     allow_improper: bool,
     abut: bool,
     verbose: bool,
-    is_gd: Option<bool>,                     // is gamma/delta mode
+    is_gd: Option<bool>, // is gamma/delta mode
 ) {
     let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
     annotate_seq_core(
