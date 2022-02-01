@@ -221,7 +221,7 @@ pub fn annotate_seq_core(
     // Find maximal perfect matches of length >= 20, or 12 for J regions, so long
     // as we have extension to a 20-mer with only one mismatch.
     //
-    // perf = {(ref_id, ref_start, tig_start, len)}
+    // perf = {(ref_id, ref_start - tig_start, tig_start, len)}
 
     let mut perf = Vec::<(i32, i32, i32, i32)>::new();
     if b.len() < K {
@@ -288,7 +288,7 @@ pub fn annotate_seq_core(
 
     let mut offsets = Vec::<(i32, i32)>::new();
     for i in 0..perf.len() {
-        offsets.push((perf[i].0, perf[i].1 - perf[i].2));
+        offsets.push((perf[i].0, perf[i].1));
     }
     unique_sort(&mut offsets);
     const MM: i32 = 12;
@@ -297,7 +297,7 @@ pub fn annotate_seq_core(
         let off = offsets[m].1; // ref_start - tig_start
         let mut tig_starts = Vec::<i32>::new();
         for i in 0..perf.len() {
-            if perf[i].0 == t && perf[i].1 - perf[i].2 == off {
+            if perf[i].0 == t && perf[i].1 == off {
                 tig_starts.push(perf[i].2);
             }
         }
@@ -331,7 +331,7 @@ pub fn annotate_seq_core(
                         }
                     }
                     if !known {
-                        perf.push((t, p, l, len));
+                        perf.push((t, p - l, l, len));
                     }
                 }
                 l = lx;
