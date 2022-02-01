@@ -340,6 +340,19 @@ pub fn annotate_seq_core(
     // Sort perfect matches.
 
     perf.sort_unstable();
+    if verbose {
+        fwriteln!(log, "\nINITIAL PERF ALIGNMENTS\n");
+        for s in perf.iter() {
+            fwriteln!(log, 
+                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}",
+                s.0,
+                s.1,
+                s.2,
+                s.1 + s.2,
+                s.3,
+            );
+        }
+    }
 
     // Merge perfect matches.  We track the positions on b of mismatches.
     // semi = {(t, off, pos on b, len, positions on b of mismatches)}
@@ -390,6 +403,20 @@ pub fn annotate_seq_core(
             k1 = k2 + 1;
         }
         i = j as usize;
+    }
+    if verbose {
+        fwriteln!(log, "\nINITIAL SEMI ALIGNMENTS\n");
+        for s in semi.iter() {
+            fwriteln!(log, 
+                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
+                s.0,
+                s.1,
+                s.2,
+                s.1 + s.2,
+                s.3,
+                s.4.len(),
+            );
+        }
     }
 
     // Extend backwards and then forwards.
