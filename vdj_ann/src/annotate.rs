@@ -447,8 +447,8 @@ pub fn annotate_seq_core(
 
         let p2 = off + semi[j-1].2 + semi[j-1].3;
         // if -off >= 0 && p1 - off <= b_seq.len() as i32 {
-        if b_seq.len() as i32 - p2 - L >= 0 {
-            for p in 0..=b_seq.len() as i32 - p2 - L {
+        if true {
+            for p in p2..=b_seq.len() as i32 - L {
                 let l = p - off;
                 let mut diffs = 0;
                 for m in 0..L {
