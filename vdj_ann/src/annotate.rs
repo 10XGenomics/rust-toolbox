@@ -283,7 +283,7 @@ pub fn annotate_seq_core(
 
 
 
-    // Find maximal perfect matches of length >= 12 that have the same offset as a perfect match 
+    // Find maximal perfect matches of length >= 10 that have the same offset as a perfect match 
     // already found and are not equal to one of them.
 
     let mut offsets = Vec::<(i32, i32)>::new();
@@ -291,7 +291,7 @@ pub fn annotate_seq_core(
         offsets.push((perf[i].0, perf[i].1));
     }
     unique_sort(&mut offsets);
-    const MM: i32 = 12;
+    const MM: i32 = 10;
     for m in 0..offsets.len() {
         let t = offsets[m].0;
         let off = offsets[m].1; // ref_start - tig_start
