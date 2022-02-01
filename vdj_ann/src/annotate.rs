@@ -294,22 +294,29 @@ pub fn annotate_seq_core(
     }
 
     // Find maximal perfect matches of length >= 10 that have the same offset as a perfect match 
-    // already found and are not equal to one of them.
+    // already found and are not equal to one of them.  But only do this if we already have at
+    // least *** bases aligned.
 
     let mut offsets = Vec::<(i32, i32)>::new();
     for i in 0..perf.len() {
         offsets.push((perf[i].0, perf[i].1));
     }
     unique_sort(&mut offsets);
+    const MM_START: i32 = 200;
     const MM: i32 = 10;
     for m in 0..offsets.len() {
         let t = offsets[m].0;
         let off = offsets[m].1; // ref_start - tig_start
         let mut tig_starts = Vec::<i32>::new();
+        let mut total = 0;
         for i in 0..perf.len() {
             if perf[i].0 == t && perf[i].1 == off {
                 tig_starts.push(perf[i].2);
+                total += perf[i].3;
             }
+        }
+        if total < MM_START {
+            continue;
         }
         let (mut l, mut p) = (0, off);
         while l <= b_seq.len() as i32 - MM {
