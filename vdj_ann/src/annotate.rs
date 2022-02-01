@@ -302,7 +302,7 @@ pub fn annotate_seq_core(
         offsets.push((perf[i].0, perf[i].1));
     }
     unique_sort(&mut offsets);
-    const MM_START: i32 = 200;
+    const MM_START: i32 = 150;
     const MM: i32 = 10;
     for m in 0..offsets.len() {
         let t = offsets[m].0;
