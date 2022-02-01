@@ -512,42 +512,6 @@ pub fn annotate_seq_core(
                 }
             }
         }
-
-        /*
-        let p2 = off + semi[j-1].2 + semi[j-1].3;
-        // if -off >= 0 && p1 - off <= b_seq.len() as i32 {
-        if true {
-            for p in p2.. {
-                if p + L > refs[t as usize].len() as i32 {
-                    break;
-                }
-                let l = p - off;
-                if l + L > b_seq.len() as i32 {
-                    break;
-                }
-                let mut diffs = 0;
-                for m in 0..L {
-                    if b_seq[(l + m) as usize] != refs[t as usize].get((p + m) as usize) {
-                        diffs += 1;
-                        if diffs > MAX_DIFFS {
-                            break;
-                        }
-                    }
-                }
-                if diffs <= MAX_DIFFS {
-                    let mut x = Vec::<i32>::new();
-                    for m in 0..L {
-                        if b_seq[(l + m) as usize] != refs[t as usize].get((p + m) as usize) {
-                            x.push(l + m);
-                        }
-                    }
-                    semi.push((t, off, p - off, L, x));
-                    break;
-                }
-            }
-        }
-        */
-
         i = j;
     }
     semi.sort();
