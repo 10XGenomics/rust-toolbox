@@ -456,8 +456,10 @@ pub fn annotate_seq_core(
     if verbose {
         fwriteln!(log, "\nSEMI ALIGNMENTS\n");
         for s in semi.iter() {
-            fwriteln!(log, "t = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
+            fwriteln!(log, 
+                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
                 s.0,
+                s.1,
                 s.2,
                 s.1 + s.2,
                 s.3,
