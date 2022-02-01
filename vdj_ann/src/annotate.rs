@@ -654,6 +654,7 @@ pub fn annotate_seq_core(
             semi[i1].3 = (l2 + len2) - l1;
             semi[i1].4.append(&mut mis3);
             semi[i1].4.append(&mut mis2.clone());
+            unique_sort(&mut semi[i1].4);
             semi[i2].0 = -1_i32;
             to_delete[i2] = true;
         }
@@ -671,7 +672,6 @@ pub fn annotate_seq_core(
                 s.3,
                 s.4.len(),
             );
-            fwriteln!(log, "mis = {}", s.4.iter().format(",")); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         }
     }
 
