@@ -280,9 +280,6 @@ pub fn annotate_seq_core(
         }
     }
 
-
-
-
     // Find maximal perfect matches of length >= 10 that have the same offset as a perfect match 
     // already found and are not equal to one of them.
 
@@ -339,9 +336,6 @@ pub fn annotate_seq_core(
             }
         }
     }
-
-
-        
 
     // Sort perfect matches.
 
