@@ -453,6 +453,18 @@ pub fn annotate_seq_core(
     for i in 0..semi.len() {
         semi[i].4.sort_unstable();
     }
+    if verbose {
+        fwriteln!(log, "\nSEMI ALIGNMENTS\n");
+        for s in semi.iter() {
+            fwriteln!(log, "t = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
+                s.0,
+                s.2,
+                s.1 + s.2,
+                s.3,
+                s.4.len(),
+            );
+        }
+    }
 
     // Add some 40-mers with the same offset having <= 6 mismatches.
     // semi = {(t, off, pos on b, len, positions on b of mismatches)}
