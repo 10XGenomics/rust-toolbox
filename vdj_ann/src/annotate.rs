@@ -295,7 +295,7 @@ pub fn annotate_seq_core(
 
     // Find maximal perfect matches of length >= 10 that have the same offset as a perfect match 
     // already found and are not equal to one of them.  But only do this if we already have at
-    // least *** bases aligned.
+    // least 150 bases aligned.
 
     let mut offsets = Vec::<(i32, i32)>::new();
     for i in 0..perf.len() {
@@ -318,21 +318,22 @@ pub fn annotate_seq_core(
         if total < MM_START {
             continue;
         }
+        let r = refs[t as usize].to_bytes();
         let (mut l, mut p) = (0, off);
         while l <= b_seq.len() as i32 - MM {
-            if p + MM > refs[t as usize].len() as i32 {
+            if p + MM > r.len() as i32 {
                 break;
             }
-            if p < 0 || b_seq[l as usize] != refs[t as usize].get(p as usize) {
+            if p < 0 || b_seq[l as usize] != r[p as usize] {
                 l += 1;
                 p += 1;
             } else {
                 let (mut lx, mut px) = (l + 1, p + 1);
                 loop {
-                    if lx >= b_seq.len() as i32 || px >= refs[t as usize].len() as i32 {
+                    if lx >= b_seq.len() as i32 || px >= r.len() as i32 {
                         break;
                     }
-                    if b_seq[lx as usize] != refs[t as usize].get(px as usize) {
+                    if b_seq[lx as usize] != r[px as usize] {
                         break;
                     }
                     lx += 1;
