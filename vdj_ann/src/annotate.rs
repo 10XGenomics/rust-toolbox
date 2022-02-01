@@ -509,20 +509,6 @@ pub fn annotate_seq_core(
         i = j;
     }
     semi.sort();
-    if verbose {
-        fwriteln!(log, "\nSEMI ALIGNMENTS\n");
-        for s in semi.iter() {
-            fwriteln!(log, 
-                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
-                s.0,
-                s.1,
-                s.2,
-                s.1 + s.2,
-                s.3,
-                s.4.len(),
-            );
-        }
-    }
 
     // Allow extension over some mismatches on right if it gets us to the end on
     // the reference.  Ditto for left.
@@ -574,6 +560,20 @@ pub fn annotate_seq_core(
         }
         for i in 0..semi.len() {
             semi[i].4.sort_unstable();
+        }
+    }
+    if verbose {
+        fwriteln!(log, "\nSEMI ALIGNMENTS\n");
+        for s in semi.iter() {
+            fwriteln!(log, 
+                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
+                s.0,
+                s.1,
+                s.2,
+                s.1 + s.2,
+                s.3,
+                s.4.len(),
+            );
         }
     }
 
