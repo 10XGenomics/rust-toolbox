@@ -671,6 +671,7 @@ pub fn annotate_seq_core(
                 s.3,
                 s.4.len(),
             );
+            fwriteln!(log, "mis = {}", s.4.iter().format(",")); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         }
     }
 
