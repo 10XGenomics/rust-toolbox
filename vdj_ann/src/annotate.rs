@@ -619,6 +619,20 @@ pub fn annotate_seq_core(
         }
     }
     erase_if(&mut semi, &to_delete);
+    if verbose {
+        fwriteln!(log, "\nSEMI ALIGNMENTS AFTER EXTENSION\n");
+        for s in semi.iter() {
+            fwriteln!(log, 
+                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
+                s.0,
+                s.1,
+                s.2,
+                s.1 + s.2,
+                s.3,
+                s.4.len(),
+            );
+        }
+    }
 
     // Transform to create annx, having structure:
     // { ( sequence start, match length, ref tig, ref tig start, {mismatches} ) }.
