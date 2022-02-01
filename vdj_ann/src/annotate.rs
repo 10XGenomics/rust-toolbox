@@ -247,6 +247,7 @@ pub fn annotate_seq_core(
                 len += 1;
             }
             let mut ok = len >= 20;
+            /*
             if !ok && allow_weak {
                 let mut ext1 = len + 1;
                 let mut lx = l as i32 - 2;
@@ -274,6 +275,7 @@ pub fn annotate_seq_core(
                     ok = true;
                 }
             }
+            */
             if ok {
                 perf.push((t as i32, p as i32 - l as i32, l as i32, len as i32));
             }
