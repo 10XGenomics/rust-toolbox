@@ -279,6 +279,19 @@ pub fn annotate_seq_core(
             }
         }
     }
+    if verbose {
+        fwriteln!(log, "\nINITIAL PERF ALIGNMENTS\n");
+        for s in perf.iter() {
+            fwriteln!(log, 
+                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}",
+                s.0,
+                s.1,
+                s.2,
+                s.1 + s.2,
+                s.3,
+            );
+        }
+    }
 
     // Find maximal perfect matches of length >= 10 that have the same offset as a perfect match 
     // already found and are not equal to one of them.
@@ -341,7 +354,7 @@ pub fn annotate_seq_core(
 
     perf.sort_unstable();
     if verbose {
-        fwriteln!(log, "\nINITIAL PERF ALIGNMENTS\n");
+        fwriteln!(log, "\nPERF ALIGNMENTS\n");
         for s in perf.iter() {
             fwriteln!(log, 
                 "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}",
