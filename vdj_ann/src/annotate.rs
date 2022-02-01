@@ -216,7 +216,7 @@ pub fn annotate_seq_core(
 
     const K: usize = 12;
     const MIN_PERF_EXT: usize = 5;
-    const MAX_RATE: f64 = 0.18;
+    const MAX_RATE: f64 = 0.17;
 
     // Find maximal perfect matches of length >= 20, or 12 for J regions, so long
     // as we have extension to a 20-mer with only one mismatch.
