@@ -220,6 +220,8 @@ pub fn annotate_seq_core(
 
     // Find maximal perfect matches of length >= 20, or 12 for J regions, so long
     // as we have extension to a 20-mer with only one mismatch.
+    //
+    // perf = {(ref_id, ref_start, tig_start, len)}
 
     let mut perf = Vec::<(i32, i32, i32, i32)>::new();
     if b.len() < K {
@@ -277,6 +279,72 @@ pub fn annotate_seq_core(
             }
         }
     }
+
+
+
+
+    // Find maximal perfect matches of length >= 12 that have the same offset as a perfect match 
+    // already found and are not equal to one of them.
+
+    let mut offsets = Vec::<(i32, i32)>::new();
+    for i in 0..perf.len() {
+        offsets.push((perf[i].0, perf[i].1 - perf[i].2));
+    }
+    unique_sort(&mut offsets);
+    const MM: i32 = 12;
+    for m in 0..offsets.len() {
+        let t = offsets[m].0;
+        let off = offsets[m].1; // ref_start - tig_start
+        let mut tig_starts = Vec::<i32>::new();
+        for i in 0..perf.len() {
+            if perf[i].0 == t && perf[i].1 - perf[i].2 == off {
+                tig_starts.push(perf[i].2);
+            }
+        }
+        let (mut l, mut p) = (0, off);
+        while l <= b_seq.len() as i32 - MM {
+            if p + MM > refs[t as usize].len() as i32 {
+                break;
+            }
+            if p < 0 || b_seq[l as usize] != refs[t as usize].get(p as usize) {
+                l += 1;
+                p += 1;
+            } else {
+                let (mut lx, mut px) = (l + 1, p + 1);
+                loop {
+                    if lx >= b_seq.len() as i32 || px >= refs[t as usize].len() as i32 {
+                        break;
+                    }
+                    if b_seq[lx as usize] != refs[t as usize].get(px as usize) {
+                        break;
+                    }
+                    lx += 1;
+                    px += 1;
+                }
+                let len = lx - l;
+                if len >= MM && len < 20 {
+                    let mut known = false;
+                    for k in 0..tig_starts.len() {
+                        if l == tig_starts[k] {
+                            known = true;
+                            break;
+                        }
+                    }
+                    if !known {
+                        perf.push((t, p, l, len));
+                    }
+                }
+                l = lx;
+                p = px;
+            }
+        }
+    }
+
+
+        
+
+    // Sort perfect matches.
+
     perf.sort_unstable();
 
     // Merge perfect matches.  We track the positions on b of mismatches.
