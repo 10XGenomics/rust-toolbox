@@ -687,14 +687,22 @@ pub fn annotate_seq_core(
                 if to_delete[k1] || to_delete[k2] {
                     continue;
                 }
-                let start = min(semi[k1].2, semi[k2].2);
-                let stop = max(semi[k1].2 + semi[k1].3, semi[k2].2 + semi[k2].3);
-                semi[k1].2 = start;
-                semi[k1].3 = stop - start;
-                let mut m2 = semi[k2].4.clone();
-                semi[k1].4.append(&mut m2);
-                unique_sort(&mut semi[k1].4);
-                to_delete[k2] = true;
+                let start1 = semi[k1].2;
+                let start2 = semi[k2].2;
+                let len1 = semi[k1].3;
+                let len2 = semi[k2].3;
+                let stop1 = start1 + len1;
+                let stop2 = start2 + len2;
+                let start = min(start1, start2);
+                let stop = max(stop1, stop2);
+                if stop - start <= len1 + len2 {
+                    semi[k1].2 = start;
+                    semi[k1].3 = stop - start;
+                    let mut m2 = semi[k2].4.clone();
+                    semi[k1].4.append(&mut m2);
+                    unique_sort(&mut semi[k1].4);
+                    to_delete[k2] = true;
+                }
             }
         }
         i = j;
