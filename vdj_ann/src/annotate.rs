@@ -700,7 +700,6 @@ pub fn annotate_seq_core(
                             }
                         }
                         semi[i].3 += stop - start;
-                        println!("extending");
                     }
                 }
             }
