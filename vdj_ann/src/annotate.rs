@@ -685,6 +685,9 @@ pub fn annotate_seq_core(
         let t = semi[i].0 as usize;
         if refdata.name[t] == "IGKV1-12" {
             println!("have {}", j - i);
+            let ref_start = semi[i].0 + semi[i].1;
+            use io_utils::*;
+            printme!(ref_start);
         }
         if j - i == 1 {
             let ref_start = semi[i].0 + semi[i].1;
