@@ -696,6 +696,7 @@ pub fn annotate_seq_core(
                             semi[i].4.push(m);
                         }
                     }
+                    println!("extended"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
                     semi[i].3 += stop - start;
                 }
             }
