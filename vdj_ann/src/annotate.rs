@@ -683,6 +683,7 @@ pub fn annotate_seq_core(
             j += 1;
         }
         if j - i == 1 && semi[i].1 == 0 && semi[i].2 == 0 {
+            println!("checking v");
             let t = semi[i].0 as usize;
             if refdata.is_v(t) {
                 println!("thinking");
