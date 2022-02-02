@@ -694,7 +694,7 @@ pub fn annotate_seq_core(
             }
         }
         if ok {
-            let offset = semi[k].0;
+            let offset = semi[k].1;
             let ref_start = semi[k].1 + semi[k].2;
             let tig_start = semi[k].2;
             let t = semi[k].0 as usize;
