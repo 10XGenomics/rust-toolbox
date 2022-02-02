@@ -1559,10 +1559,12 @@ pub fn annotate_seq_core(
         for k1 in i..j {
             for k2 in i..j {
                 if annx[k1].2 == annx[k2].2 {
-                    if annx[k1].2 == annx[k2].2 && annx[k1].3 == annx[k2].3 {
-                        if annx[k1].1 > annx[k2].1 {
-                            to_delete[k2] = true;
-                        }
+                    if annx[k1].3 == annx[k2].3 && annx[k1].1 > annx[k2].1 {
+                        to_delete[k2] = true;
+                    }
+                    if annx[k1].3 + annx[k1].1 == annx[k2].3 + annx[k2].1
+                        && annx[k1].2 < annx[k2].2 {
+                        to_delete[k2] = true;
                     }
                 }
             }
