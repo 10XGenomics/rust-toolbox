@@ -671,6 +671,7 @@ pub fn annotate_seq_core(
 
     // If a V gene aligns starting at 0, and goes at least 85% of the way to the end, and there
     // is only one alignment of the V gene, extend it to the end.
+    // (Only one requirement ameliorated.)
     // semi = {(t, off, pos on b, len, positions on b of mismatches)}
 
     let mut i = 0;
@@ -682,25 +683,34 @@ pub fn annotate_seq_core(
             }
             j += 1;
         }
+        let mut k = i;
+        let mut ok = false;
         if j - i == 1 {
-            let ref_start = semi[i].1 + semi[i].2;
-            let tig_start = semi[i].2;
-            if ref_start == 0 {
-                let t = semi[i].0 as usize;
-                if refdata.is_v(t) {
-                    let r = &refs[t];
-                    let len = semi[i].3;
-                    if len < r.len() as i32 && len as f64 / r.len() as f64 >= 0.85 
-                        && len + tig_start < b_seq.len() as i32 {
-                        let start = len;
-                        let stop = min(r.len(), b_seq.len()) as i32;
-                        for m in start..stop {
-                            if b_seq[(tig_start + m) as usize] != r.get(m as usize) {
-                                semi[i].4.push(m);
-                            }
+            ok = true;
+        } else if j - i == 2 {
+            ok = true;
+            if semi[i].2 < semi[i + 1].2 {
+                k = i + 1;
+            }
+        }
+        if ok {
+            let ref_start = semi[k].1 + semi[k].2;
+            let tig_start = semi[k].2;
+            let t = semi[k].0 as usize;
+            if refdata.is_v(t) {
+                let r = &refs[t];
+                let len = semi[k].3;
+                if ref_start + len < r.len() as i32 
+                    && (ref_start + len) as f64 / r.len() as f64 >= 0.85 
+                    && len + tig_start < b_seq.len() as i32 {
+                    let start = len;
+                    let stop = min(r.len(), b_seq.len()) as i32;
+                    for m in start..stop {
+                        if b_seq[(tig_start + m) as usize] != r.get(m as usize) {
+                            semi[k].4.push(m);
                         }
-                        semi[i].3 += stop - start;
                     }
+                    semi[i].3 += stop - start;
                 }
             }
         }
