@@ -710,7 +710,7 @@ pub fn annotate_seq_core(
                             semi[k].4.push(m);
                         }
                     }
-                    semi[i].3 += stop - start;
+                    semi[k].3 += stop - start;
                 }
             }
         }
