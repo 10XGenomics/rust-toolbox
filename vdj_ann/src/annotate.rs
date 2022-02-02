@@ -718,6 +718,12 @@ pub fn annotate_seq_core(
         i = j;
     }
 
+    // Make sure that mismatches are unique sorted.
+
+    for i in 0..semi.len() {
+        unique_sort(&mut semi[i].4);
+    }
+
     // For V segments, don't count mismatches within ten bases of the end of the V segment, as
     // these might be in the junction region.
 
