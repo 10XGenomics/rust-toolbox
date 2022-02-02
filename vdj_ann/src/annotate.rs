@@ -673,7 +673,6 @@ pub fn annotate_seq_core(
     // is only one alignment of the V gene, extend it to the end.
     // semi = {(t, off, pos on b, len, positions on b of mismatches)}
 
-    /*
     let mut i = 0;
     while i < semi.len() {
         let mut j = i + 1;
@@ -707,7 +706,6 @@ pub fn annotate_seq_core(
         }
         i = j;
     }
-    */
 
     // Print.
 
