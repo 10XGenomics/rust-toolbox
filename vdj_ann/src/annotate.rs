@@ -682,14 +682,10 @@ pub fn annotate_seq_core(
             }
             j += 1;
         }
-        use io_utils::*;
-        printme!(j - i);
         if j - i == 1 {
-            println!("looking");
             let ref_start = semi[i].0 + semi[i].1;
             let tig_start = semi[i].2;
             if ref_start == 0 {
-                println!("trying");
                 let t = semi[i].0 as usize;
                 if refdata.is_v(t) {
                     let r = &refs[t];
@@ -704,6 +700,7 @@ pub fn annotate_seq_core(
                             }
                         }
                         semi[i].3 += stop - start;
+                        println!("extending");
                     }
                 }
             }
