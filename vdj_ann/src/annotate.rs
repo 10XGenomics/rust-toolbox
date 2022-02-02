@@ -743,6 +743,31 @@ pub fn annotate_seq_core(
     }
     */
 
+    // Delete some subsumed alignments.
+
+    let mut to_delete = vec![false; semi.len()];
+    let mut i = 0;
+    while i < semi.len() {
+        let mut j = i + 1;
+        while j < semi.len() {
+            if semi[j].0 != semi[i].0 || semi[j].1 != semi[i].1 {
+                break;
+            }
+            j += 1;
+        }
+        for k1 in i..j {
+            for k2 in i..j {
+                if semi[k1].1 + semi[k1].2 + semi[k1].3 == semi[k2].1 + semi[k2].2 + semi[k2].3 {
+                    if semi[k1].3 > semi[k2].3 {
+                        to_delete[k2] = true;
+                    }
+                }
+            }
+        }
+        i = j;
+    }
+    erase_if(&mut semi, &to_delete);
+
     // Print.
 
     if verbose {
@@ -1560,10 +1585,6 @@ pub fn annotate_seq_core(
             for k2 in i..j {
                 if annx[k1].2 == annx[k2].2 {
                     if annx[k1].3 == annx[k2].3 && annx[k1].1 > annx[k2].1 {
-                        to_delete[k2] = true;
-                    }
-                    if annx[k1].3 + annx[k1].1 == annx[k2].3 + annx[k2].1
-                        && annx[k1].2 < annx[k2].2 {
                         to_delete[k2] = true;
                     }
                 }
