@@ -1519,6 +1519,33 @@ pub fn annotate_seq_core(
     }
     erase_if(&mut annx, &to_delete);
 
+    // Delete some subsumed alignments.
+
+    let mut to_delete = vec![false; annx.len()];
+    let mut i = 0;
+    while i < annx.len() {
+        let mut j = i + 1;
+        while j < annx.len() {
+            if annx[j].0 != annx[i].0 {
+                break;
+            }
+            j += 1;
+        }
+        for k1 in i..j {
+            for k2 in i..j {
+                if annx[k1].2 == annx[k2].2 {
+                    if annx[k1].2 == annx[k2].2 && annx[k1].3 == annx[k2].3 {
+                        if annx[k1].1 > annx[k2].1 {
+                            to_delete[k2] = true;
+                        }
+                    }
+                }
+            }
+        }
+        i = j;
+    }
+    erase_if(&mut annx, &to_delete);
+
     // Log alignments.
 
     if verbose {
