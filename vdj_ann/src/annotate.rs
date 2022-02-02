@@ -694,6 +694,7 @@ pub fn annotate_seq_core(
             }
         }
         if ok {
+            let offset = semi[k].0;
             let ref_start = semi[k].1 + semi[k].2;
             let tig_start = semi[k].2;
             let t = semi[k].0 as usize;
@@ -703,10 +704,10 @@ pub fn annotate_seq_core(
                 if ref_start + len < r.len() as i32 
                     && (ref_start + len) as f64 / r.len() as f64 >= 0.85 
                     && len + tig_start < b_seq.len() as i32 {
-                    let start = len;
+                    let start = ref_start + len;
                     let stop = min(r.len(), b_seq.len()) as i32;
                     for m in start..stop {
-                        if b_seq[(tig_start + m) as usize] != r.get(m as usize) {
+                        if b_seq[(m - offset) as usize] != r.get(m as usize) {
                             semi[k].4.push(m);
                         }
                     }
