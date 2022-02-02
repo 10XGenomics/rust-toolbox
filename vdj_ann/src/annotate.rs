@@ -1536,7 +1536,7 @@ pub fn annotate_seq_core(
     let mut last = vec![0; refdata.refs.len()];
     for i in 0..annx.len() {
         let t = annx[i].2 as usize;
-        last[t] = max(last[t], annx[i].0 + annx[i].1);
+        last[t] = max(last[t], annx[i].2 + annx[i].1);
     }
 
     let mut to_delete: Vec<bool> = vec![false; annx.len()];
