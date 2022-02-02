@@ -1530,11 +1530,51 @@ pub fn annotate_seq_core(
 
 
 
+    // If two V segments are aligned starting at 0 on the reference and one
+    // is aligned a lot further, it wins.
+
+    let mut lens = vec![0; refdata.refs.len()];
+    for i in 0..annx.len() {
+        let t = annx[i].2 as usize;
+        lens[t] += annx[i].3 + annx[i].1;
+    }
+    let mut to_delete: Vec<bool> = vec![false; annx.len()];
+    for i1 in 0..annx.len() {
+        for i2 in 0..annx.len() {
+            let (t1, t2) = (annx[i1].2 as usize, annx[i2].2 as usize);
+            if rheaders[t1].contains("segment") || rheaders[t2].contains("segment") {
+                continue;
+            }
+            if !refdata.is_v(t1) || !refdata.is_v(t2) {
+                continue;
+            }
+            if t1 == t2 {
+                continue;
+            }
+            let (p1, p2) = (annx[i1].3, annx[i2].3);
+            if p1 > 0 {
+                continue;
+            }
+            const MIN_EXT: i32 = 50;
+            if (p2 > 0 && lens[t1] >= lens[t2]) || (p2 == 0 && lens[t1] >= lens[t2] + MIN_EXT) {
+                if verbose {
+                    fwriteln!(log, "");
+                    print_alignx(log, &annx[i1], refdata);
+                    fwriteln!(log, "beats");
+                    print_alignx(log, &annx[i2], refdata);
+                }
+                to_delete[i2] = true;
+            }
+        }
+    }
+    erase_if(&mut annx, &to_delete);
+
 
 
     // If two V segments are aligned starting at 0 on the reference and one
     // is aligned a lot further, it wins.
 
+    /*
     let mut to_delete: Vec<bool> = vec![false; annx.len()];
     for i1 in 0..annx.len() {
         for i2 in 0..annx.len() {
@@ -1566,7 +1606,7 @@ pub fn annotate_seq_core(
         }
     }
     erase_if(&mut annx, &to_delete);
-
+    */
 
 
     /*
