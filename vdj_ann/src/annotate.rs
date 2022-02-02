@@ -1470,7 +1470,7 @@ pub fn annotate_seq_core(
     }
     erase_if(&mut annx, &to_delete);
 
-    // For IGH and TRB, if there is a V and J, but no D, look for a D that matches nearly perfectly
+    // For IGH and TRB (and TRD in Gamma/delta mode), if there is a V and J, but no D, look for a D that matches nearly perfectly
     // between them.  We consider only alignments having no indels.  The following conditions
     // are required:
     // 1. At most three mismatches.
@@ -1486,7 +1486,8 @@ pub fn annotate_seq_core(
         let t = ann.2 as usize;
         if !rheaders[t].contains("segment") {
             let rt = refdata.rtype[t];
-            if rt == 0 || rt == 4 {
+            // IGH or TRB (or TRD in Gamma/delta mode)
+            if rt == 0 || rt == 4 || rt == 5 {
                 if refdata.segtype[t] == "V" {
                     v = true;
                     vstop = ann.0 + ann.1;
