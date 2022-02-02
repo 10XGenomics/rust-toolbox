@@ -687,6 +687,9 @@ pub fn annotate_seq_core(
             let tig_start = semi[i].2;
             if ref_start == 0 {
                 let t = semi[i].0 as usize;
+                if refdata.name[t] == "IGKV1-12" {
+                    println!("trying");
+                }
                 if refdata.is_v(t) {
                     let r = &refs[t];
                     let len = semi[i].3;
@@ -700,6 +703,9 @@ pub fn annotate_seq_core(
                             }
                         }
                         semi[i].3 += stop - start;
+                        if refdata.name[t] == "IGKV1-12" {
+                            println!("extending");
+                        }
                     }
                 }
             }
