@@ -669,7 +669,7 @@ pub fn annotate_seq_core(
     }
     erase_if(&mut semi, &to_delete);
 
-    // If a V gene aligns starting at 0, and goes at least 75% of the way to the end, and there
+    // If a V gene aligns starting at 0, and goes at least 60% of the way to the end, and there
     // is only one alignment of the V gene, extend it to the end.
     // (Only one requirement ameliorated.)
     // semi = {(t, off, pos on b, len, positions on b of mismatches)}
@@ -702,7 +702,7 @@ pub fn annotate_seq_core(
                 let r = &refs[t];
                 let len = semi[k].3;
                 if ref_start + len < r.len() as i32 
-                    && (ref_start + len) as f64 / r.len() as f64 >= 0.75 
+                    && (ref_start + len) as f64 / r.len() as f64 >= 0.60
                     && len + tig_start < b_seq.len() as i32 {
                     let start = ref_start + len;
                     let stop = min(r.len(), b_seq.len()) as i32;
