@@ -1530,6 +1530,14 @@ pub fn annotate_seq_core(
 
     // If two V segments are aligned starting at 0 on the reference and one
     // is aligned a lot further, it wins.
+    // (Ameliorated.)
+    // { ( sequence start, match length, ref tig, ref tig start, {mismatches} ) }.
+
+    let mut last = vec![0; refdata.refs.len()];
+    for i in 0..annx.len() {
+        let t = annx[i].2 as usize;
+        last[t] = max(last[t], annx[i].0 + annx[i].1);
+    }
 
     let mut to_delete: Vec<bool> = vec![false; annx.len()];
     for i1 in 0..annx.len() {
@@ -1550,14 +1558,16 @@ pub fn annotate_seq_core(
                 continue;
             }
             const MIN_EXT: i32 = 50;
-            if (p2 > 0 && len1 >= len2) || (p2 == 0 && len1 >= len2 + MIN_EXT) {
-                if verbose {
-                    fwriteln!(log, "");
-                    print_alignx(log, &annx[i1], refdata);
-                    fwriteln!(log, "beats");
-                    print_alignx(log, &annx[i2], refdata);
+            if last[t1] >= last[t2] + MIN_EXT {
+                if (p2 > 0 && len1 >= len2) || (p2 == 0 && len1 >= len2 + MIN_EXT) {
+                    if verbose {
+                        fwriteln!(log, "");
+                        print_alignx(log, &annx[i1], refdata);
+                        fwriteln!(log, "beats");
+                        print_alignx(log, &annx[i2], refdata);
+                    }
+                    to_delete[i2] = true;
                 }
-                to_delete[i2] = true;
             }
         }
     }
