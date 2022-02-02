@@ -685,6 +685,7 @@ pub fn annotate_seq_core(
         if j - i == 1 && semi[i].1 == 0 && semi[i].2 == 0 {
             let t = semi[i].0 as usize;
             if refdata.is_v(t) {
+                println!("thinking");
                 let r = &refs[t];
                 let len = semi[i].3;
                 if len < r.len() as i32 && len as f64 / r.len() as f64 >= 0.85 
