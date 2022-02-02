@@ -682,6 +682,8 @@ pub fn annotate_seq_core(
             }
             j += 1;
         }
+        use io_utils::*;
+        printme!(j - i);
         if j - i == 1 {
             println!("looking");
             let ref_start = semi[i].0 + semi[i].1;
