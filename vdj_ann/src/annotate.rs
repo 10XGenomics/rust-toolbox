@@ -682,24 +682,25 @@ pub fn annotate_seq_core(
             }
             j += 1;
         }
-        if j - i == 1 && semi[i].1 == 0 && semi[i].2 == 0 {
-            println!("checking v");
-            let t = semi[i].0 as usize;
-            if refdata.is_v(t) {
-                println!("thinking");
-                let r = &refs[t];
-                let len = semi[i].3;
-                if len < r.len() as i32 && len as f64 / r.len() as f64 >= 0.85 
-                    && len < b_seq.len() as i32 {
-                    let start = len;
-                    let stop = min(r.len(), b_seq.len()) as i32;
-                    for m in start..stop {
-                        if b_seq[m as usize] != r.get(m as usize) {
-                            semi[i].4.push(m);
+        if j - i == 1 {
+            let ref_start = semi[i].0 + semi[i].1;
+            let tig_start = semi[i].2;
+            if ref_start == 0 {
+                let t = semi[i].0 as usize;
+                if refdata.is_v(t) {
+                    let r = &refs[t];
+                    let len = semi[i].3;
+                    if len < r.len() as i32 && len as f64 / r.len() as f64 >= 0.85 
+                        && len + tig_start < b_seq.len() as i32 {
+                        let start = len;
+                        let stop = min(r.len(), b_seq.len()) as i32;
+                        for m in start..stop {
+                            if b_seq[(tig_start + m) as usize] != r.get(m as usize) {
+                                semi[i].4.push(m);
+                            }
                         }
+                        semi[i].3 += stop - start;
                     }
-                    println!("extended"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                    semi[i].3 += stop - start;
                 }
             }
         }
