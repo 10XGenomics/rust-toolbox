@@ -668,6 +668,43 @@ pub fn annotate_seq_core(
         }
     }
     erase_if(&mut semi, &to_delete);
+
+    // If a V gene aligns starting at 0, and goes at least 85% of the way to the end, and there
+    // is only one alignment of the V gene, extend it to the end.
+    // semi = {(t, off, pos on b, len, positions on b of mismatches)}
+
+    let mut i = 0;
+    while i < semi.len() {
+        let mut j = i + 1;
+        while j < semi.len() {
+            if semi[j].0 != semi[i].0 {
+                break;
+            }
+            j += 1;
+        }
+        if j - i == 1 && semi[i].1 == 0 && semi[i].2 == 0 {
+            let t = semi[i].0 as usize;
+            if refdata.is_v(t) {
+                let r = &refs[t];
+                let len = semi[i].3;
+                if len < r.len() as i32 && len as f64 / r.len() as f64 >= 0.85 
+                    && len < b_seq.len() as i32 {
+                    let start = len;
+                    let stop = min(r.len(), b_seq.len()) as i32;
+                    for m in start..stop {
+                        if b_seq[m as usize] != r.get(m as usize) {
+                            semi[i].4.push(m);
+                        }
+                    }
+                    semi[i].3 += stop - start;
+                }
+            }
+        }
+        i = j;
+    }
+
+    // Print.
+
     if verbose {
         fwriteln!(log, "\nSEMI ALIGNMENTS AFTER EXTENSION\n");
         for s in semi.iter() {
