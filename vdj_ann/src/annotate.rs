@@ -718,6 +718,23 @@ pub fn annotate_seq_core(
         i = j;
     }
 
+    // For V segments, don't count mismatches within ten bases of the end of the V segment, as
+    // these might be in the junction region.
+
+    for i in 0..semi.len() {
+        let t = semi[i].0 as usize;
+        if refdata.is_v(t) {
+            let mut to_delete = vec![false; semi[i].4.len()];
+            for j in 0..semi[i].4.len() {
+                let p = semi[i].4[j];
+                if p >= refdata.refs[t].len() as i32 - 10 {
+                    to_delete[j] = true;
+                }
+            }
+            erase_if(&mut semi[i].4, &to_delete);
+        }
+    }
+
     // Print.
 
     if verbose {
