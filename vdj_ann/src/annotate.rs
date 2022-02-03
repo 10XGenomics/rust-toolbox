@@ -1135,6 +1135,7 @@ pub fn annotate_seq_core(
                 }
                 let tot1 = stop1 - start1;
                 let tot2 = stop2 - start2;
+                let off2 = annx[i2].3 - annx[i2].0;
 
                 // Case where there is no indel.
 
@@ -1149,6 +1150,46 @@ pub fn annotate_seq_core(
                     annx[i1].1 = tot1 as i32;
                     annx[i1].4 = mis;
                     to_delete[i2] = true;
+                    continue;
+                }
+
+                // Case of insertion.
+
+                if tot1 > tot2 && aligns[t] == 2 {
+                    let start1 = start1 as i32;
+                    let stop1 = stop1 as i32;
+                    let ins = (tot1 - tot2) as i32;
+                    let mut best_ipos = 0;
+                    let mut best_mis = 1000000;
+                    let mut best_mis1 = Vec::<i32>::new();
+                    let mut best_mis2 = Vec::<i32>::new();
+                    for ipos in start1..stop1 - ins {
+                        let mut mis1 = Vec::<i32>::new();
+                        let mut mis2 = Vec::<i32>::new();
+                        for p in start1..ipos {
+                            if b_seq[p as usize] != refs[t].get((p + off1) as usize) {
+                                mis1.push(p as i32);
+                            }
+                        }
+                        for p in ipos + ins..stop1 {
+                            if b_seq[p as usize] != refs[t].get((p + off2) as usize) {
+                                mis2.push(p as i32);
+                            }
+                        }
+                        let mis = (mis1.len() + mis2.len()) as i32;
+                        if mis < best_mis {
+                            best_mis = mis;
+                            best_mis1 = mis1;
+                            best_mis2 = mis2;
+                            best_ipos = ipos;
+                        }
+                    }
+                    annx[i1].1 = best_ipos - start1;
+                    annx[i1].4 = best_mis1;
+                    annx[i2].1 = stop1 - best_ipos - ins;
+                    annx[i2].0 = best_ipos + ins;
+                    annx[i2].3 = best_ipos + ins + off2;
+                    annx[i2].4 = best_mis2;
                     continue;
                 }
 
