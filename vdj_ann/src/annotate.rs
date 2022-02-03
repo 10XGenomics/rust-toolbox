@@ -1785,13 +1785,15 @@ pub fn annotate_seq_core(
         let len = annx[i].1 as usize;
         if aligns[t] == 1 && annx[i].3 == 0 && len < refs[t].len() {
             if len as f64 / refs[t].len() as f64 >= 0.75 {
-                for p in len..refs[t].len() {
-                    let q = p as i32 + annx[i].0 - annx[i].3;
-                    if b_seq[q as usize] != refs[t].get(p) {
-                        annx[i].4.push(q);
+                if (refs[t].len() as i32 + annx[i].0 - annx[i].3) as usize <= b_seq.len() {
+                    for p in len..refs[t].len() {
+                        let q = p as i32 + annx[i].0 - annx[i].3;
+                        if b_seq[q as usize] != refs[t].get(p) {
+                            annx[i].4.push(q);
+                        }
                     }
+                    annx[i].1 = refs[t].len() as i32;
                 }
-                annx[i].1 = refs[t].len() as i32;
             }
         }
     }
