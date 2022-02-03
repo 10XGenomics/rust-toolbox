@@ -783,25 +783,6 @@ pub fn annotate_seq_core(
     }
     report_semis(verbose, "SEMI ALIGNMENTS AFTER SECOND EXTENSION", &semi, &b_seq, &refs, log);
 
-    // For V segments, don't count mismatches within ten bases of the end of the V segment, as
-    // these might be in the junction region.
-
-    /*
-    for i in 0..semi.len() {
-        let t = semi[i].0 as usize;
-        if refdata.is_v(t) {
-            let mut to_delete = vec![false; semi[i].4.len()];
-            for j in 0..semi[i].4.len() {
-                let p = semi[i].4[j];
-                if p >= refdata.refs[t].len() as i32 - 10 {
-                    to_delete[j] = true;
-                }
-            }
-            erase_if(&mut semi[i].4, &to_delete);
-        }
-    }
-    */
-
     // Delete some subsumed alignments.
 
     let mut to_delete = vec![false; semi.len()];
@@ -1825,95 +1806,6 @@ pub fn annotate_seq_core(
         }
     }
     erase_if(&mut annx, &to_delete);
-
-
-
-    // If two V segments are aligned starting at 0 on the reference and one
-    // is aligned a lot further, it wins.
-
-    /*
-    let mut to_delete: Vec<bool> = vec![false; annx.len()];
-    for i1 in 0..annx.len() {
-        for i2 in 0..annx.len() {
-            let (t1, t2) = (annx[i1].2 as usize, annx[i2].2 as usize);
-            if rheaders[t1].contains("segment") || rheaders[t2].contains("segment") {
-                continue;
-            }
-            if !refdata.is_v(t1) || !refdata.is_v(t2) {
-                continue;
-            }
-            if t1 == t2 {
-                continue;
-            }
-            let (len1, len2) = (annx[i1].1, annx[i2].1);
-            let (p1, p2) = (annx[i1].3, annx[i2].3);
-            if p1 > 0 {
-                continue;
-            }
-            const MIN_EXT: i32 = 50;
-            if (p2 > 0 && len1 >= len2) || (p2 == 0 && len1 >= len2 + MIN_EXT) {
-                if verbose {
-                    fwriteln!(log, "");
-                    print_alignx(log, &annx[i1], refdata);
-                    fwriteln!(log, "beats");
-                    print_alignx(log, &annx[i2], refdata);
-                }
-                to_delete[i2] = true;
-            }
-        }
-    }
-    erase_if(&mut annx, &to_delete);
-    */
-
-
-    /*
-
-    // If two V segments are aligned starting at 0 on the reference and one
-    // is aligned a lot further, it wins.
-    // (Ameliorated.)
-    // { ( sequence start, match length, ref tig, ref tig start, {mismatches} ) }.
-
-    let mut last = vec![0; refdata.refs.len()];
-    for i in 0..annx.len() {
-        let t = annx[i].2 as usize;
-        last[t] = max(last[t], annx[i].3 + annx[i].1);
-    }
-
-    let mut to_delete: Vec<bool> = vec![false; annx.len()];
-    for i1 in 0..annx.len() {
-        for i2 in 0..annx.len() {
-            let (t1, t2) = (annx[i1].2 as usize, annx[i2].2 as usize);
-            if rheaders[t1].contains("segment") || rheaders[t2].contains("segment") {
-                continue;
-            }
-            if !refdata.is_v(t1) || !refdata.is_v(t2) {
-                continue;
-            }
-            if t1 == t2 {
-                continue;
-            }
-            let (len1, len2) = (annx[i1].1, annx[i2].1);
-            let (p1, p2) = (annx[i1].3, annx[i2].3);
-            if p1 > 0 {
-                continue;
-            }
-            const MIN_EXT: i32 = 50;
-            if last[t1] >= last[t2] + MIN_EXT {
-                if (p2 > 0 && len1 >= len2) || (p2 == 0 && len1 >= len2 + MIN_EXT) {
-                    if verbose {
-                        fwriteln!(log, "");
-                        print_alignx(log, &annx[i1], refdata);
-                        fwriteln!(log, "beats");
-                        print_alignx(log, &annx[i2], refdata);
-                    }
-                    to_delete[i2] = true;
-                }
-            }
-        }
-    }
-    erase_if(&mut annx, &to_delete);
-
-    */
 
     // For IG, if we have a C segment that aligns starting at zero, and a V segment
     // that aligns, but no J segment, try to find a J segment alignment.  For now we
