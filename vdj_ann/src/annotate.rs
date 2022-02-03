@@ -1096,22 +1096,23 @@ pub fn annotate_seq_core(
     // ◼ The approach to answering this seems very inefficient.
     // ◼ When this was moved here, some UTR alignments disappeared.
 
+    // { ( sequence start, match length, ref tig, ref tig start, {mismatches} ) }.
     if abut {
         let mut to_delete: Vec<bool> = vec![false; annx.len()];
         for i1 in 0..annx.len() {
-            let t1 = annx[i1].2 as usize;
-            if rheaders[t1].contains("segment") {
+            let t = annx[i1].2 as usize;
+            if rheaders[t].contains("segment") {
                 continue;
             }
-            if !refdata.is_u(t1) && !refdata.is_v(t1) {
+            if !refdata.is_u(t) && !refdata.is_v(t) {
                 continue;
             }
+            let off1 = annx[i1].3 - annx[i1].0;
             for i2 in 0..annx.len() {
-                if i2 == i1 || annx[i2].2 as usize != t1 {
+                if to_delete[i1] || to_delete[i2] {
                     continue;
                 }
-                let t2 = annx[i2].2 as usize;
-                if refdata.is_v(t1) != refdata.is_v(t2) {
+                if i2 == i1 || annx[i2].2 as usize != t {
                     continue;
                 }
                 let (l1, mut l2) = (annx[i1].0 as usize, annx[i2].0 as usize);
@@ -1123,13 +1124,32 @@ pub fn annotate_seq_core(
                     continue;
                 }
                 let (p1, mut p2) = (annx[i1].3 as usize, annx[i2].3 as usize);
-                let (start1, stop1) = (l1 as usize, (l2 + len2) as usize);
-                let (start2, stop2) = (p1 as usize, (p2 + len2) as usize);
+                let (start1, stop1) = (l1 as usize, (l2 + len2) as usize); // extent on contig
+                let (start2, stop2) = (p1 as usize, (p2 + len2) as usize); // extend on reference
                 if !(start1 < stop1 && start2 < stop2) {
                     continue;
                 }
+                let tot1 = stop1 - start1;
+                let tot2 = stop2 - start2;
+
+                // Case where there is no indel.
+
+                if tot1 == tot2 {
+                    let mut mis = annx[i1].4.clone();
+                    for p in l1 + len1..l2 {
+                        if b_seq[p] != refs[t].get(p + off1 as usize) {
+                            mis.push(p as i32);
+                        }
+                    }
+                    mis.append(&mut annx[i2].4.clone());
+                    annx[i1].1 = tot1 as i32;
+                    annx[i1].4 = mis;
+                    to_delete[i2] = true;
+                    continue;
+                }
+
                 let b1 = b.slice(start1, stop1).to_owned();
-                let b2 = refs[t1].slice(start2, stop2).to_owned();
+                let b2 = refs[t].slice(start2, stop2).to_owned();
 
 
                 let a = affine_align(&b1, &b2);
@@ -1184,7 +1204,7 @@ pub fn annotate_seq_core(
                     i += opcount;
                 }
                 if verbose {
-                    fwriteln!(log, "\ntrying to merge\n{}\n{}", rheaders[t1], rheaders[t2]);
+                    fwriteln!(log, "\ntrying to merge\n{}\n{}", rheaders[t], rheaders[t]);
                     fwriteln!(log, "|del| = {}, |ins| = {}", del.len(), ins.len());
                 }
                 if del.solo() && ins.is_empty() {
@@ -1220,7 +1240,7 @@ pub fn annotate_seq_core(
                     annx[i1].1 = len1 as i32;
                     annx[i1].4.truncate(0);
                     for j in 0..len1 {
-                        if b_seq[l1 + j] != refs[t1].get(p1 + j) {
+                        if b_seq[l1 + j] != refs[t].get(p1 + j) {
                             annx[i1].4.push((l1 + j) as i32);
                         }
                     }
@@ -1233,12 +1253,12 @@ pub fn annotate_seq_core(
                     annx[i1].4.truncate(0);
                     annx[i2].4.truncate(0);
                     for j in 0..len1 {
-                        if b_seq[l1 + j] != refs[t1].get(p1 + j) {
+                        if b_seq[l1 + j] != refs[t].get(p1 + j) {
                             annx[i1].4.push((l1 + j) as i32);
                         }
                     }
                     for j in 0..len2 {
-                        if b_seq[l2 + j] != refs[t1].get(p2 + j) {
+                        if b_seq[l2 + j] != refs[t].get(p2 + j) {
                             annx[i2].4.push((l2 + j) as i32);
                         }
                     }
