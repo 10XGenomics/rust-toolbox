@@ -1235,16 +1235,13 @@ pub fn annotate_seq_core(
                     continue;
                 }
 
-                if true {
-                    continue;
-                }
+                // It's not clear why the rest of this code helps, but it does.
 
                 let p1 = p1 as usize;
                 let mut p2 = p2 as usize;
 
                 let b1 = b.slice(start1, stop1).to_owned();
                 let b2 = refs[t].slice(start2, stop2).to_owned();
-
 
                 let a = affine_align(&b1, &b2);
                 let mut del = Vec::<(usize, usize, usize)>::new();
