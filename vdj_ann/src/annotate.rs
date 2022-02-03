@@ -1111,6 +1111,9 @@ pub fn annotate_seq_core(
                     continue;
                 }
                 let t2 = annx[i2].2 as usize;
+                if refdata.is_v(t1) != refdata.is_v(t2) {
+                    continue;
+                }
                 let (l1, mut l2) = (annx[i1].0 as usize, annx[i2].0 as usize);
                 if l1 >= l2 {
                     continue;
@@ -1127,6 +1130,8 @@ pub fn annotate_seq_core(
                 }
                 let b1 = b.slice(start1, stop1).to_owned();
                 let b2 = refs[t1].slice(start2, stop2).to_owned();
+
+
                 let a = affine_align(&b1, &b2);
                 let mut del = Vec::<(usize, usize, usize)>::new();
                 let mut ins = Vec::<(usize, usize, usize)>::new();
