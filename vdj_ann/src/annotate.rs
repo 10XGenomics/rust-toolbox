@@ -446,7 +446,7 @@ pub fn annotate_seq_core(
             let mut new_mis = Vec::<i32>::new();
             for j in 0..len {
                 if b_seq[(tig_start + j) as usize] != refs[t].get((ref_start + j) as usize) {
-                    new_mis.push(ref_start + j);
+                    new_mis.push(tig_start + j);
                 }
             }
             if new_mis != *mis {
@@ -650,7 +650,7 @@ pub fn annotate_seq_core(
             let mut new_mis = Vec::<i32>::new();
             for j in 0..len {
                 if b_seq[(tig_start + j) as usize] != refs[t].get((ref_start + j) as usize) {
-                    new_mis.push(ref_start + j);
+                    new_mis.push(tig_start + j);
                 }
             }
             if new_mis != *mis {
@@ -868,7 +868,7 @@ pub fn annotate_seq_core(
             let mut new_mis = Vec::<i32>::new();
             for j in 0..len {
                 if b_seq[(tig_start + j) as usize] != refs[t].get((ref_start + j) as usize) {
-                    new_mis.push(ref_start + j);
+                    new_mis.push(tig_start + j);
                 }
             }
             if new_mis != *mis {
