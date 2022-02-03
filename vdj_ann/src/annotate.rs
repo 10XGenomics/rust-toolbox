@@ -1753,6 +1753,29 @@ pub fn annotate_seq_core(
     }
     erase_if(&mut annx, &to_delete);
 
+    // Extend some alignments.
+    // { ( sequence start, match length, ref tig, ref tig start, {mismatches} ) }.
+
+    let mut aligns = vec![0; refs.len()];
+    for i in 0..annx.len() {
+        aligns[annx[i].2 as usize] += 1;
+    }
+    for i in 0..annx.len() {
+        let t = annx[i].2 as usize;
+        let len = annx[i].1 as usize;
+        if aligns[t] == 1 && annx[i].3 == 0 && len < refs[t].len() {
+            if len as f64 / refs[t].len() as f64 >= 0.75 {
+                for p in len..refs[t].len() {
+                    let q = p as i32 + annx[i].0 - annx[i].3;
+                    if b_seq[q as usize] != refs[t].get(p) {
+                        annx[i].4.push(q);
+                    }
+                }
+                annx[i].1 = refs[t].len() as i32;
+            }
+        }
+    }
+
     // Log alignments.
 
     if verbose {
