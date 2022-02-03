@@ -479,7 +479,7 @@ pub fn annotate_seq_core(
             if !ok {
                 break;
             }
-            mis.push(l - 1);
+            mis.push(l - 1 + off);
             l -= MIN_PERF_EXT as i32 + 1;
             len += MIN_PERF_EXT as i32 + 1;
             while l > 0 && l + off > 0 {
