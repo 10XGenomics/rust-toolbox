@@ -1134,12 +1134,10 @@ pub fn annotate_seq_core(
 
                 // Case where there is no indel.
 
-                let p1 = p1 as usize;
-                let mut p2 = p2 as usize;
                 if tot1 == tot2 {
                     let mut mis = annx[i1].4.clone();
                     for p in l1 + len1..l2 {
-                        if b_seq[p] != refs[t].get(p + off1 as usize) {
+                        if b_seq[p] != refs[t].get((p as i32 + off1) as usize) {
                             mis.push(p as i32);
                         }
                     }
@@ -1149,6 +1147,9 @@ pub fn annotate_seq_core(
                     to_delete[i2] = true;
                     continue;
                 }
+
+                let p1 = p1 as usize;
+                let mut p2 = p2 as usize;
 
                 let b1 = b.slice(start1, stop1).to_owned();
                 let b2 = refs[t].slice(start2, stop2).to_owned();
