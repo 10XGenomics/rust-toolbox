@@ -191,6 +191,49 @@ fn print_alignx(log: &mut Vec<u8>, a: &(i32, i32, i32, i32, Vec<i32>), refdata: 
     );
 }
 
+fn report_semis(
+    verbose: bool,
+    title: &str,
+    semi: &Vec<(i32, i32, i32, i32, Vec<i32>)>,
+    b_seq: &Vec<u8>,
+    refs: &Vec<DnaString>,
+    log: &mut Vec<u8>,
+) {
+    if verbose {
+        fwriteln!(log, "\n{}\n", title);
+        for s in semi.iter() {
+            fwrite!(log, 
+                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
+                s.0,
+                s.1,
+                s.2,
+                s.1 + s.2,
+                s.3,
+                s.4.len(),
+            );
+            let t = s.0 as usize;
+            let off = s.1;
+            let tig_start = s.2;
+            let ref_start = off + tig_start;
+            let len = s.3;
+            let mis = &s.4;
+            let mut new_mis = Vec::<i32>::new();
+            for j in 0..len {
+                if b_seq[(tig_start + j) as usize] != refs[t].get((ref_start + j) as usize) {
+                    new_mis.push(tig_start + j);
+                }
+            }
+            if new_mis != *mis {
+                fwriteln!(log, " [INVALID]");
+                fwriteln!(log, "computed = {}", mis.iter().format(","));
+                fwriteln!(log, "correct  = {}", new_mis.iter().format(","));
+            } else {
+                fwriteln!(log, "");
+            }
+        }
+    }
+}
+
 pub fn annotate_seq_core(
     b: &DnaString,
     refdata: &RefData,
@@ -425,39 +468,7 @@ pub fn annotate_seq_core(
         }
         i = j as usize;
     }
-    if verbose {
-        fwriteln!(log, "\nINITIAL SEMI ALIGNMENTS\n");
-        for s in semi.iter() {
-            fwrite!(log, 
-                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
-                s.0,
-                s.1,
-                s.2,
-                s.1 + s.2,
-                s.3,
-                s.4.len(),
-            );
-            let t = s.0 as usize;
-            let off = s.1;
-            let tig_start = s.2;
-            let ref_start = off + tig_start;
-            let len = s.3;
-            let mis = &s.4;
-            let mut new_mis = Vec::<i32>::new();
-            for j in 0..len {
-                if b_seq[(tig_start + j) as usize] != refs[t].get((ref_start + j) as usize) {
-                    new_mis.push(tig_start + j);
-                }
-            }
-            if new_mis != *mis {
-                fwriteln!(log, " [INVALID]");
-                fwriteln!(log, "computed = {}", mis.iter().format(","));
-                fwriteln!(log, "correct  = {}", new_mis.iter().format(","));
-            } else {
-                fwriteln!(log, "");
-            }
-        }
-    }
+    report_semis(verbose, "INITIAL SEMI ALIGNMENTS", &semi, &b_seq, &refs, log);
 
     // Extend backwards and then forwards.
 
@@ -629,39 +640,7 @@ pub fn annotate_seq_core(
             semi[i].4.sort_unstable();
         }
     }
-    if verbose {
-        fwriteln!(log, "\nSEMI ALIGNMENTS\n");
-        for s in semi.iter() {
-            fwrite!(log, 
-                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
-                s.0,
-                s.1,
-                s.2,
-                s.1 + s.2,
-                s.3,
-                s.4.len(),
-            );
-            let t = s.0 as usize;
-            let off = s.1;
-            let tig_start = s.2;
-            let ref_start = off + tig_start;
-            let len = s.3;
-            let mis = &s.4;
-            let mut new_mis = Vec::<i32>::new();
-            for j in 0..len {
-                if b_seq[(tig_start + j) as usize] != refs[t].get((ref_start + j) as usize) {
-                    new_mis.push(tig_start + j);
-                }
-            }
-            if new_mis != *mis {
-                fwriteln!(log, " [INVALID]");
-                fwriteln!(log, "computed = {}", mis.iter().format(","));
-                fwriteln!(log, "correct  = {}", new_mis.iter().format(","));
-            } else {
-                fwriteln!(log, "");
-            }
-        }
-    }
+    report_semis(verbose, "SEMI ALIGNMENTS", &semi, &b_seq, &refs, log);
 
     // Extend between match blocks.
     // ◼ This is pretty crappy.  What we should do instead is arrange the initial
@@ -706,6 +685,7 @@ pub fn annotate_seq_core(
         }
     }
     erase_if(&mut semi, &to_delete);
+    report_semis(verbose, "SEMI ALIGNMENTS AFTER EXTENSION", &semi, &b_seq, &refs, log);
 
     // Merge overlapping alignments.
     // semi = {(t, off, pos on b, len, positions on b of mismatches)}
@@ -844,44 +824,7 @@ pub fn annotate_seq_core(
         i = j;
     }
     erase_if(&mut semi, &to_delete);
-
-    // Print.
-
-    if verbose {
-        fwriteln!(log, "\nSEMI ALIGNMENTS AFTER EXTENSION\n");
-        for s in semi.iter() {
-            fwrite!(log, 
-                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
-                s.0,
-                s.1,
-                s.2,
-                s.1 + s.2,
-                s.3,
-                s.4.len(),
-            );
-            let t = s.0 as usize;
-            let off = s.1;
-            let tig_start = s.2;
-            let ref_start = off + tig_start;
-            let len = s.3;
-            let mis = &s.4;
-            let mut new_mis = Vec::<i32>::new();
-            for j in 0..len {
-                if b_seq[(tig_start + j) as usize] != refs[t].get((ref_start + j) as usize) {
-                    new_mis.push(tig_start + j);
-                }
-            }
-            if new_mis != *mis {
-                fwriteln!(log, " [INVALID]");
-                fwriteln!(log, "computed = {}", mis.iter().format(","));
-                fwriteln!(log, "correct  = {}", new_mis.iter().format(","));
-            } else {
-                fwriteln!(log, "");
-            }
-        }
-    }
-    
-    // semi = {(t, off, pos on b, len, positions on b of mismatches)}
+    report_semis(verbose, "SEMI ALIGNMENTS AFTER SUBSUMPTION", &semi, &b_seq, &refs, log);
 
     // Transform to create annx, having structure:
     // { ( sequence start, match length, ref tig, ref tig start, {mismatches} ) }.
