@@ -1794,7 +1794,7 @@ pub fn annotate_seq_core(
     for i in 0..annx.len() {
         let t = annx[i].2 as usize;
         // lens[t] += annx[i].3 + annx[i].1;
-        lens[t] += annx[i].1;
+        lens[t] = max(lens[t], annx[i].3 + annx[i].1);
     }
     let mut to_delete: Vec<bool> = vec![false; annx.len()];
     for i1 in 0..annx.len() {
