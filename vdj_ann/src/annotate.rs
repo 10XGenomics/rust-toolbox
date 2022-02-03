@@ -150,7 +150,7 @@ pub fn chain_type(b: &DnaString, rkmers_plus_full_20: &[(Kmer20, i32, i32)], rty
 // (see below for details)
 //
 // The structure of the output is:
-// { ( start on sequence, match length, ref tig, start on ref tig, mismatches ) }.
+// { ( start on sequence, match length, ref tig, start on ref tig, mismatches on sequence ) }.
 
 pub fn annotate_seq(
     b: &DnaString,
