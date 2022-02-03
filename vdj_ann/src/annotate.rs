@@ -766,7 +766,7 @@ pub fn annotate_seq_core(
                     let stop = min(r.len() as i32, b_seq.len() as i32 + offset);
                     for m in start..stop {
                         if b_seq[(m - offset) as usize] != r.get(m as usize) {
-                            semi[k].4.push(m);
+                            semi[k].4.push(m - offset);
                         }
                     }
                     semi[k].3 += stop - start;
