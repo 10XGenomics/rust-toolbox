@@ -834,9 +834,12 @@ pub fn annotate_seq_core(
                 }
             }
             if new_mis != *mis {
-                fwrite!(log, " [INVALID]");
+                fwriteln!(log, " [INVALID]");
+                fwriteln!(log, "computed = {}", mis.iter().format(","));
+                fwriteln!(log, "correct  = {}", new_mis.iter().format(","));
+            } else {
+                fwriteln!(log, "");
             }
-            fwriteln!(log, "");
         }
     }
     
