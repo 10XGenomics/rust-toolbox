@@ -1745,7 +1745,7 @@ pub fn annotate_seq_core(
         let t = annx[i].2 as usize;
         let len = annx[i].1 as usize;
         if aligns[t] == 1 && annx[i].3 == 0 && len < refs[t].len() {
-            if len as f64 / refs[t].len() as f64 >= 0.75 {
+            if len as f64 / refs[t].len() as f64 >= 0.7 {
                 for p in len..refs[t].len() {
                     let q = p as i32 + annx[i].0 - annx[i].3;
                     if b_seq[q as usize] != refs[t].get(p) {
