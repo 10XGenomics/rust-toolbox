@@ -202,7 +202,8 @@ fn report_semis(
     if verbose {
         fwriteln!(log, "\n{}\n", title);
         for s in semi.iter() {
-            fwrite!(log, 
+            fwrite!(
+                log,
                 "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
                 s.0,
                 s.1,
@@ -325,7 +326,8 @@ pub fn annotate_seq_core(
     if verbose {
         fwriteln!(log, "\nINITIAL PERF ALIGNMENTS\n");
         for s in perf.iter() {
-            fwriteln!(log, 
+            fwriteln!(
+                log,
                 "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}",
                 s.0,
                 s.1,
@@ -336,7 +338,7 @@ pub fn annotate_seq_core(
         }
     }
 
-    // Find maximal perfect matches of length >= 10 that have the same offset as a perfect match 
+    // Find maximal perfect matches of length >= 10 that have the same offset as a perfect match
     // already found and are not equal to one of them.  But only do this if we already have at
     // least 150 bases aligned.
 
@@ -407,7 +409,8 @@ pub fn annotate_seq_core(
     if verbose {
         fwriteln!(log, "\nPERF ALIGNMENTS\n");
         for s in perf.iter() {
-            fwriteln!(log, 
+            fwriteln!(
+                log,
                 "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}",
                 s.0,
                 s.1,
@@ -468,7 +471,14 @@ pub fn annotate_seq_core(
         }
         i = j as usize;
     }
-    report_semis(verbose, "INITIAL SEMI ALIGNMENTS", &semi, &b_seq, &refs, log);
+    report_semis(
+        verbose,
+        "INITIAL SEMI ALIGNMENTS",
+        &semi,
+        &b_seq,
+        &refs,
+        log,
+    );
 
     // Extend backwards and then forwards.
 
@@ -685,7 +695,14 @@ pub fn annotate_seq_core(
         }
     }
     erase_if(&mut semi, &to_delete);
-    report_semis(verbose, "SEMI ALIGNMENTS AFTER EXTENSION", &semi, &b_seq, &refs, log);
+    report_semis(
+        verbose,
+        "SEMI ALIGNMENTS AFTER EXTENSION",
+        &semi,
+        &b_seq,
+        &refs,
+        log,
+    );
 
     // Merge overlapping alignments.
     // semi = {(t, off, pos on b, len, positions on b of mismatches)}
@@ -726,7 +743,14 @@ pub fn annotate_seq_core(
         i = j;
     }
     erase_if(&mut semi, &to_delete);
-    report_semis(verbose, "SEMI ALIGNMENTS AFTER MERGER", &semi, &b_seq, &refs, log);
+    report_semis(
+        verbose,
+        "SEMI ALIGNMENTS AFTER MERGER",
+        &semi,
+        &b_seq,
+        &refs,
+        log,
+    );
 
     // If a V gene aligns starting at 0, and goes at least 60% of the way to the end, and there
     // is only one alignment of the V gene, extend it to the end.
@@ -759,9 +783,10 @@ pub fn annotate_seq_core(
             if refdata.is_v(t) {
                 let r = &refs[t];
                 let len = semi[k].3;
-                if ref_start + len < r.len() as i32 
+                if ref_start + len < r.len() as i32
                     && (ref_start + len) as f64 / r.len() as f64 >= 0.60
-                    && len + tig_start < b_seq.len() as i32 {
+                    && len + tig_start < b_seq.len() as i32
+                {
                     let start = ref_start + len;
                     let stop = min(r.len() as i32, b_seq.len() as i32 + offset);
                     for m in start..stop {
@@ -781,7 +806,14 @@ pub fn annotate_seq_core(
     for i in 0..semi.len() {
         unique_sort(&mut semi[i].4);
     }
-    report_semis(verbose, "SEMI ALIGNMENTS AFTER SECOND EXTENSION", &semi, &b_seq, &refs, log);
+    report_semis(
+        verbose,
+        "SEMI ALIGNMENTS AFTER SECOND EXTENSION",
+        &semi,
+        &b_seq,
+        &refs,
+        log,
+    );
 
     // Delete some subsumed alignments.
 
@@ -807,7 +839,14 @@ pub fn annotate_seq_core(
         i = j;
     }
     erase_if(&mut semi, &to_delete);
-    report_semis(verbose, "SEMI ALIGNMENTS AFTER SUBSUMPTION", &semi, &b_seq, &refs, log);
+    report_semis(
+        verbose,
+        "SEMI ALIGNMENTS AFTER SUBSUMPTION",
+        &semi,
+        &b_seq,
+        &refs,
+        log,
+    );
 
     // Transform to create annx, having structure:
     // { ( sequence start, match length, ref tig, ref tig start, {mismatches} ) }.
@@ -1765,8 +1804,6 @@ pub fn annotate_seq_core(
             print_alignx(log, &annx[i], refdata);
         }
     }
-
-
 
     // If two V segments are aligned starting at 0 on the reference and one
     // is aligned a lot further, it wins.
