@@ -1163,7 +1163,7 @@ pub fn annotate_seq_core(
                     let mut best_mis = 1000000;
                     let mut best_mis1 = Vec::<i32>::new();
                     let mut best_mis2 = Vec::<i32>::new();
-                    for ipos in start1..stop1 - ins {
+                    for ipos in start1..=stop1 - ins {
                         let mut mis1 = Vec::<i32>::new();
                         let mut mis2 = Vec::<i32>::new();
                         for p in start1..ipos {
@@ -1189,6 +1189,48 @@ pub fn annotate_seq_core(
                     annx[i2].1 = stop1 - best_ipos - ins;
                     annx[i2].0 = best_ipos + ins;
                     annx[i2].3 = best_ipos + ins + off2;
+                    annx[i2].4 = best_mis2;
+                    continue;
+                }
+
+                // Case of deletion.
+
+                if tot1 < tot2 && aligns[t] == 2 {
+                    let start2 = start2 as i32;
+                    let stop2 = stop2 as i32;
+                    let del = (tot2 - tot1) as i32;
+                    let mut best_dpos = 0;
+                    let mut best_mis = 1000000;
+                    let mut best_mis1 = Vec::<i32>::new();
+                    let mut best_mis2 = Vec::<i32>::new();
+                    for dpos in start2..=stop2 - del {
+                        let mut mis1 = Vec::<i32>::new();
+                        let mut mis2 = Vec::<i32>::new();
+                        for q in start2..dpos {
+                            let p = q - off1;
+                            if b_seq[p as usize] != refs[t].get(q as usize) {
+                                mis1.push(p);
+                            }
+                        }
+                        for q in dpos + del..stop2 {
+                            let p = q - off2;
+                            if b_seq[p as usize] != refs[t].get(q as usize) {
+                                mis2.push(p);
+                            }
+                        }
+                        let mis = (mis1.len() + mis2.len()) as i32;
+                        if mis < best_mis {
+                            best_mis = mis;
+                            best_mis1 = mis1;
+                            best_mis2 = mis2;
+                            best_dpos = dpos;
+                        }
+                    }
+                    annx[i1].1 = best_dpos - start2;
+                    annx[i1].4 = best_mis1;
+                    annx[i2].0 = best_dpos + del - off2;
+                    annx[i2].1 = stop2 - best_dpos - del;
+                    annx[i2].3 = best_dpos + del;
                     annx[i2].4 = best_mis2;
                     continue;
                 }
