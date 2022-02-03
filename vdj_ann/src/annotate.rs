@@ -1155,7 +1155,7 @@ pub fn annotate_seq_core(
 
                 // Case of insertion.
 
-                if tot1 > tot2 && aligns[t] == 2 {
+                if tot1 > tot2 /* && aligns[t] == 2 */ {
                     let start1 = start1 as i32;
                     let stop1 = stop1 as i32;
                     let ins = (tot1 - tot2) as i32;
