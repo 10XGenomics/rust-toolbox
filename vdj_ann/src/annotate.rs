@@ -726,6 +726,7 @@ pub fn annotate_seq_core(
         i = j;
     }
     erase_if(&mut semi, &to_delete);
+    report_semis(verbose, "SEMI ALIGNMENTS AFTER MERGER", &semi, &b_seq, &refs, log);
 
     // If a V gene aligns starting at 0, and goes at least 60% of the way to the end, and there
     // is only one alignment of the V gene, extend it to the end.
