@@ -781,6 +781,7 @@ pub fn annotate_seq_core(
     for i in 0..semi.len() {
         unique_sort(&mut semi[i].4);
     }
+    report_semis(verbose, "SEMI ALIGNMENTS AFTER SECOND EXTENSION", &semi, &b_seq, &refs, log);
 
     // For V segments, don't count mismatches within ten bases of the end of the V segment, as
     // these might be in the junction region.
