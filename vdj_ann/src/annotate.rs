@@ -504,7 +504,7 @@ pub fn annotate_seq_core(
             if !ok {
                 break;
             }
-            mis.push(l + len);
+            mis.push(l + len + off);
             len += MIN_PERF_EXT as i32 + 1;
             while l + len < b.len() as i32 && l + off + len < refs[t as usize].len() as i32 {
                 if b_seq[(l + len) as usize] != refs[t as usize].get((l + off + len) as usize) {
