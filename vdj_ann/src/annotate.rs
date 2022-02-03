@@ -1123,9 +1123,9 @@ pub fn annotate_seq_core(
                 if l1 + len1 > l2 + len2 {
                     continue;
                 }
-                let (p1, mut p2) = (annx[i1].3 as usize, annx[i2].3 as usize);
+                let (p1, p2) = (annx[i1].3, annx[i2].3);
                 let (start1, stop1) = (l1 as usize, (l2 + len2) as usize); // extent on contig
-                let (start2, stop2) = (p1 as usize, (p2 + len2) as usize); // extend on reference
+                let (start2, stop2) = (p1 as usize, (p2 as usize + len2) as usize); // extent on ref
                 if !(start1 < stop1 && start2 < stop2) {
                     continue;
                 }
@@ -1134,6 +1134,8 @@ pub fn annotate_seq_core(
 
                 // Case where there is no indel.
 
+                let p1 = p1 as usize;
+                let mut p2 = p2 as usize;
                 if tot1 == tot2 {
                     let mut mis = annx[i1].4.clone();
                     for p in l1 + len1..l2 {
