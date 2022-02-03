@@ -1099,6 +1099,10 @@ pub fn annotate_seq_core(
     // { ( sequence start, match length, ref tig, ref tig start, {mismatches} ) }.
     if abut {
         let mut to_delete: Vec<bool> = vec![false; annx.len()];
+        let mut aligns = vec![0; refs.len()];
+        for i in 0..annx.len() {
+            aligns[annx[i].2 as usize] += 1;
+        }
         for i1 in 0..annx.len() {
             let t = annx[i1].2 as usize;
             if rheaders[t].contains("segment") {
@@ -1134,7 +1138,7 @@ pub fn annotate_seq_core(
 
                 // Case where there is no indel.
 
-                if tot1 == tot2 {
+                if tot1 == tot2 && aligns[t] == 2 {
                     let mut mis = annx[i1].4.clone();
                     for p in l1 + len1..l2 {
                         if b_seq[p] != refs[t].get((p as i32 + off1) as usize) {
