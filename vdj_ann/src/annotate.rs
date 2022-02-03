@@ -812,7 +812,7 @@ pub fn annotate_seq_core(
     if verbose {
         fwriteln!(log, "\nSEMI ALIGNMENTS AFTER EXTENSION\n");
         for s in semi.iter() {
-            fwriteln!(log, 
+            fwrite!(log, 
                 "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
                 s.0,
                 s.1,
@@ -821,8 +821,26 @@ pub fn annotate_seq_core(
                 s.3,
                 s.4.len(),
             );
+            let t = s.0 as usize;
+            let off = s.1;
+            let tig_start = s.2;
+            let ref_start = off + tig_start;
+            let len = s.3;
+            let mis = &s.4;
+            let mut new_mis = Vec::<i32>::new();
+            for j in 0..len {
+                if b_seq[(tig_start + j) as usize] != refs[t].get((ref_start + j) as usize) {
+                    new_mis.push(ref_start + j);
+                }
+            }
+            if new_mis != *mis {
+                fwrite!(log, " [INVALID]");
+            }
+            fwriteln!(log, "");
         }
     }
+    
+    // semi = {(t, off, pos on b, len, positions on b of mismatches)}
 
     // Transform to create annx, having structure:
     // { ( sequence start, match length, ref tig, ref tig start, {mismatches} ) }.
