@@ -780,7 +780,7 @@ pub fn annotate_seq_core(
             let ref_start = semi[k].1 + semi[k].2;
             let tig_start = semi[k].2;
             let t = semi[k].0 as usize;
-            if refdata.is_v(t) {
+            if !rheaders[t].contains("segment") && refdata.is_v(t) {
                 let r = &refs[t];
                 let len = semi[k].3;
                 if ref_start + len < r.len() as i32
@@ -1128,7 +1128,7 @@ pub fn annotate_seq_core(
             if rheaders[t].contains("segment") {
                 continue;
             }
-            if !refdata.is_u(t) && !refdata.is_v(t) {
+            if !rheaders[t].contains("segment") && !refdata.is_u(t) && !refdata.is_v(t) {
                 continue;
             }
             let off1 = annx[i1].3 - annx[i1].0;

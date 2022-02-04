@@ -1458,6 +1458,8 @@ checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
 [[package]]
 name = "vdj_ann"
 version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e9d0a7fad1e932f77983ffd9be8b84a185a93696a4ad2ae817b832c96b0a3f6"
 dependencies = [
  "align_tools 0.1.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "amino 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1478,9 +1480,7 @@ dependencies = [
 
 [[package]]
 name = "vdj_ann"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e9d0a7fad1e932f77983ffd9be8b84a185a93696a4ad2ae817b832c96b0a3f6"
+version = "0.4.3"
 dependencies = [
  "align_tools 0.1.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "amino 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1512,7 +1512,7 @@ dependencies = [
  "pretty_trace 0.5.23 (registry+https://github.com/rust-lang/crates.io-index)",
  "sha2",
  "string_utils 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "vdj_ann 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vdj_ann 0.4.2",
  "vector_utils 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
