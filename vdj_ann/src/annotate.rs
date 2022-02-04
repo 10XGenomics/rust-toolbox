@@ -150,7 +150,7 @@ pub fn chain_type(b: &DnaString, rkmers_plus_full_20: &[(Kmer20, i32, i32)], rty
 // (see below for details)
 //
 // The structure of the output is:
-// { ( start on sequence, match length, ref tig, start on ref tig, mismatches ) }.
+// { ( start on sequence, match length, ref tig, start on ref tig, mismatches on sequence ) }.
 
 pub fn annotate_seq(
     b: &DnaString,
@@ -191,6 +191,50 @@ fn print_alignx(log: &mut Vec<u8>, a: &(i32, i32, i32, i32, Vec<i32>), refdata: 
     );
 }
 
+fn report_semis(
+    verbose: bool,
+    title: &str,
+    semi: &Vec<(i32, i32, i32, i32, Vec<i32>)>,
+    b_seq: &Vec<u8>,
+    refs: &Vec<DnaString>,
+    log: &mut Vec<u8>,
+) {
+    if verbose {
+        fwriteln!(log, "\n{}\n", title);
+        for s in semi.iter() {
+            fwrite!(
+                log,
+                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
+                s.0,
+                s.1,
+                s.2,
+                s.1 + s.2,
+                s.3,
+                s.4.len(),
+            );
+            let t = s.0 as usize;
+            let off = s.1;
+            let tig_start = s.2;
+            let ref_start = off + tig_start;
+            let len = s.3;
+            let mis = &s.4;
+            let mut new_mis = Vec::<i32>::new();
+            for j in 0..len {
+                if b_seq[(tig_start + j) as usize] != refs[t].get((ref_start + j) as usize) {
+                    new_mis.push(tig_start + j);
+                }
+            }
+            if new_mis != *mis {
+                fwriteln!(log, " [INVALID]");
+                fwriteln!(log, "computed = {}", mis.iter().format(","));
+                fwriteln!(log, "correct  = {}", new_mis.iter().format(","));
+            } else {
+                fwriteln!(log, "");
+            }
+        }
+    }
+}
+
 pub fn annotate_seq_core(
     b: &DnaString,
     refdata: &RefData,
@@ -220,6 +264,8 @@ pub fn annotate_seq_core(
 
     // Find maximal perfect matches of length >= 20, or 12 for J regions, so long
     // as we have extension to a 20-mer with only one mismatch.
+    //
+    // perf = {(ref_id, ref_start - tig_start, tig_start, len)}
 
     let mut perf = Vec::<(i32, i32, i32, i32)>::new();
     if b.len() < K {
@@ -277,7 +323,103 @@ pub fn annotate_seq_core(
             }
         }
     }
+    if verbose {
+        fwriteln!(log, "\nINITIAL PERF ALIGNMENTS\n");
+        for s in perf.iter() {
+            fwriteln!(
+                log,
+                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}",
+                s.0,
+                s.1,
+                s.2,
+                s.1 + s.2,
+                s.3,
+            );
+        }
+    }
+
+    // Find maximal perfect matches of length >= 10 that have the same offset as a perfect match
+    // already found and are not equal to one of them.  But only do this if we already have at
+    // least 150 bases aligned.
+
+    let mut offsets = Vec::<(i32, i32)>::new();
+    for i in 0..perf.len() {
+        offsets.push((perf[i].0, perf[i].1));
+    }
+    unique_sort(&mut offsets);
+    const MM_START: i32 = 150;
+    const MM: i32 = 10;
+    for m in 0..offsets.len() {
+        let t = offsets[m].0;
+        let off = offsets[m].1; // ref_start - tig_start
+        let mut tig_starts = Vec::<i32>::new();
+        let mut total = 0;
+        for i in 0..perf.len() {
+            if perf[i].0 == t && perf[i].1 == off {
+                tig_starts.push(perf[i].2);
+                total += perf[i].3;
+            }
+        }
+        if total < MM_START {
+            continue;
+        }
+        let r = refs[t as usize].to_bytes();
+        let (mut l, mut p) = (0, off);
+        while l <= b_seq.len() as i32 - MM {
+            if p + MM > r.len() as i32 {
+                break;
+            }
+            if p < 0 || b_seq[l as usize] != r[p as usize] {
+                l += 1;
+                p += 1;
+            } else {
+                let (mut lx, mut px) = (l + 1, p + 1);
+                loop {
+                    if lx >= b_seq.len() as i32 || px >= r.len() as i32 {
+                        break;
+                    }
+                    if b_seq[lx as usize] != r[px as usize] {
+                        break;
+                    }
+                    lx += 1;
+                    px += 1;
+                }
+                let len = lx - l;
+                if len >= MM && len < 20 {
+                    let mut known = false;
+                    for k in 0..tig_starts.len() {
+                        if l == tig_starts[k] {
+                            known = true;
+                            break;
+                        }
+                    }
+                    if !known {
+                        perf.push((t, p - l, l, len));
+                    }
+                }
+                l = lx;
+                p = px;
+            }
+        }
+    }
+
+    // Sort perfect matches.
+
     perf.sort_unstable();
+    if verbose {
+        fwriteln!(log, "\nPERF ALIGNMENTS\n");
+        for s in perf.iter() {
+            fwriteln!(
+                log,
+                "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}",
+                s.0,
+                s.1,
+                s.2,
+                s.1 + s.2,
+                s.3,
+            );
+        }
+    }
 
     // Merge perfect matches.  We track the positions on b of mismatches.
     // semi = {(t, off, pos on b, len, positions on b of mismatches)}
@@ -329,6 +471,14 @@ pub fn annotate_seq_core(
         }
         i = j as usize;
     }
+    report_semis(
+        verbose,
+        "INITIAL SEMI ALIGNMENTS",
+        &semi,
+        &b_seq,
+        &refs,
+        log,
+    );
 
     // Extend backwards and then forwards.
 
@@ -500,6 +650,7 @@ pub fn annotate_seq_core(
             semi[i].4.sort_unstable();
         }
     }
+    report_semis(verbose, "SEMI ALIGNMENTS", &semi, &b_seq, &refs, log);
 
     // Extend between match blocks.
     // ◼ This is pretty crappy.  What we should do instead is arrange the initial
@@ -538,11 +689,164 @@ pub fn annotate_seq_core(
             semi[i1].3 = (l2 + len2) - l1;
             semi[i1].4.append(&mut mis3);
             semi[i1].4.append(&mut mis2.clone());
+            unique_sort(&mut semi[i1].4);
             semi[i2].0 = -1_i32;
             to_delete[i2] = true;
         }
     }
     erase_if(&mut semi, &to_delete);
+    report_semis(
+        verbose,
+        "SEMI ALIGNMENTS AFTER EXTENSION",
+        &semi,
+        &b_seq,
+        &refs,
+        log,
+    );
+
+    // Merge overlapping alignments.
+    // semi = {(t, off, pos on b, len, positions on b of mismatches)}
+
+    let mut to_delete = vec![false; semi.len()];
+    let mut i = 0;
+    while i < semi.len() {
+        let mut j = i + 1;
+        while j < semi.len() {
+            if semi[j].0 != semi[i].0 || semi[j].1 != semi[i].1 {
+                break;
+            }
+            j += 1;
+        }
+        for k1 in i..j {
+            for k2 in k1 + 1..j {
+                if to_delete[k1] || to_delete[k2] {
+                    continue;
+                }
+                let start1 = semi[k1].2;
+                let start2 = semi[k2].2;
+                let len1 = semi[k1].3;
+                let len2 = semi[k2].3;
+                let stop1 = start1 + len1;
+                let stop2 = start2 + len2;
+                let start = min(start1, start2);
+                let stop = max(stop1, stop2);
+                if stop - start <= len1 + len2 {
+                    semi[k1].2 = start;
+                    semi[k1].3 = stop - start;
+                    let mut m2 = semi[k2].4.clone();
+                    semi[k1].4.append(&mut m2);
+                    unique_sort(&mut semi[k1].4);
+                    to_delete[k2] = true;
+                }
+            }
+        }
+        i = j;
+    }
+    erase_if(&mut semi, &to_delete);
+    report_semis(
+        verbose,
+        "SEMI ALIGNMENTS AFTER MERGER",
+        &semi,
+        &b_seq,
+        &refs,
+        log,
+    );
+
+    // If a V gene aligns starting at 0, and goes at least 60% of the way to the end, and there
+    // is only one alignment of the V gene, extend it to the end.
+    // (Only one requirement ameliorated.)
+
+    let mut i = 0;
+    while i < semi.len() {
+        let mut j = i + 1;
+        while j < semi.len() {
+            if semi[j].0 != semi[i].0 {
+                break;
+            }
+            j += 1;
+        }
+        let mut k = i;
+        let mut ok = false;
+        if j - i == 1 {
+            ok = true;
+        } else if j - i == 2 {
+            ok = true;
+            if semi[i].2 < semi[i + 1].2 {
+                k = i + 1;
+            }
+        }
+        if ok {
+            let offset = semi[k].1;
+            let ref_start = semi[k].1 + semi[k].2;
+            let tig_start = semi[k].2;
+            let t = semi[k].0 as usize;
+            if refdata.is_v(t) {
+                let r = &refs[t];
+                let len = semi[k].3;
+                if ref_start + len < r.len() as i32
+                    && (ref_start + len) as f64 / r.len() as f64 >= 0.60
+                    && len + tig_start < b_seq.len() as i32
+                {
+                    let start = ref_start + len;
+                    let stop = min(r.len() as i32, b_seq.len() as i32 + offset);
+                    for m in start..stop {
+                        if b_seq[(m - offset) as usize] != r.get(m as usize) {
+                            semi[k].4.push(m - offset);
+                        }
+                    }
+                    semi[k].3 += stop - start;
+                }
+            }
+        }
+        i = j;
+    }
+
+    // Make sure that mismatches are unique sorted.
+
+    for i in 0..semi.len() {
+        unique_sort(&mut semi[i].4);
+    }
+    report_semis(
+        verbose,
+        "SEMI ALIGNMENTS AFTER SECOND EXTENSION",
+        &semi,
+        &b_seq,
+        &refs,
+        log,
+    );
+
+    // Delete some subsumed alignments.
+
+    let mut to_delete = vec![false; semi.len()];
+    let mut i = 0;
+    while i < semi.len() {
+        let mut j = i + 1;
+        while j < semi.len() {
+            if semi[j].0 != semi[i].0 || semi[j].1 != semi[i].1 {
+                break;
+            }
+            j += 1;
+        }
+        for k1 in i..j {
+            for k2 in i..j {
+                if semi[k1].1 + semi[k1].2 + semi[k1].3 == semi[k2].1 + semi[k2].2 + semi[k2].3 {
+                    if semi[k1].3 > semi[k2].3 {
+                        to_delete[k2] = true;
+                    }
+                }
+            }
+        }
+        i = j;
+    }
+    erase_if(&mut semi, &to_delete);
+    report_semis(
+        verbose,
+        "SEMI ALIGNMENTS AFTER SUBSUMPTION",
+        &semi,
+        &b_seq,
+        &refs,
+        log,
+    );
 
     // Transform to create annx, having structure:
     // { ( sequence start, match length, ref tig, ref tig start, {mismatches} ) }.
@@ -812,21 +1116,29 @@ pub fn annotate_seq_core(
     // ◼ The approach to answering this seems very inefficient.
     // ◼ When this was moved here, some UTR alignments disappeared.
 
+    // { ( sequence start, match length, ref tig, ref tig start, {mismatches} ) }.
     if abut {
         let mut to_delete: Vec<bool> = vec![false; annx.len()];
+        let mut aligns = vec![0; refs.len()];
+        for i in 0..annx.len() {
+            aligns[annx[i].2 as usize] += 1;
+        }
         for i1 in 0..annx.len() {
-            let t1 = annx[i1].2 as usize;
-            if rheaders[t1].contains("segment") {
+            let t = annx[i1].2 as usize;
+            if rheaders[t].contains("segment") {
                 continue;
             }
-            if !refdata.is_u(t1) && !refdata.is_v(t1) {
+            if !refdata.is_u(t) && !refdata.is_v(t) {
                 continue;
             }
+            let off1 = annx[i1].3 - annx[i1].0;
             for i2 in 0..annx.len() {
-                if i2 == i1 || annx[i2].2 as usize != t1 {
+                if to_delete[i1] || to_delete[i2] {
                     continue;
                 }
-                let t2 = annx[i2].2 as usize;
+                if i2 == i1 || annx[i2].2 as usize != t {
+                    continue;
+                }
                 let (l1, mut l2) = (annx[i1].0 as usize, annx[i2].0 as usize);
                 if l1 >= l2 {
                     continue;
@@ -835,14 +1147,122 @@ pub fn annotate_seq_core(
                 if l1 + len1 > l2 + len2 {
                     continue;
                 }
-                let (p1, mut p2) = (annx[i1].3 as usize, annx[i2].3 as usize);
-                let (start1, stop1) = (l1 as usize, (l2 + len2) as usize);
-                let (start2, stop2) = (p1 as usize, (p2 + len2) as usize);
+                let (p1, p2) = (annx[i1].3, annx[i2].3);
+                let (start1, stop1) = (l1 as usize, (l2 + len2) as usize); // extent on contig
+                let (start2, stop2) = (p1 as usize, (p2 as usize + len2) as usize); // extent on ref
                 if !(start1 < stop1 && start2 < stop2) {
                     continue;
                 }
+                let tot1 = stop1 - start1;
+                let tot2 = stop2 - start2;
+                let off2 = annx[i2].3 - annx[i2].0;
+
+                // Case where there is no indel.
+
+                if tot1 == tot2 && aligns[t] == 2 {
+                    let mut mis = annx[i1].4.clone();
+                    for p in l1 + len1..l2 {
+                        if b_seq[p] != refs[t].get((p as i32 + off1) as usize) {
+                            mis.push(p as i32);
+                        }
+                    }
+                    mis.append(&mut annx[i2].4.clone());
+                    annx[i1].1 = tot1 as i32;
+                    annx[i1].4 = mis;
+                    to_delete[i2] = true;
+                    continue;
+                }
+
+                // Case of insertion.
+
+                if tot1 > tot2 && aligns[t] == 2 {
+                    let start1 = start1 as i32;
+                    let stop1 = stop1 as i32;
+                    let ins = (tot1 - tot2) as i32;
+                    let mut best_ipos = 0;
+                    let mut best_mis = 1000000;
+                    let mut best_mis1 = Vec::<i32>::new();
+                    let mut best_mis2 = Vec::<i32>::new();
+                    for ipos in start1..=stop1 - ins {
+                        let mut mis1 = Vec::<i32>::new();
+                        let mut mis2 = Vec::<i32>::new();
+                        for p in start1..ipos {
+                            if b_seq[p as usize] != refs[t].get((p + off1) as usize) {
+                                mis1.push(p as i32);
+                            }
+                        }
+                        for p in ipos + ins..stop1 {
+                            if b_seq[p as usize] != refs[t].get((p + off2) as usize) {
+                                mis2.push(p as i32);
+                            }
+                        }
+                        let mis = (mis1.len() + mis2.len()) as i32;
+                        if mis < best_mis {
+                            best_mis = mis;
+                            best_mis1 = mis1;
+                            best_mis2 = mis2;
+                            best_ipos = ipos;
+                        }
+                    }
+                    annx[i1].1 = best_ipos - start1;
+                    annx[i1].4 = best_mis1;
+                    annx[i2].1 = stop1 - best_ipos - ins;
+                    annx[i2].0 = best_ipos + ins;
+                    annx[i2].3 = best_ipos + ins + off2;
+                    annx[i2].4 = best_mis2;
+                    continue;
+                }
+
+                // Case of deletion.
+
+                if tot1 < tot2 && aligns[t] == 2 {
+                    let start2 = start2 as i32;
+                    let stop2 = stop2 as i32;
+                    let del = (tot2 - tot1) as i32;
+                    let mut best_dpos = 0;
+                    let mut best_mis = 1000000;
+                    let mut best_mis1 = Vec::<i32>::new();
+                    let mut best_mis2 = Vec::<i32>::new();
+                    for dpos in start2..=stop2 - del {
+                        let mut mis1 = Vec::<i32>::new();
+                        let mut mis2 = Vec::<i32>::new();
+                        for q in start2..dpos {
+                            let p = q - off1;
+                            if b_seq[p as usize] != refs[t].get(q as usize) {
+                                mis1.push(p);
+                            }
+                        }
+                        for q in dpos + del..stop2 {
+                            let p = q - off2;
+                            if b_seq[p as usize] != refs[t].get(q as usize) {
+                                mis2.push(p);
+                            }
+                        }
+                        let mis = (mis1.len() + mis2.len()) as i32;
+                        if mis < best_mis {
+                            best_mis = mis;
+                            best_mis1 = mis1;
+                            best_mis2 = mis2;
+                            best_dpos = dpos;
+                        }
+                    }
+                    annx[i1].1 = best_dpos - start2;
+                    annx[i1].4 = best_mis1;
+                    annx[i2].0 = best_dpos + del - off2;
+                    annx[i2].1 = stop2 - best_dpos - del;
+                    annx[i2].3 = best_dpos + del;
+                    annx[i2].4 = best_mis2;
+                    continue;
+                }
+
+                // It's not clear why the rest of this code helps, but it does.
+
+                let p1 = p1 as usize;
+                let mut p2 = p2 as usize;
+
                 let b1 = b.slice(start1, stop1).to_owned();
-                let b2 = refs[t1].slice(start2, stop2).to_owned();
+                let b2 = refs[t].slice(start2, stop2).to_owned();
+
                 let a = affine_align(&b1, &b2);
                 let mut del = Vec::<(usize, usize, usize)>::new();
                 let mut ins = Vec::<(usize, usize, usize)>::new();
@@ -895,7 +1315,7 @@ pub fn annotate_seq_core(
                     i += opcount;
                 }
                 if verbose {
-                    fwriteln!(log, "\ntrying to merge\n{}\n{}", rheaders[t1], rheaders[t2]);
+                    fwriteln!(log, "\ntrying to merge\n{}\n{}", rheaders[t], rheaders[t]);
                     fwriteln!(log, "|del| = {}, |ins| = {}", del.len(), ins.len());
                 }
                 if del.solo() && ins.is_empty() {
@@ -931,7 +1351,7 @@ pub fn annotate_seq_core(
                     annx[i1].1 = len1 as i32;
                     annx[i1].4.truncate(0);
                     for j in 0..len1 {
-                        if b_seq[l1 + j] != refs[t1].get(p1 + j) {
+                        if b_seq[l1 + j] != refs[t].get(p1 + j) {
                             annx[i1].4.push((l1 + j) as i32);
                         }
                     }
@@ -944,12 +1364,12 @@ pub fn annotate_seq_core(
                     annx[i1].4.truncate(0);
                     annx[i2].4.truncate(0);
                     for j in 0..len1 {
-                        if b_seq[l1 + j] != refs[t1].get(p1 + j) {
+                        if b_seq[l1 + j] != refs[t].get(p1 + j) {
                             annx[i1].4.push((l1 + j) as i32);
                         }
                     }
                     for j in 0..len2 {
-                        if b_seq[l2 + j] != refs[t1].get(p2 + j) {
+                        if b_seq[l2 + j] != refs[t].get(p2 + j) {
                             annx[i2].4.push((l2 + j) as i32);
                         }
                     }
@@ -1328,6 +1748,56 @@ pub fn annotate_seq_core(
     }
     erase_if(&mut annx, &to_delete);
 
+    // Delete some subsumed alignments.
+
+    let mut to_delete = vec![false; annx.len()];
+    let mut i = 0;
+    while i < annx.len() {
+        let mut j = i + 1;
+        while j < annx.len() {
+            if annx[j].0 != annx[i].0 {
+                break;
+            }
+            j += 1;
+        }
+        for k1 in i..j {
+            for k2 in i..j {
+                if annx[k1].2 == annx[k2].2 {
+                    if annx[k1].3 == annx[k2].3 && annx[k1].1 > annx[k2].1 {
+                        to_delete[k2] = true;
+                    }
+                }
+            }
+        }
+        i = j;
+    }
+    erase_if(&mut annx, &to_delete);
+
+    // Extend some alignments.
+    // { ( sequence start, match length, ref tig, ref tig start, {mismatches} ) }.
+
+    let mut aligns = vec![0; refs.len()];
+    for i in 0..annx.len() {
+        aligns[annx[i].2 as usize] += 1;
+    }
+    for i in 0..annx.len() {
+        let t = annx[i].2 as usize;
+        let len = annx[i].1 as usize;
+        if aligns[t] == 1 && annx[i].3 == 0 && len < refs[t].len() {
+            if len as f64 / refs[t].len() as f64 >= 0.75 {
+                if (refs[t].len() as i32 + annx[i].0 - annx[i].3) as usize <= b_seq.len() {
+                    for p in len..refs[t].len() {
+                        let q = p as i32 + annx[i].0 - annx[i].3;
+                        if b_seq[q as usize] != refs[t].get(p) {
+                            annx[i].4.push(q);
+                        }
+                    }
+                    annx[i].1 = refs[t].len() as i32;
+                }
+            }
+        }
+    }
+
     // Log alignments.
 
     if verbose {
@@ -1340,6 +1810,11 @@ pub fn annotate_seq_core(
     // If two V segments are aligned starting at 0 on the reference and one
     // is aligned a lot further, it wins.
 
+    let mut lens = vec![0; refdata.refs.len()];
+    for i in 0..annx.len() {
+        let t = annx[i].2 as usize;
+        lens[t] += annx[i].3 + annx[i].1;
+    }
     let mut to_delete: Vec<bool> = vec![false; annx.len()];
     for i1 in 0..annx.len() {
         for i2 in 0..annx.len() {
@@ -1353,13 +1828,12 @@ pub fn annotate_seq_core(
             if t1 == t2 {
                 continue;
             }
-            let (len1, len2) = (annx[i1].1, annx[i2].1);
             let (p1, p2) = (annx[i1].3, annx[i2].3);
             if p1 > 0 {
                 continue;
             }
             const MIN_EXT: i32 = 50;
-            if (p2 > 0 && len1 >= len2) || (p2 == 0 && len1 >= len2 + MIN_EXT) {
+            if (p2 > 0 && lens[t1] >= lens[t2]) || (p2 == 0 && lens[t1] >= lens[t2] + MIN_EXT) {
                 if verbose {
                     fwriteln!(log, "");
                     print_alignx(log, &annx[i1], refdata);
