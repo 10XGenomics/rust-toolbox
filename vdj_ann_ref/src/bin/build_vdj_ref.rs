@@ -296,6 +296,9 @@ fn parse_gtf_file(gtf: &str, demangle: &HashMap<String, String>, exons: &mut Vec
             }
         }
         gene = gene.to_uppercase();
+        if gene.starts_with("TCRG-C") {
+            gene = format!("TRGC{}", gene.after("TCRG-C"));
+        }
         let mut gene2: String;
         if demangle.contains_key(&gene) {
             gene2 = demangle[&gene.clone()].clone();
@@ -1482,6 +1485,10 @@ fn main() {
             || gene == "IGHM"
             || gene.starts_with("IGHA")
         {
+            let mut gene = gene.to_string();
+            if gene.starts_with("TRG") {
+                gene = format!("TRGC{}", gene.after("TRG"));
+            }
             let mut seq = DnaString::new();
             for k in i..j {
                 if exons[k].2 != chr {
@@ -1498,7 +1505,7 @@ fn main() {
             if p >= 0 {
                 m = left_trims[p as usize].1;
             }
-            let header = header_from_gene(gene, false, &mut record, trid);
+            let header = header_from_gene(&gene, false, &mut record, trid);
             if fw {
                 print_oriented_fasta(&mut out, &header, &seq.slice(m, seq.len()), fw, none);
             } else {
