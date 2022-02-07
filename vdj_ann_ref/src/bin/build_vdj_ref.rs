@@ -402,14 +402,14 @@ fn main() {
 
     // Define root output directory.
 
-    let root = "vdj_ann/vdj_refs";
+    let root = "vdj_ann_ref/vdj_refs";
     let mut out = open_for_write_new![&format!("{}/{}/fasta/regions.fa", root, species)];
 
     // Define release.  If this is ever changed, the effect on the fasta output
     // files should be very carefully examined.  Specify sequence source.
 
     let release = 94;
-    let version = "5.0.0";
+    let version = "7.0.0";
     let (source, source2) = match species {
         "human" => (
             format!("GRCh38-release{}", release),
