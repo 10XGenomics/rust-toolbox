@@ -86,6 +86,7 @@ use debruijn::{
 };
 use fasta_tools::load_genbank_accession;
 use flate2::read::MultiGzDecoder;
+use perf_stats::*;
 use pretty_trace::PrettyTrace;
 use process::Command;
 use sha2::{Digest, Sha256};
@@ -99,6 +100,7 @@ use std::{
     i32,
     io::{BufRead, BufReader},
     println, process, str, usize, vec, write, writeln,
+    time::Instant,
 };
 use string_utils::{cap1, TextUtils};
 use vector_utils::{bin_member, bin_position1_2, erase_if, next_diff12_8, unique_sort};
@@ -371,6 +373,8 @@ fn parse_gtf_file(gtf: &str, demangle: &HashMap<String, String>, exons: &mut Vec
 }
 
 fn main() {
+    let t = Instant::now();
+
     // Force panic to yield a traceback, and make it a pretty one.
 
     PrettyTrace::new().on();
@@ -1192,6 +1196,7 @@ fn main() {
     // and it might be possible to speed it up.
     // ◼ Put this 'selective fasta loading' into its own function.
 
+    println!("{:.1} seconds used, loading fasta", elapsed(&t));
     let mut refs = Vec::<DnaString>::new();
     let mut rheaders = Vec::<String>::new();
     let gz = MultiGzDecoder::new(std::fs::File::open(&fasta).unwrap());
@@ -1232,6 +1237,7 @@ fn main() {
 
     // Get the DNA sequences for the exons.
 
+    println!("{:.1} seconds used, getting exon seqs", elapsed(&t));
     let mut dna = Vec::<DnaString>::new();
     for i in 0..exons.len() {
         let chr = &exons[i].2;
@@ -1244,6 +1250,7 @@ fn main() {
     // Remove transcripts having identical sequences, or which are identical except for trailing
     // bases.  The shorter transcript is deleted.
 
+    println!("{:.1} seconds used, checking for nearly identical transcripts", elapsed(&t));
     let mut to_delete = vec![false; exons.len()];
     let mut i = 0;
     let mut dnas = Vec::<(Vec<DnaString>, usize, usize)>::new();
