@@ -299,6 +299,9 @@ fn parse_gtf_file(gtf: &str, demangle: &HashMap<String, String>, exons: &mut Vec
         if gene.starts_with("TCRG-C") {
             gene = format!("TRGC{}", gene.after("TCRG-C"));
         }
+        if gene.starts_with("TCRG-V") {
+            gene = format!("TRGV{}", gene.after("TCRG-V"));
+        }
         let mut gene2: String;
         if demangle.contains_key(&gene) {
             gene2 = demangle[&gene.clone()].clone();
@@ -1486,8 +1489,8 @@ fn main() {
             || gene.starts_with("IGHA")
         {
             let mut gene = gene.to_string();
-            if gene.starts_with("TRG") {
-                gene = format!("TRGC{}", gene.after("TRG"));
+            if gene.starts_with("TRGCC") {
+                gene = format!("TRG{}", gene.after("TRGC"));
             }
             let mut seq = DnaString::new();
             for k in i..j {
