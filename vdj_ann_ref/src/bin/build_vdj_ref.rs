@@ -25,7 +25,7 @@
 //    build_vdj_ref MOUSE
 //    *** These must be run from the root of the repo! ***
 //    You don't need to do this unless you're changing this code.
-//    Running this for human can be very slow.
+//    Running this for human can take over an hour.
 //
 //    These files get ultimately moved to:
 //    /mnt/opt/refdata_cellranger/vdj/
