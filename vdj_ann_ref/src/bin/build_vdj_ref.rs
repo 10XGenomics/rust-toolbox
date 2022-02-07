@@ -99,8 +99,9 @@ use std::{
     fs::File,
     i32,
     io::{BufRead, BufReader},
-    println, process, str, usize, vec, write, writeln,
+    println, process, str,
     time::Instant,
+    usize, vec, write, writeln,
 };
 use string_utils::{cap1, TextUtils};
 use vector_utils::{bin_member, bin_position1_2, erase_if, next_diff12_8, unique_sort};
@@ -1250,7 +1251,10 @@ fn main() {
     // Remove transcripts having identical sequences, or which are identical except for trailing
     // bases.  The shorter transcript is deleted.
 
-    println!("{:.1} seconds used, checking for nearly identical transcripts", elapsed(&t));
+    println!(
+        "{:.1} seconds used, checking for nearly identical transcripts",
+        elapsed(&t)
+    );
     let mut to_delete = vec![false; exons.len()];
     let mut i = 0;
     let mut dnas = Vec::<(Vec<DnaString>, usize, usize)>::new();
@@ -1259,6 +1263,12 @@ fn main() {
         let mut x = Vec::<DnaString>::new();
         for k in i..j {
             x.push(dna[k].clone());
+        }
+        if !exons[i].6 {
+            x.reverse();
+            for k in 0..x.len() {
+                x[k] = x[k].rc().to_owned();
+            }
         }
         dnas.push((x, i, j));
         i = j;
