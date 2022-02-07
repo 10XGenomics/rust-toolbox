@@ -192,7 +192,7 @@ pub fn p_at_most_m_distinct_in_sample_of_x_from_n(
 #[cfg(test)]
 mod tests {
 
-    // Test stirling stuff.  Works with "cargo test".  
+    // Test stirling stuff.  Works with "cargo test".
 
     #[test]
     fn test_stirling_stuff() {
