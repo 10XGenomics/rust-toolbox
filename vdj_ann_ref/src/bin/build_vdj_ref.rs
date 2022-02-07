@@ -1298,6 +1298,7 @@ fn main() {
 
     // Build fasta.
 
+    println!("{:.1} seconds used, building fasta", elapsed(&t));
     let mut i = 0;
     let mut record = 0;
     while i < exons.len() {
