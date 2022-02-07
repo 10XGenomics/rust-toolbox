@@ -533,7 +533,7 @@ fn main() {
              CTGTGCCAGCAGCTTAGC",
         ));
 
-        // Add IGHV3-9, probably for cell ranger 7.0.
+        // Add IGHV3-9, for cell ranger 7.0.
 
         added_genes_seq.push((
             "IGHV3-9",
@@ -1239,7 +1239,8 @@ fn main() {
         dna.push(seq);
     }
 
-    // Remove transcripts having identical sequences.
+    // Remove transcripts having identical sequences, or which are identical except for trailing
+    // bases.  The shorter transcript is deleted.
 
     let mut to_delete = vec![false; exons.len()];
     let mut i = 0;
@@ -1255,10 +1256,32 @@ fn main() {
     }
     dnas.sort();
     for i in 1..dnas.len() {
-        if dnas[i].0 == dnas[i - 1].0 {
-            let (i, j) = (dnas[i].1, dnas[i].2);
-            for k in i..j {
-                to_delete[k] = true;
+        let n = dnas[i].0.len();
+        if dnas[i - 1].0.len() == n {
+            let mut semi = true;
+            for j in 0..n - 1 {
+                if dnas[i].0[j] != dnas[i - 1].0[j] {
+                    semi = false;
+                    break;
+                }
+            }
+            if semi {
+                let mut matches = true;
+                let x1 = &dnas[i - 1].0[n - 1];
+                let x2 = &dnas[i].0[n - 1];
+                let k = std::cmp::min(x1.len(), x2.len());
+                for p in 0..k {
+                    if x1.get(p) != x2.get(p) {
+                        matches = false;
+                        break;
+                    }
+                }
+                if matches {
+                    let (r, s) = (dnas[i - 1].1, dnas[i - 1].2);
+                    for k in r..s {
+                        to_delete[k] = true;
+                    }
+                }
             }
         }
     }
