@@ -33,6 +33,14 @@ pub fn human_ref_4_0() -> &'static str {
     include_str!["../vdj_refs_4.0/human/fasta/regions.fa"]
 }
 
+pub fn human_ref_5_0() -> &'static str {
+    include_str!["../vdj_refs_5.0/human/fasta/regions.fa"]
+}
+
+pub fn human_ref_7_0() -> &'static str {
+    include_str!["../vdj_refs_7.0/human/fasta/regions.fa"]
+}
+
 pub fn mouse_ref() -> &'static str {
     include_str!["../vdj_refs/mouse/fasta/regions.fa"]
 }
@@ -47,6 +55,14 @@ pub fn mouse_ref_3_1() -> &'static str {
 
 pub fn mouse_ref_4_0() -> &'static str {
     include_str!["../vdj_refs_4.0/mouse/fasta/regions.fa"]
+}
+
+pub fn mouse_ref_5_0() -> &'static str {
+    include_str!["../vdj_refs_5.0/mouse/fasta/regions.fa"]
+}
+
+pub fn mouse_ref_7_0() -> &'static str {
+    include_str!["../vdj_refs_7.0/mouse/fasta/regions.fa"]
 }
 
 // ids_to_use_opt: Optional hashSet of ids. If specified only reference
