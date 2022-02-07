@@ -1,10 +1,6 @@
-1. If you test with "cargo test", the test will deliberately fail.
+Please test with "cargo test -- --nocapture".
 
-Instead, please test with "cargo test --release -- --nocapture".
+Without the -- --nocapture, the test crashes weirdly.  See comments at the test
+in pretty_trace/src/lib.rs.
 
-There are two reasons for this:
-A. Tests are too slow to run without release mode.
-B. Without the -- --nocapture, the test crashes weirdly.  See comments at the test
-   in pretty_trace/src/lib.rs.
-
-2. The tests are only confirmed to work under linux.  They failed under OS X when tested.
+The tests are only confirmed to work under linux.  They failed under OS X when tested.
