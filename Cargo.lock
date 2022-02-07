@@ -917,6 +917,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "perf_stats"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b0177fac70981a979322d624a0c4820d0c698b975267c92f34a5f15ccf3f9a8d"
+dependencies = [
+ "io_utils 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc",
+ "string_utils 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "permutation"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1509,6 +1520,7 @@ dependencies = [
  "flate2",
  "io_utils 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "kmer_lookup 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "perf_stats 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "pretty_trace 0.5.23 (registry+https://github.com/rust-lang/crates.io-index)",
  "sha2",
  "string_utils 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -192,20 +192,8 @@ pub fn p_at_most_m_distinct_in_sample_of_x_from_n(
 #[cfg(test)]
 mod tests {
 
-    // Test stirling stuff.  Works with "cargo test --release".  We don't allow
-    // "cargo test" because it is insanely slow.
+    // Test stirling stuff.  Works with "cargo test".
 
-    #[cfg(debug_assertions)]
-    #[test]
-    fn test_vdj_stirling_stuff_fail() {
-        println!(
-            "\n\"cargo test\" deliberately fails here because without running in release mode,"
-        );
-        println!("the test would be too slow.\n");
-        panic!("aborting");
-    }
-
-    #[cfg(not(debug_assertions))]
     #[test]
     fn test_stirling_stuff() {
         use num_bigint::{BigInt, BigUint, ToBigUint};

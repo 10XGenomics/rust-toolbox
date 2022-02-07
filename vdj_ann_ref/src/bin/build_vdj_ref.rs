@@ -84,6 +84,7 @@ use debruijn::{
 };
 use fasta_tools::load_genbank_accession;
 use flate2::read::MultiGzDecoder;
+use perf_stats::*;
 use pretty_trace::PrettyTrace;
 use process::Command;
 use sha2::{Digest, Sha256};
@@ -96,7 +97,9 @@ use std::{
     fs::File,
     i32,
     io::{BufRead, BufReader},
-    println, process, str, usize, vec, write, writeln,
+    println, process, str,
+    time::Instant,
+    usize, vec, write, writeln,
 };
 use string_utils::{cap1, TextUtils};
 use vector_utils::{bin_member, bin_position1_2, erase_if, next_diff12_8, unique_sort};
@@ -369,6 +372,8 @@ fn parse_gtf_file(gtf: &str, demangle: &HashMap<String, String>, exons: &mut Vec
 }
 
 fn main() {
+    let t = Instant::now();
+
     // Force panic to yield a traceback, and make it a pretty one.
 
     PrettyTrace::new().on();
@@ -402,14 +407,14 @@ fn main() {
 
     // Define root output directory.
 
-    let root = "vdj_ann/vdj_refs";
+    let root = "vdj_ann_ref/vdj_refs";
     let mut out = open_for_write_new![&format!("{}/{}/fasta/regions.fa", root, species)];
 
     // Define release.  If this is ever changed, the effect on the fasta output
     // files should be very carefully examined.  Specify sequence source.
 
     let release = 94;
-    let version = "5.0.0";
+    let version = "7.0.0";
     let (source, source2) = match species {
         "human" => (
             format!("GRCh38-release{}", release),
@@ -533,7 +538,7 @@ fn main() {
              CTGTGCCAGCAGCTTAGC",
         ));
 
-        // Add IGHV3-9, probably for cell ranger 7.0.
+        // Add IGHV3-9, for cell ranger 7.0.
 
         added_genes_seq.push((
             "IGHV3-9",
@@ -1190,6 +1195,7 @@ fn main() {
     // and it might be possible to speed it up.
     // ◼ Put this 'selective fasta loading' into its own function.
 
+    println!("{:.1} seconds used, loading fasta", elapsed(&t));
     let mut refs = Vec::<DnaString>::new();
     let mut rheaders = Vec::<String>::new();
     let gz = MultiGzDecoder::new(std::fs::File::open(&fasta).unwrap());
@@ -1230,6 +1236,7 @@ fn main() {
 
     // Get the DNA sequences for the exons.
 
+    println!("{:.1} seconds used, getting exon seqs", elapsed(&t));
     let mut dna = Vec::<DnaString>::new();
     for i in 0..exons.len() {
         let chr = &exons[i].2;
@@ -1239,8 +1246,13 @@ fn main() {
         dna.push(seq);
     }
 
-    // Remove transcripts having identical sequences.
+    // Remove transcripts having identical sequences, or which are identical except for trailing
+    // bases.  The shorter transcript is deleted.
 
+    println!(
+        "{:.1} seconds used, checking for nearly identical transcripts",
+        elapsed(&t)
+    );
     let mut to_delete = vec![false; exons.len()];
     let mut i = 0;
     let mut dnas = Vec::<(Vec<DnaString>, usize, usize)>::new();
@@ -1250,15 +1262,43 @@ fn main() {
         for k in i..j {
             x.push(dna[k].clone());
         }
+        if !exons[i].6 {
+            x.reverse();
+            for k in 0..x.len() {
+                x[k] = x[k].rc().to_owned();
+            }
+        }
         dnas.push((x, i, j));
         i = j;
     }
     dnas.sort();
     for i in 1..dnas.len() {
-        if dnas[i].0 == dnas[i - 1].0 {
-            let (i, j) = (dnas[i].1, dnas[i].2);
-            for k in i..j {
-                to_delete[k] = true;
+        let n = dnas[i].0.len();
+        if dnas[i - 1].0.len() == n {
+            let mut semi = true;
+            for j in 0..n - 1 {
+                if dnas[i].0[j] != dnas[i - 1].0[j] {
+                    semi = false;
+                    break;
+                }
+            }
+            if semi {
+                let mut matches = true;
+                let x1 = &dnas[i - 1].0[n - 1];
+                let x2 = &dnas[i].0[n - 1];
+                let k = std::cmp::min(x1.len(), x2.len());
+                for p in 0..k {
+                    if x1.get(p) != x2.get(p) {
+                        matches = false;
+                        break;
+                    }
+                }
+                if matches {
+                    let (r, s) = (dnas[i - 1].1, dnas[i - 1].2);
+                    for k in r..s {
+                        to_delete[k] = true;
+                    }
+                }
             }
         }
     }
@@ -1266,6 +1306,7 @@ fn main() {
 
     // Build fasta.
 
+    println!("{:.1} seconds used, building fasta", elapsed(&t));
     let mut i = 0;
     let mut record = 0;
     while i < exons.len() {
@@ -1472,6 +1513,7 @@ fn main() {
 
     // Add genes.
 
+    println!("{:.1} seconds used, adding genes", elapsed(&t));
     for i in 0..added_genes.len() {
         add_gene(
             &mut out,

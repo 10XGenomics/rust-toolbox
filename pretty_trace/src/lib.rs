@@ -1356,9 +1356,9 @@ mod tests {
         // add exit_message(...) to PrettyTrace
         //
         // In addition, and connected to this,
-        // cargo test --release
+        // cargo test
         // does not work, and instead you need to use
-        // cargo test --release -- --nocapture
+        // cargo test -- --nocapture
 
         let message = "Dang it, you found a bug!  Please call us at (999) 123-4567.";
         PrettyTrace::new()

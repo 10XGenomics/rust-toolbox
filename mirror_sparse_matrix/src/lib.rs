@@ -572,7 +572,7 @@ impl Default for MirrorSparseMatrix {
 #[cfg(test)]
 mod tests {
 
-    // test with: cargo test --release -p mirror_sparse_matrix  -- --nocapture
+    // test with: cargo test -p mirror_sparse_matrix  -- --nocapture
 
     use super::*;
     use io_utils::printme;
@@ -581,6 +581,7 @@ mod tests {
     #[test]
     fn test_mirror_sparse_matrix() {
         PrettyTrace::new().on();
+        // Dated comment:
         // We have observed that with cargo test --release, tracebacks here can be incomplete,
         // and indeed this is true even if one doesn't use pretty trace.  In such cases, running
         // without --release works.
