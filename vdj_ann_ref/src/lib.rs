@@ -17,6 +17,10 @@ pub fn human_ref() -> &'static str {
     include_str!["../vdj_refs/human/fasta/regions.fa"]
 }
 
+pub fn human_ref_old() -> &'static str {
+    include_str!["../vdj_refs_old/human/fasta/regions.fa"]
+}
+
 pub fn human_supp_ref() -> &'static str {
     include_str!["../vdj_refs/human/fasta/supp_regions.fa"]
 }
@@ -43,6 +47,10 @@ pub fn human_ref_7_0() -> &'static str {
 
 pub fn mouse_ref() -> &'static str {
     include_str!["../vdj_refs/mouse/fasta/regions.fa"]
+}
+
+pub fn mouse_ref_old() -> &'static str {
+    include_str!["../vdj_refs_old/mouse/fasta/regions.fa"]
 }
 
 pub fn mouse_supp_ref() -> &'static str {
