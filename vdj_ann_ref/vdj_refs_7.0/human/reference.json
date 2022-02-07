@@ -6,5 +6,5 @@
     "input_gtf_files": "release-94/gtf/homo_sapiens/Homo_sapiens.GRCh38.94.chr_patch_hapl_scaff.gtf",
     "mkref_version": "",
     "type": "V(D)J Reference",
-    "version": "5.0.0"
+    "version": "7.0.0"
 }
