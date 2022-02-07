@@ -1505,6 +1505,7 @@ fn main() {
 
     // Add genes.
 
+    println!("{:.1} seconds used, adding genes", elapsed(&t));
     for i in 0..added_genes.len() {
         add_gene(
             &mut out,
