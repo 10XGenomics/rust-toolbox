@@ -16,7 +16,7 @@ pub fn read_fasta_to_vec_vec_u8(f: impl AsRef<Path>) -> Vec<Vec<u8>> {
     let mut x = Vec::<Vec<u8>>::new();
     let f = f.as_ref();
     match f.extension() {
-        Some(ex) if ex == "gz" => {
+        Some(ex) if ex != "gz" => {
             let fin = open_for_read![f];
             let mut last: String = String::new();
             let mut first = true;
