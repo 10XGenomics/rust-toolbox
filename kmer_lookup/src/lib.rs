@@ -53,7 +53,7 @@ pub fn make_kmer_lookup_single_simple<K: Kmer>(dv: &[DnaString], x: &mut Vec<K>)
     x.clear();
     x.reserve(sz);
 
-    x.extend(dv.iter().flat_map(|b| b.iter_kmers::<K>()));
+    x.extend(dv.iter().flat_map(<DnaString as Vmer>::iter_kmers::<K>));
     unique_sort(x);
 }
 

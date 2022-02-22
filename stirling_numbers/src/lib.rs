@@ -260,13 +260,14 @@ mod tests {
             let y1 = x1.clone() * n.to_biguint().unwrap();
             let y1x2 = y1 / x2.clone();
 
-            if y1x2 != n.to_biguint().unwrap()
-                && y1x2 != (n - 1).to_biguint().unwrap()
-                && y1x2 != (n + 1).to_biguint().unwrap()
-            {
-                eprintln!("x1 != x2 to {} digits, y1x2 = {}", y1x2, d);
-                assert!(0 == 1);
-            }
+            assert!(
+                y1x2 == n.to_biguint().unwrap()
+                    || y1x2 == (n - 1).to_biguint().unwrap()
+                    || y1x2 == (n + 1).to_biguint().unwrap(),
+                "x1 != x2 to {} digits, y1x2 = {}",
+                y1x2,
+                d
+            );
         }
 
         // Test one value in stirling2_table<f64> versus value in wikipedia.
