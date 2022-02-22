@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.57.0
+          toolchain: 1.58.1
           components: rustfmt, clippy
           default: true
       - name: Checkout git repository
@@ -62,8 +62,10 @@ jobs:
            -F clippy::unused_io_amount
            -D clippy::perf
            -D unused
+           -W clippy::redundant_closure_for_method_calls
            -A clippy::many_single_char_names
            -A clippy::comparison_chain
+           -A clippy::needless_range_loop
       - name: Cargo check
         run: RUSTFLAGS="-D unused -D warnings" cargo check --all-targets
       - name: Run Rust tests

@@ -137,14 +137,11 @@ pub fn available_mem_gb() -> Option<f64> {
             for line in f.lines() {
                 let s = line.unwrap();
                 if s.starts_with("MemAvailable") {
-                    let split: Vec<&str> = s.split_whitespace().collect();
+                    let split: Vec<&str> = s.split_ascii_whitespace().collect();
                     if split.len() != 3 || split[2] != "kB" {
                         return None;
                     }
-                    if split[1].parse::<i64>().is_err() {
-                        return None;
-                    }
-                    return Some(split[1].force_f64() / (1024 * 1024) as f64);
+                    return Some(split[1].parse::<i64>().ok()? as f64 / (1024_f64 * 1024_f64));
                 }
             }
             None

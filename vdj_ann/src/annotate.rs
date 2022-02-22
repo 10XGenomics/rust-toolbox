@@ -194,14 +194,14 @@ fn print_alignx(log: &mut Vec<u8>, a: &(i32, i32, i32, i32, Vec<i32>), refdata: 
 fn report_semis(
     verbose: bool,
     title: &str,
-    semi: &Vec<(i32, i32, i32, i32, Vec<i32>)>,
-    b_seq: &Vec<u8>,
-    refs: &Vec<DnaString>,
+    semi: &[(i32, i32, i32, i32, Vec<i32>)],
+    b_seq: &[u8],
+    refs: &[DnaString],
     log: &mut Vec<u8>,
 ) {
     if verbose {
         fwriteln!(log, "\n{}\n", title);
-        for s in semi.iter() {
+        for s in semi {
             fwrite!(
                 log,
                 "t = {}, offset = {}, tig start = {}, ref start = {}, len = {}, mis = {}",
@@ -385,7 +385,7 @@ pub fn annotate_seq_core(
                     px += 1;
                 }
                 let len = lx - l;
-                if len >= MM && len < 20 {
+                if (MM..20).contains(&len) {
                     let mut known = false;
                     for k in 0..tig_starts.len() {
                         if l == tig_starts[k] {
@@ -431,10 +431,7 @@ pub fn annotate_seq_core(
         let j = next_diff12_4(&perf, i as i32);
         let (t, off) = (perf[i].0, perf[i].1);
         let mut join = vec![false; j as usize - i];
-        let mut mis = Vec::<Vec<i32>>::new();
-        for _k in i..j as usize {
-            mis.push(Vec::<i32>::new());
-        }
+        let mut mis = vec![Vec::<i32>::new(); j as usize - i];
         for k in i..j as usize - 1 {
             let (l1, len1) = (perf[k].2, perf[k].3);
             let (l2, len2) = (perf[k + 1].2, perf[k + 1].3);
@@ -471,14 +468,7 @@ pub fn annotate_seq_core(
         }
         i = j as usize;
     }
-    report_semis(
-        verbose,
-        "INITIAL SEMI ALIGNMENTS",
-        &semi,
-        &b_seq,
-        &refs,
-        log,
-    );
+    report_semis(verbose, "INITIAL SEMI ALIGNMENTS", &semi, &b_seq, refs, log);
 
     // Extend backwards and then forwards.
 
@@ -650,7 +640,7 @@ pub fn annotate_seq_core(
             semi[i].4.sort_unstable();
         }
     }
-    report_semis(verbose, "SEMI ALIGNMENTS", &semi, &b_seq, &refs, log);
+    report_semis(verbose, "SEMI ALIGNMENTS", &semi, &b_seq, refs, log);
 
     // Extend between match blocks.
     // ◼ This is pretty crappy.  What we should do instead is arrange the initial
@@ -700,7 +690,7 @@ pub fn annotate_seq_core(
         "SEMI ALIGNMENTS AFTER EXTENSION",
         &semi,
         &b_seq,
-        &refs,
+        refs,
         log,
     );
 
@@ -748,7 +738,7 @@ pub fn annotate_seq_core(
         "SEMI ALIGNMENTS AFTER MERGER",
         &semi,
         &b_seq,
-        &refs,
+        refs,
         log,
     );
 
@@ -811,7 +801,7 @@ pub fn annotate_seq_core(
         "SEMI ALIGNMENTS AFTER SECOND EXTENSION",
         &semi,
         &b_seq,
-        &refs,
+        refs,
         log,
     );
 
@@ -829,10 +819,10 @@ pub fn annotate_seq_core(
         }
         for k1 in i..j {
             for k2 in i..j {
-                if semi[k1].1 + semi[k1].2 + semi[k1].3 == semi[k2].1 + semi[k2].2 + semi[k2].3 {
-                    if semi[k1].3 > semi[k2].3 {
-                        to_delete[k2] = true;
-                    }
+                if semi[k1].1 + semi[k1].2 + semi[k1].3 == semi[k2].1 + semi[k2].2 + semi[k2].3
+                    && semi[k1].3 > semi[k2].3
+                {
+                    to_delete[k2] = true;
                 }
             }
         }
@@ -844,7 +834,7 @@ pub fn annotate_seq_core(
         "SEMI ALIGNMENTS AFTER SUBSUMPTION",
         &semi,
         &b_seq,
-        &refs,
+        refs,
         log,
     );
 
@@ -1762,10 +1752,8 @@ pub fn annotate_seq_core(
         }
         for k1 in i..j {
             for k2 in i..j {
-                if annx[k1].2 == annx[k2].2 {
-                    if annx[k1].3 == annx[k2].3 && annx[k1].1 > annx[k2].1 {
-                        to_delete[k2] = true;
-                    }
+                if annx[k1].2 == annx[k2].2 && annx[k1].3 == annx[k2].3 && annx[k1].1 > annx[k2].1 {
+                    to_delete[k2] = true;
                 }
             }
         }
@@ -1783,18 +1771,19 @@ pub fn annotate_seq_core(
     for i in 0..annx.len() {
         let t = annx[i].2 as usize;
         let len = annx[i].1 as usize;
-        if aligns[t] == 1 && annx[i].3 == 0 && len < refs[t].len() {
-            if len as f64 / refs[t].len() as f64 >= 0.75 {
-                if (refs[t].len() as i32 + annx[i].0 - annx[i].3) as usize <= b_seq.len() {
-                    for p in len..refs[t].len() {
-                        let q = p as i32 + annx[i].0 - annx[i].3;
-                        if b_seq[q as usize] != refs[t].get(p) {
-                            annx[i].4.push(q);
-                        }
-                    }
-                    annx[i].1 = refs[t].len() as i32;
+        if aligns[t] == 1
+            && annx[i].3 == 0
+            && len < refs[t].len()
+            && len as f64 / refs[t].len() as f64 >= 0.75
+            && (refs[t].len() as i32 + annx[i].0 - annx[i].3) as usize <= b_seq.len()
+        {
+            for p in len..refs[t].len() {
+                let q = p as i32 + annx[i].0 - annx[i].3;
+                if b_seq[q as usize] != refs[t].get(p) {
+                    annx[i].4.push(q);
                 }
             }
+            annx[i].1 = refs[t].len() as i32;
         }
     }
 

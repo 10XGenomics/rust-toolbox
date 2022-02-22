@@ -946,7 +946,7 @@ fn main() {
                 "{}/{}/{}/dna/{}.GRCh38.dna.toplevel.fa",
                 releasep, ftype, species_name, csn
             ),
-            _ => format!(""),
+            _ => String::default(),
         }
     }
 

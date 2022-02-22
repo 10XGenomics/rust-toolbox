@@ -451,14 +451,18 @@ pub fn next_diff1_8<S: Eq, T: Eq, U: Eq, V: Eq, W: Eq, X: Eq, Y: Eq, Z: Eq>(
 // RESIZE WITHOUT SETTING
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-// resize_without_setting: Resize a vector to the given size without initializing
-// the entries.  Capacity is not reduced if it exceeds the given size.  This
-// function is only 'safe' (meaning actually safe) if followed by code that sets all
-// all the entries.  And this should only be used when the type is 'fixed width',
-// e.g. not on Strings or Vecs.
-//
-// Panics if allocation fails.
-
+/// resize_without_setting: Resize a vector to the given size without initializing
+/// the entries.  Capacity is not reduced if it exceeds the given size.
+///
+/// # Safety
+///
+/// After a call to this function, all entries in the vector must be set before
+/// being read.  Only be used when the type is 'fixed width', e.g. not on
+/// Strings or Vecs, cannot own any allocated objects, or implement the Drop
+/// trait.
+///
+/// Panics if allocation fails.
+#[warn(clippy::uninit_vec)]
 pub unsafe fn resize_without_setting<T>(x: &mut Vec<T>, n: usize) {
     x.clear();
     x.reserve(n);
