@@ -9,4 +9,4 @@ edition = "2018"
 
 [dependencies]
 debruijn = "0.3"
-string_utils = "0.1"
+string_utils = { version = "0.1", path = "../string_utils" }

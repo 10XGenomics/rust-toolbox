@@ -9,4 +9,4 @@ include = ["src/lib.rs", "LICENSE", "README.md"]
 repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
-vector_utils = "0.1"
+vector_utils = { version = "0.1", path = "../vector_utils" }

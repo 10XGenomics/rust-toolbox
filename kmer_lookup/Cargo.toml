@@ -10,4 +10,4 @@ edition = "2018"
 [dependencies]
 debruijn = "0.3"
 rayon = "1"
-vector_utils = "0.1"
+vector_utils = { version = "0.1", path = "../vector_utils" }

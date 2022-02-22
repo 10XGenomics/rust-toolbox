@@ -8,5 +8,5 @@ edition = "2018"
 repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
-string_utils = "0.1"
-vector_utils = "0.1"
+string_utils = { version = "0.1", path = "../string_utils" }
+vector_utils = { version = "0.1", path = "../vector_utils" }

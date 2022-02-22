@@ -24,6 +24,14 @@ jobs:
         uses: actions/checkout@master
       - name: Check Rust formatting
         run: cargo fmt -- --check
+      - name: Install cargo-deny
+        run: |
+          wget https://github.com/EmbarkStudios/cargo-deny/releases/download/0.11.3/cargo-deny-0.11.3-x86_64-unknown-linux-musl.tar.gz
+          tar -xvf cargo-deny-0.11.3-x86_64-unknown-linux-musl.tar.gz
+          mkdir -p ~/bin/
+          cp cargo-deny-0.11.3-x86_64-unknown-linux-musl/cargo-deny ~/bin/
+          rm -r cargo-deny-*
+          echo "$HOME/bin" >> $GITHUB_PATH
       - name: Cache cargo registry
         uses: actions/cache@v1
         with:
@@ -46,6 +54,8 @@ jobs:
       - name: Remove the Cargo target directory
         if: github.ref == 'refs/heads/master'
         run: cargo clean
+      - name: Deny duplicate dependencies
+        run: cargo deny --locked check
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
