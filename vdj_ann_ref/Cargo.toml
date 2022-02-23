@@ -12,14 +12,14 @@ publish = false
 
 [dependencies]
 debruijn = "0.3"
-exons = "0.1"
-fasta_tools = "0.1"
+exons = { version = "0.1", path = "../exons" }
+fasta_tools =  { version = "0.1", path = "../fasta_tools" }
 flate2 = "1"
-io_utils = "0.3"
-kmer_lookup = "0.1"
-perf_stats = "0.1"
-pretty_trace = "0.5"
+io_utils = { version = "0.3", path = "../io_utils" }
+kmer_lookup = { version = "0.1", path = "../kmer_lookup" }
+perf_stats = { version = "0.1", path = "../perf_stats" }
+pretty_trace = { version = "0.5", path = "../pretty_trace" }
 sha2 = ">=0.9.3, <0.11"
-string_utils = "0.1"
-vector_utils = "0.1"
-vdj_ann = "0.4"
+string_utils = { version = "0.1", path = "../string_utils" }
+vector_utils = { version = "0.1", path = "../vector_utils" }
+vdj_ann = { version = "0.4", path = "../vdj_ann" }

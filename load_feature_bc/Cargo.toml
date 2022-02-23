@@ -9,5 +9,5 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
 flate2 = "1"
-io_utils = "0.3"
-string_utils = "0.1"
+io_utils = { version = "0.3", path = "../io_utils" }
+string_utils = { version = "0.1", path = "../string_utils" }

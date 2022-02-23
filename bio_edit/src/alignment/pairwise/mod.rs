@@ -11,8 +11,8 @@
 //! # Example
 //!
 //! ```
-//! use bio::alignment::pairwise::*;
-//! use bio::alignment::AlignmentOperation::*;
+//! use bio_edit::alignment::pairwise::*;
+//! use bio_edit::alignment::AlignmentOperation::*;
 //!
 //! let x = b"ACCGTGGAT";
 //! let y = b"AAAAACCGTTGAT";
@@ -255,7 +255,7 @@ impl<F: MatchFunc> Scoring<F> {
     /// * `gap_open` - the score for opening a gap (should not be positive)
     /// * `gap_extend` - the score for extending a gap (should not be positive)
     /// * `match_fn` - function that returns the score for substitutions
-    ///    (see also [`bio::alignment::pairwise::Scoring`](struct.Scoring.html))
+    ///    (see also [`bio_edit::alignment::pairwise::Scoring`](struct.Scoring.html))
     pub fn new(gap_open: i32, gap_extend: i32, match_fn: F) -> Self {
         assert!(gap_open <= 0, "gap_open can't be positive");
         assert!(gap_extend <= 0, "gap_extend can't be positive");
@@ -279,7 +279,7 @@ impl<F: MatchFunc> Scoring<F> {
     /// * `penalty` - Clipping penalty for x (both prefix and suffix, should not be positive)
     ///
     /// ```rust
-    /// use bio::alignment::pairwise::{Scoring, MIN_SCORE};
+    /// use bio_edit::alignment::pairwise::{Scoring, MIN_SCORE};
     /// let scoring = Scoring::from_scores(0, -2, 1, -2).xclip(-5);
     /// assert!(scoring.xclip_prefix == -5);
     /// assert!(scoring.yclip_prefix == MIN_SCORE);
@@ -301,7 +301,7 @@ impl<F: MatchFunc> Scoring<F> {
     ///
     /// # Example
     /// ```rust
-    /// use bio::alignment::pairwise::{Scoring, MIN_SCORE};
+    /// use bio_edit::alignment::pairwise::{Scoring, MIN_SCORE};
     /// let scoring = Scoring::from_scores(0, -2, 1, -2).xclip_prefix(-5);
     /// assert!(scoring.xclip_prefix == -5);
     /// assert!(scoring.yclip_prefix == MIN_SCORE);
@@ -321,7 +321,7 @@ impl<F: MatchFunc> Scoring<F> {
     /// * `penalty` - Suffix clipping penalty for x (should not be positive)
     ///
     /// ```rust
-    /// use bio::alignment::pairwise::{Scoring, MIN_SCORE};
+    /// use bio_edit::alignment::pairwise::{Scoring, MIN_SCORE};
     /// let scoring = Scoring::from_scores(0, -2, 1, -2).xclip_suffix(-5);
     /// assert!(scoring.xclip_prefix == MIN_SCORE);
     /// assert!(scoring.yclip_prefix == MIN_SCORE);
@@ -341,7 +341,7 @@ impl<F: MatchFunc> Scoring<F> {
     /// * `penalty` - Clipping penalty for y (both prefix and suffix, should not be positive)
     ///
     /// ```rust
-    /// use bio::alignment::pairwise::{Scoring, MIN_SCORE};
+    /// use bio_edit::alignment::pairwise::{Scoring, MIN_SCORE};
     /// let scoring = Scoring::from_scores(0, -2, 1, -2).yclip(-5);
     /// assert!(scoring.xclip_prefix == MIN_SCORE);
     /// assert!(scoring.yclip_prefix == -5);
@@ -362,12 +362,12 @@ impl<F: MatchFunc> Scoring<F> {
     /// * `penalty` - Prefix clipping penalty for y (should not be positive)
     ///
     /// ```rust
-    /// use bio::alignment::pairwise::{Scoring, MIN_SCORE};
+    /// use bio_edit::alignment::pairwise::{Scoring, MIN_SCORE};
     /// let scoring = Scoring::from_scores(0, -2, 1, -2).yclip_prefix(-5);
-    /// assert!(scoring.xclip_prefix == MIN_SCORE);
-    /// assert!(scoring.yclip_prefix == -5);
-    /// assert!(scoring.xclip_suffix == MIN_SCORE);
-    /// assert!(scoring.yclip_suffix == MIN_SCORE);
+    /// assert_eq!(scoring.xclip_prefix, MIN_SCORE);
+    /// assert_eq!(scoring.yclip_prefix, -5);
+    /// assert_eq!(scoring.xclip_suffix, MIN_SCORE);
+    /// assert_eq!(scoring.yclip_suffix, MIN_SCORE);
     /// ```
     pub fn yclip_prefix(mut self, penalty: i32) -> Self {
         assert!(penalty <= 0, "Clipping penalty can't be positive");
@@ -382,7 +382,7 @@ impl<F: MatchFunc> Scoring<F> {
     /// * `penalty` - Suffix clipping penalty for y (should not be positive)
     ///
     /// ```rust
-    /// use bio::alignment::pairwise::{Scoring, MIN_SCORE};
+    /// use bio_edit::alignment::pairwise::{Scoring, MIN_SCORE};
     /// let scoring = Scoring::from_scores(0, -2, 1, -2).yclip_suffix(-5);
     /// assert!(scoring.xclip_prefix == MIN_SCORE);
     /// assert!(scoring.yclip_prefix == MIN_SCORE);
@@ -432,9 +432,9 @@ impl<F: MatchFunc> Scoring<F> {
 /// `Sn` is the last column of the matrix. This is needed to keep track of
 /// suffix clipping scores
 ///
-/// `traceback` - see [`bio::alignment::pairwise::TracebackCell`](struct.TracebackCell.html)
+/// `traceback` - see [`bio_edit::alignment::pairwise::TracebackCell`](struct.TracebackCell.html)
 ///
-/// `scoring` - see [`bio::alignment::pairwise::Scoring`](struct.Scoring.html)
+/// `scoring` - see [`bio_edit::alignment::pairwise::Scoring`](struct.Scoring.html)
 #[allow(non_snake_case)]
 pub struct Aligner<F: MatchFunc> {
     I: [Vec<i32>; 2],
@@ -458,7 +458,7 @@ impl<F: MatchFunc> Aligner<F> {
     /// * `gap_open` - the score for opening a gap (should be negative)
     /// * `gap_extend` - the score for extending a gap (should be negative)
     /// * `match_fn` - function that returns the score for substitutions
-    ///    (see also [`bio::alignment::pairwise::Scoring`](struct.Scoring.html))
+    ///    (see also [`bio_edit::alignment::pairwise::Scoring`](struct.Scoring.html))
     pub fn new(gap_open: i32, gap_extend: i32, match_fn: F) -> Self {
         Aligner::with_capacity(
             DEFAULT_ALIGNER_CAPACITY,
@@ -479,7 +479,7 @@ impl<F: MatchFunc> Aligner<F> {
     /// * `gap_open` - the score for opening a gap (should be negative)
     /// * `gap_extend` - the score for extending a gap (should be negative)
     /// * `match_fn` - function that returns the score for substitutions
-    ///    (see also [`bio::alignment::pairwise::Scoring`](struct.Scoring.html))
+    ///    (see also [`bio_edit::alignment::pairwise::Scoring`](struct.Scoring.html))
     pub fn with_capacity(m: usize, n: usize, gap_open: i32, gap_extend: i32, match_fn: F) -> Self {
         assert!(gap_open <= 0, "gap_open can't be positive");
         assert!(gap_extend <= 0, "gap_extend can't be positive");
@@ -500,7 +500,7 @@ impl<F: MatchFunc> Aligner<F> {
     ///
     /// # Arguments
     ///
-    /// * `scoring` - the scoring struct (see bio::alignment::pairwise::Scoring)
+    /// * `scoring` - the scoring struct (see bio_edit::alignment::pairwise::Scoring)
     pub fn with_scoring(scoring: Scoring<F>) -> Self {
         Aligner::with_capacity_and_scoring(
             DEFAULT_ALIGNER_CAPACITY,
