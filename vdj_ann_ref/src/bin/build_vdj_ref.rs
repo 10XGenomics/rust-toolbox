@@ -551,6 +551,20 @@ fn main() {
             "ATGGAGTTGGGACTGAGCTGGATTTTCCTTTTGGCTATTTTAAAAGGTGTCCAGTGTGAAGTGCAGCTGGTGGAGTCTGGGGGAGGCTTGGTACAGCCTGGCAGGTCCCTGAGACTCTCCTGTGCAGCCTCTGGATTCACCTTTGATGATTATGCCATGCACTGGGTCCGGCAAGCTCCAGGGAAGGGCCTGGAGTGGGTCTCAGGTATTAGTTGGAATAGTGGTAGCATAGGCTATGCGGACTCTGTGAAGGGCCGATTCACCATCTCCAGAGACAACGCCAAGAACTCCCTGTATCTGCAAATGAACAGTCTGAGAGCTGAGGACACGGCCTTGTATTACTGTGCAAAAGATA",
         ));
 
+        // Also for cell ranger 7.0.
+        // Delete the following human genes from the reference:
+        // IGHV4-30-2, IGKV1D-33, IGKV1D-37, IGKV1D-39, IGKV2D-28.
+        // These are identical to other genes in the reference, except that the reference provides
+        // a longer 5'-UTR in one case. We observe that clonotypes having one of these genes often
+        // have heterogeneous assignments between the gene and its duplicate, and that's bad, as
+        // it implies that assignment of genes to clonotypes in these cases is effectively random.
+
+        deleted_genes.push("IGHV4-30-2");
+        deleted_genes.push("IGKV1D-33");
+        deleted_genes.push("IGKV1D-37");
+        deleted_genes.push("IGKV1D-39");
+        deleted_genes.push("IGKV2D-28");
+
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
         // Begin human changes for cell ranger 5.0.
         // (see also mouse changes, below)
