@@ -679,7 +679,7 @@ pub fn score_fwr3(aa: &[u8], r: usize, freqs: &[Vec<Vec<(u32, u8)>>]) -> f64 {
     } else {
         chain_type = "TRB";
     }
-    let cdr3 = cdr3_start(&aa.to_vec(), chain_type, false);
+    let cdr3 = cdr3_start(aa, chain_type, false);
     let motif = freqs[0].len();
     let mut score = 0.0;
     for j in 0..motif {
@@ -736,7 +736,7 @@ pub fn score4(aa: &[u8], r: usize) -> usize {
     } else {
         chain_type = "TRB";
     }
-    let cdr3 = cdr3_start(&aa.to_vec(), chain_type, false);
+    let cdr3 = cdr3_start(aa, chain_type, false);
     let n = aa.len();
     assert!(n >= 22);
     let mut score = 0;

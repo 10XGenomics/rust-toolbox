@@ -195,6 +195,6 @@ pub fn load_genbank_accession(accession: &str, bases: &mut DnaString) {
     // ◼ The following assert should not be necessary: the DnaString constructor
     // ◼ should gag if it gets nonsense input.
     assert!(!fasta.contains("moved"));
-    fasta = fasta.replace("\n", "");
+    fasta = fasta.replace('\n', "");
     *bases = DnaString::from_dna_string(&fasta);
 }

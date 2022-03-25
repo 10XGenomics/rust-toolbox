@@ -40,8 +40,8 @@ pub fn nthreads() -> i64 {
                 let s = line.unwrap();
                 if s.starts_with("Threads:") {
                     let mut s = s.after("Threads:").to_string();
-                    s = s.replace("\t", "");
-                    s = s.replace(" ", "");
+                    s = s.replace('\t', "");
+                    s = s.replace(' ', "");
                     return s.force_i64();
                 }
             }
@@ -229,7 +229,7 @@ pub fn ps_me() {
                 ppid = s.after("PPid:\t").force_i64();
             } else if s.starts_with("VmRSS:\t") {
                 let t = s.after("VmRSS:\t");
-                let t = t.to_string().replace(" ", "");
+                let t = t.to_string().replace(' ', "");
                 rss = t.before("k").force_f64() / (1024 * 1024) as f64;
             }
         }
@@ -245,7 +245,7 @@ pub fn ps_me() {
                 continue 'outer;
             } // fail that does occur rarely
             cmd = line.unwrap();
-            cmd = cmd.replace(" ", " ");
+            cmd = cmd.replace(' ', " ");
         }
         if cmd.len() <= RIGHT {
             println!("{:6}  {:6} {:7.2}  {}", ppid, pid, rss, cmd);
