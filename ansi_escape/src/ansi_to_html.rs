@@ -238,7 +238,7 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                         for e in escapes.iter() {
                             if e.solo() && e[0] == 1 {
                                 if reset || new_state.bold != old_state.bold {
-                                    out += &strme(&pack_ansi_escape(e)).to_string();
+                                    out += strme(&pack_ansi_escape(e));
                                 }
                                 break;
                             }
@@ -249,7 +249,7 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                                 || (y.len() == 3 && y[0] == 38 && y[1] == 5)
                             {
                                 if reset || new_state.color != old_state.color {
-                                    out += &strme(&pack_ansi_escape(y)).to_string();
+                                    out += strme(&pack_ansi_escape(y));
                                 }
                                 break;
                             }
@@ -260,7 +260,7 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                                 || (y.len() == 3 && y[0] == 48 && y[1] == 5)
                             {
                                 if reset || new_state.background != old_state.background {
-                                    out += &strme(&pack_ansi_escape(y)).to_string();
+                                    out += strme(&pack_ansi_escape(y));
                                 }
                                 break;
                             }
@@ -404,7 +404,7 @@ impl ColorState {
                 s += &format!("background-color:{};", self.background);
             }
             if self.bold {
-                s += &"font-weight:bold;".to_string()
+                s += "font-weight:bold;"
             }
             s += "\">";
             s
@@ -422,7 +422,7 @@ impl ColorState {
                 s += &format!("fill: {};", self.color);
             }
             if self.bold {
-                s += &"font-weight: bold;".to_string()
+                s += "font-weight: bold;"
             }
             s += "\">";
             s

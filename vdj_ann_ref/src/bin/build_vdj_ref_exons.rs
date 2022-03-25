@@ -824,7 +824,7 @@ fn main() {
         if gene2.contains('(') {
             gene2 = gene2.before("(").to_string();
         }
-        gene2 = gene2.replace(" ", "");
+        gene2 = gene2.replace(' ', "");
         if gene2.contains("identical") || gene2.contains("identicle") {
             continue;
         }
@@ -912,7 +912,7 @@ fn main() {
     let mut stops = Vec::<usize>::new();
     for i in 0..exons.len() {
         let chr = &exons[i].2;
-        let chrid = to_chr[&chr.to_string()];
+        let chrid = to_chr[chr];
         starts.push(exons[i].3 as usize);
         stops.push(exons[i].4 as usize);
         let (start, stop) = (exons[i].3 - EXT as i32, exons[i].4 + EXT as i32);

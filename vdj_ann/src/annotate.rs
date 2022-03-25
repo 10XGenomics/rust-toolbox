@@ -3344,7 +3344,7 @@ mod tests {
         let annotation = ContigAnnotation::from_seq(
             &contig_seq,
             &contig_qual,
-            &"clonotype125_consensus_1".to_string(),
+            "clonotype125_consensus_1",
             &refdata,
             120,
             2,

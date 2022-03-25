@@ -66,7 +66,7 @@ fn main() {
     // Load the exons.
 
     let mut exons = Vec::<(String, i32, i32, bool, String, i32)>::new();
-    fetch_exons(&species.to_string(), &mut exons);
+    fetch_exons(species, &mut exons);
 
     // Hardcoded and inappropriate fasta location.
     // source = ftp://ftp.ensembl.org/pub/release-94/fasta/homo_sapiens/
@@ -168,10 +168,10 @@ fn main() {
         if i > 0 && *chr == exons2[i - 1].0 && gap < MIN_EXTRA as i32 {
             continue;
         }
-        if !to_chr.contains_key(&chr.to_string()) {
+        if !to_chr.contains_key(chr) {
             continue;
         }
-        let chrid = to_chr[&chr.to_string()];
+        let chrid = to_chr[chr];
 
         // Case 1.  Gap is not too long, use it all.  Create sequence and emit as
         // rust code.  Then code the rc.

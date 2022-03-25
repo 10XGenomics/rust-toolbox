@@ -306,7 +306,7 @@ pub fn stop_profiling() {
             }
             if !symv.is_empty() {
                 let mut log = String::new();
-                print_tabular_vbox(&mut log, &symv, 0, &b"l|l|l|l|l".to_vec(), false, false);
+                print_tabular_vbox(&mut log, &symv, 0, b"l|l|l|l|l".as_ref(), false, false);
                 for _ in 0..*count {
                     let x = log.to_string();
                     traces.push(x);
