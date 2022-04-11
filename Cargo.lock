@@ -28,7 +28,7 @@ dependencies = [
 
 [[package]]
 name = "align_tools"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "bio_edit",
  "debruijn",
@@ -1292,7 +1292,7 @@ checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
 
 [[package]]
 name = "vdj_ann"
-version = "0.4.3"
+version = "0.4.4"
 dependencies = [
  "align_tools",
  "amino",
