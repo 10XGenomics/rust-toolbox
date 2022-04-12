@@ -22,4 +22,4 @@ pretty_trace = { version = "0.5", path = "../pretty_trace" }
 sha2 = ">=0.9.3, <0.11"
 string_utils = { version = "0.1", path = "../string_utils" }
 vector_utils = { version = "0.1", path = "../vector_utils" }
-vdj_ann = { version = "0.4", path = "../vdj_ann" }
+vdj_ann = "0.4"

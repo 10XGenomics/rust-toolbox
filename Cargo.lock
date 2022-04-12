@@ -30,11 +30,24 @@ dependencies = [
 name = "align_tools"
 version = "0.1.12"
 dependencies = [
- "bio_edit",
+ "bio_edit 0.1.1",
  "debruijn",
  "itertools",
- "string_utils",
- "vector_utils",
+ "string_utils 0.1.4",
+ "vector_utils 0.1.5",
+]
+
+[[package]]
+name = "align_tools"
+version = "0.1.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd531016352cabb23118a1922376b59f3f0d31b703b3e6794064859388baa4d9"
+dependencies = [
+ "bio_edit 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "debruijn",
+ "itertools",
+ "string_utils 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vector_utils 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -42,15 +55,25 @@ name = "amino"
 version = "0.1.7"
 dependencies = [
  "debruijn",
- "string_utils",
+ "string_utils 0.1.4",
+]
+
+[[package]]
+name = "amino"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5fd6d116795099c91389d0d065b0a8ca053f15b38df74f31f6c935cbc4629e6c"
+dependencies = [
+ "debruijn",
+ "string_utils 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "ansi_escape"
 version = "0.1.3"
 dependencies = [
- "string_utils",
- "vector_utils",
+ "string_utils 0.1.4",
+ "vector_utils 0.1.5",
 ]
 
 [[package]]
@@ -121,6 +144,16 @@ dependencies = [
 [[package]]
 name = "bio_edit"
 version = "0.1.1"
+dependencies = [
+ "bio-types",
+ "bit-set",
+]
+
+[[package]]
+name = "bio_edit"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d6b4b0768c61eb19dad63fbb3cd4f56db42dc0b80ee66d371784c799c196c0ba"
 dependencies = [
  "bio-types",
  "bit-set",
@@ -330,6 +363,12 @@ name = "equiv"
 version = "0.1.3"
 
 [[package]]
+name = "equiv"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad251ad0f0bd07cfe4ff98ed118a6fa615fe89be43236e123228dc55f4b15f0c"
+
+[[package]]
 name = "evalexpr"
 version = "7.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -339,9 +378,9 @@ checksum = "0eb8c3fede1e2612da9d84fc2a20769b269c8a3d6d29e0854c22f336db343701"
 name = "exons"
 version = "0.1.5"
 dependencies = [
- "io_utils",
- "string_utils",
- "vector_utils",
+ "io_utils 0.3.2",
+ "string_utils 0.1.4",
+ "vector_utils 0.1.5",
 ]
 
 [[package]]
@@ -350,8 +389,8 @@ version = "0.1.3"
 dependencies = [
  "evalexpr",
  "statrs",
- "string_utils",
- "vector_utils",
+ "string_utils 0.1.4",
+ "vector_utils 0.1.5",
 ]
 
 [[package]]
@@ -360,8 +399,20 @@ version = "0.1.8"
 dependencies = [
  "debruijn",
  "flate2",
- "io_utils",
- "string_utils",
+ "io_utils 0.3.2",
+ "string_utils 0.1.4",
+]
+
+[[package]]
+name = "fasta_tools"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "68adfb3db3241435957c3a0066c7b65beec225023961c5848264c66272cedea7"
+dependencies = [
+ "debruijn",
+ "flate2",
+ "io_utils 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "string_utils 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -435,7 +486,17 @@ name = "graph_simple"
 version = "0.1.5"
 dependencies = [
  "petgraph",
- "vector_utils",
+ "vector_utils 0.1.5",
+]
+
+[[package]]
+name = "graph_simple"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41db170d943bdc507695fc6c5ba41e12ce2c074e0310aad5bb64edb2c70308e6"
+dependencies = [
+ "petgraph",
+ "vector_utils 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -467,11 +528,25 @@ name = "hyperbase"
 version = "0.1.8"
 dependencies = [
  "debruijn",
- "equiv",
- "graph_simple",
- "kmer_lookup",
+ "equiv 0.1.3",
+ "graph_simple 0.1.5",
+ "kmer_lookup 0.1.5",
  "petgraph",
- "vector_utils",
+ "vector_utils 0.1.5",
+]
+
+[[package]]
+name = "hyperbase"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2e4149ebb430498aa1c8fcc2bfa348df892a34a66218abbe3474fe241f503d3d"
+dependencies = [
+ "debruijn",
+ "equiv 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "graph_simple 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kmer_lookup 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "petgraph",
+ "vector_utils 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -501,7 +576,20 @@ dependencies = [
  "flate2",
  "lz4",
  "serde",
- "string_utils",
+ "string_utils 0.1.4",
+]
+
+[[package]]
+name = "io_utils"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d88c239b08f2e90f0f0d71faab2975ee25f70af3869afb442ffd327219eed1ae"
+dependencies = [
+ "bincode",
+ "flate2",
+ "lz4",
+ "serde",
+ "string_utils 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -525,7 +613,18 @@ version = "0.1.5"
 dependencies = [
  "debruijn",
  "rayon",
- "vector_utils",
+ "vector_utils 0.1.5",
+]
+
+[[package]]
+name = "kmer_lookup"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8b99223e43a9eb74be262b78b33727e1a70a224f96db44063632de610938dfd"
+dependencies = [
+ "debruijn",
+ "rayon",
+ "vector_utils 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -551,8 +650,8 @@ name = "load_feature_bc"
 version = "0.1.7"
 dependencies = [
  "flate2",
- "io_utils",
- "string_utils",
+ "io_utils 0.3.2",
+ "string_utils 0.1.4",
 ]
 
 [[package]]
@@ -642,7 +741,7 @@ name = "mirror_sparse_matrix"
 version = "0.1.17"
 dependencies = [
  "binary_vec_io",
- "io_utils",
+ "io_utils 0.3.2",
  "pretty_trace",
 ]
 
@@ -800,9 +899,9 @@ checksum = "0744126afe1a6dd7f394cb50a716dbe086cb06e255e53d8d0185d82828358fb5"
 name = "perf_stats"
 version = "0.1.8"
 dependencies = [
- "io_utils",
+ "io_utils 0.3.2",
  "libc",
- "string_utils",
+ "string_utils 0.1.4",
 ]
 
 [[package]]
@@ -855,16 +954,16 @@ name = "pretty_trace"
 version = "0.5.23"
 dependencies = [
  "backtrace",
- "io_utils",
+ "io_utils 0.3.2",
  "lazy_static",
  "libc",
  "nix",
  "pprof",
  "rayon",
- "stats_utils",
- "string_utils",
+ "stats_utils 0.1.3",
+ "string_utils 0.1.4",
  "tables",
- "vector_utils",
+ "vector_utils 0.1.5",
 ]
 
 [[package]]
@@ -1152,6 +1251,12 @@ name = "stats_utils"
 version = "0.1.3"
 
 [[package]]
+name = "stats_utils"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b2d615734a36694d0a5803b1fe69b185611864224f5b2d4425ad0b69e39fb877"
+
+[[package]]
 name = "stirling_numbers"
 version = "0.1.7"
 dependencies = [
@@ -1160,14 +1265,23 @@ dependencies = [
  "num-traits",
  "rand",
  "rayon",
- "vector_utils",
+ "vector_utils 0.1.5",
 ]
 
 [[package]]
 name = "string_utils"
 version = "0.1.4"
 dependencies = [
- "vector_utils",
+ "vector_utils 0.1.5",
+]
+
+[[package]]
+name = "string_utils"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0247f2b34eb8810f2bab2b5d2fb1abc5f7d446ce23712efc463aa1c51e5021d0"
+dependencies = [
+ "vector_utils 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1227,9 +1341,9 @@ dependencies = [
 name = "tables"
 version = "0.1.5"
 dependencies = [
- "io_utils",
+ "io_utils 0.3.2",
  "itertools",
- "string_utils",
+ "string_utils 0.1.4",
 ]
 
 [[package]]
@@ -1294,21 +1408,44 @@ checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
 name = "vdj_ann"
 version = "0.4.4"
 dependencies = [
- "align_tools",
- "amino",
- "bio_edit",
+ "align_tools 0.1.12",
+ "amino 0.1.7",
+ "bio_edit 0.1.1",
  "debruijn",
- "fasta_tools",
- "hyperbase",
- "io_utils",
+ "fasta_tools 0.1.8",
+ "hyperbase 0.1.8",
+ "io_utils 0.3.2",
  "itertools",
- "kmer_lookup",
+ "kmer_lookup 0.1.5",
  "serde",
  "serde_json",
- "stats_utils",
- "string_utils",
- "vdj_types",
- "vector_utils",
+ "stats_utils 0.1.3",
+ "string_utils 0.1.4",
+ "vdj_types 0.2.0",
+ "vector_utils 0.1.5",
+]
+
+[[package]]
+name = "vdj_ann"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47fa42c6642aca9d26aafdd71c17a4c1108853ab3cb79a6706175b430882e44f"
+dependencies = [
+ "align_tools 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "amino 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bio_edit 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "debruijn",
+ "fasta_tools 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "hyperbase 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "io_utils 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "itertools",
+ "kmer_lookup 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde",
+ "serde_json",
+ "stats_utils 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "string_utils 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vdj_types 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vector_utils 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1317,16 +1454,16 @@ version = "0.2.1"
 dependencies = [
  "debruijn",
  "exons",
- "fasta_tools",
+ "fasta_tools 0.1.8",
  "flate2",
- "io_utils",
- "kmer_lookup",
+ "io_utils 0.3.2",
+ "kmer_lookup 0.1.5",
  "perf_stats",
  "pretty_trace",
  "sha2",
- "string_utils",
- "vdj_ann",
- "vector_utils",
+ "string_utils 0.1.4",
+ "vdj_ann 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vector_utils 0.1.5",
 ]
 
 [[package]]
@@ -1338,8 +1475,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "vdj_types"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "029dbe2aecc529693aecdf5f8f7cab1a647ed7df5c8e3bf13ab1f2907745be91"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "vector_utils"
 version = "0.1.5"
+dependencies = [
+ "permutation",
+ "superslice",
+]
+
+[[package]]
+name = "vector_utils"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2d3ecf8ee11bfddd2cb41fe07abbb063610a90d22515b47718d1a7ba200d3059"
 dependencies = [
  "permutation",
  "superslice",
