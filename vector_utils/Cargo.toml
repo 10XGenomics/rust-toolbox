@@ -9,5 +9,5 @@ edition = "2018"
 include = ["src/lib.rs", "LICENSE", "README.md"]
 
 [dependencies]
-permutation = "0.2"
+permutation = "0.4"
 superslice = "1"

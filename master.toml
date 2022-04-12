@@ -28,7 +28,7 @@ num-bigint = "^0.4"
 num-rational = "^0.4"
 num-traits = "^0.2"
 perf_stats = { version = "0.1", path = "../perf_stats" }
-permutation = "0.2"
+permutation = "0.4"
 petgraph = ">=0.5,<0.7"
 pprof = { version = "0.6", features = ["protobuf"] }
 pretty_trace = { version = "0.5", path = "../pretty_trace" }
