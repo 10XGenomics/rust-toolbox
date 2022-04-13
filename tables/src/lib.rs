@@ -160,72 +160,17 @@ pub fn print_tabular_vbox(
 ) {
     // Define box characters.
 
-    let dash;
-    if !bold_box {
-        dash = '─';
-    } else {
-        dash = '━';
-    }
-    let verty;
-    if !bold_box {
-        verty = '│';
-    } else {
-        verty = '┃';
-    }
-    let topleft;
-    if !bold_box {
-        topleft = '┌';
-    } else {
-        topleft = '┏';
-    }
-    let topright;
-    if !bold_box {
-        topright = '┐';
-    } else {
-        topright = '┓';
-    }
-    let botleft;
-    if !bold_box {
-        botleft = '└';
-    } else {
-        botleft = '┗';
-    }
-    let botright;
-    if !bold_box {
-        botright = '┘';
-    } else {
-        botright = '┛';
-    }
-    let tee;
-    if !bold_box {
-        tee = '┬';
-    } else {
-        tee = '┳';
-    }
-    let uptee;
-    if !bold_box {
-        uptee = '┴';
-    } else {
-        uptee = '┻';
-    }
-    let cross;
-    if !bold_box {
-        cross = '┼';
-    } else {
-        cross = '╋';
-    }
-    let lefty;
-    if !bold_box {
-        lefty = '├';
-    } else {
-        lefty = '┣';
-    }
-    let righty;
-    if !bold_box {
-        righty = '┤';
-    } else {
-        righty = '┫';
-    }
+    let dash = if !bold_box { '─' } else { '━' };
+    let verty = if !bold_box { '│' } else { '┃' };
+    let topleft = if !bold_box { '┌' } else { '┏' };
+    let topright = if !bold_box { '┐' } else { '┓' };
+    let botleft = if !bold_box { '└' } else { '┗' };
+    let botright = if !bold_box { '┘' } else { '┛' };
+    let tee = if !bold_box { '┬' } else { '┳' };
+    let uptee = if !bold_box { '┴' } else { '┻' };
+    let cross = if !bold_box { '┼' } else { '╋' };
+    let lefty = if !bold_box { '├' } else { '┣' };
+    let righty = if !bold_box { '┤' } else { '┫' };
 
     // Proceed.
 

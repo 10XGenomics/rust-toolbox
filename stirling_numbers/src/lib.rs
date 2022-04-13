@@ -201,7 +201,7 @@ mod tests {
         use rand::rngs::StdRng;
         use rand::{Rng, SeedableRng};
         use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-        use vector_utils::*;
+        use vector_utils::unique_sort;
 
         use super::*;
 

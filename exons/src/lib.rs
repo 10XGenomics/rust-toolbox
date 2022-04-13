@@ -14,15 +14,14 @@ pub fn fetch_exons(species: &str, exons: &mut Vec<(String, i32, i32, bool, Strin
     // Define gtf file location.  See notes in bin/build_vdj_ref.fs.
 
     let root = "/mnt/opt/meowmix_git/ensembl/release-94/gtf";
-    let gtf: String;
-    if species == "human" {
-        gtf = format!(
+    let gtf = if species == "human" {
+        format!(
             "{}/homo_sapiens/Homo_sapiens.GRCh38.94.chr_patch_hapl_scaff.gtf",
             root
-        );
+        )
     } else {
-        gtf = format!("{}/mus_musculus/Mus_musculus.GRCm38.94.gtf", root);
-    }
+        format!("{}/mus_musculus/Mus_musculus.GRCm38.94.gtf", root)
+    };
 
     // Parse the gtf file.
 

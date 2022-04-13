@@ -84,7 +84,7 @@ use debruijn::{
 };
 use fasta_tools::load_genbank_accession;
 use flate2::read::MultiGzDecoder;
-use perf_stats::*;
+use perf_stats::elapsed;
 use pretty_trace::PrettyTrace;
 use process::Command;
 use sha2::{Digest, Sha256};
@@ -302,12 +302,11 @@ fn parse_gtf_file(gtf: &str, demangle: &HashMap<String, String>, exons: &mut Vec
         if gene.starts_with("TCRG-V") {
             gene = format!("TRGV{}", gene.after("TCRG-V"));
         }
-        let mut gene2: String;
-        if demangle.contains_key(&gene) {
-            gene2 = demangle[&gene.clone()].clone();
-        } else {
+        let gene2 = demangle.get(&gene);
+        if gene2.is_none() {
             continue;
         }
+        let mut gene2 = gene2.unwrap().clone();
 
         // Special fixes.  Here the gff3 file is trying to impose a saner naming
         // scheme on certain genes, but we're sticking with the scheme that people

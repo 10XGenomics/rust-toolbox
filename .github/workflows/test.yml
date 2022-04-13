@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.59.0
+          toolchain: 1.60.0
           components: rustfmt, clippy
           default: true
       - name: Checkout git repository
@@ -26,10 +26,10 @@ jobs:
         run: cargo fmt -- --check
       - name: Install cargo-deny
         run: |
-          wget https://github.com/EmbarkStudios/cargo-deny/releases/download/0.11.3/cargo-deny-0.11.3-x86_64-unknown-linux-musl.tar.gz
-          tar -xvf cargo-deny-0.11.3-x86_64-unknown-linux-musl.tar.gz
+          wget https://github.com/EmbarkStudios/cargo-deny/releases/download/0.11.4/cargo-deny-0.11.4-x86_64-unknown-linux-musl.tar.gz
+          tar -xvf cargo-deny-0.11.4-x86_64-unknown-linux-musl.tar.gz
           mkdir -p ~/bin/
-          cp cargo-deny-0.11.3-x86_64-unknown-linux-musl/cargo-deny ~/bin/
+          cp cargo-deny-0.11.4-x86_64-unknown-linux-musl/cargo-deny ~/bin/
           rm -r cargo-deny-*
           echo "$HOME/bin" >> $GITHUB_PATH
       - name: Cache cargo registry
@@ -54,7 +54,7 @@ jobs:
       - name: Remove the Cargo target directory
         if: github.ref == 'refs/heads/master'
         run: cargo clean
-      - name: Deny duplicate dependencies
+      - name: Deny duplicate dependencies and check licenses
         run: cargo deny --locked check
       - uses: actions-rs/clippy-check@v1
         with:
