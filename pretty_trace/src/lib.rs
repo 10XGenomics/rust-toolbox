@@ -151,8 +151,13 @@ use lazy_static::lazy_static;
 use libc::SIGINT;
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
 use nix::Error;
+
+#[cfg(not(target_os = "windows"))]
 use pprof::protos::Message;
+
+#[cfg(not(target_os = "windows"))]
 use pprof::ProfilerGuard;
+
 use stats_utils::percent_ratio;
 use std::{
     collections::HashMap,
@@ -179,8 +184,10 @@ use vector_utils::{contains_at, erase_if, make_freq};
 // PROFILING
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
+#[cfg(not(target_os = "windows"))]
 static mut GUARD: Option<ProfilerGuard<'static>> = None;
 
+#[cfg(not(target_os = "windows"))]
 static mut REPORT: Option<pprof::Report> = None;
 
 static mut BLACKLIST: Vec<String> = Vec::new();
@@ -197,6 +204,7 @@ static mut BLACKLIST: Vec<String> = Vec::new();
 ///
 /// Profiling <i>appears</i> to correctly represent wallclock in parallel loops.
 
+#[cfg(not(target_os = "windows"))]
 pub fn start_profiling(blacklist: &[String]) {
     let frequency = 1000;
     unsafe {
@@ -343,6 +351,7 @@ pub fn stop_profiling() {
 /// This assumes that you have called start_profiling.
 /// The functions stop_profiling and dump_profiling_as_proto can both be run, in either order.
 
+#[cfg(not(target_os = "windows"))]
 pub fn dump_profiling_as_proto(f: &str) {
     unsafe {
         if REPORT.is_none() {
