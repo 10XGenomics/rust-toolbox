@@ -59,6 +59,7 @@ pub fn nthreads() -> i64 {
 // If you think that at some point you're using too many threads, this gives you
 // a way of finding it, by pre-capping the thread count.
 
+#[cfg(not(target_os = "windows"))]
 pub fn set_max_threads(n: u64) {
     unsafe {
         let limit = rlimit {
@@ -125,6 +126,7 @@ pub fn peak_mem_usage_bytes() -> i64 {
     maxrss_slf
 }
 
+#[cfg(any(target_os = "macos", target_os = "ios"))]
 pub fn peak_mem_usage_gb() -> f64 {
     peak_mem_usage_bytes() as f64 / ((1024 * 1024 * 1024) as f64)
 }
@@ -156,6 +158,7 @@ pub fn available_mem_gb() -> Option<f64> {
 
 // Report getrusage stats.
 
+#[cfg(not(target_os = "windows"))]
 pub fn getrusage() -> rusage {
     use std::mem::MaybeUninit;
     let usage: rusage = unsafe { MaybeUninit::zeroed().assume_init() };
@@ -194,6 +197,7 @@ pub fn mem_usage_gb() -> f64 {
 // showing the parent process id, the process id, its memory use in GB (RSS),
 // and the command, which is folder.
 
+#[cfg(not(target_os = "windows"))]
 pub fn ps_me() {
     let uid = unsafe { getuid() } as i64;
     println!(
