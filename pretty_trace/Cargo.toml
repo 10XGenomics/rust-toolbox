@@ -22,7 +22,7 @@ tables = { version = "0.1", path = "../tables" }
 string_utils = { version = "0.1", path = "../string_utils" }
 vector_utils = { version = "0.1", path = "../vector_utils" }
 
-#[cfg(not(target_os = "windows"))]
+[target.'cfg(not(windows))'.dependencies]
 pprof = { version = "0.6", features = ["protobuf"] }
 
 [dev-dependencies]
