@@ -17,11 +17,13 @@ io_utils = { version = "0.3", path = "../io_utils" }
 lazy_static = "1"
 libc = "0.2"
 nix = ">=0.19.1, <0.24"
-pprof = { version = "0.6", features = ["protobuf"] }
 stats_utils = { version = "0.1", path = "../stats_utils" }
 tables = { version = "0.1", path = "../tables" }
 string_utils = { version = "0.1", path = "../string_utils" }
 vector_utils = { version = "0.1", path = "../vector_utils" }
+
+#[cfg(not(target_os = "windows"))]
+pprof = { version = "0.6", features = ["protobuf"] }
 
 [dev-dependencies]
 rayon = "1"
