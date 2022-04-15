@@ -3,8 +3,13 @@
 // Computational performance stats.
 
 use io_utils::dir_list;
+
+#[cfg(not(target_os = "windows"))]
 use libc::{getuid, rusage, RLIMIT_NPROC};
+
+#[cfg(not(target_os = "windows"))]
 use libc::{rlimit, setrlimit};
+
 use std::{
     cmp::min,
     fs::File,
