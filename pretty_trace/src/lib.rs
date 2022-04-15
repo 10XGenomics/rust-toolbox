@@ -181,7 +181,7 @@ use std::{
 };
 
 #[cfg(not(target_os = "windows"))]
-use std::os::unix::io::FromRawFd,
+use std::os::unix::io::FromRawFd;
 
 use string_utils::{stringme, strme, TextUtils};
 use tables::print_tabular_vbox;
@@ -969,7 +969,7 @@ fn force_pretty_trace_fancy(
                 }
             }
         }
-    
+
         // Dump full traceback to log file.
 
         if !log_file_name.is_empty() {
