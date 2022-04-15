@@ -7,6 +7,8 @@
 
 use itertools::Itertools;
 use std::io::Write;
+
+#[cfg(not(target_os = "windows"))]
 use std::os::unix::fs::MetadataExt;
 
 pub trait BinaryInputOutputSafe {}
@@ -54,17 +56,21 @@ pub fn binary_read_to_ref<T>(f: &mut std::fs::File, p: &mut T, n: usize) -> Resu
             bytes_read += n;
         }
         if bytes_read != bytes_to_read {
-            let metadata = f.metadata()?;
-            let msg = format!(
+            let mut msg = format!(
                 "Failure in binary_read_to_ref, bytes_read = {}, but \
-                bytes_to_read = {}.  Bytes read on successive\nattempts = {}.\n\
-                File has length {} and inode {}.",
+                bytes_to_read = {}.  Bytes read on successive\nattempts = {}.\n",
                 bytes_read,
                 bytes_to_read,
                 reads.iter().format(","),
-                metadata.len(),
-                metadata.ino(),
             );
+            if cfg!(not(target_os = "windows")) {
+                let metadata = f.metadata()?;
+                msg += &mut format!(
+                    "File has length {} and inode {}.\n",
+                    metadata.len(),
+                    metadata.ino(),
+                );
+            }
             panic!("{}", msg);
         }
     }
