@@ -149,7 +149,11 @@ use backtrace::Backtrace;
 use io_utils::open_for_write_new;
 use lazy_static::lazy_static;
 use libc::SIGINT;
+
+#[cfg(not(target_os = "windows"))]
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
+
+#[cfg(not(target_os = "windows"))]
 use nix::Error;
 
 #[cfg(not(target_os = "windows"))]
@@ -165,7 +169,6 @@ use std::{
     fs::File,
     io::{BufWriter, Write},
     ops::Deref,
-    os::unix::io::FromRawFd,
     panic,
     str::from_utf8,
     sync::atomic::AtomicBool,
@@ -176,6 +179,10 @@ use std::{
     time,
     time::Instant,
 };
+
+#[cfg(not(target_os = "windows"))]
+use std::os::unix::io::FromRawFd;
+
 use string_utils::{stringme, strme, TextUtils};
 use tables::print_tabular_vbox;
 use vector_utils::{contains_at, erase_if, make_freq};
@@ -217,6 +224,7 @@ pub fn start_profiling(blacklist: &[String]) {
 /// This assumes that you have called start_profiling.
 /// The functions stop_profiling and dump_profiling_as_proto can both be run, in either order.
 
+#[cfg(not(target_os = "windows"))]
 pub fn stop_profiling() {
     unsafe {
         if REPORT.is_none() {
@@ -640,6 +648,7 @@ lazy_static! {
 
 // Redirect SIGINT and SIGUSR1 interrupts to the function "handler".
 
+#[cfg(not(target_os = "windows"))]
 fn install_signal_handler(happening: bool, ctrlc: bool) -> Result<(), Error> {
     if happening {
         let handler = SigHandler::Handler(handler);
@@ -754,7 +763,10 @@ fn force_pretty_trace_fancy(
 ) {
     // Set up to catch SIGNINT and SIGUSR1 interrupts.
 
-    let _ = install_signal_handler(happening.on, ctrlc);
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = install_signal_handler(happening.on, ctrlc);
+    }
     if ctrlc_debug {
         CTRLC_DEBUG.store(true, SeqCst);
     }
@@ -941,16 +953,19 @@ fn force_pretty_trace_fancy(
         // Dump traceback to file descriptor.
 
         let mut failed = false;
-        if fd >= 0 {
-            unsafe {
-                let mut err_file = File::from_raw_fd(fd);
-                let x = err_file.write(out.as_bytes());
-                if x.is_err() {
-                    eprintln!(
-                        "\nProblem in PrettyTrace writing to file descriptor {}.\n",
-                        fd
-                    );
-                    failed = true;
+        #[cfg(not(target_os = "windows"))]
+        {
+            if fd >= 0 {
+                unsafe {
+                    let mut err_file = File::from_raw_fd(fd);
+                    let x = err_file.write(out.as_bytes());
+                    if x.is_err() {
+                        eprintln!(
+                            "\nProblem in PrettyTrace writing to file descriptor {}.\n",
+                            fd
+                        );
+                        failed = true;
+                    }
                 }
             }
         }
