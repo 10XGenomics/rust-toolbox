@@ -63,7 +63,8 @@ pub fn binary_read_to_ref<T>(f: &mut std::fs::File, p: &mut T, n: usize) -> Resu
                 bytes_to_read,
                 reads.iter().format(","),
             );
-            if cfg!(not(target_os = "windows")) {
+            #[cfg(not(target_os = "windows"))]
+            {
                 let metadata = f.metadata()?;
                 msg += &mut format!(
                     "File has length {} and inode {}.\n",
