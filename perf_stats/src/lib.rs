@@ -126,7 +126,7 @@ pub fn peak_mem_usage_bytes() -> i64 {
     maxrss_slf
 }
 
-#[cfg(any(target_os = "macos", target_os = "ios"))]
+#[cfg(any(target_os = "macos", target_os = "ios", target_os = "linux"))]
 pub fn peak_mem_usage_gb() -> f64 {
     peak_mem_usage_bytes() as f64 / ((1024 * 1024 * 1024) as f64)
 }
