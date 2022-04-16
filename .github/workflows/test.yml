@@ -33,19 +33,19 @@ jobs:
           rm -r cargo-deny-*
           echo "$HOME/bin" >> $GITHUB_PATH
       - name: Cache cargo registry
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/registry
           key: ${{runner.os}}-cargo-registry-${{hashFiles('**/*.rs')}}
           restore-keys: ${{runner.os}}-cargo-registry-
       - name: Cache cargo git index
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/git
           key: ${{runner.os}}-cargo-git-${{hashFiles('**/*.rs')}}
           restore-keys: ${{runner.os}}-cargo-git-
       - name: Cache cargo build --release --all-targets
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: target
           key: ${{runner.os}}-cargo-target-${{hashFiles('**/*.rs')}}
