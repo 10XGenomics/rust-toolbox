@@ -111,16 +111,16 @@ fn get_u32_at_pos(v: &[u8], pos: usize) -> u32 {
     u32::from_le_bytes(z)
 }
 
-fn _put_u8_at_pos(v: &mut Vec<u8>, pos: usize, val: u8) {
+fn _put_u8_at_pos(v: &mut [u8], pos: usize, val: u8) {
     v[pos] = val;
 }
 
-fn _put_u16_at_pos(v: &mut Vec<u8>, pos: usize, val: u16) {
+fn _put_u16_at_pos(v: &mut [u8], pos: usize, val: u16) {
     let z = val.to_le_bytes();
     v[pos..(2 + pos)].clone_from_slice(&z[..2]);
 }
 
-fn put_u32_at_pos(v: &mut Vec<u8>, pos: usize, val: u32) {
+fn put_u32_at_pos(v: &mut [u8], pos: usize, val: u32) {
     let z = val.to_le_bytes();
     v[pos..(4 + pos)].clone_from_slice(&z[..4]);
 }
@@ -593,12 +593,11 @@ mod tests {
             for i in 0..n {
                 let mut y = Vec::<(i32, i32)>::new();
                 for j in 0..k {
-                    let col: usize;
-                    if storage_version == 0 {
-                        col = i + j;
+                    let col = if storage_version == 0 {
+                        i + j
                     } else {
-                        col = 10000 * i + j;
-                    }
+                        10000 * i + j
+                    };
                     y.push((col as i32, (i * i * j) as i32));
                 }
                 x.push(y);
@@ -618,12 +617,7 @@ mod tests {
             let y = MirrorSparseMatrix::build_from_vec(&x, &row_labels, &col_labels);
             let row_sum2 = y.sum_of_row(test_row);
             assert_eq!(row_sum, row_sum2);
-            let test_col;
-            if storage_version == 0 {
-                test_col = 15;
-            } else {
-                test_col = 90001;
-            }
+            let test_col = if storage_version == 0 { 15 } else { 90001 };
             let mut col_sum = 0;
             for i in 0..x.len() {
                 for j in 0..x[i].len() {

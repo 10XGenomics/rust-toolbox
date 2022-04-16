@@ -27,7 +27,7 @@ pub fn distance<T: Eq>(x1: &[T], x2: &[T]) -> usize {
 
 // Reverse sort a vector.
 
-pub fn reverse_sort<T: Ord>(x: &mut Vec<T>) {
+pub fn reverse_sort<T: Ord>(x: &mut [T]) {
     x.sort_by(|a, b| b.cmp(a));
 }
 

@@ -252,52 +252,51 @@ pub fn stop_profiling() {
                     if name.contains("::") {
                         name = name.rev_after("::").to_string();
                     }
-                    let filename;
-                    if s.filename.is_some() {
-                        filename = s.filename.as_ref().unwrap().to_str().unwrap().to_string();
-                    } else {
-                        filename = "unknown".to_string();
-                    }
-                    let mut cratex; // crate without version
-                    let mut version = String::new(); // crate version
-                    let file;
-                    if filename.contains("/cargo/git/checkouts/") {
-                        let post = filename.after("/cargo/git/checkouts/");
-                        if post.contains("/src/") && post.rev_before("/src/").contains('/') {
-                            let mid = post.rev_before("/src/");
-                            file = post.after("/src/").to_string();
-                            if mid.after("/").contains('/') {
-                                version = mid.between("/", "/").to_string();
-                                cratex = mid.rev_after("/").to_string();
-                            } else {
-                                version = mid.rev_after("/").to_string();
-                                cratex = post.before("/").to_string();
-                                if cratex.contains('-') {
-                                    cratex = cratex.rev_before("-").to_string();
+                    let filename = match s.filename.as_ref() {
+                        Some(name) => name.to_str().unwrap(),
+                        _ => "unknown",
+                    };
+                    let (file, mut version, mut cratex) =
+                        if filename.contains("/cargo/git/checkouts/") {
+                            let post = filename.after("/cargo/git/checkouts/");
+                            if post.contains("/src/") && post.rev_before("/src/").contains('/') {
+                                let mid = post.rev_before("/src/");
+                                let file = post.after("/src/");
+                                if mid.after("/").contains('/') {
+                                    (file, mid.between("/", "/"), mid.rev_after("/"))
+                                } else {
+                                    let cratex = post.before("/");
+                                    (
+                                        file,
+                                        mid.rev_after("/"),
+                                        if cratex.contains('-') {
+                                            cratex.rev_before("-")
+                                        } else {
+                                            cratex
+                                        },
+                                    )
                                 }
+                            } else {
+                                ("unknown", "", "unknown")
                             }
+                        } else if filename.contains("/src/")
+                            && filename.rev_before("/src/").contains('/')
+                        {
+                            (
+                                filename.rev_after("/src/"),
+                                "",
+                                filename.rev_before("/src/").rev_after("/"),
+                            )
                         } else {
-                            cratex = "unknown".to_string();
-                            file = "unknown".to_string();
-                        }
-                    } else if filename.contains("/src/")
-                        && filename.rev_before("/src/").contains('/')
-                    {
-                        cratex = filename.rev_before("/src/").rev_after("/").to_string();
-                        file = filename.rev_after("/src/").to_string();
-                    } else {
-                        cratex = "unknown".to_string();
-                        file = "unknown".to_string();
-                    }
-                    let lineno;
-                    if s.lineno.is_some() {
-                        lineno = format!("{}", s.lineno.unwrap());
-                    } else {
-                        lineno = "?".to_string();
-                    }
+                            ("unknown", "", "unknown")
+                        };
+                    let lineno = match s.lineno {
+                        Some(n) => format!("{}", n),
+                        _ => "?".to_string(),
+                    };
                     if cratex.contains('-') && version.is_empty() {
                         let c = cratex.rev_before("-");
-                        let d = cratex.rev_after("-").to_string();
+                        let d = cratex.rev_after("-");
                         // check to see if d = x.y.z for some nonnegative integers x, y, z
                         if d.contains('.')
                             && d.after(".").contains('.')
@@ -305,24 +304,25 @@ pub fn stop_profiling() {
                             && d.between(".", ".").parse::<usize>().is_ok()
                             && d.rev_after(".").parse::<usize>().is_ok()
                         {
-                            cratex = c.to_string();
-                            version = d.to_string();
+                            cratex = c;
+                            version = d;
                         }
                     }
-                    let mut blacklisted = false;
-                    for b in blacklist.iter() {
-                        if *b == cratex {
-                            blacklisted = true;
-                        }
-                    }
+                    let blacklisted = blacklist.iter().any(|b| b == cratex);
                     if !blacklisted && file.ends_with(".rs") {
-                        symv.push(vec![name, cratex, version, file, lineno]);
+                        symv.push(vec![
+                            name,
+                            cratex.to_string(),
+                            version.to_string(),
+                            file.to_string(),
+                            lineno,
+                        ]);
                     }
                 }
             }
             if !symv.is_empty() {
                 let mut log = String::new();
-                print_tabular_vbox(&mut log, &symv, 0, b"l|l|l|l|l".as_ref(), false, false);
+                print_tabular_vbox(&mut log, &symv, 0, b"l|l|l|l|l", false, false);
                 for _ in 0..*count {
                     let x = log.to_string();
                     traces.push(x);

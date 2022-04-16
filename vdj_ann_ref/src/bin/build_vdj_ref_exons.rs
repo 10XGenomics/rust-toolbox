@@ -33,15 +33,15 @@ use io_utils::{fwrite, fwriteln, open_for_read, open_for_write_new};
 
 // copied from tenkit2/pack_dna.rs:
 
-pub fn reverse_complement(x: &mut Vec<u8>) {
+pub fn reverse_complement(x: &mut [u8]) {
     x.reverse();
-    for j in 0..x.len() {
-        x[j] = match x[j] {
+    for v in x {
+        *v = match *v {
             b'A' => b'T',
             b'C' => b'G',
             b'G' => b'C',
             b'T' => b'A',
-            _ => x[j],
+            _ => *v,
         }
     }
 }
@@ -88,19 +88,18 @@ fn parse_gtf_file(gtf: &str, demangle: &HashMap<String, String>, exons: &mut Vec
 
         // Get gene name and demangle.
 
-        let mut gene = String::new();
+        let mut gene = "";
         for i in 0..fields8.len() {
             if fields8[i].starts_with(" gene_name") {
-                gene = fields8[i].between("\"", "\"").to_string();
+                gene = fields8[i].between("\"", "\"");
             }
         }
-        gene = gene.to_uppercase();
-        let mut gene2: String;
-        if demangle.contains_key(&gene) {
-            gene2 = demangle[&gene.clone()].clone();
-        } else {
+        let gene = gene.to_uppercase();
+        let gene2 = demangle.get(&gene);
+        if gene2.is_none() {
             continue;
         }
+        let mut gene2 = gene2.unwrap().clone();
 
         // Special fixes.  Here the gff3 file is trying to impose a saner naming
         // scheme on certain genes, but we're sticking with the scheme that people
@@ -139,19 +138,19 @@ fn parse_gtf_file(gtf: &str, demangle: &HashMap<String, String>, exons: &mut Vec
 
         // Get transcript name.
 
-        let mut tr = String::new();
+        let mut tr = "";
         for i in 0..fields8.len() {
             if fields8[i].starts_with(" transcript_name") {
-                tr = fields8[i].between("\"", "\"").to_string();
+                tr = fields8[i].between("\"", "\"");
             }
         }
 
         // Get transcript id.
 
-        let mut trid = String::new();
+        let mut trid = "";
         for i in 0..fields8.len() {
             if fields8[i].starts_with(" transcript_id") {
-                trid = fields8[i].between("\"", "\"").to_string();
+                trid = fields8[i].between("\"", "\"");
             }
         }
 
@@ -160,19 +159,16 @@ fn parse_gtf_file(gtf: &str, demangle: &HashMap<String, String>, exons: &mut Vec
         let chr = fields[0];
         let start = fields[3].force_i32() - 1;
         let stop = fields[4].force_i32();
-        let mut fw = false;
-        if fields[6] == "+" {
-            fw = true;
-        }
+        let fw = fields[6] == "+";
         exons.push((
             gene2,
-            tr,
+            tr.to_string(),
             chr.to_string(),
             start,
             stop,
             cat.to_string(),
             fw,
-            trid,
+            trid.to_string(),
         ));
     }
     exons.sort();
@@ -190,29 +186,18 @@ fn main() {
         eprintln!("Please supply exactly one argument.");
         std::process::exit(1);
     }
-    let mut download = false;
-    let mut species = String::new();
-    match args[1].as_str() {
-        "DOWNLOAD" => {
-            download = true;
-        }
-        "HUMAN" => {
-            species = "human".to_string();
-        }
-        "MOUSE" => {
-            species = "mouse".to_string();
-        }
-        "BALBC" => {
-            species = "balbc".to_string();
-        }
-        "NONE" => {
-            species = "human".to_string();
-        }
+    let species = match args[1].as_str() {
+        "DOWNLOAD" => "",
+        "HUMAN" => "human",
+        "MOUSE" => "mouse",
+        "BALBC" => "balbc",
+        "NONE" => "human",
         _ => {
             eprintln!("Call with DOWNLOAD or HUMAN or MOUSE or NONE.");
             std::process::exit(1);
         }
-    }
+    };
+    let download = species.is_empty();
 
     // Define root output directory.
 
@@ -666,11 +651,11 @@ fn main() {
 
     // Define input filenames.
 
-    let gtf = format!("{}/{}", internal, ensembl_path(&species, "gtf", release));
+    let gtf = format!("{}/{}", internal, ensembl_path(species, "gtf", release));
     let fasta = format!(
         "{}/{}.gz",
         internal,
-        ensembl_path(&species, "fasta", release)
+        ensembl_path(species, "fasta", release)
     );
 
     // Generate reference.json.  Note version number.
@@ -689,12 +674,12 @@ fn main() {
     fwriteln!(
         json,
         r###"    "input_fasta_files": "{}","###,
-        ensembl_path(&species, "fasta", release)
+        ensembl_path(species, "fasta", release)
     );
     fwriteln!(
         json,
         r###"    "input_gtf_files": "{}","###,
-        ensembl_path(&species, "gtf", release)
+        ensembl_path(species, "gtf", release)
     );
     fwriteln!(json, r###"    "mkref_version": "","###);
     fwriteln!(json, r###"    "type": "V(D)J Reference","###);
@@ -710,7 +695,7 @@ fn main() {
     //    except that in the gtf file, for genes present only on alternate loci,
     //    only an accession identifier is given (in some and perhaps all cases).
 
-    let gff3 = format!("{}/{}", internal, ensembl_path(&species, "gff3", release));
+    let gff3 = format!("{}/{}", internal, ensembl_path(species, "gff3", release));
     let mut demangle = HashMap::<String, String>::new();
     let f = open_for_read![&gff3];
     for line in f.lines() {
@@ -982,12 +967,11 @@ fn main() {
         );
         if exons[i].5 == "CDS" && exons[i].0.as_bytes()[3] == b'V' {
             if i < exons.len() - 1 && exons[i].1 == exons[i + 1].1 {
-                let intron;
-                if !exons[i].6 {
-                    intron = starts[i] - stops[i + 1];
+                let intron = if !exons[i].6 {
+                    starts[i] - stops[i + 1]
                 } else {
-                    intron = starts[i + 1] - stops[i];
-                }
+                    starts[i + 1] - stops[i]
+                };
                 print!(", intron = {}", intron);
             }
         } else if exons[i].0.as_bytes()[3] == b'V' {

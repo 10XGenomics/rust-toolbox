@@ -80,23 +80,20 @@ fn main() {
     //
     // Addendum: above outdated, see build_vdj_ref.rs.
 
-    let fasta: String;
-    if species == "human" {
-        fasta = "/mnt/assembly/peeps/jaffe/\
+    let fasta = if species == "human" {
+        "/mnt/assembly/peeps/jaffe/\
                  Homo_sapiens.GRCh38.dna.primary_assembly.fa"
-            .to_string();
     } else {
-        fasta = "/mnt/opt/meowmix_git/ensembl/release-94/fasta/mus_musculus/dna/\
+        "/mnt/opt/meowmix_git/ensembl/release-94/fasta/mus_musculus/dna/\
                  Mus_musculus.GRCm38.dna.toplevel.fa.gz"
-            .to_string();
-    }
+    };
 
     // Load fasta.
     // ◼ This is too slow for human.
 
     let mut refs = Vec::<DnaString>::new();
     let mut rheaders = Vec::<String>::new();
-    read_fasta_into_vec_dna_string_plus_headers(&fasta, &mut refs, &mut rheaders);
+    read_fasta_into_vec_dna_string_plus_headers(fasta, &mut refs, &mut rheaders);
     let mut to_chr = HashMap::new();
     for i in 0..rheaders.len() {
         let chr = rheaders[i].before(" ");

@@ -67,26 +67,22 @@ pub fn print_start_codon_positions(tig: &DnaString, log: &mut Vec<u8>) {
 // ◼ Ns are incorrectly handled.  See lena 100349 for lots of examples.
 
 pub fn chain_type(b: &DnaString, rkmers_plus_full_20: &[(Kmer20, i32, i32)], rtype: &[i32]) -> i8 {
-    let n = 7;
+    const N: usize = 7;
     let k = 20;
     if b.len() < k {
         return -1_i8;
     }
-    let mut count_this = vec![0; 2 * n];
+    let mut count_this = [0; 2 * N];
     let brc = b.rc();
     for l in 0..b.len() - k + 1 {
-        let mut is_type = vec![false; 2 * n];
+        let mut is_type = [false; 2 * N];
         for pass in 0..2 {
-            let mut z = 0;
-            if pass == 1 {
-                z = n;
-            }
-            let x: Kmer20;
-            if pass == 0 {
-                x = b.get_kmer(l);
+            let z = if pass == 1 { N } else { 0 };
+            let x = if pass == 0 {
+                b.get_kmer(l)
             } else {
-                x = brc.get_kmer(l);
-            }
+                brc.get_kmer(l)
+            };
             let low = lower_bound1_3(rkmers_plus_full_20, &x) as usize;
             for j in low..rkmers_plus_full_20.len() {
                 if rkmers_plus_full_20[j].0 != x {
@@ -99,30 +95,26 @@ pub fn chain_type(b: &DnaString, rkmers_plus_full_20: &[(Kmer20, i32, i32)], rty
             }
         }
         let mut nt = 0;
-        for l in 0..2 * n {
+        for l in 0..2 * N {
             if is_type[l] {
                 nt += 1;
             }
         }
         if nt == 1 {
-            for l in 0..2 * n {
+            for l in 0..2 * N {
                 if is_type[l] {
                     count_this[l] += 1;
                 }
             }
         }
     }
-    // let m = count_this.max();
-    let mut m = 0;
-    for l in 0..2 * n {
-        m = max(m, count_this[l]);
-    }
-    let mut best = 0;
-    for l in 0..2 * n {
-        if count_this[l] == m {
-            best = l;
-        }
-    }
+    let m = *count_this.iter().max().unwrap();
+    let best = count_this
+        .iter()
+        .enumerate()
+        .rfind(|&v| *v.1 == m)
+        .unwrap()
+        .0;
     reverse_sort(&mut count_this);
     if count_this[0] > count_this[1] {
         best as i8
