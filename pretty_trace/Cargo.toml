@@ -23,7 +23,7 @@ string_utils = { version = "0.1", path = "../string_utils" }
 vector_utils = { version = "0.1", path = "../vector_utils" }
 
 [target.'cfg(not(windows))'.dependencies]
-pprof = { version = "0.6", features = ["protobuf"] }
+pprof = { version = "0.8", features = ["protobuf"] }
 
 [dev-dependencies]
 rayon = "1"
