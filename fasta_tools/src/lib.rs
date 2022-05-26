@@ -76,7 +76,7 @@ pub fn read_fasta_into_vec_dna_string_plus_headers(
 ) {
     let f = f.as_ref();
     match f.extension() {
-        Some(ex) if ex == "gz" => {
+        Some(ex) if ex != "gz" => {
             let fin = open_for_read![f];
             let mut last: String = String::new();
             let mut first = true;
