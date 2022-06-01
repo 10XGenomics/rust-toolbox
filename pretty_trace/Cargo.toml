@@ -16,14 +16,14 @@ backtrace = "0.3.40"
 io_utils = { version = "0.3", path = "../io_utils" }
 lazy_static = "1"
 libc = "0.2"
-nix = ">=0.19.1, <0.24"
+nix = ">=0.19.1, <0.25"
 stats_utils = { version = "0.1", path = "../stats_utils" }
 tables = { version = "0.1", path = "../tables" }
 string_utils = { version = "0.1", path = "../string_utils" }
 vector_utils = { version = "0.1", path = "../vector_utils" }
 
 [target.'cfg(not(windows))'.dependencies]
-pprof = { version = "0.6", features = ["protobuf"] }
+pprof = { version = ">=0.7,<0.10", features = ["prost-codec"] }
 
 [dev-dependencies]
 rayon = "1"
