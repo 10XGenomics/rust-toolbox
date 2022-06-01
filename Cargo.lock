@@ -331,9 +331,9 @@ version = "0.1.3"
 
 [[package]]
 name = "evalexpr"
-version = "7.0.0"
+version = "7.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0eb8c3fede1e2612da9d84fc2a20769b269c8a3d6d29e0854c22f336db343701"
+checksum = "6d12ade899353d57a81f2a76a772cecbd22c2931dac2ef946ab94de98f9803f7"
 
 [[package]]
 name = "exons"
