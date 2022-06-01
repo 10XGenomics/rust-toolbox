@@ -12,5 +12,5 @@ debruijn = "0.3"
 equiv = { version = "0.1", path = "../equiv" }
 graph_simple = { version = "0.1", path = "../graph_simple" }
 kmer_lookup = { version = "0.1", path = "../kmer_lookup" }
-petgraph = ">=0.5,<0.7"
+petgraph = ">=0.5, <0.7"
 vector_utils = { version = "0.1", path = "../vector_utils" }
