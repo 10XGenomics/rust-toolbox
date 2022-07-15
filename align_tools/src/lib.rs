@@ -11,6 +11,7 @@ use bio_edit::alignment::{
 use debruijn::dna_string::DnaString;
 use itertools::Itertools;
 use std::cmp::min;
+use std::fmt::Write;
 use string_utils::{stringme, strme};
 use vector_utils::reverse_sort;
 
@@ -104,21 +105,23 @@ pub fn summary_less(a: &Alignment) -> String {
     }
     reverse_sort(&mut del);
     reverse_sort(&mut ins);
-    let mut s = String::new();
     if sub == 0 && del.is_empty() && ins.is_empty() {
-        s = "0".to_string();
+        "0".to_string()
     } else {
-        if sub > 0 {
-            s = format!("{}", sub);
+        let mut s = if sub > 0 {
+            format!("{}", sub)
+        } else {
+            String::new()
+        };
+        s.reserve_exact(2 * (del.len() + ins.len()));
+        for d in del {
+            write!(s, "D{}", d).unwrap();
         }
-        for i in 0..del.len() {
-            s += &format!("D{}", del[i]);
+        for i in ins {
+            write!(s, "I{}", i).unwrap();
         }
-        for i in 0..ins.len() {
-            s += &format!("I{}", ins[i]);
-        }
+        s
     }
-    s
 }
 
 // Like summary, but show more detail on indels.

@@ -6,6 +6,7 @@
 // See also crate memmap.
 
 use itertools::Itertools;
+use std::fmt::Write as _;
 use std::io::Write;
 
 #[cfg(not(target_os = "windows"))]
@@ -66,11 +67,13 @@ pub fn binary_read_to_ref<T>(f: &mut std::fs::File, p: &mut T, n: usize) -> Resu
             #[cfg(not(target_os = "windows"))]
             {
                 let metadata = f.metadata()?;
-                msg += &mut format!(
-                    "File has length {} and inode {}.\n",
+                writeln!(
+                    msg,
+                    "File has length {} and inode {}.",
                     metadata.len(),
                     metadata.ino(),
-                );
+                )
+                .unwrap();
             }
             panic!("{}", msg);
         }
@@ -116,14 +119,14 @@ where
     binary_read_to_ref::<T>(f, &mut x[len], n)
 }
 
-pub fn binary_write_vec_vec<T>(f: &mut std::fs::File, x: &[Vec<T>]) -> Result<(), Error>
+pub fn binary_write_vec_vec<T>(f: &mut std::fs::File, x: &[impl AsRef<[T]>]) -> Result<(), Error>
 where
     T: BinaryInputOutputSafe,
 {
     let n = x.len();
     binary_write_from_ref::<usize>(f, &n, 1)?;
-    for i in 0..n {
-        binary_write_vec::<T>(f, &x[i])?;
+    for xi in x {
+        binary_write_vec::<T>(f, xi.as_ref())?;
     }
     Ok(())
 }
@@ -140,8 +143,8 @@ where
         x.reserve(extra);
     }
     x.resize(len + n, Vec::<T>::new());
-    for i in 0..n {
-        binary_read_vec::<T>(f, &mut x[i])?;
+    for xi in x.iter_mut().take(n) {
+        binary_read_vec::<T>(f, xi)?;
     }
     Ok(())
 }

@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.61.0
+          toolchain: 1.62.0
           components: rustfmt, clippy
           default: true
       - name: Checkout git repository
@@ -63,16 +63,17 @@ jobs:
           # more important ones.
           args: |
            --all-features --all-targets --locked --release --
-           -W clippy::wildcard_imports
+           -D clippy::perf
+           -D clippy::style
+           -D unused
+           -D clippy::redundant_closure_for_method_calls
+           -D clippy::wildcard_imports
            -W clippy::float_cmp
            -W future_incompatible
            -W nonstandard_style
            -W rust_2018_compatibility
            -W rust_2021_compatibility
            -F clippy::unused_io_amount
-           -D clippy::perf
-           -D unused
-           -W clippy::redundant_closure_for_method_calls
            -A clippy::many_single_char_names
            -A clippy::comparison_chain
            -A clippy::needless_range_loop
