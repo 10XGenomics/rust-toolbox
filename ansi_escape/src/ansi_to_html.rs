@@ -34,6 +34,7 @@
 // svg translation added
 
 use std::cmp::max;
+use std::fmt::Write;
 use string_utils::{strme, TextUtils};
 use vector_utils::VecUtils;
 
@@ -61,18 +62,19 @@ pub fn convert_text_with_ansi_escapes_to_svg(
         "xmlns=\"http://www.w3.org/2000/svg\">".to_string(),
     ];
     let mut max_width = 0;
-    for m in 0..lines0.len() {
-        let t = &lines0[m];
+    for (m, t) in lines0.into_iter().enumerate() {
         let mut width = 0;
         let mut svg = String::new();
-        svg += &format!(
+        write!(
+            svg,
             "<text x=\"{}\" y=\"{:.1}\" font-family=\"{}\" font-size=\"{}\" \
                 style=\"white-space: pre;\">",
             0,
             (m + 1) as f64 * vsep,
             font_family,
             font_size,
-        );
+        )
+        .unwrap();
         let y: Vec<char> = t.chars().collect();
         let mut states = Vec::<ColorState>::new();
         let mut current_state = ColorState::default();
@@ -105,10 +107,7 @@ pub fn convert_text_with_ansi_escapes_to_svg(
                     }
                     j += 1;
                 }
-                let mut e = Vec::<u8>::new();
-                for m in i..=j {
-                    e.push(y[m] as u8);
-                }
+                let e = y[i..=j].iter().map(|&ym| ym as u8).collect::<Vec<_>>();
                 states.push(ansi_escape_to_color_state(&e));
                 i = j + 1;
             }
@@ -122,8 +121,8 @@ pub fn convert_text_with_ansi_escapes_to_svg(
     }
     lines[1] = format!("viewBox=\"0 0 {} {}\"", max_width as f64 * hsep, height);
     let mut svg = String::new();
-    for i in 0..lines.len() {
-        svg += &lines[i];
+    for line in lines {
+        svg += line.as_str();
         svg += "\n";
     }
     svg += "</svg>\n";
@@ -172,10 +171,7 @@ pub fn convert_text_with_ansi_escapes_to_html(
                 }
                 j += 1;
             }
-            let mut e = Vec::<u8>::new();
-            for m in i..=j {
-                e.push(y[m] as u8);
-            }
+            let e = y[i..=j].iter().map(|&ym| ym as u8).collect::<Vec<_>>();
             states.push(ansi_escape_to_color_state(&e));
             i = j + 1;
         }
@@ -201,14 +197,14 @@ pub fn compress_ansi_escapes(x: &str) -> String {
         if y[i] != '' {
             if !escapes.is_empty() {
                 let mut states = Vec::<ColorState>::new();
-                for j in 0..escapes.len() {
-                    states.push(ansi_escape_to_color_state(&pack_ansi_escape(&escapes[j])));
+                for e in &escapes {
+                    states.push(ansi_escape_to_color_state(&pack_ansi_escape(e)));
                 }
                 let new_state = merge(&states);
                 if new_state != old_state {
                     let mut end = None;
-                    for i in 0..escapes.len() {
-                        if escapes[i].solo() && escapes[i][0] == 0 {
+                    for (i, e) in escapes.iter().enumerate() {
+                        if e.solo() && e[0] == 0 {
                             end = Some(i);
                         }
                     }
@@ -280,10 +276,7 @@ pub fn compress_ansi_escapes(x: &str) -> String {
                 }
                 j += 1;
             }
-            let mut e = Vec::<u8>::new();
-            for m in i..=j {
-                e.push(y[m] as u8);
-            }
+            let e = y[i..=j].iter().map(|&ym| ym as u8).collect::<Vec<_>>();
             escapes.push(unpack_ansi_escape(&e));
             i = j + 1;
         }
@@ -342,12 +335,10 @@ fn unpack_ansi_escape(x: &[u8]) -> Vec<u8> {
     }
     assert_eq!(x[1], b'[');
     assert_eq!(x[n - 1], b'm');
-    let s = x[2..n - 1].split(|c| *c == b';').collect::<Vec<&[u8]>>();
-    let mut y = Vec::<u8>::new();
-    for i in 0..s.len() {
-        y.push(strme(s[i]).force_usize() as u8);
-    }
-    y
+    x[2..n - 1]
+        .split(|c| *c == b';')
+        .map(|si| strme(si).force_usize() as u8)
+        .collect()
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -355,12 +346,13 @@ fn unpack_ansi_escape(x: &[u8]) -> Vec<u8> {
 // Reverse the process.
 
 fn pack_ansi_escape(y: &[u8]) -> Vec<u8> {
-    let mut x = b"[".to_vec();
-    for i in 0..y.len() {
+    let mut x = Vec::with_capacity(3 + 3 * y.len());
+    x.extend(b"[");
+    for (i, &yi) in y.iter().enumerate() {
         if i > 0 {
             x.push(b';');
         }
-        x.append(&mut format!("{}", y[i]).as_bytes().to_vec());
+        x.extend(format!("{}", yi).as_bytes());
     }
     x.push(b'm');
     x
@@ -398,10 +390,10 @@ impl ColorState {
         } else {
             let mut s = "<span style=\"".to_string();
             if !self.color.is_empty() {
-                s += &format!("color:{};", self.color);
+                write!(s, "color:{};", self.color).unwrap();
             }
             if !self.background.is_empty() {
-                s += &format!("background-color:{};", self.background);
+                write!(s, "background-color:{};", self.background).unwrap();
             }
             if self.bold {
                 s += "font-weight:bold;"
@@ -419,7 +411,7 @@ impl ColorState {
         } else {
             let mut s = "<tspan style=\"".to_string();
             if !self.color.is_empty() {
-                s += &format!("fill: {};", self.color);
+                write!(s, "fill: {};", self.color).unwrap();
             }
             if self.bold {
                 s += "font-weight: bold;"
@@ -434,15 +426,15 @@ impl ColorState {
 
 fn merge(s: &[ColorState]) -> ColorState {
     let mut x = ColorState::default();
-    for i in 0..s.len() {
-        if s[i].null() {
+    for si in s {
+        if si.null() {
             x.color = String::new();
             x.background = String::new();
             x.bold = false;
-        } else if !s[i].color.is_empty() {
-            x.color = s[i].color.clone();
-        } else if !s[i].background.is_empty() {
-            x.background = s[i].background.clone();
+        } else if !si.color.is_empty() {
+            x.color = si.color.clone();
+        } else if !si.background.is_empty() {
+            x.background = si.background.clone();
         } else {
             x.bold = true;
         }

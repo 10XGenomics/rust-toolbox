@@ -149,6 +149,7 @@ use backtrace::Backtrace;
 use io_utils::open_for_write_new;
 use lazy_static::lazy_static;
 use libc::SIGINT;
+use std::fmt::Write as _;
 
 #[cfg(not(target_os = "windows"))]
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
@@ -242,9 +243,8 @@ pub fn stop_profiling() {
             let m = &frames.frames;
             n += count;
             let mut symv = Vec::<Vec<String>>::new();
-            for i in 0..m.len() {
-                for j in 0..m[i].len() {
-                    let s = &m[i][j];
+            for mi in m {
+                for s in mi {
                     let mut name = s.name();
                     if name.ends_with("::{{closure}}") {
                         name = name.rev_before("::{{closure}}").to_string();
@@ -332,24 +332,28 @@ pub fn stop_profiling() {
         traces.sort();
         let mut freq = Vec::<(u32, String)>::new();
         make_freq(&traces, &mut freq);
-        let mut report = String::new();
+        let mut report = String::with_capacity(61 + 40 * freq.len());
         let traced = 100.0 * traces.len() as f64 / n as f64;
-        report += &format!(
+        write!(
+            report,
             "\nPRETTY TRACE PROFILE\n\nTRACED = {:.1}%\n\nTOTAL = {}\n\n",
             traced,
             traces.len()
-        );
+        )
+        .unwrap();
         let mut total = 0;
         for (i, x) in freq.iter().enumerate() {
             total += x.0 as usize;
-            report += &format!(
+            write!(
+                report,
                 "[{}] COUNT = {} = {:.2}% ⮕ {:.2}%\n{}\n",
                 i + 1,
                 x.0,
                 percent_ratio(x.0 as usize, traces.len()),
                 percent_ratio(total, traces.len()),
                 x.1
-            );
+            )
+            .unwrap();
         }
         print!("{}", report);
     };
@@ -1111,7 +1115,7 @@ fn prettify_traceback(bt: &[u8], whitelist: &[String], pack: bool) -> String {
             j += 1;
         }
         while j < s.len() {
-            if !(s[j] as char).is_digit(10) {
+            if !(s[j] as char).is_ascii_digit() {
                 break;
             }
             j += 1;
@@ -1425,15 +1429,10 @@ mod tests {
                     println!("TESTING THE PANIC FOR CORRECTNESS");
                     println!("{}", bar);
                     let s = strme(&buffer);
-                    let mut have_main = false;
-                    let lines: Vec<&str> = s.split_terminator('\n').collect();
-                    for i in 0..lines.len() {
+                    let have_main = s.split_terminator('\n').any(|line|
                         // Test relaxed here because on an AWS box, we did not see the ::looper part.
                         // if lines[i].contains("pretty_trace::tests::looper") {
-                        if lines[i].contains("pretty_trace::tests") {
-                            have_main = true;
-                        }
-                    }
+                        line.contains("pretty_trace::tests"));
                     if have_main {
                         println!("\ngood: found inner loop\n");
                     } else {

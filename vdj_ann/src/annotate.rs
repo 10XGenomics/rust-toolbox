@@ -17,6 +17,7 @@ use io_utils::{fwrite, fwriteln};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use stats_utils::percent_ratio;
+use std::fmt::Write as _;
 use std::{
     cmp::{max, min},
     fs::File,
@@ -341,15 +342,13 @@ pub fn annotate_seq_core(
     unique_sort(&mut offsets);
     const MM_START: i32 = 150;
     const MM: i32 = 10;
-    for m in 0..offsets.len() {
-        let t = offsets[m].0;
-        let off = offsets[m].1; // ref_start - tig_start
+    for (t, off) in offsets {
         let mut tig_starts = Vec::<i32>::new();
         let mut total = 0;
-        for i in 0..perf.len() {
-            if perf[i].0 == t && perf[i].1 == off {
-                tig_starts.push(perf[i].2);
-                total += perf[i].3;
+        for pi in &perf {
+            if pi.0 == t && pi.1 == off {
+                tig_starts.push(pi.2);
+                total += pi.3;
             }
         }
         if total < MM_START {
@@ -2659,16 +2658,8 @@ pub fn get_cdr3(tig: &DnaStringSlice, cdr3: &mut Vec<(usize, Vec<u8>, usize, usi
 
     // Only return cdr3s having the maximum score.
 
-    let mut m = 0;
-    for i in 0..cdr3.len() {
-        m = max(m, cdr3[i].2 + cdr3[i].3);
-    }
-    let mut to_delete = vec![false; cdr3.len()];
-    for i in 0..cdr3.len() {
-        if cdr3[i].2 + cdr3[i].3 < m {
-            to_delete[i] = true;
-        }
-    }
+    let m = cdr3.iter().map(|cdi| cdi.2 + cdi.3).max().unwrap_or(0);
+    let to_delete = cdr3.iter().map(|cdi| cdi.2 + cdi.3 < m).collect::<Vec<_>>();
     erase_if(cdr3, &to_delete);
     cdr3.sort();
 
@@ -2854,27 +2845,27 @@ impl AnnotationUnit {
         let len1 = ann[0].1 as usize;
         let right1 = b.len() - left1 - len1;
         if left1 > 0 {
-            cig += &format!("{}S", left1);
+            write!(cig, "{}S", left1).unwrap();
         }
-        cig += &format!("{}M", len1);
+        write!(cig, "{}M", len1).unwrap();
         if na == 1 && right1 > 0 {
-            cig += &format!("{}S", right1);
+            write!(cig, "{}S", right1).unwrap();
         }
         if na == 2 {
             let n1 = ann[1].0 - ann[0].0 - ann[0].1;
             let n2 = ann[1].3 - ann[0].3 - ann[0].1;
             if n1 == 0 {
-                cig += &format!("{}D", n2);
+                write!(cig, "{}D", n2).unwrap();
             }
             if n2 == 0 {
-                cig += &format!("{}I", n1);
+                write!(cig, "{}I", n1).unwrap();
             }
             let left2 = ann[1].0 as usize;
             let len2 = ann[1].1 as usize;
             let right2 = b.len() - left2 - len2;
-            cig += &format!("{}M", len2);
+            write!(cig, "{}M", len2).unwrap();
             if right2 > 0 {
-                cig += &format!("{}S", right2);
+                write!(cig, "{}S", right2).unwrap();
             }
         }
 

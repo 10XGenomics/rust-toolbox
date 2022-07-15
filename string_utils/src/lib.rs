@@ -3,6 +3,7 @@
 // This file contains some miscellaneous string utilities.
 
 use std::cmp::max;
+use std::fmt::Write;
 use vector_utils::next_diff;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -158,8 +159,8 @@ pub fn parse_csv(x: &str) -> Vec<String> {
             stop -= 1;
         }
         let mut s = String::new();
-        for m in start..stop {
-            s.push(w[m]);
+        for &ch in &w[start..stop] {
+            s.push(ch);
         }
         y.push(s);
         i = j + 1;
@@ -191,9 +192,9 @@ pub fn abbrev_list<T: Eq + std::fmt::Display>(x: &[T]) -> String {
         }
         let j = next_diff(x, i);
         if j - i == 1 {
-            s.push_str(&format!("{}", x[i]));
+            write!(s, "{}", x[i]).unwrap();
         } else {
-            s.push_str(&format!("{}^{}", x[i], j - i));
+            write!(s, "{}^{}", x[i], j - i).unwrap();
         }
         i = j;
     }

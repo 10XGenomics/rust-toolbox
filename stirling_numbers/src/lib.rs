@@ -216,11 +216,11 @@ mod tests {
             let group = 1000;
             assert!(count % group == 0);
             let mut rng: StdRng = SeedableRng::from_seed([0_u8; 32]);
-            let mut seeds = Vec::<[u8; 32]>::new();
+            let mut seeds = Vec::<[u8; 32]>::with_capacity(group);
             for _ in 0..group {
                 let mut x = [0_u8; 32];
-                for j in 0..x.len() {
-                    x[j] = rng.gen_range(0..255);
+                for xj in x.iter_mut() {
+                    *xj = rng.gen_range(0..255);
                 }
                 seeds.push(x);
             }
