@@ -21,5 +21,5 @@ description = "Some tools that are 'internal' for now because they are insuffici
 repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
-bio-types = "0.12"
+bio-types = ">= 0.12, < 1"
 bit-set = "0.5"
