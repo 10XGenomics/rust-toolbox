@@ -9,7 +9,7 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
 
-evalexpr = "7"
+evalexpr = ">=7, <9"
 statrs = "0.15"
 string_utils = { version = "0.1", path = "../string_utils" }
 vector_utils = { version = "0.1", path = "../vector_utils" }
