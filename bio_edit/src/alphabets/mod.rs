@@ -7,7 +7,7 @@ use std::borrow::Borrow;
 
 use bit_set::BitSet;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Alphabet {
     pub symbols: BitSet,
 }
