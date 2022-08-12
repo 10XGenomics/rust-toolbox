@@ -870,7 +870,7 @@ fn force_pretty_trace_fancy(
         }
         let msg = match info.location() {
             Some(location) => {
-                let loc = &(*location.file());
+                let loc = location.file();
 
                 // Replace long constructs of the form /rustc/......./src/
                 //                                  by /rustc/<stuff>/src/.

@@ -32,7 +32,8 @@ pub fn have_stop(b: &DnaString, j: usize) -> bool {
 
 pub fn aa3_to_aa(aa3: &[u8]) -> u8 {
     assert!(aa3.len() == 3);
-    let aa = match aa3 {
+
+    match aa3 {
         b"ALA" => b'A',
         b"ARG" => b'R',
         b"ASN" => b'N',
@@ -54,13 +55,13 @@ pub fn aa3_to_aa(aa3: &[u8]) -> u8 {
         b"TYR" => b'Y',
         b"VAL" => b'V',
         _ => panic!("Unexpected three-letter amino acid code {}.", strme(aa3)),
-    };
-    aa
+    }
 }
 
 pub fn codon_to_aa(codon: &[u8]) -> u8 {
     assert!(codon.len() == 3);
-    let aa = match codon {
+
+    match codon {
         b"GGT" => b'G',
         b"GGC" => b'G',
         b"GGA" => b'G',
@@ -126,8 +127,7 @@ pub fn codon_to_aa(codon: &[u8]) -> u8 {
         b"TAA" => b'*',
         b"TGA" => b'*',
         _ => panic!("Unexpected codon {}.", strme(codon)),
-    };
-    aa
+    }
 }
 
 // Convert a given DNA sequence to amino acids, starting at a given position.
