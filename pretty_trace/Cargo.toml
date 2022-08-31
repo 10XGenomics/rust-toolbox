@@ -1,7 +1,7 @@
 [package]
 name = "pretty_trace"
 # When version is bumped, version in README.md also needs to be bumped.
-version = "0.5.23"
+version = "0.5.24"
 authors = ["David Jaffe <david.jaffe@10xgenomics.com>"]
 license = "MIT"
 description = "Tools for generating pretty tracebacks and for profiling."
@@ -13,17 +13,20 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
 backtrace = "0.3.40"
-io_utils = { version = "0.3", path = "../io_utils" }
+io_utils = { version = "0.3", path = "../io_utils", optional = true }
 lazy_static = "1"
 libc = "0.2"
 nix = ">=0.19.1, <0.25"
-stats_utils = { version = "0.1", path = "../stats_utils" }
-tables = { version = "0.1", path = "../tables" }
+stats_utils = { version = "0.1", path = "../stats_utils", optional = true }
+tables = { version = "0.1", path = "../tables", optional = true }
 string_utils = { version = "0.1", path = "../string_utils" }
 vector_utils = { version = "0.1", path = "../vector_utils" }
 
 [target.'cfg(not(windows))'.dependencies]
-pprof = { version = ">=0.7,<0.10", features = ["prost-codec"] }
+pprof = { version = ">=0.7,<0.10", features = ["prost-codec"], optional = true }
+
+[features]
+pprof = ["dep:pprof", "dep:io_utils", "dep:stats_utils", "dep:tables"]
 
 [dev-dependencies]
 rayon = "1"

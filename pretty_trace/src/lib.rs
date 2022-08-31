@@ -146,9 +146,11 @@
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 use backtrace::Backtrace;
+#[cfg(all(not(target_os = "windows"), feature = "pprof"))]
 use io_utils::open_for_write_new;
 use lazy_static::lazy_static;
 use libc::SIGINT;
+#[cfg(all(not(target_os = "windows"), feature = "pprof"))]
 use std::fmt::Write as _;
 
 #[cfg(not(target_os = "windows"))]
@@ -157,12 +159,13 @@ use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal
 #[cfg(not(target_os = "windows"))]
 use nix::Error;
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(all(not(target_os = "windows"), feature = "pprof"))]
 use pprof::protos::Message;
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(all(not(target_os = "windows"), feature = "pprof"))]
 use pprof::ProfilerGuard;
 
+#[cfg(all(not(target_os = "windows"), feature = "pprof"))]
 use stats_utils::percent_ratio;
 use std::{
     collections::HashMap,
@@ -185,19 +188,23 @@ use std::{
 use std::os::unix::io::FromRawFd;
 
 use string_utils::{stringme, strme, TextUtils};
+#[cfg(all(not(target_os = "windows"), feature = "pprof"))]
 use tables::print_tabular_vbox;
-use vector_utils::{contains_at, erase_if, make_freq};
+#[cfg(all(not(target_os = "windows"), feature = "pprof"))]
+use vector_utils::make_freq;
+use vector_utils::{contains_at, erase_if};
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // PROFILING
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(all(not(target_os = "windows"), feature = "pprof"))]
 static mut GUARD: Option<ProfilerGuard<'static>> = None;
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(all(not(target_os = "windows"), feature = "pprof"))]
 static mut REPORT: Option<pprof::Report> = None;
 
+#[cfg(all(not(target_os = "windows"), feature = "pprof"))]
 static mut BLACKLIST: Vec<String> = Vec::new();
 
 /// Start profiling, blacklisting the given crates.  
@@ -212,7 +219,7 @@ static mut BLACKLIST: Vec<String> = Vec::new();
 ///
 /// Profiling <i>appears</i> to correctly represent wallclock in parallel loops.
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(all(not(target_os = "windows"), feature = "pprof"))]
 pub fn start_profiling(blacklist: &[String]) {
     let frequency = 1000;
     unsafe {
@@ -225,7 +232,7 @@ pub fn start_profiling(blacklist: &[String]) {
 /// This assumes that you have called start_profiling.
 /// The functions stop_profiling and dump_profiling_as_proto can both be run, in either order.
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(all(not(target_os = "windows"), feature = "pprof"))]
 pub fn stop_profiling() {
     unsafe {
         if REPORT.is_none() {
@@ -363,7 +370,7 @@ pub fn stop_profiling() {
 /// This assumes that you have called start_profiling.
 /// The functions stop_profiling and dump_profiling_as_proto can both be run, in either order.
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(all(not(target_os = "windows"), feature = "pprof"))]
 pub fn dump_profiling_as_proto(f: &str) {
     unsafe {
         if REPORT.is_none() {
