@@ -2,6 +2,8 @@
 
 // This file contains miscellaneous vector utilities.
 
+use std::borrow::Borrow;
+
 use superslice::Ext;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -216,18 +218,24 @@ pub fn make_freq<T: Ord + Clone>(x: &[T], freq: &mut Vec<(u32, T)>) {
 // MEMBERSHIP
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
+// Like binary_search, but allows searching by a different type from what's in
+// the slice, e.g. searching a &[String] for a &str.
+fn borrowed_binary_search<T: Ord + ?Sized>(x: &[impl Borrow<T>], d: &T) -> Result<usize, usize> {
+    x.binary_search_by(|p| p.borrow().cmp(d))
+}
+
 // Test to see if a sorted vector contains a given element.
 
-pub fn bin_member<T: Ord>(x: &[T], d: &T) -> bool {
-    x.binary_search(d).is_ok()
+pub fn bin_member<T: Ord + ?Sized>(x: &[impl Borrow<T>], d: &T) -> bool {
+    borrowed_binary_search(x, d).is_ok()
 }
 
 // Return the position of an element in an unsorted vector.
 // Returns -1 if not present.
 
-pub fn position<T: Ord>(x: &[T], d: &T) -> i32 {
+pub fn position<T: Ord + ?Sized>(x: &[impl Borrow<T>], d: &T) -> i32 {
     for (i, y) in x.iter().enumerate() {
-        if y == d {
+        if y.borrow() == d {
             return i as i32;
         }
     }
@@ -237,39 +245,45 @@ pub fn position<T: Ord>(x: &[T], d: &T) -> i32 {
 // Return the position of an element in a sorted vector, or using just the first
 // position.  Returns -1 if not present.
 
-pub fn bin_position<T: Ord>(x: &[T], d: &T) -> i32 {
-    match x.binary_search(d) {
+pub fn bin_position<T: Ord + ?Sized>(x: &[impl Borrow<T>], d: &T) -> i32 {
+    match borrowed_binary_search(x, d) {
         Ok(p) => p as i32,
         Err(_e) => -1,
     }
 }
 
-pub fn bin_position1_2<S: Ord, T: Ord>(x: &[(S, T)], d: &S) -> i32 {
-    match x.binary_search_by_key(&d, |&(ref a, ref _b)| a) {
+pub fn bin_position1_2<S: Ord + ?Sized, T: Ord>(x: &[(impl Borrow<S>, T)], d: &S) -> i32 {
+    match x.binary_search_by_key(&d, |&(ref a, ref _b)| a.borrow()) {
         Ok(p) => p as i32,
         Err(_e) => -1,
     }
 }
 
-pub fn bin_position1_3<S: Ord, T: Ord, U: Ord>(x: &[(S, T, U)], d: &S) -> i32 {
-    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c)| a) {
-        Ok(p) => p as i32,
-        Err(_e) => -1,
-    }
-}
-
-pub fn bin_position1_4<S: Ord, T: Ord, U: Ord, V: Ord>(x: &[(S, T, U, V)], d: &S) -> i32 {
-    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c, ref _d)| a) {
-        Ok(p) => p as i32,
-        Err(_e) => -1,
-    }
-}
-
-pub fn bin_position1_5<S: Ord, T: Ord, U: Ord, V: Ord, W: Ord>(
-    x: &[(S, T, U, V, W)],
+pub fn bin_position1_3<S: Ord + ?Sized, T: Ord, U: Ord>(
+    x: &[(impl Borrow<S>, T, U)],
     d: &S,
 ) -> i32 {
-    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c, ref _d, ref _e)| a) {
+    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c)| a.borrow()) {
+        Ok(p) => p as i32,
+        Err(_e) => -1,
+    }
+}
+
+pub fn bin_position1_4<S: Ord + ?Sized, T: Ord, U: Ord, V: Ord>(
+    x: &[(impl Borrow<S>, T, U, V)],
+    d: &S,
+) -> i32 {
+    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c, ref _d)| a.borrow()) {
+        Ok(p) => p as i32,
+        Err(_e) => -1,
+    }
+}
+
+pub fn bin_position1_5<S: Ord + ?Sized, T: Ord, U: Ord, V: Ord, W: Ord>(
+    x: &[(impl Borrow<S>, T, U, V, W)],
+    d: &S,
+) -> i32 {
+    match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c, ref _d, ref _e)| a.borrow()) {
         Ok(p) => p as i32,
         Err(_e) => -1,
     }
@@ -277,34 +291,42 @@ pub fn bin_position1_5<S: Ord, T: Ord, U: Ord, V: Ord, W: Ord>(
 
 // Find lower/upper bounds.
 
-pub fn lower_bound<T: Ord>(x: &[T], d: &T) -> i64 {
-    x.lower_bound(d) as i64
+fn lower_bound_usize<T: Ord + ?Sized>(x: &[impl Borrow<T>], d: &T) -> usize {
+    x.lower_bound_by(|y| y.borrow().cmp(d))
 }
 
-pub fn upper_bound<T: Ord>(x: &[T], d: &T) -> i64 {
-    x.upper_bound(d) as i64
+pub fn lower_bound<T: Ord + ?Sized>(x: &[impl Borrow<T>], d: &T) -> i64 {
+    lower_bound_usize(x, d) as i64
 }
 
-pub fn lower_bound1_2<S: Ord, T: Ord>(x: &[(S, T)], d: &S) -> i64 {
-    x.lower_bound_by_key(&d, |(a, _b)| a) as i64
+fn upper_bound_usize<T: Ord + ?Sized>(x: &[impl Borrow<T>], d: &T) -> usize {
+    x.upper_bound_by(|y| y.borrow().cmp(d))
 }
 
-pub fn upper_bound1_2<S: Ord, T: Ord>(x: &[(S, T)], d: &S) -> i64 {
-    x.upper_bound_by_key(&d, |(a, _b)| a) as i64
+pub fn upper_bound<T: Ord + ?Sized>(x: &[impl Borrow<T>], d: &T) -> i64 {
+    upper_bound_usize(x, d) as i64
 }
 
-pub fn lower_bound1_3<S: Ord, T: Ord, U: Ord>(x: &[(S, T, U)], d: &S) -> i64 {
-    x.lower_bound_by_key(&d, |(a, _b, _c)| a) as i64
+pub fn lower_bound1_2<S: Ord + ?Sized, T: Ord>(x: &[(impl Borrow<S>, T)], d: &S) -> i64 {
+    x.lower_bound_by_key(&d, |(a, _b)| a.borrow()) as i64
 }
 
-pub fn upper_bound1_3<S: Ord, T: Ord, U: Ord>(x: &[(S, T, U)], d: &S) -> i64 {
-    x.upper_bound_by_key(&d, |(a, _b, _c)| a) as i64
+pub fn upper_bound1_2<S: Ord + ?Sized, T: Ord>(x: &[(impl Borrow<S>, T)], d: &S) -> i64 {
+    x.upper_bound_by_key(&d, |(a, _b)| a.borrow()) as i64
+}
+
+pub fn lower_bound1_3<S: Ord + ?Sized, T: Ord, U: Ord>(x: &[(impl Borrow<S>, T, U)], d: &S) -> i64 {
+    x.lower_bound_by_key(&d, |(a, _b, _c)| a.borrow()) as i64
+}
+
+pub fn upper_bound1_3<S: Ord + ?Sized, T: Ord, U: Ord>(x: &[(impl Borrow<S>, T, U)], d: &S) -> i64 {
+    x.upper_bound_by_key(&d, |(a, _b, _c)| a.borrow()) as i64
 }
 
 // Compute the number of instances of a given element in a sorted vector.
 
-pub fn count_instances<T: Ord>(x: &[T], d: &T) -> i32 {
-    (x.upper_bound(d) - x.lower_bound(d)) as i32
+pub fn count_instances<T: Ord + ?Sized>(x: &[impl Borrow<T>], d: &T) -> i32 {
+    (upper_bound_usize(x, d) - lower_bound_usize(x, d)) as i32
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
