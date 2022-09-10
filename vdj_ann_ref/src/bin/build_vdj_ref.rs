@@ -443,7 +443,7 @@ fn main() {
     // genomics.  If the bool field ("fw") is false, the given coordinates are used
     // to extract a sequence, and then it is reversed.
 
-    let excluded_genes = vec![];
+    let excluded_genes = Vec::<&str>::new();
     let mut allowed_pseudogenes = Vec::<&str>::new();
     let mut deleted_genes = Vec::<&str>::new();
     let mut added_genes = Vec::<(&str, &str, usize, usize, bool)>::new();
