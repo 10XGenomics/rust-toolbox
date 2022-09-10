@@ -1231,12 +1231,12 @@ fn main() {
             if rheaders.len() == all_chrs.len() {
                 break;
             }
-            let mut h = s.get(1..).unwrap().to_string();
+            let mut h = s.get(1..).unwrap();
             if h.contains(' ') {
-                h = h.before(" ").to_string();
+                h = h.before(" ");
             }
-            if bin_member(&all_chrs, &h) {
-                rheaders.push(h.clone());
+            if bin_member(&all_chrs, h) {
+                rheaders.push(h.to_string());
                 using = true;
             } else {
                 using = false;
