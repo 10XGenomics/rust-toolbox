@@ -39,7 +39,7 @@ pub fn vars_of_node(n: &evalexpr::Node) -> Vec<String> {
 pub fn test_functions_in_node(n: &evalexpr::Node) -> Result<(), String> {
     let x = evalexpr_function_names();
     for i in n.iter_function_identifiers() {
-        if !bin_member(&x, &(*i).to_string()) {
+        if !bin_member(&x, i) {
             return Err(format!("Unknown function name {} in expression.", i));
         }
     }
