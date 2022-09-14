@@ -692,6 +692,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "nix"
+version = "0.24.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "195cdbc1741b8134346d515b3a56a1c94b0912758009cfd53f99ea0f57b065fc"
+dependencies = [
+ "bitflags",
+ "cfg-if",
+ "libc",
+ "memoffset",
+]
+
+[[package]]
 name = "num-bigint"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -833,7 +845,7 @@ dependencies = [
  "findshlibs",
  "libc",
  "log",
- "nix",
+ "nix 0.23.1",
  "once_cell",
  "parking_lot",
  "prost",
@@ -859,7 +871,7 @@ dependencies = [
  "io_utils",
  "lazy_static",
  "libc",
- "nix",
+ "nix 0.24.2",
  "pprof",
  "rayon",
  "stats_utils",
