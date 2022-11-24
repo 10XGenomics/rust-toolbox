@@ -56,9 +56,8 @@ jobs:
         run: cargo clean
       - name: Deny duplicate dependencies and check licenses
         run: cargo deny --locked check
-      - uses: actions-rs/clippy-check@v1
+      - uses: 10XGenomics/clippy-check@main
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           # TODO: re-enable some the -A lints below once we're clean on other
           # more important ones.
           args: |
