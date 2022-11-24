@@ -15,40 +15,39 @@ jobs:
   rust:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.63.0
+          toolchain: 1.65.0
           components: rustfmt, clippy
-          default: true
       - name: Checkout git repository
         uses: actions/checkout@master
       - name: Check Rust formatting
         run: cargo fmt -- --check
       - name: Install cargo-deny
         run: |
-          wget https://github.com/EmbarkStudios/cargo-deny/releases/download/0.12.2/cargo-deny-0.12.2-x86_64-unknown-linux-musl.tar.gz
-          tar -xvf cargo-deny-0.12.2-x86_64-unknown-linux-musl.tar.gz
+          wget https://github.com/EmbarkStudios/cargo-deny/releases/download/0.13.5/cargo-deny-0.13.5-x86_64-unknown-linux-musl.tar.gz
+          tar -xvf cargo-deny-0.13.5-x86_64-unknown-linux-musl.tar.gz
           mkdir -p ~/bin/
-          cp cargo-deny-0.12.2-x86_64-unknown-linux-musl/cargo-deny ~/bin/
+          cp cargo-deny-0.13.5-x86_64-unknown-linux-musl/cargo-deny ~/bin/
           rm -r cargo-deny-*
           echo "$HOME/bin" >> $GITHUB_PATH
       - name: Cache cargo registry
         uses: actions/cache@v3
         with:
           path: ~/.cargo/registry
-          key: ${{runner.os}}-cargo-registry-${{hashFiles('**/*.rs')}}
+          key: ${{runner.os}}-cargo-registry-${{hashFiles('Cargo.lock')}}
           restore-keys: ${{runner.os}}-cargo-registry-
       - name: Cache cargo git index
         uses: actions/cache@v3
         with:
           path: ~/.cargo/git
-          key: ${{runner.os}}-cargo-git-${{hashFiles('**/*.rs')}}
+          key: ${{runner.os}}-cargo-git-${{hashFiles('Cargo.lock')}}
           restore-keys: ${{runner.os}}-cargo-git-
       - name: Cache cargo build --release --all-targets
         uses: actions/cache@v3
         with:
           path: target
-          key: ${{runner.os}}-cargo-target-${{hashFiles('**/*.rs')}}
+          key: ${{runner.os}}-cargo-target-${{hashFiles('Cargo.lock')}}-${{hashFiles('**/Cargo.toml')}}
           restore-keys: |
             ${{runner.os}}-cargo-target-
       - name: Remove the Cargo target directory
