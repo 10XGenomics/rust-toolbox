@@ -39,7 +39,7 @@ pub fn read_fasta_to_vec_vec_u8(f: impl AsRef<Path>) -> Vec<Vec<u8>> {
             x.push(last.as_bytes().to_vec());
         }
         _ => {
-            let gz = MultiGzDecoder::new(std::fs::File::open(&f).unwrap());
+            let gz = MultiGzDecoder::new(std::fs::File::open(f).unwrap());
             let fin = std::io::BufReader::new(gz);
             let mut last: String = String::new();
             let mut first = true;
@@ -99,7 +99,7 @@ pub fn read_fasta_into_vec_dna_string_plus_headers(
             dv.push(DnaString::from_dna_string(&last));
         }
         _ => {
-            let gz = MultiGzDecoder::new(std::fs::File::open(&f).unwrap());
+            let gz = MultiGzDecoder::new(std::fs::File::open(f).unwrap());
             let fin = std::io::BufReader::new(gz);
             let mut last: String = String::new();
             let mut first = true;

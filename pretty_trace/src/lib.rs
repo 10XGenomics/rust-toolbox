@@ -946,7 +946,7 @@ fn force_pretty_trace_fancy(
                      █ a string.  This is weird and might result in a defective traceback.\n\n";
                     }
                     Some(ex) => {
-                        let f = File::open(&ex);
+                        let f = File::open(ex);
                         if f.is_err() {
                             out +=
                             "█ WARNING.  Your executable file could not be opened for reading.\n\
@@ -1249,7 +1249,7 @@ fn prettify_traceback(bt: &[u8], whitelist: &[String], pack: bool) -> String {
             // Don't allow blocklets whose first line has the form ... main(...).
 
             let m = " main (";
-            if s.contains(&m) && s.after(m).contains(')') && !s.between(m, ")").contains('(') {
+            if s.contains(m) && s.after(m).contains(')') && !s.between(m, ")").contains('(') {
                 to_delete[j] = true;
             }
         }

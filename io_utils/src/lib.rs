@@ -16,7 +16,7 @@ use string_utils::TextUtils;
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 pub fn dir_list(d: &str) -> Vec<String> {
-    let x = fs::read_dir(&d).unwrap_or_else(|_| panic!("failed to read directory {}", d));
+    let x = fs::read_dir(d).unwrap_or_else(|_| panic!("failed to read directory {}", d));
     let mut y = Vec::<String>::new();
     for f in x {
         let s: String = f.unwrap().file_name().into_string().unwrap();

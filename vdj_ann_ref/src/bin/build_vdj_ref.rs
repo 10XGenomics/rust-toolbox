@@ -991,13 +991,13 @@ fn main() {
                     .expect("gunzip failed");
             }
             Command::new("git")
-                .current_dir(&internal)
+                .current_dir(internal)
                 .arg("add")
                 .arg(&path)
                 .status()
                 .expect("git add failed");
             Command::new("git")
-                .current_dir(&internal)
+                .current_dir(internal)
                 .arg("commit")
                 .arg(path)
                 .status()
