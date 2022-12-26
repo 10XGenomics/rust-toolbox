@@ -16,7 +16,6 @@ exons = { version = "0.1", path = "../exons" }
 fasta_tools =  { version = "0.1", path = "../fasta_tools" }
 flate2 = "1"
 io_utils = { version = "0.3", path = "../io_utils" }
-kmer_lookup = { version = "0.1", path = "../kmer_lookup" }
 perf_stats = { version = "0.1", path = "../perf_stats" }
 pretty_trace = { version = "0.5", path = "../pretty_trace" }
 sha2 = ">=0.9.3, <0.11"
