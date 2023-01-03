@@ -23,7 +23,7 @@ string_utils = { version = "0.1", path = "../string_utils" }
 vector_utils = { version = "0.1", path = "../vector_utils" }
 
 [target.'cfg(not(windows))'.dependencies]
-pprof = { version = ">=0.7,<0.10", features = ["prost-codec"], optional = true }
+pprof = { version = ">=0.7, <0.12", features = ["prost-codec"], optional = true }
 
 [features]
 pprof = ["dep:pprof", "dep:io_utils", "dep:stats_utils", "dep:tables"]
