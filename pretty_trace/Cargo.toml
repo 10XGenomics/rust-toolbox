@@ -16,7 +16,7 @@ backtrace = "0.3.40"
 io_utils = { version = "0.3", path = "../io_utils", optional = true }
 lazy_static = "1"
 libc = "0.2"
-nix = ">=0.19.1, <0.25"
+nix = ">=0.19.1, <0.27"
 stats_utils = { version = "0.1", path = "../stats_utils", optional = true }
 tables = { version = "0.1", path = "../tables", optional = true }
 string_utils = { version = "0.1", path = "../string_utils" }
