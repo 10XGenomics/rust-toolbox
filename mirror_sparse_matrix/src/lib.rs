@@ -598,7 +598,7 @@ mod tests {
                     } else {
                         10000 * i + j
                     };
-                    y.push((col as i32, (i * i * j) as i32));
+                    y.push((col, (i * i * j)));
                 }
                 x.push(y);
             }
