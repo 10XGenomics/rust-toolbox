@@ -152,7 +152,7 @@ pub fn make_kmer_lookup_oriented_single(dv: &[DnaString], x: &mut Vec<(Kmer20, i
         if s.len() < K {
             starts.push(z);
         } else {
-            let y: usize = z + s.len() as usize - K + 1;
+            let y: usize = z + s.len() - K + 1;
             starts.push(y);
         }
     }

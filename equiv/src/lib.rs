@@ -95,7 +95,7 @@ impl EquivRel {
     pub fn orbit_reps(&self, reps: &mut Vec<i32>) {
         reps.clear();
         for i in 0..self.x.len() {
-            if i == self.y[i as usize] as usize {
+            if i == self.y[i] as usize {
                 reps.push(i as i32);
             }
         }
@@ -104,7 +104,7 @@ impl EquivRel {
     pub fn norbits(&self) -> usize {
         let mut n = 0;
         for i in 0..self.x.len() {
-            if i == self.y[i as usize] as usize {
+            if i == self.y[i] as usize {
                 n += 1;
             }
         }

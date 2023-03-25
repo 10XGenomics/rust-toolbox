@@ -277,8 +277,8 @@ impl Hyper {
             println!("\nCOMPONENT {}", j + 1);
             for i in 0..comp[j].len() {
                 let e = comp[j][i];
-                let v = self.h.g.to_left(e as u32);
-                let w = self.h.g.to_right(e as u32);
+                let v = self.h.g.to_left(e);
+                let w = self.h.g.to_right(e);
                 let b: DnaString = self.h.g[EdgeIndex::<u32>::new(e as usize)].clone();
                 println!(
                     "\n{} ==(e={},len={},supp={})==> {}",
@@ -634,7 +634,7 @@ impl Hyper {
                     break;
                 }
             }
-            if eleft < self.inv[eright as usize] as usize {
+            if eleft < self.inv[eright] as usize {
                 bound.push((eleft as u32, eright as u32));
                 bound.push((self.inv[eright], self.inv[eleft]));
             }
@@ -671,8 +671,8 @@ impl Hyper {
                 }
                 let edge_id = self.h.g.first_edge(v, Outgoing).unwrap();
                 let edge = self.h.g[edge_id].clone();
-                for j in 0..self.ids[edge_id.index() as usize].len() {
-                    let id = self.ids[edge_id.index() as usize][j];
+                for j in 0..self.ids[edge_id.index()].len() {
+                    let id = self.ids[edge_id.index()][j];
                     if !havex[id as usize] {
                         have.push(id);
                         havex[id as usize] = true;
@@ -752,7 +752,7 @@ impl Hyper {
                 );
                 panic!("Involution test failed.");
             }
-            assert_eq!(self.inv[self.inv[e as usize] as usize], e as u32);
+            assert_eq!(self.inv[self.inv[e] as usize], e as u32);
             let t = self.h.g[EdgeIndex::<u32>::new(e)].rc().to_string();
             assert_eq!(
                 self.h.g[EdgeIndex::<u32>::new(self.inv[e] as usize)].to_string(),

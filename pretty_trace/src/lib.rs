@@ -442,7 +442,7 @@ impl PrettyTrace {
 
     pub fn on(&mut self) {
         let fd = if self.fd.is_some() {
-            self.fd.unwrap() as i32
+            self.fd.unwrap()
         } else {
             -1_i32
         };

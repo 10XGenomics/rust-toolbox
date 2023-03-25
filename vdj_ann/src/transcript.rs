@@ -42,9 +42,9 @@ pub fn is_valid(
         let mut igh = false;
         for j in 0..ann.len() {
             let l = ann[j].0 as usize;
-            let len = ann[j as usize].1 as usize;
-            let t = ann[j as usize].2 as usize;
-            let p = ann[j as usize].3 as usize;
+            let len = ann[j].1 as usize;
+            let t = ann[j].2 as usize;
+            let p = ann[j].3 as usize;
             if rheaders[t].contains("IGH") {
                 igh = true;
             }
@@ -212,9 +212,9 @@ pub fn junction_seq(
     let mut jstops = Vec::<i32>::new();
     for j in 0..ann.len() {
         let l = ann[j].0 as usize;
-        let len = ann[j as usize].1 as usize;
-        let t = ann[j as usize].2 as usize;
-        let p = ann[j as usize].3 as usize;
+        let len = ann[j].1 as usize;
+        let t = ann[j].2 as usize;
+        let p = ann[j].3 as usize;
         if (rheaders[t].contains("TRAJ")
             || rheaders[t].contains("IGHJ")
             || rheaders[t].contains("TRBJ")
@@ -304,7 +304,7 @@ pub fn junction_supp_core(
                     if kmers_plus[m].0 != z {
                         break;
                     }
-                    let p = kmers_plus[m as usize].2 as usize;
+                    let p = kmers_plus[m].2 as usize;
                     if j > 0 && p > 0 && b.get(j - 1) == jseq.get(p - 1) {
                         continue;
                     }

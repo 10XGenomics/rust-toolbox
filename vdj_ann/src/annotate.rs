@@ -264,15 +264,15 @@ pub fn annotate_seq_core(
     if b.len() < K {
         return;
     }
-    for l in 0..(b.len() - K + 1) as usize {
+    for l in 0..(b.len() - K + 1) {
         let x: Kmer12 = b.get_kmer(l);
         let low = lower_bound1_3(rkmers_plus, &x) as usize;
         for r in low..rkmers_plus.len() {
             if rkmers_plus[r].0 != x {
                 break;
             }
-            let t = rkmers_plus[r as usize].1 as usize;
-            let p = rkmers_plus[r as usize].2 as usize;
+            let t = rkmers_plus[r].1 as usize;
+            let p = rkmers_plus[r].2 as usize;
             if l > 0 && p > 0 && b_seq[l - 1] == refs[t].get(p - 1) {
                 continue;
             }
@@ -593,9 +593,7 @@ pub fn annotate_seq_core(
             let mut mis = semi[i].4.clone();
             let mut mis_count = 0;
             while l + len < b_seq.len() as i32 && l + len + off < refs[t as usize].len() as i32 {
-                if b_seq[(l + len as i32) as usize]
-                    != refs[t as usize].get((l + off + len as i32) as usize)
-                {
+                if b_seq[(l + len) as usize] != refs[t as usize].get((l + off + len) as usize) {
                     mis.push(l + len);
                     mis_count += 1;
                 }
@@ -1129,8 +1127,8 @@ pub fn annotate_seq_core(
                     continue;
                 }
                 let (p1, p2) = (annx[i1].3, annx[i2].3);
-                let (start1, stop1) = (l1 as usize, (l2 + len2) as usize); // extent on contig
-                let (start2, stop2) = (p1 as usize, (p2 as usize + len2) as usize); // extent on ref
+                let (start1, stop1) = (l1, (l2 + len2)); // extent on contig
+                let (start2, stop2) = (p1 as usize, (p2 as usize + len2)); // extent on ref
                 if !(start1 < stop1 && start2 < stop2) {
                     continue;
                 }
@@ -1169,12 +1167,12 @@ pub fn annotate_seq_core(
                         let mut mis2 = Vec::<i32>::new();
                         for p in start1..ipos {
                             if b_seq[p as usize] != refs[t].get((p + off1) as usize) {
-                                mis1.push(p as i32);
+                                mis1.push(p);
                             }
                         }
                         for p in ipos + ins..stop1 {
                             if b_seq[p as usize] != refs[t].get((p + off2) as usize) {
-                                mis2.push(p as i32);
+                                mis2.push(p);
                             }
                         }
                         let mis = (mis1.len() + mis2.len()) as i32;
@@ -1406,7 +1404,7 @@ pub fn annotate_seq_core(
         let mut locs = Vec::<usize>::new();
         let mut rstarts = Vec::<usize>::new();
         for k in i..j {
-            locs.push(combo[k].2 as usize);
+            locs.push(combo[k].2);
             let a = &annx[combo[k].2];
             rstarts.push(a.3 as usize);
             cov.push((a.0 as usize, (a.0 + a.1) as usize));
@@ -1582,13 +1580,13 @@ pub fn annotate_seq_core(
 
             let (mut zstop1, mut zstop2) = (0, 0);
             for l in 0..data[i1].2.len() {
-                let t = annx[data[i1].2[l] as usize].2 as usize;
+                let t = annx[data[i1].2[l]].2 as usize;
                 if refdata.is_v(t) && (data[i1].3[l] == 0 || data[i1].0[l].0 == 0) {
                     zstop1 = max(zstop1, data[i1].0[l].1);
                 }
             }
             for l in 0..data[i2].2.len() {
-                let t = annx[data[i2].2[l] as usize].2 as usize;
+                let t = annx[data[i2].2[l]].2 as usize;
                 if refdata.is_v(t) && (data[i2].3[l] == 0 || data[i2].0[l].0 == 0) {
                     zstop2 = max(zstop2, data[i2].0[l].1);
                 }
@@ -1640,7 +1638,7 @@ pub fn annotate_seq_core(
             if verbose {
                 fwriteln!(log, "\nCOMPARING");
                 for l in 0..data[i1].2.len() {
-                    let t = annx[data[i1].2[l] as usize].2 as usize;
+                    let t = annx[data[i1].2[l]].2 as usize;
                     let cov = &data[i1].0[l];
                     let mis = data[i1].1;
                     fwriteln!(
@@ -1654,7 +1652,7 @@ pub fn annotate_seq_core(
                 }
                 fwriteln!(log, "TO");
                 for l in 0..data[i2].2.len() {
-                    let t = annx[data[i2].2[l] as usize].2 as usize;
+                    let t = annx[data[i2].2[l]].2 as usize;
                     let cov = &data[i2].0[l];
                     let mis = data[i2].1;
                     fwriteln!(
@@ -2232,7 +2230,7 @@ pub fn annotate_seq_core(
     let mut vs = Vec::<(usize, usize)>::new();
     for i in 0..annx.len() {
         let t = annx[i].2 as usize;
-        if !rheaders[t as usize].contains("V-REGION") {
+        if !rheaders[t].contains("V-REGION") {
             continue;
         }
         vs.push((t, i));
