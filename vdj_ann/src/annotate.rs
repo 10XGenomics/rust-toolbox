@@ -3018,6 +3018,8 @@ pub struct ContigAnnotation {
     pub is_asm_cell: Option<bool>, // Was the barcode declared a cell by the VDJ assembler
 
     pub full_length: Option<bool>, // New field added in CR 4.1. None if the field is not set
+
+    pub junction_support: Option<(i32, i32)>, // New field added in CR 7.2. Number of (umi,reads) covering junction region for good contig
 }
 
 impl ContigAnnotation {
@@ -3040,6 +3042,7 @@ impl ContigAnnotation {
         invalidated_umis: Option<Vec<String>>,   // invalidated UMIs
         is_cellx: bool,                          // was the barcode declared a cell?
         productivex: bool,                       // productive?
+        jsupp: Option<(i32, i32)>,               // num (umi, reads) supporting junction
     ) -> ContigAnnotation {
         let mut vstart = -1_i32;
         for i in 0..ann.len() {
@@ -3129,6 +3132,7 @@ impl ContigAnnotation {
             is_cell: is_cellx,
             productive: Some(productivex),
             filtered: true,
+            junction_support: jsupp,
             // These need to be populated by the assembler explicitly as needed
             is_gex_cell: None,
             is_asm_cell: None,
@@ -3160,6 +3164,7 @@ impl ContigAnnotation {
         invalidated_umis: Option<Vec<String>>,   // invalidated UMIs
         is_cell: bool,                           // was the barcode declared a cell?
         is_gd: Option<bool>,                     // is gamma/delta mode
+        jsupp: Option<(i32, i32)>,               // num (umi, reads) supporting junction
     ) -> ContigAnnotation {
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
         annotate_seq(b, refdata, &mut ann, true, false, true);
@@ -3179,6 +3184,7 @@ impl ContigAnnotation {
             invalidated_umis,
             is_cell,
             productive,
+            jsupp,
         )
     }
 
@@ -3334,6 +3340,7 @@ mod tests {
             None,
             None,
             false, // is_cell, should be changed to None
+            None,
             None,
         );
 
