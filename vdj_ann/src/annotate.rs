@@ -2963,6 +2963,12 @@ pub struct Region {
     pub aa_seq: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+pub struct JunctionSupport {
+    reads: i32,
+    umis: i32,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct ContigAnnotation {
     // raw data for the contig
@@ -3019,7 +3025,7 @@ pub struct ContigAnnotation {
 
     pub full_length: Option<bool>, // New field added in CR 4.1. None if the field is not set
 
-    pub junction_support: Option<(i32, i32)>, // New field added in CR 7.2. Number of (umi,reads) covering junction region for good contig
+    pub junction_support: Option<JunctionSupport>, // New field added in CR 7.2. Coverage of junction region for a good contig
 }
 
 impl ContigAnnotation {
@@ -3042,7 +3048,7 @@ impl ContigAnnotation {
         invalidated_umis: Option<Vec<String>>,   // invalidated UMIs
         is_cellx: bool,                          // was the barcode declared a cell?
         productivex: bool,                       // productive?
-        jsupp: Option<(i32, i32)>,               // num (umi, reads) supporting junction
+        jsupp: Option<JunctionSupport>,          // num reads, umis supporting junction
     ) -> ContigAnnotation {
         let mut vstart = -1_i32;
         for i in 0..ann.len() {
@@ -3164,7 +3170,7 @@ impl ContigAnnotation {
         invalidated_umis: Option<Vec<String>>,   // invalidated UMIs
         is_cell: bool,                           // was the barcode declared a cell?
         is_gd: Option<bool>,                     // is gamma/delta mode
-        jsupp: Option<(i32, i32)>,               // num (umi, reads) supporting junction
+        jsupp: Option<JunctionSupport>,          // num reads, umis supporting junction
     ) -> ContigAnnotation {
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
         annotate_seq(b, refdata, &mut ann, true, false, true);
