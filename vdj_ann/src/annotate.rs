@@ -2965,8 +2965,8 @@ pub struct Region {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct JunctionSupport {
-    reads: i32,
-    umis: i32,
+    pub reads: i32,
+    pub umis: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
