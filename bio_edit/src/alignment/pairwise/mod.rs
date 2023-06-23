@@ -109,7 +109,7 @@
 //! let y = b"AAAAACGTACGTACGTAAAA";
 //! let mut aligner = Aligner::with_capacity_and_scoring(x.len(), y.len(), scoring);
 //! let alignment = aligner.custom(x, y);
-//! println!("{}", alignment.pretty(x, y));
+//! println!("{}", alignment.pretty(x, y, 60));
 //! assert_eq!(alignment.score, 2);
 //! assert_eq!(
 //!     alignment.operations,
