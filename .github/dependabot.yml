@@ -5,6 +5,13 @@ updates:
   schedule:
     interval: daily
   open-pull-requests-limit: 10
+  groups:
+    backtrace:
+      patterns:
+        - addr2line
+        - backtrace
+        - flate2
+        - miniz-oxide
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
