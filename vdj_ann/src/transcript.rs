@@ -16,6 +16,13 @@ use vector_utils::{lower_bound1_3, unique_sort};
 // TEST FOR VALID VDJ SEQUENCE
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
+#[derive(Debug)]
+pub enum UnproductiveContigCause{
+    NoCdr3,
+    Misordered,
+    NotFull,
+}
+
 pub fn is_valid(
     b: &DnaString,
     refdata: &RefData,
@@ -23,11 +30,12 @@ pub fn is_valid(
     logme: bool,
     log: &mut Vec<u8>,
     is_gd: Option<bool>,
-) -> bool {
+) -> (bool, Vec<UnproductiveContigCause>){
     // Unwrap gamma/delta mode flag
     let gd_mode = is_gd.unwrap_or(false);
     let refs = &refdata.refs;
     let rheaders = &refdata.rheaders;
+    let mut ret_vec = Vec::new();
     for pass in 0..2 {
         let mut m = "A";
         if pass == 1 {
@@ -139,7 +147,7 @@ pub fn is_valid(
             if logme {
                 fwriteln!(log, "did not find CDR3");
             }
-            return false;
+            return (false, vec![UnproductiveContigCause::NoCdr3]);
         }
         let mut too_large = false;
         const MIN_DELTA: i32 = -25;
@@ -179,15 +187,17 @@ pub fn is_valid(
         }
         if misordered && logme {
             fwriteln!(log, "misordered");
+            ret_vec.push(UnproductiveContigCause::Misordered);
         }
         if !full && logme {
             fwriteln!(log, "not full");
+            ret_vec.push(UnproductiveContigCause::NotFull);
         }
         if full && !too_large && !misordered {
-            return true;
+            return (true, vec![]);
         }
     }
-    false
+    (false, ret_vec)
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -354,18 +364,24 @@ mod tests {
     fn test_is_valid() {
         use refx::RefData;
         use debruijn::dna_string::DnaString;
-
+        // TODO use a smaller ref checked in to the repo
         let refdata = RefData::from_fasta(&String::from(
-            "test/inputs/test_no_internal_soft_clipping_ref.fa",
+            "/mnt/opt/refdata_cellranger/vdj/vdj_GRCm38_alts_ensembl-7.1.0/fasta/regions.fa",
         ));
 
-        let b = DnaString::from_dna_string("AAACGT");
-        let ann = [(1,2,0,4,5)];
         let mut log: Vec<u8> = vec![];
 
-        let aaa = is_valid(&b, &refdata, &ann, false, &mut log, None);
+        // // NoCdr3
+        // let b = DnaString::from_dna_string("ACATCTCTCTCATTAGAGGTTGATCTTTGAGGAAAACAGGGTGTTGCCTAAAGGATGAAAGTGTTGAGTCTGTTGTACCTGTTGACAGCCATTCCTGGTATCCTGTCTGATGTACAGCTTCAGGAGTCAGGACCTGGCCTCGTGAAACCTTCTCAGTCTCTGTCTCTCACCTGCTCTGTCACTGGCTACTCCATCACCAGTGGTTATTACTGGAACTGGATCCGGCAGTTTCCAGGAAACAAACTGGAATGGATGGGCTACATAAGCTACGACGGTAGCAATAACTACAACCCATCTCTCAAAAATCGAATCTCCATCACTCGTGACACATCTAAGAACCAGTTTTTCCTGAAGTTGAATTCTGTGACTACTGAGGACACAGCTACATATTACTGTGCAAGATCTACTATGATTACGACGGGGTTTGCTTACTGGGGCCAAGGGACTCTGGTCACTGTCTCTGCAG");
+        // let ann = [(54, 148, 139, 0, 16), (205, 246, 139, 148, 58), (418, 48, 29, 0, 2)];
+        
+        let b = DnaString::from_dna_string("GACACATCTCTCTCATTAGAGGTTGATCTTTGAGGAAAACAGGGTGTTGCCTAAAGGATGAAAGTGTTGAGTCTGTTGTACCTGTTGACAGCCATTCCTGGTATCCTGTCTGATGTACAGCTTCAGGAGTCAGGACCTGGCCTCGTGAAACCTTCTCAGTCTCTGTCTCTCACCTGCTCTGTCACTGGCTACTCCATCACCAGTGGTTATTACTGGAACTGGATCCGGCAGTTTCCAGGAAACAAACTGGAATGGATGGGCTACATAAGCTACGACGGTAGCAATAACTACAACCCATCTCTCAAAAATCGAATCTCCATCACTCGTGACACATCTAAGAACCAGTTTTTCCTGAAGTTGAATTCTGTGACTACTGAGGACACAGCTACATATTACTGTGCAAGATCTACTATGATTACGACGGGGTTTGCTTACTGGGGCCAAGGGACTCTGGTCACTGTCTCTGCAGAGAGTCAGTCCTTCCCAAATGTCTTCCCCCTCGTCTCCTGCGAGAGCCCCCTGTCTGATAAGAATCTGGTGGCCATGGGCTGCCTGGCCCGGGACTTCCTGCCCAGCACCATTTCCTTCACCTGGAACTACCAGAACAACACTGAAGTCATCCAGGGTATCAGAACCTTCCCAACACTGAGGACAGGGGGCAAGTACCTAGCCACCTCGCA");
+        let ann = [(57, 148, 139, 0, 16), (208, 246, 139, 148, 58), (421, 48, 29, 0, 2), (469, 211, 31, 0, 0)];
+        
 
-        assert!(!aaa);
+        let aaa = is_valid(&b, &refdata, &ann, false, &mut log, None);
+        println!("{:?}", aaa);
+        assert!(1 == 2);
 
 
 

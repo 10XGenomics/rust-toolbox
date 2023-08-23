@@ -3179,7 +3179,7 @@ impl ContigAnnotation {
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
         annotate_seq(b, refdata, &mut ann, true, false, true);
         let mut log = Vec::<u8>::new();
-        let productive = is_valid(b, refdata, &ann, false, &mut log, is_gd);
+        let productive = is_valid(b, refdata, &ann, false, &mut log, is_gd).0;
         ContigAnnotation::from_annotate_seq(
             b,
             q,
