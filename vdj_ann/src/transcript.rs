@@ -189,14 +189,17 @@ pub fn is_valid(
         if misordered && logme {
             fwriteln!(log, "misordered");
             ret_vec.push(UnproductiveContigCause::Misordered);
+            println!(">> Misordered");
         }
         if too_large && logme {
             fwriteln!(log, "too large");
             ret_vec.push(UnproductiveContigCause::TooLarge);
+            println!(">> TooLarge");
         }
         if !full && logme {
             fwriteln!(log, "not full");
             ret_vec.push(UnproductiveContigCause::NotFull);
+            println!(">> NotFull");
         }
         if full && !too_large && !misordered {
             return (true, vec![]);
