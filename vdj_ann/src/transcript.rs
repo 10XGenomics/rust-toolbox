@@ -187,29 +187,35 @@ pub fn is_valid(
                 }
             }
         }
-        if misordered && logme {
-            fwriteln!(log, "misordered");
+        if misordered {
+            if logme {
+                fwriteln!(log, "misordered");
+            }
             ret_vec.push(UnproductiveContigCause::Misordered);
-            println!(">> Misordered");
-            return (false, vec![UnproductiveContigCause::Misordered]);
+            // println!(">> Misordered");
+            // return (false, vec![UnproductiveContigCause::Misordered]);
         }
-        if too_large && logme {
-            fwriteln!(log, "too large");
+        if too_large {
+            if logme {
+                fwriteln!(log, "too large");
+            }
             ret_vec.push(UnproductiveContigCause::TooLarge);
-            println!(">> TooLarge");
-            return (false, vec![UnproductiveContigCause::TooLarge]);
+            // println!(">> TooLarge");
+            // return (false, vec![UnproductiveContigCause::TooLarge]);
         }
-        if !full && logme {
-            fwriteln!(log, "not full");
+        if !full {
+            if logme {
+                fwriteln!(log, "not full");
+            }
             ret_vec.push(UnproductiveContigCause::NotFull);
-            println!(">> NotFull");
-            return (false, vec![UnproductiveContigCause::NotFull]);
+            // println!(">> NotFull");
+            // return (false, vec![UnproductiveContigCause::NotFull]);
         }
         if full && !too_large && !misordered {
             return (true, vec![]);
         }
     }
-    (false, vec![UnproductiveContigCause::ANOTHER])
+    (false, ret_vec)
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
