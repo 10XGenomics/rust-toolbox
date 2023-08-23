@@ -343,3 +343,31 @@ pub fn junction_supp_core(
         idi = idj;
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::refx;
+
+    #[test]
+    fn test_is_valid() {
+        use refx::RefData;
+        use debruijn::dna_string::DnaString;
+
+        let refdata = RefData::from_fasta(&String::from(
+            "test/inputs/test_no_internal_soft_clipping_ref.fa",
+        ));
+
+        let b = DnaString::from_dna_string("AAACGT");
+        let ann = [(1,2,0,4,5)];
+        let mut log: Vec<u8> = vec![];
+
+        let aaa = is_valid(&b, &refdata, &ann, false, &mut log, None);
+
+        assert!(!aaa);
+
+
+
+    }
+}
