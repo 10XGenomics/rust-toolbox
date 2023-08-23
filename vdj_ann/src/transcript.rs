@@ -22,6 +22,7 @@ pub enum UnproductiveContigCause{
     Misordered,
     NotFull,
     TooLarge,
+    ANOTHER,
 }
 
 pub fn is_valid(
@@ -208,7 +209,7 @@ pub fn is_valid(
             return (true, vec![]);
         }
     }
-    (false, ret_vec)
+    (false, vec![UnproductiveContigCause::ANOTHER])
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
