@@ -52,11 +52,13 @@ pub fn is_valid(
         let mut last_jstop: i32 = -1;
         let mut last_jstop_len: i32 = -1;
         let mut igh = false;
+        println!("--> {:?}", b);
         for j in 0..ann.len() {
             let l = ann[j].0 as usize;
             let len = ann[j].1 as usize;
             let t = ann[j].2 as usize;
             let p = ann[j].3 as usize;
+            println!("------> {:?}", rheaders[t]);
             if rheaders[t].contains("IGH") {
                 igh = true;
             }
