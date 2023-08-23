@@ -21,6 +21,7 @@ pub enum UnproductiveContigCause{
     NoCdr3,
     Misordered,
     NotFull,
+    TooLarge,
 }
 
 pub fn is_valid(
@@ -188,6 +189,10 @@ pub fn is_valid(
         if misordered && logme {
             fwriteln!(log, "misordered");
             ret_vec.push(UnproductiveContigCause::Misordered);
+        }
+        if too_large && logme {
+            fwriteln!(log, "too large");
+            ret_vec.push(UnproductiveContigCause::TooLarge);
         }
         if !full && logme {
             fwriteln!(log, "not full");
