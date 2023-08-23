@@ -5,24 +5,26 @@
 use crate::annotate::get_cdr3_using_ann;
 use crate::refx::RefData;
 use amino::{have_start, have_stop};
-use debruijn::{dna_string::DnaString, kmer::Kmer20, Mer, Vmer};
+use debruijn::dna_string::DnaString;
+use debruijn::kmer::Kmer20;
+use debruijn::{Mer, Vmer};
 use hyperbase::Hyper;
 use io_utils::fwriteln;
 use kmer_lookup::make_kmer_lookup_20_single;
-use std::{cmp::max, io::prelude::*};
+use std::cmp::max;
+use std::io::prelude::*;
 use vector_utils::{lower_bound1_3, unique_sort};
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // TEST FOR VALID VDJ SEQUENCE
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-#[derive(Debug)]
-pub enum UnproductiveContigCause{
+#[derive(Debug, PartialEq, Ord, PartialOrd, Eq)]
+pub enum UnproductiveContigCause {
     NoCdr3,
     Misordered,
     NotFull,
     TooLarge,
-    ANOTHER,
 }
 
 pub fn is_valid(
@@ -32,7 +34,7 @@ pub fn is_valid(
     logme: bool,
     log: &mut Vec<u8>,
     is_gd: Option<bool>,
-) -> (bool, Vec<UnproductiveContigCause>){
+) -> (bool, Vec<UnproductiveContigCause>) {
     // Unwrap gamma/delta mode flag
     let gd_mode = is_gd.unwrap_or(false);
     let refs = &refdata.refs;
@@ -215,6 +217,8 @@ pub fn is_valid(
             return (true, vec![]);
         }
     }
+    ret_vec.sort_unstable();
+    ret_vec.dedup();
     (false, ret_vec)
 }
 
@@ -372,7 +376,6 @@ pub fn junction_supp_core(
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -380,8 +383,8 @@ mod tests {
 
     #[test]
     fn test_is_valid() {
-        use refx::RefData;
         use debruijn::dna_string::DnaString;
+        use refx::RefData;
         // TODO use a smaller ref checked in to the repo
         let refdata = RefData::from_fasta(&String::from(
             "/mnt/opt/refdata_cellranger/vdj/vdj_GRCm38_alts_ensembl-7.1.0/fasta/regions.fa",
@@ -389,19 +392,59 @@ mod tests {
 
         let mut log: Vec<u8> = vec![];
 
-        // // NoCdr3
-        // let b = DnaString::from_dna_string("ACATCTCTCTCATTAGAGGTTGATCTTTGAGGAAAACAGGGTGTTGCCTAAAGGATGAAAGTGTTGAGTCTGTTGTACCTGTTGACAGCCATTCCTGGTATCCTGTCTGATGTACAGCTTCAGGAGTCAGGACCTGGCCTCGTGAAACCTTCTCAGTCTCTGTCTCTCACCTGCTCTGTCACTGGCTACTCCATCACCAGTGGTTATTACTGGAACTGGATCCGGCAGTTTCCAGGAAACAAACTGGAATGGATGGGCTACATAAGCTACGACGGTAGCAATAACTACAACCCATCTCTCAAAAATCGAATCTCCATCACTCGTGACACATCTAAGAACCAGTTTTTCCTGAAGTTGAATTCTGTGACTACTGAGGACACAGCTACATATTACTGTGCAAGATCTACTATGATTACGACGGGGTTTGCTTACTGGGGCCAAGGGACTCTGGTCACTGTCTCTGCAG");
-        // let ann = [(54, 148, 139, 0, 16), (205, 246, 139, 148, 58), (418, 48, 29, 0, 2)];
-        
-        let b = DnaString::from_dna_string("GACACATCTCTCTCATTAGAGGTTGATCTTTGAGGAAAACAGGGTGTTGCCTAAAGGATGAAAGTGTTGAGTCTGTTGTACCTGTTGACAGCCATTCCTGGTATCCTGTCTGATGTACAGCTTCAGGAGTCAGGACCTGGCCTCGTGAAACCTTCTCAGTCTCTGTCTCTCACCTGCTCTGTCACTGGCTACTCCATCACCAGTGGTTATTACTGGAACTGGATCCGGCAGTTTCCAGGAAACAAACTGGAATGGATGGGCTACATAAGCTACGACGGTAGCAATAACTACAACCCATCTCTCAAAAATCGAATCTCCATCACTCGTGACACATCTAAGAACCAGTTTTTCCTGAAGTTGAATTCTGTGACTACTGAGGACACAGCTACATATTACTGTGCAAGATCTACTATGATTACGACGGGGTTTGCTTACTGGGGCCAAGGGACTCTGGTCACTGTCTCTGCAGAGAGTCAGTCCTTCCCAAATGTCTTCCCCCTCGTCTCCTGCGAGAGCCCCCTGTCTGATAAGAATCTGGTGGCCATGGGCTGCCTGGCCCGGGACTTCCTGCCCAGCACCATTTCCTTCACCTGGAACTACCAGAACAACACTGAAGTCATCCAGGGTATCAGAACCTTCCCAACACTGAGGACAGGGGGCAAGTACCTAGCCACCTCGCA");
-        let ann = [(57, 148, 139, 0, 16), (208, 246, 139, 148, 58), (421, 48, 29, 0, 2), (469, 211, 31, 0, 0)];
-        
+        // NoCdr3
+        let b = DnaString::from_dna_string("ACATCTCTCTCATTAGAGGTTGATCTTTGAGGAAAACAGGGTGTTGCCTAAAGGATGAAAGTGTTGAGTCTGTTGTACCTGTTGACAGCCATTCCTGGTATCCTGTCTGATGTACAGCTTCAGGAGTCAGGACCTGGCCTCGTGAAACCTTCTCAGTCTCTGTCTCTCACCTGCTCTGTCACTGGCTACTCCATCACCAGTGGTTATTACTGGAACTGGATCCGGCAGTTTCCAGGAAACAAACTGGAATGGATGGGCTACATAAGCTACGACGGTAGCAATAACTACAACCCATCTCTCAAAAATCGAATCTCCATCACTCGTGACACATCTAAGAACCAGTTTTTCCTGAAGTTGAATTCTGTGACTACTGAGGACACAGCTACATATTACTGTGCAAGATCTACTATGATTACGACGGGGTTTGCTTACTGGGGCCAAGGGACTCTGGTCACTGTCTCTGCAG");
+        let ann = [
+            (54, 148, 139, 0, 16),
+            (205, 246, 139, 148, 58),
+            (418, 48, 29, 0, 2),
+        ];
+        let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
+        assert!(!return_value.0);
+        assert!(return_value
+            .1
+            .iter()
+            .all(|item| vec![UnproductiveContigCause::NoCdr3].contains(item)));
 
-        let aaa = is_valid(&b, &refdata, &ann, false, &mut log, None);
-        println!("{:?}", aaa);
+        // NotFull
+        let b = DnaString::from_dna_string("GAACACATGCCCAATGTCCTCTCCACAGACACTGAACACACTGACTCCAACCATGGGGTGGAGTCTGGATCTTTTTCTTCCTCCTGTCAGGAACTGCAGGTGTCCACTCTGAGGTCCAGCTGCAACAGTCTGGACCTGAGCTGGTGAAGCCTGGGGCTTCAGTGAAGATATCCTGCAAGGCTTCTGGCTACACATTCACTGACTACTACATGAACTGGGTGAAGCAGAGCCATGGAAAGAGCCTTGAGTGGATTGGACTTGTTAATCCTAACAATGGTGGTACTAGCTACAACCAGAAGTTCAAGGGCAAGGCCACATTGACTGTAGACAAGTCCTCCAGCACAGCCTACATGGAGCTCCGCAGCCTGACATCTGAGGACTCTGCGGTCTATTACTGTGCAAGAAGGGCTAGGGTAACTGGGATGCTATGGACTACTGGGGTCAAGGAACCTCAGTCACCGTCTCCTCAGAGAGTCAGTCCTTCCCAAATGTCTTCCCCCTCGTCTCCTGCGAGAGCCCCCTGTCTGATAAGAATCTGGTGGCCATGGGCTGCCTGGCCCGGGACTTCCTGCCCAGCACCATTTCCTTCACCTGGAACTACCAGAACAACACTGAAGTCATCCAGGGTATCAGAACCTTCCCAACACTGAGGACAGGGGGCAAGTACCTAGCCACCTCGCA");
+        let ann = [(64, 340, 46, 11, 11)];
+        let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
+        assert!(!return_value.0);
+        assert!(return_value
+            .1
+            .iter()
+            .all(|item| vec![UnproductiveContigCause::NotFull].contains(item)));
+
+        // [NotFull, TooLarge]
+        let ann = [
+            (64, 340, 46, 11, 11),
+            (416, 54, 30, 0, 4),
+            (470, 211, 31, 0, 0),
+        ];
+        let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
+        assert!(!return_value.0);
+        assert!(return_value.1.iter().all(|item| vec![
+            UnproductiveContigCause::NotFull,
+            UnproductiveContigCause::TooLarge
+        ]
+        .contains(item)));
+
+        // [Misordered, NotFull, TooLarge]
+        let ann = [
+            (416, 54, 30, 0, 4),
+            (64, 340, 46, 11, 11),
+            (470, 211, 31, 0, 0),
+        ];
+        let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
+        assert!(!return_value.0);
+        assert!(return_value.1.iter().all(|item| vec![
+            UnproductiveContigCause::NotFull,
+            UnproductiveContigCause::TooLarge,
+            UnproductiveContigCause::Misordered
+        ]
+        .contains(item)));
+
         assert!(1 == 2);
-
-
-
     }
 }
