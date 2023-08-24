@@ -229,10 +229,10 @@ pub fn is_valid(
 
     ret_vec.sort_unstable();
     ret_vec.dedup();
-    return ContigStatus {
+    ContigStatus {
         productive: false,
         unproductive_cause: ret_vec,
-    };
+    }
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
