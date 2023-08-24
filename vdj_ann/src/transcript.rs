@@ -379,7 +379,7 @@ mod tests {
     fn test_is_valid() {
         use debruijn::dna_string::DnaString;
         use refx::RefData;
-        // TODO use a smaller ref checked in to the repo
+
         let refdata =
             RefData::from_fasta(&String::from("test/inputs/test_productive_is_valid_ref.fa"));
 
