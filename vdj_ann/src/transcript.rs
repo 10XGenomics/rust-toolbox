@@ -27,6 +27,11 @@ pub enum UnproductiveContigCause {
     TooLarge,
 }
 
+pub struct ContigStatus {
+    pub productive: bool,
+    pub unproductive_cause: Vec<UnproductiveContigCause>,
+}
+
 pub fn is_valid(
     b: &DnaString,
     refdata: &RefData,
@@ -34,7 +39,7 @@ pub fn is_valid(
     logme: bool,
     log: &mut Vec<u8>,
     is_gd: Option<bool>,
-) -> (bool, Vec<UnproductiveContigCause>) {
+) -> ContigStatus {
     // Unwrap gamma/delta mode flag
     let gd_mode = is_gd.unwrap_or(false);
     let refs = &refdata.refs;
@@ -151,7 +156,10 @@ pub fn is_valid(
             if logme {
                 fwriteln!(log, "did not find CDR3");
             }
-            return (false, vec![UnproductiveContigCause::NoCdr3]);
+            return ContigStatus {
+                productive: false,
+                unproductive_cause: vec![UnproductiveContigCause::NoCdr3],
+            };
         }
         let mut too_large = false;
         const MIN_DELTA: i32 = -25;
@@ -208,12 +216,18 @@ pub fn is_valid(
             ret_vec.push(UnproductiveContigCause::NotFull);
         }
         if full && !too_large && !misordered {
-            return (true, vec![]);
+            return ContigStatus {
+                productive: true,
+                unproductive_cause: vec![],
+            };
         }
     }
     ret_vec.sort_unstable();
     ret_vec.dedup();
-    (false, ret_vec)
+    return ContigStatus {
+        productive: false,
+        unproductive_cause: ret_vec,
+    };
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -393,9 +407,9 @@ mod tests {
             (418, 48, 1, 0, 2),
         ];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
-        assert!(!return_value.0);
+        assert!(!return_value.productive);
         assert!(return_value
-            .1
+            .unproductive_cause
             .iter()
             .all(|item| vec![UnproductiveContigCause::NoCdr3].contains(item)));
 
@@ -403,9 +417,9 @@ mod tests {
         let b = DnaString::from_dna_string("GAACACATGCCCAATGTCCTCTCCACAGACACTGAACACACTGACTCCAACCATGGGGTGGAGTCTGGATCTTTTTCTTCCTCCTGTCAGGAACTGCAGGTGTCCACTCTGAGGTCCAGCTGCAACAGTCTGGACCTGAGCTGGTGAAGCCTGGGGCTTCAGTGAAGATATCCTGCAAGGCTTCTGGCTACACATTCACTGACTACTACATGAACTGGGTGAAGCAGAGCCATGGAAAGAGCCTTGAGTGGATTGGACTTGTTAATCCTAACAATGGTGGTACTAGCTACAACCAGAAGTTCAAGGGCAAGGCCACATTGACTGTAGACAAGTCCTCCAGCACAGCCTACATGGAGCTCCGCAGCCTGACATCTGAGGACTCTGCGGTCTATTACTGTGCAAGAAGGGCTAGGGTAACTGGGATGCTATGGACTACTGGGGTCAAGGAACCTCAGTCACCGTCTCCTCAGAGAGTCAGTCCTTCCCAAATGTCTTCCCCCTCGTCTCCTGCGAGAGCCCCCTGTCTGATAAGAATCTGGTGGCCATGGGCTGCCTGGCCCGGGACTTCCTGCCCAGCACCATTTCCTTCACCTGGAACTACCAGAACAACACTGAAGTCATCCAGGGTATCAGAACCTTCCCAACACTGAGGACAGGGGGCAAGTACCTAGCCACCTCGCA");
         let ann = [(64, 340, 2, 11, 11)];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
-        assert!(!return_value.0);
+        assert!(!return_value.productive);
         assert!(return_value
-            .1
+            .unproductive_cause
             .iter()
             .all(|item| vec![UnproductiveContigCause::NotFull].contains(item)));
 
@@ -416,8 +430,8 @@ mod tests {
             (470, 211, 4, 0, 0),
         ];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
-        assert!(!return_value.0);
-        assert!(return_value.1.iter().all(|item| vec![
+        assert!(!return_value.productive);
+        assert!(return_value.unproductive_cause.iter().all(|item| vec![
             UnproductiveContigCause::NotFull,
             UnproductiveContigCause::TooLarge
         ]
@@ -430,8 +444,8 @@ mod tests {
             (470, 211, 4, 0, 0),
         ];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
-        assert!(!return_value.0);
-        assert!(return_value.1.iter().all(|item| vec![
+        assert!(!return_value.productive);
+        assert!(return_value.unproductive_cause.iter().all(|item| vec![
             UnproductiveContigCause::NotFull,
             UnproductiveContigCause::TooLarge,
             UnproductiveContigCause::Misordered
@@ -442,7 +456,7 @@ mod tests {
         let b = DnaString::from_dna_string("GGACCAAAATTCAAAGACAAAATGCATTGTCAAGTGCAGATTTTCAGCTTCCTGCTAATCAGTGCCTCAGTCATAATGTCCAGAGGACAAATTGTTCTCACCCAGTCTCCAGCAATCATGTCTGCATCTCCAGGGGAGAAGGTCACCATAACCTGCAGTGCCAGCTCAAGTGTAAGTTACATGCACTGGTTCCAGCAGAAGCCAGGCACTTCTCCCAAACTCTGGATTTATAGCACATCCAACCTGGCTTCTGGAGTCCCTGCTCGCTTCAGTGGCAGTGGATCTGGGACCTCTTACTCTCTCACAATCAGCCGAATGGAGGCTGAAGATGCTGCCACTTATTACTGCCAGCAAAGGAGTAGTTACCCGCTCACGTTCGGTGCTGGGACCAAGCTGGAGCTGAAACGGGCTGATGCTGCACCAACTGTATCCATCTTCCCACCATCCAGTGAGCAGTTAACATCTGGAGGTGCCTCAGTCGTGTGCTTC");
         let ann = [(21, 352, 5, 0, 3), (368, 38, 6, 0, 0), (406, 83, 7, 0, 0)];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
-        assert!(return_value.0);
-        assert!(return_value.1.is_empty());
+        assert!(return_value.productive);
+        assert!(return_value.unproductive_cause.is_empty());
     }
 }
