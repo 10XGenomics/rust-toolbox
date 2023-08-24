@@ -52,13 +52,11 @@ pub fn is_valid(
         let mut last_jstop: i32 = -1;
         let mut last_jstop_len: i32 = -1;
         let mut igh = false;
-        println!("--> {:?}", b);
         for j in 0..ann.len() {
             let l = ann[j].0 as usize;
             let len = ann[j].1 as usize;
             let t = ann[j].2 as usize;
             let p = ann[j].3 as usize;
-            println!("------> {:?}", rheaders[t]);
             if rheaders[t].contains("IGH") {
                 igh = true;
             }
@@ -196,24 +194,18 @@ pub fn is_valid(
                 fwriteln!(log, "misordered");
             }
             ret_vec.push(UnproductiveContigCause::Misordered);
-            // println!(">> Misordered");
-            // return (false, vec![UnproductiveContigCause::Misordered]);
         }
         if too_large {
             if logme {
                 fwriteln!(log, "too large");
             }
             ret_vec.push(UnproductiveContigCause::TooLarge);
-            // println!(">> TooLarge");
-            // return (false, vec![UnproductiveContigCause::TooLarge]);
         }
         if !full {
             if logme {
                 fwriteln!(log, "not full");
             }
             ret_vec.push(UnproductiveContigCause::NotFull);
-            // println!(">> NotFull");
-            // return (false, vec![UnproductiveContigCause::NotFull]);
         }
         if full && !too_large && !misordered {
             return (true, vec![]);
@@ -389,7 +381,7 @@ mod tests {
         use refx::RefData;
         // TODO use a smaller ref checked in to the repo
         let refdata = RefData::from_fasta(&String::from(
-            "/mnt/opt/refdata_cellranger/vdj/vdj_GRCm38_alts_ensembl-7.1.0/fasta/regions.fa",
+            "/mnt/home/nima.mousavi/yard/flex/runs/20230823_wasted_data_contig/ref.fa",
         ));
 
         let mut log: Vec<u8> = vec![];
@@ -397,9 +389,9 @@ mod tests {
         // NoCdr3
         let b = DnaString::from_dna_string("ACATCTCTCTCATTAGAGGTTGATCTTTGAGGAAAACAGGGTGTTGCCTAAAGGATGAAAGTGTTGAGTCTGTTGTACCTGTTGACAGCCATTCCTGGTATCCTGTCTGATGTACAGCTTCAGGAGTCAGGACCTGGCCTCGTGAAACCTTCTCAGTCTCTGTCTCTCACCTGCTCTGTCACTGGCTACTCCATCACCAGTGGTTATTACTGGAACTGGATCCGGCAGTTTCCAGGAAACAAACTGGAATGGATGGGCTACATAAGCTACGACGGTAGCAATAACTACAACCCATCTCTCAAAAATCGAATCTCCATCACTCGTGACACATCTAAGAACCAGTTTTTCCTGAAGTTGAATTCTGTGACTACTGAGGACACAGCTACATATTACTGTGCAAGATCTACTATGATTACGACGGGGTTTGCTTACTGGGGCCAAGGGACTCTGGTCACTGTCTCTGCAG");
         let ann = [
-            (54, 148, 139, 0, 16),
-            (205, 246, 139, 148, 58),
-            (418, 48, 29, 0, 2),
+            (54, 148, 0, 0, 16),
+            (205, 246, 0, 148, 58),
+            (418, 48, 1, 0, 2),
         ];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
         assert!(!return_value.0);
@@ -410,7 +402,7 @@ mod tests {
 
         // NotFull
         let b = DnaString::from_dna_string("GAACACATGCCCAATGTCCTCTCCACAGACACTGAACACACTGACTCCAACCATGGGGTGGAGTCTGGATCTTTTTCTTCCTCCTGTCAGGAACTGCAGGTGTCCACTCTGAGGTCCAGCTGCAACAGTCTGGACCTGAGCTGGTGAAGCCTGGGGCTTCAGTGAAGATATCCTGCAAGGCTTCTGGCTACACATTCACTGACTACTACATGAACTGGGTGAAGCAGAGCCATGGAAAGAGCCTTGAGTGGATTGGACTTGTTAATCCTAACAATGGTGGTACTAGCTACAACCAGAAGTTCAAGGGCAAGGCCACATTGACTGTAGACAAGTCCTCCAGCACAGCCTACATGGAGCTCCGCAGCCTGACATCTGAGGACTCTGCGGTCTATTACTGTGCAAGAAGGGCTAGGGTAACTGGGATGCTATGGACTACTGGGGTCAAGGAACCTCAGTCACCGTCTCCTCAGAGAGTCAGTCCTTCCCAAATGTCTTCCCCCTCGTCTCCTGCGAGAGCCCCCTGTCTGATAAGAATCTGGTGGCCATGGGCTGCCTGGCCCGGGACTTCCTGCCCAGCACCATTTCCTTCACCTGGAACTACCAGAACAACACTGAAGTCATCCAGGGTATCAGAACCTTCCCAACACTGAGGACAGGGGGCAAGTACCTAGCCACCTCGCA");
-        let ann = [(64, 340, 46, 11, 11)];
+        let ann = [(64, 340, 2, 11, 11)];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
         assert!(!return_value.0);
         assert!(return_value
@@ -420,9 +412,9 @@ mod tests {
 
         // [NotFull, TooLarge]
         let ann = [
-            (64, 340, 46, 11, 11),
-            (416, 54, 30, 0, 4),
-            (470, 211, 31, 0, 0),
+            (64, 340, 2, 11, 11),
+            (416, 54, 3, 0, 4),
+            (470, 211, 4, 0, 0),
         ];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
         assert!(!return_value.0);
@@ -434,9 +426,9 @@ mod tests {
 
         // [Misordered, NotFull, TooLarge]
         let ann = [
-            (416, 54, 30, 0, 4),
-            (64, 340, 46, 11, 11),
-            (470, 211, 31, 0, 0),
+            (416, 54, 3, 0, 4),
+            (64, 340, 2, 11, 11),
+            (470, 211, 4, 0, 0),
         ];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
         assert!(!return_value.0);
