@@ -27,6 +27,7 @@ pub enum UnproductiveContigCause {
     TooLarge,
 }
 
+#[derive(Debug)]
 pub struct ContigStatus {
     pub productive: bool,
     pub unproductive_cause: Vec<UnproductiveContigCause>,
@@ -45,6 +46,8 @@ pub fn is_valid(
     let refs = &refdata.refs;
     let rheaders = &refdata.rheaders;
     let mut ret_vec = Vec::new();
+    let mut never_full = true;
+    // two passes, one for light chains and one for heavy chains
     for pass in 0..2 {
         let mut m = "A";
         if pass == 1 {
@@ -104,12 +107,13 @@ pub fn is_valid(
         unique_sort(&mut vstarts);
         unique_sort(&mut jstops);
         let mut full = false;
-        for pass in 1..3 {
-            if pass == 2 && full {
+        // 2 passes to check frameshifts (finding the start/stop codon)
+        for inner_pass in 1..3 {
+            if inner_pass == 2 && full {
                 continue;
             }
             let mut msg = "";
-            if pass == 2 {
+            if inner_pass == 2 {
                 msg = "frameshifted ";
             };
             for start in vstarts.iter() {
@@ -118,7 +122,8 @@ pub fn is_valid(
                 }
                 for stop in jstops.iter() {
                     let n = stop - start;
-                    if pass == 2 || n % 3 == 1 {
+                    // on second pass, go through with checking for stop codon regardless of n % 3 value
+                    if inner_pass == 2 || n % 3 == 1 {
                         let mut stop_codon = false;
                         // shouldn't it be stop-3+1????????????????????????????????
                         for j in (*start..stop - 3).step_by(3) {
@@ -127,8 +132,9 @@ pub fn is_valid(
                             }
                         }
                         if !stop_codon {
-                            if pass == 1 {
+                            if inner_pass == 1 {
                                 full = true;
+                                never_full = false;
                             }
                             if logme {
                                 fwriteln!(
@@ -156,16 +162,13 @@ pub fn is_valid(
             if logme {
                 fwriteln!(log, "did not find CDR3");
             }
-            return ContigStatus {
-                productive: false,
-                unproductive_cause: vec![UnproductiveContigCause::NoCdr3],
-            };
+            ret_vec.push(UnproductiveContigCause::NoCdr3);
         }
         let mut too_large = false;
         const MIN_DELTA: i32 = -25;
         const MIN_DELTA_IGH: i32 = -55;
         const MAX_DELTA: i32 = 35;
-        if first_vstart >= 0 && last_jstop >= 0 {
+        if first_vstart >= 0 && last_jstop >= 0 && !cdr3.is_empty() {
             let delta = (last_jstop_len + first_vstart_len + 3 * cdr3[0].1.len() as i32 - 20)
                 - (last_jstop - first_vstart);
             if logme {
@@ -209,19 +212,21 @@ pub fn is_valid(
             }
             ret_vec.push(UnproductiveContigCause::TooLarge);
         }
-        if !full {
-            if logme {
-                fwriteln!(log, "not full");
-            }
-            ret_vec.push(UnproductiveContigCause::NotFull);
-        }
-        if full && !too_large && !misordered {
+        if full && !too_large && !misordered && ret_vec.is_empty() {
             return ContigStatus {
                 productive: true,
                 unproductive_cause: vec![],
             };
         }
     }
+    if never_full {
+        if logme {
+            fwriteln!(log, "not full");
+        }
+
+        ret_vec.push(UnproductiveContigCause::NotFull);
+    }
+
     ret_vec.sort_unstable();
     ret_vec.dedup();
     return ContigStatus {
