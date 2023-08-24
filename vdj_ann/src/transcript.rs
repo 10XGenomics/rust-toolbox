@@ -400,7 +400,7 @@ mod tests {
         use refx::RefData;
 
         let refdata =
-            RefData::from_fasta(&String::from("test/inputs/test_productive_is_valid_ref.fa"));
+            RefData::from_fasta(String::from("test/inputs/test_productive_is_valid_ref.fa"));
 
         let mut log: Vec<u8> = vec![];
 
