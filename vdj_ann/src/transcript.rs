@@ -380,9 +380,8 @@ mod tests {
         use debruijn::dna_string::DnaString;
         use refx::RefData;
         // TODO use a smaller ref checked in to the repo
-        let refdata = RefData::from_fasta(&String::from(
-            "/mnt/home/nima.mousavi/yard/flex/runs/20230823_wasted_data_contig/ref.fa",
-        ));
+        let refdata =
+            RefData::from_fasta(&String::from("test/inputs/test_productive_is_valid_ref.fa"));
 
         let mut log: Vec<u8> = vec![];
 
@@ -439,12 +438,11 @@ mod tests {
         ]
         .contains(item)));
 
+        // Productive
         let b = DnaString::from_dna_string("GGACCAAAATTCAAAGACAAAATGCATTGTCAAGTGCAGATTTTCAGCTTCCTGCTAATCAGTGCCTCAGTCATAATGTCCAGAGGACAAATTGTTCTCACCCAGTCTCCAGCAATCATGTCTGCATCTCCAGGGGAGAAGGTCACCATAACCTGCAGTGCCAGCTCAAGTGTAAGTTACATGCACTGGTTCCAGCAGAAGCCAGGCACTTCTCCCAAACTCTGGATTTATAGCACATCCAACCTGGCTTCTGGAGTCCCTGCTCGCTTCAGTGGCAGTGGATCTGGGACCTCTTACTCTCTCACAATCAGCCGAATGGAGGCTGAAGATGCTGCCACTTATTACTGCCAGCAAAGGAGTAGTTACCCGCTCACGTTCGGTGCTGGGACCAAGCTGGAGCTGAAACGGGCTGATGCTGCACCAACTGTATCCATCTTCCCACCATCCAGTGAGCAGTTAACATCTGGAGGTGCCTCAGTCGTGTGCTTC");
         let ann = [(21, 352, 5, 0, 3), (368, 38, 6, 0, 0), (406, 83, 7, 0, 0)];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
         assert!(return_value.0);
         assert!(return_value.1.is_empty());
-
-        assert!(1 == 2);
     }
 }
