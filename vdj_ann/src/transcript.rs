@@ -33,6 +33,28 @@ pub struct ContigStatus {
     pub unproductive_cause: Vec<UnproductiveContigCause>,
 }
 
+// ann: { ( start on sequence, match length, ref tig, start on ref tig, mismatches on sequence ) }.
+
+#[derive(Debug)]
+pub struct Annotation {
+    pub seq_start: usize, // Start position on sequence
+    pub match_len: usize, // Match length
+    pub ref_tig: usize,   // Reference tig index (ordered in ref.fa starting from 0)
+    pub tig_start: usize, // Start position on reference tig
+    pub mismatches: usize,
+}
+impl From<(i32, i32, i32, i32, i32)> for Annotation {
+    fn from(ann_element: (i32, i32, i32, i32, i32)) -> Self {
+        Annotation {
+            seq_start: ann_element.0 as usize,
+            match_len: ann_element.1 as usize,
+            ref_tig: ann_element.2 as usize,
+            tig_start: ann_element.3 as usize,
+            mismatches: ann_element.4 as usize,
+        }
+    }
+}
+
 pub fn is_valid(
     b: &DnaString,
     refdata: &RefData,
@@ -61,46 +83,43 @@ pub fn is_valid(
         let mut last_jstop_len: i32 = -1;
         let mut igh = false;
         for j in 0..ann.len() {
-            let l = ann[j].0 as usize;
-            let len = ann[j].1 as usize;
-            let t = ann[j].2 as usize;
-            let p = ann[j].3 as usize;
-            if rheaders[t].contains("IGH") {
+            let annot = Annotation::from(ann[j]);
+            if rheaders[annot.ref_tig].contains("IGH") {
                 igh = true;
             }
-            if !rheaders[t].contains("5'UTR")
+            if !rheaders[annot.ref_tig].contains("5'UTR")
                 && ((m == "A"
-                    && (rheaders[t].contains("TRAV")
-                        || (rheaders[t].contains("TRGV") && gd_mode)
-                        || rheaders[t].contains("IGHV")))
+                    && (rheaders[annot.ref_tig].contains("TRAV")
+                        || (rheaders[annot.ref_tig].contains("TRGV") && gd_mode)
+                        || rheaders[annot.ref_tig].contains("IGHV")))
                     || (m == "B"
-                        && (rheaders[t].contains("TRBV")
-                            || (rheaders[t].contains("TRDV") && gd_mode)
-                            || rheaders[t].contains("IGLV")
-                            || rheaders[t].contains("IGKV"))))
+                        && (rheaders[annot.ref_tig].contains("TRBV")
+                            || (rheaders[annot.ref_tig].contains("TRDV") && gd_mode)
+                            || rheaders[annot.ref_tig].contains("IGLV")
+                            || rheaders[annot.ref_tig].contains("IGKV"))))
             {
                 if first_vstart < 0 {
-                    first_vstart = l as i32;
-                    first_vstart_len = (refs[t].len() - p) as i32;
+                    first_vstart = annot.seq_start as i32;
+                    first_vstart_len = (refs[annot.ref_tig].len() - annot.tig_start) as i32;
                 }
-                if p == 0 {
-                    vstarts.push(l as i32);
+                if annot.tig_start == 0 {
+                    vstarts.push(annot.seq_start as i32);
                 }
             }
             if (m == "A"
-                && (rheaders[t].contains("TRAJ")
-                    || (rheaders[t].contains("TRGJ") && gd_mode)
-                    || rheaders[t].contains("IGHJ")))
+                && (rheaders[annot.ref_tig].contains("TRAJ")
+                    || (rheaders[annot.ref_tig].contains("TRGJ") && gd_mode)
+                    || rheaders[annot.ref_tig].contains("IGHJ")))
                 || (m == "B"
-                    && (rheaders[t].contains("TRBJ")
-                        || (rheaders[t].contains("TRDJ") && gd_mode)
-                        || rheaders[t].contains("IGLJ")
-                        || rheaders[t].contains("IGKJ")))
+                    && (rheaders[annot.ref_tig].contains("TRBJ")
+                        || (rheaders[annot.ref_tig].contains("TRDJ") && gd_mode)
+                        || rheaders[annot.ref_tig].contains("IGLJ")
+                        || rheaders[annot.ref_tig].contains("IGKJ")))
             {
-                last_jstop = (l + len) as i32;
-                last_jstop_len = (p + len) as i32;
-                if p + len == refs[t].len() {
-                    jstops.push((l + len) as i32);
+                last_jstop = (annot.seq_start + annot.match_len) as i32;
+                last_jstop_len = (annot.tig_start + annot.match_len) as i32;
+                if annot.tig_start + annot.match_len == refs[annot.ref_tig].len() {
+                    jstops.push((annot.seq_start + annot.match_len) as i32);
                 }
             }
         }
@@ -187,14 +206,14 @@ pub fn is_valid(
         }
         let mut misordered = false;
         for j1 in 0..ann.len() {
-            let t1 = ann[j1].2 as usize;
+            let annot1 = Annotation::from(ann[j1]);
             for j2 in j1 + 1..ann.len() {
-                let t2 = ann[j2].2 as usize;
-                if (refdata.is_j(t1) && refdata.is_v(t2))
-                    || (refdata.is_j(t1) && refdata.is_u(t2))
-                    || (refdata.is_j(t1) && refdata.is_d(t2))
-                    || (refdata.is_v(t1) && refdata.is_u(t2))
-                    || (refdata.is_c(t1) && !refdata.is_c(t2))
+                let annot2 = Annotation::from(ann[j2]);
+                if (refdata.is_j(annot1.ref_tig) && refdata.is_v(annot2.ref_tig))
+                    || (refdata.is_j(annot1.ref_tig) && refdata.is_u(annot2.ref_tig))
+                    || (refdata.is_j(annot1.ref_tig) && refdata.is_d(annot2.ref_tig))
+                    || (refdata.is_v(annot1.ref_tig) && refdata.is_u(annot2.ref_tig))
+                    || (refdata.is_c(annot1.ref_tig) && !refdata.is_c(annot2.ref_tig))
                 {
                     misordered = true;
                 }
