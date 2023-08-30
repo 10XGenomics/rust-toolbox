@@ -95,7 +95,7 @@ pub fn is_valid(
         if pass == 1 {
             m = "B";
         }
-        println!(">> Pass: {:?}, m: {:?}", pass, m);
+        // println!(">> Pass: {:?}, m: {:?}", pass, m);
         let mut vstarts = Vec::<i32>::new();
         let mut jstops = Vec::<i32>::new();
         let mut first_vstart: i32 = -1;
@@ -146,12 +146,12 @@ pub fn is_valid(
         }
         unique_sort(&mut vstarts);
         unique_sort(&mut jstops);
-        println!(">>>> vstarts: {:?}", vstarts);
-        println!(">>>> jstops: {:?}", jstops);
+        // println!(">>>> vstarts: {:?}", vstarts);
+        // println!(">>>> jstops: {:?}", jstops);
         let mut full = false;
         // 2 passes to check frameshifts (finding the start/stop codon)
         for inner_pass in 1..3 {
-            println!(">>>>>> inner_pass: {:?}", inner_pass);
+            // println!(">>>>>> inner_pass: {:?}", inner_pass);
             if inner_pass == 2 && full {
                 continue;
             }
