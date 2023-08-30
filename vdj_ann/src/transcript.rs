@@ -84,7 +84,7 @@ pub fn is_valid(
     let mut missing_vstart = true;
     // let premature_stop = true;
     // let frameshift_mut = false;
-    // let missing_cdr3 = false;
+    let mut missing_cdr3 = false;
     // let too_large = true;
     // let misordered = false;
     let mut contig_status: UnproductiveContig = Default::default();
@@ -212,6 +212,7 @@ pub fn is_valid(
                 fwriteln!(log, "did not find CDR3");
             }
             contig_status |= UnproductiveContig::NO_CDR3;
+            missing_cdr3 = true;
         }
         let mut too_large = false;
         const MIN_DELTA: i32 = -25;
@@ -261,7 +262,8 @@ pub fn is_valid(
             }
             contig_status |= UnproductiveContig::SIZE_DELTA;
         }
-        if full && !too_large && !misordered && contig_status.is_empty() {
+        if full && !too_large && !misordered && !missing_cdr3 {
+            // && contig_status.is_empty() {
             return ContigStatus {
                 productive: true,
                 unproductive_cause: contig_status,
