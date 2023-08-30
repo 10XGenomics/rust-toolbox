@@ -1354,6 +1354,7 @@ dependencies = [
  "align_tools",
  "amino",
  "bio_edit",
+ "bitflags 2.4.0",
  "debruijn",
  "fasta_tools",
  "hyperbase",

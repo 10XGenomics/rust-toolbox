@@ -5,6 +5,7 @@
 use crate::annotate::get_cdr3_using_ann;
 use crate::refx::RefData;
 use amino::{have_start, have_stop};
+use bitflags::bitflags;
 use debruijn::dna_string::DnaString;
 use debruijn::kmer::Kmer20;
 use debruijn::{Mer, Vmer};
@@ -19,18 +20,30 @@ use vector_utils::{lower_bound1_3, unique_sort};
 // TEST FOR VALID VDJ SEQUENCE
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-#[derive(Debug, PartialEq, Ord, PartialOrd, Eq)]
-pub enum UnproductiveContigCause {
-    NoCdr3,
-    Misordered,
-    NotFull,
-    TooLarge,
+// #[derive(Debug, PartialEq, Ord, PartialOrd, Eq)]
+// pub enum UnproductiveContigCause {
+//     NoCdr3,
+//     Misordered,
+//     NotFull,
+//     TooLarge,
+// }
+bitflags! {
+    #[derive(Debug, Default,PartialEq)]
+    pub struct UnproductiveContig: u16 {
+        const NOT_FULL_LEN = 1u16;
+        const MISSING_V_START = 2u16;
+        const PREMATURE_STOP = 4u16;
+        const FRAMESHIFT = 8u16;
+        const NO_CDR3 = 16u16;
+        const SIZE_DELTA = 32u16;
+        const MISORDERED =  64u16;
+    }
 }
 
 #[derive(Debug)]
 pub struct ContigStatus {
     pub productive: bool,
-    pub unproductive_cause: Vec<UnproductiveContigCause>,
+    pub unproductive_cause: UnproductiveContig,
 }
 
 // ann: { ( start on sequence, match length, ref tig, start on ref tig, mismatches on sequence ) }.
@@ -67,7 +80,14 @@ pub fn is_valid(
     let gd_mode = is_gd.unwrap_or(false);
     let refs = &refdata.refs;
     let rheaders = &refdata.rheaders;
-    let mut ret_vec = Vec::new();
+    // let not_full_length = false;
+    // let missing_vstart = false;
+    // let premature_stop = true;
+    // let frameshift_mut = false;
+    // let missing_cdr3 = false;
+    // let too_large = true;
+    // let misordered = false;
+    let mut contig_status: UnproductiveContig = Default::default();
     let mut never_full = true;
     // two passes, one for light chains and one for heavy chains
     for pass in 0..2 {
@@ -181,7 +201,7 @@ pub fn is_valid(
             if logme {
                 fwriteln!(log, "did not find CDR3");
             }
-            ret_vec.push(UnproductiveContigCause::NoCdr3);
+            contig_status |= UnproductiveContig::NO_CDR3;
         }
         let mut too_large = false;
         const MIN_DELTA: i32 = -25;
@@ -223,18 +243,18 @@ pub fn is_valid(
             if logme {
                 fwriteln!(log, "misordered");
             }
-            ret_vec.push(UnproductiveContigCause::Misordered);
+            contig_status |= UnproductiveContig::MISORDERED;
         }
         if too_large {
             if logme {
                 fwriteln!(log, "too large");
             }
-            ret_vec.push(UnproductiveContigCause::TooLarge);
+            contig_status |= UnproductiveContig::SIZE_DELTA;
         }
-        if full && !too_large && !misordered && ret_vec.is_empty() {
+        if full && !too_large && !misordered && contig_status.is_empty() {
             return ContigStatus {
                 productive: true,
-                unproductive_cause: vec![],
+                unproductive_cause: contig_status,
             };
         }
     }
@@ -243,14 +263,12 @@ pub fn is_valid(
             fwriteln!(log, "not full");
         }
 
-        ret_vec.push(UnproductiveContigCause::NotFull);
+        contig_status |= UnproductiveContig::NOT_FULL_LEN;
     }
 
-    ret_vec.sort_unstable();
-    ret_vec.dedup();
     ContigStatus {
         productive: false,
-        unproductive_cause: ret_vec,
+        unproductive_cause: contig_status,
     }
 }
 
@@ -423,7 +441,7 @@ mod tests {
 
         let mut log: Vec<u8> = vec![];
 
-        // NoCdr3
+        // NO_CDR3
         let b = DnaString::from_dna_string("ACATCTCTCTCATTAGAGGTTGATCTTTGAGGAAAACAGGGTGTTGCCTAAAGGATGAAAGTGTTGAGTCTGTTGTACCTGTTGACAGCCATTCCTGGTATCCTGTCTGATGTACAGCTTCAGGAGTCAGGACCTGGCCTCGTGAAACCTTCTCAGTCTCTGTCTCTCACCTGCTCTGTCACTGGCTACTCCATCACCAGTGGTTATTACTGGAACTGGATCCGGCAGTTTCCAGGAAACAAACTGGAATGGATGGGCTACATAAGCTACGACGGTAGCAATAACTACAACCCATCTCTCAAAAATCGAATCTCCATCACTCGTGACACATCTAAGAACCAGTTTTTCCTGAAGTTGAATTCTGTGACTACTGAGGACACAGCTACATATTACTGTGCAAGATCTACTATGATTACGACGGGGTTTGCTTACTGGGGCCAAGGGACTCTGGTCACTGTCTCTGCAG");
         let ann = [
             (54, 148, 0, 0, 16),
@@ -432,22 +450,19 @@ mod tests {
         ];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
         assert!(!return_value.productive);
-        assert!(return_value
-            .unproductive_cause
-            .iter()
-            .all(|item| vec![UnproductiveContigCause::NoCdr3].contains(item)));
+        assert_eq!(return_value.unproductive_cause, UnproductiveContig::NO_CDR3);
 
-        // NotFull
+        // NOT_FULL_LEN
         let b = DnaString::from_dna_string("GAACACATGCCCAATGTCCTCTCCACAGACACTGAACACACTGACTCCAACCATGGGGTGGAGTCTGGATCTTTTTCTTCCTCCTGTCAGGAACTGCAGGTGTCCACTCTGAGGTCCAGCTGCAACAGTCTGGACCTGAGCTGGTGAAGCCTGGGGCTTCAGTGAAGATATCCTGCAAGGCTTCTGGCTACACATTCACTGACTACTACATGAACTGGGTGAAGCAGAGCCATGGAAAGAGCCTTGAGTGGATTGGACTTGTTAATCCTAACAATGGTGGTACTAGCTACAACCAGAAGTTCAAGGGCAAGGCCACATTGACTGTAGACAAGTCCTCCAGCACAGCCTACATGGAGCTCCGCAGCCTGACATCTGAGGACTCTGCGGTCTATTACTGTGCAAGAAGGGCTAGGGTAACTGGGATGCTATGGACTACTGGGGTCAAGGAACCTCAGTCACCGTCTCCTCAGAGAGTCAGTCCTTCCCAAATGTCTTCCCCCTCGTCTCCTGCGAGAGCCCCCTGTCTGATAAGAATCTGGTGGCCATGGGCTGCCTGGCCCGGGACTTCCTGCCCAGCACCATTTCCTTCACCTGGAACTACCAGAACAACACTGAAGTCATCCAGGGTATCAGAACCTTCCCAACACTGAGGACAGGGGGCAAGTACCTAGCCACCTCGCA");
         let ann = [(64, 340, 2, 11, 11)];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
         assert!(!return_value.productive);
-        assert!(return_value
-            .unproductive_cause
-            .iter()
-            .all(|item| vec![UnproductiveContigCause::NotFull].contains(item)));
+        assert_eq!(
+            return_value.unproductive_cause,
+            UnproductiveContig::NOT_FULL_LEN
+        );
 
-        // [NotFull, TooLarge]
+        // [NOT_FULL_LEN, SIZE_DELTA]
         let ann = [
             (64, 340, 2, 11, 11),
             (416, 54, 3, 0, 4),
@@ -455,11 +470,10 @@ mod tests {
         ];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
         assert!(!return_value.productive);
-        assert!(return_value.unproductive_cause.iter().all(|item| vec![
-            UnproductiveContigCause::NotFull,
-            UnproductiveContigCause::TooLarge
-        ]
-        .contains(item)));
+        assert_eq!(
+            return_value.unproductive_cause,
+            UnproductiveContig::NOT_FULL_LEN | UnproductiveContig::SIZE_DELTA
+        );
 
         // [Misordered, NotFull, TooLarge]
         let ann = [
@@ -469,12 +483,12 @@ mod tests {
         ];
         let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
         assert!(!return_value.productive);
-        assert!(return_value.unproductive_cause.iter().all(|item| vec![
-            UnproductiveContigCause::NotFull,
-            UnproductiveContigCause::TooLarge,
-            UnproductiveContigCause::Misordered
-        ]
-        .contains(item)));
+        assert_eq!(
+            return_value.unproductive_cause,
+            UnproductiveContig::NOT_FULL_LEN
+                | UnproductiveContig::SIZE_DELTA
+                | UnproductiveContig::MISORDERED
+        );
 
         // Productive
         let b = DnaString::from_dna_string("GGACCAAAATTCAAAGACAAAATGCATTGTCAAGTGCAGATTTTCAGCTTCCTGCTAATCAGTGCCTCAGTCATAATGTCCAGAGGACAAATTGTTCTCACCCAGTCTCCAGCAATCATGTCTGCATCTCCAGGGGAGAAGGTCACCATAACCTGCAGTGCCAGCTCAAGTGTAAGTTACATGCACTGGTTCCAGCAGAAGCCAGGCACTTCTCCCAAACTCTGGATTTATAGCACATCCAACCTGGCTTCTGGAGTCCCTGCTCGCTTCAGTGGCAGTGGATCTGGGACCTCTTACTCTCTCACAATCAGCCGAATGGAGGCTGAAGATGCTGCCACTTATTACTGCCAGCAAAGGAGTAGTTACCCGCTCACGTTCGGTGCTGGGACCAAGCTGGAGCTGAAACGGGCTGATGCTGCACCAACTGTATCCATCTTCCCACCATCCAGTGAGCAGTTAACATCTGGAGGTGCCTCAGTCGTGTGCTTC");
