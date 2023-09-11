@@ -3026,6 +3026,8 @@ pub struct ContigAnnotation {
     pub full_length: Option<bool>, // New field added in CR 4.1. None if the field is not set
 
     pub junction_support: Option<JunctionSupport>, // New field added in CR 7.2. Coverage of junction region for a good contig
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sample: Option<String>,
 }
 
 impl ContigAnnotation {
@@ -3150,6 +3152,8 @@ impl ContigAnnotation {
             cdr2: None,
             fwr3: None,
             fwr4: None,
+
+            sample: None,
         };
         ann.full_length = Some(ann.is_full_length());
         ann
