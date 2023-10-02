@@ -42,6 +42,7 @@ allow = [
     "MIT",
     "MPL-2.0",
     "OpenSSL",
+    "Unicode-DFS-2016",
     "WTFPL",
 ]
 copyleft = "deny"
@@ -94,4 +95,4 @@ allow-registry = ["https://github.com/rust-lang/crates.io-index"]
 allow-git = []
 
 [sources.allow-org]
-github = ["10XGenomics"]
+github = []
