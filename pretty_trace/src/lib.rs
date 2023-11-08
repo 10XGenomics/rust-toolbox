@@ -111,7 +111,7 @@
 //! <pre>
 //!     PrettyTrace::new().ctrlc().on();
 //! </pre>
-//! then any Ctrl-C will be converted into a panic, and then you'll get a trackback.
+//! then any Ctrl-C will be converted into a panic, and then you'll get a traceback.
 //!
 //! # Full disclosure
 //!
