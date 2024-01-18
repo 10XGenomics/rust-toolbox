@@ -416,11 +416,11 @@ pub fn fr3_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
 
         // Score positions.
 
-        if cdr3_start < 35 {
+        if cdr3_start < 28 {
             return None;
         }
         let mut score_pos = Vec::<(usize, usize)>::with_capacity(35 - 28 + 1);
-        for j in cdr3_start - 35..=cdr3_start - 28 {
+        for j in cdr3_start.saturating_sub(35)..=cdr3_start - 28 {
             // changed to 39
             let mut score = 0;
             for (p, wm) in pwm.iter().enumerate() {
@@ -466,9 +466,11 @@ pub fn fr3_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
         ];
 
         // Score positions.
-
+        if cdr3_start < 32 - 2 {
+            return None;
+        }
         let mut score_pos = Vec::<(usize, isize)>::with_capacity(42 - 32 + 1);
-        for j in cdr3_start.saturating_sub(42 - 2)..=cdr3_start.saturating_sub(32 - 2) {
+        for j in cdr3_start.saturating_sub(42 - 2)..=cdr3_start - (32 - 2) {
             let mut score = 0;
             for (p, wm) in pwm.iter().enumerate() {
                 for l in wm {
@@ -525,9 +527,11 @@ pub fn fr3_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
         ];
 
         // Score positions.
-
+        if cdr3_start < 33 {
+            return None;
+        }
         let mut score_pos = Vec::<(usize, usize)>::with_capacity(36 - 33 + 1);
-        for j in cdr3_start - 36..=cdr3_start - 33 {
+        for j in cdr3_start.saturating_sub(36)..=cdr3_start - 33 {
             let mut score = 0;
             for (p, wm) in pwm.iter().enumerate() {
                 for l in wm {
@@ -569,9 +573,11 @@ pub fn fr3_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
         ];
 
         // Score positions.
-
+        if cdr3_start < 35 {
+            return None;
+        }
         let mut score_pos = Vec::<(usize, usize)>::with_capacity(38 - 35 + 1);
-        for j in cdr3_start - 38..=cdr3_start - 35 {
+        for j in cdr3_start.saturating_sub(38)..=cdr3_start - 35 {
             let mut score = 0;
             for (p, wm) in pwm.iter().enumerate() {
                 for l in wm {
