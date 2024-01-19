@@ -179,8 +179,8 @@ where
             check.push(s);
             tov.insert(s);
         }
-        while !check.is_empty() {
-            let x = check.pop().unwrap();
+        while let Some(x) = check.pop() {
+            
             let n = self.n_to(x as usize);
             for i in 0..n {
                 let y = self.v_to(x as usize, i);
@@ -211,8 +211,8 @@ where
             check.push(s);
             fromv.insert(s);
         }
-        while !check.is_empty() {
-            let x = check.pop().unwrap();
+        while let Some(x) = check.pop() {
+            
             let n = self.n_from(x as usize);
             for i in 0..n {
                 let y = self.v_from(x as usize, i);
@@ -255,8 +255,8 @@ where
             c.clear();
             cnext.clear();
             cnext.push(v as u32);
-            while !cnext.is_empty() {
-                let w = cnext.pop().unwrap();
+            while let Some(w) = cnext.pop() {
+                
                 if used[w as usize] {
                     continue;
                 }

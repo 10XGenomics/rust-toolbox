@@ -66,7 +66,7 @@ pub struct MirrorSparseMatrix {
 pub fn get_code_version_from_file(f: &str) -> u32 {
     assert_eq!(std::mem::size_of::<usize>(), 8); // for the usize at the beginning of the file
     let mut ff = std::fs::File::open(f).unwrap();
-    let mut x = vec![0_u32; 11];
+    let mut x = [0_u32; 11];
     binary_read_to_ref::<u32>(&mut ff, &mut x[0], 11).unwrap();
     x[10]
 }

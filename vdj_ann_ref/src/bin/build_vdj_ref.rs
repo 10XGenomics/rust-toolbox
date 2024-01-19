@@ -895,7 +895,7 @@ fn main() {
         // End mouse changes for cell ranger 5.0.
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
     }
-    if species == "balbc" {}
+    species == "balbc";
 
     // Normalize exceptions.
 
@@ -1028,25 +1028,25 @@ fn main() {
     let mut sha256 = Sha256::new();
     copy(&mut File::open(&fasta).unwrap(), &mut sha256).unwrap();
     let hash = sha256.finalize();
-    fwriteln!(json, r###"    "fasta_hash": "{:x}","###, hash);
-    fwriteln!(json, r###"    "genomes": "{}","###, source2);
+    fwriteln!(json, r#"    "fasta_hash": "{:x}","#, hash);
+    fwriteln!(json, r#"    "genomes": "{}","#, source2);
     let mut sha256 = Sha256::new();
     copy(&mut File::open(&gtf).unwrap(), &mut sha256).unwrap();
     let hash = sha256.finalize();
-    fwriteln!(json, r###"    "gtf_hash": "{:x}","###, hash);
+    fwriteln!(json, r#"    "gtf_hash": "{:x}","#, hash);
     fwriteln!(
         json,
-        r###"    "input_fasta_files": "{}","###,
+        r#"    "input_fasta_files": "{}","#,
         ensembl_path(species, "fasta", release)
     );
     fwriteln!(
         json,
-        r###"    "input_gtf_files": "{}","###,
+        r#"    "input_gtf_files": "{}","#,
         ensembl_path(species, "gtf", release)
     );
     fwriteln!(json, r###"    "mkref_version": "","###);
     fwriteln!(json, r###"    "type": "V(D)J Reference","###);
-    fwriteln!(json, r###"    "version": "{}""###, version);
+    fwriteln!(json, r#"    "version": "{}""#, version);
     fwrite!(json, "}}");
 
     // Load the gff3 file and use it to do two things:

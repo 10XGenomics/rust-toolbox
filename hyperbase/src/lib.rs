@@ -597,8 +597,8 @@ impl Hyper {
         // This is complicated.
 
         let mut bound = Vec::<(u32, u32)>::new();
-        while !vertex_queue.is_empty() {
-            let v = vertex_queue.pop().unwrap();
+        while let Some(v) = vertex_queue.pop() {
+            
             if !vertex_kill[v.index()] {
                 continue;
             }
@@ -644,8 +644,8 @@ impl Hyper {
         let mut have: Vec<u32>;
         let mut havex: Vec<bool> = vec![false; (maxread + 1) as usize];
         self.ids.reserve(bound.len());
-        while !bound.is_empty() {
-            let bounds = bound.pop().unwrap();
+        while let Some(bounds) = bound.pop() {
+            
             let new_edge_no: usize = self.h.g.edge_count();
             let mut new_edge = self.h.g.edge_obj(bounds.0).clone();
             have = self.ids[bounds.0 as usize].clone();

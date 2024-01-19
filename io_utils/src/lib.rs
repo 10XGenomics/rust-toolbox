@@ -319,11 +319,7 @@ pub fn read_vector_entry_from_json<R: BufRead>(json: &mut R) -> Result<Option<Ve
                     _ => {}
                 };
             }
-            if s[i] == b'\\' && !escaped {
-                escaped = true;
-            } else {
-                escaped = false;
-            }
+            escaped = s[i] == b'\\' && !escaped;
             entry.push(s[i]);
         }
         line.clear();

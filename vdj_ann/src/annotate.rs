@@ -2911,7 +2911,7 @@ impl AnnotationUnit {
 
         // Build the rest.
 
-        let types = vec!["IGH", "IGK", "IGL", "TRA", "TRB", "TRD", "TRG"];
+        let types = ["IGH", "IGK", "IGL", "TRA", "TRB", "TRD", "TRG"];
         let mut chain_type = String::new();
         for i in 0..types.len() {
             if refdata.rheaders[t].contains(types[i]) {
