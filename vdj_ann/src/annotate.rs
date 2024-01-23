@@ -8,21 +8,17 @@ use crate::transcript::is_valid;
 use align_tools::affine_align;
 use amino::{aa_seq, have_start};
 use bio_edit::alignment::AlignmentOperation::{Del, Ins, Match, Subst, Xclip, Yclip};
-use debruijn::{
-    dna_string::{DnaString, DnaStringSlice},
-    kmer::{Kmer12, Kmer20},
-    Mer, Vmer,
-};
+use debruijn::dna_string::{DnaString, DnaStringSlice};
+use debruijn::kmer::{Kmer12, Kmer20};
+use debruijn::{Mer, Vmer};
 use io_utils::{fwrite, fwriteln};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use stats_utils::percent_ratio;
+use std::cmp::{max, min};
 use std::fmt::Write as _;
-use std::{
-    cmp::{max, min},
-    fs::File,
-    io::{BufWriter, Write},
-};
+use std::fs::File;
+use std::io::{BufWriter, Write};
 use string_utils::{stringme, strme, TextUtils};
 use vdj_types::{VdjChain, VdjRegion};
 use vector_utils::{
@@ -3179,7 +3175,7 @@ impl ContigAnnotation {
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
         annotate_seq(b, refdata, &mut ann, true, false, true);
         let mut log = Vec::<u8>::new();
-        let productive = is_valid(b, refdata, &ann, false, &mut log, is_gd);
+        let productive = is_valid(b, refdata, &ann, false, &mut log, is_gd).productive;
         ContigAnnotation::from_annotate_seq(
             b,
             q,

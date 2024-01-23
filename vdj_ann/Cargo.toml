@@ -26,3 +26,4 @@ stats_utils = { version = "0.1", path = "../stats_utils" }
 string_utils = { version = "0.1", path = "../string_utils" }
 vector_utils = { version = "0.1", path = "../vector_utils" }
 vdj_types = { version = "0.2", path = "../vdj_types" }
+bitflags = "2.4.0"

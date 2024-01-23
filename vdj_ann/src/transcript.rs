@@ -5,16 +5,68 @@
 use crate::annotate::get_cdr3_using_ann;
 use crate::refx::RefData;
 use amino::{have_start, have_stop};
-use debruijn::{dna_string::DnaString, kmer::Kmer20, Mer, Vmer};
+use bitflags::bitflags;
+use debruijn::dna_string::DnaString;
+use debruijn::kmer::Kmer20;
+use debruijn::{Mer, Vmer};
 use hyperbase::Hyper;
 use io_utils::fwriteln;
 use kmer_lookup::make_kmer_lookup_20_single;
-use std::{cmp::max, io::prelude::*};
+use std::cmp::max;
+use std::io::prelude::*;
 use vector_utils::{lower_bound1_3, unique_sort};
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // TEST FOR VALID VDJ SEQUENCE
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+// #[derive(Debug, PartialEq, Ord, PartialOrd, Eq)]
+// pub enum UnproductiveContigCause {
+//     NoCdr3,
+//     Misordered,
+//     NotFull,
+//     TooLarge,
+// }
+bitflags! {
+    #[derive(Debug, Default,PartialEq)]
+    pub struct UnproductiveContig: u16 {
+        const NOT_FULL_LEN = 1u16;
+        const MISSING_V_START = 2u16;
+        const PREMATURE_STOP = 4u16;
+        const FRAMESHIFT = 8u16;
+        const NO_CDR3 = 16u16;
+        const SIZE_DELTA = 32u16;
+        const MISORDERED =  64u16;
+    }
+}
+
+#[derive(Debug)]
+pub struct ContigStatus {
+    pub productive: bool,
+    pub unproductive_cause: UnproductiveContig,
+}
+
+// ann: { ( start on sequence, match length, ref tig, start on ref tig, mismatches on sequence ) }.
+
+#[derive(Debug)]
+pub struct Annotation {
+    pub seq_start: usize, // Start position on sequence
+    pub match_len: usize, // Match length
+    pub ref_tig: usize,   // Reference tig index (ordered in ref.fa starting from 0)
+    pub tig_start: usize, // Start position on reference tig
+    pub mismatches: usize,
+}
+impl From<(i32, i32, i32, i32, i32)> for Annotation {
+    fn from(ann_element: (i32, i32, i32, i32, i32)) -> Self {
+        Annotation {
+            seq_start: ann_element.0 as usize,
+            match_len: ann_element.1 as usize,
+            ref_tig: ann_element.2 as usize,
+            tig_start: ann_element.3 as usize,
+            mismatches: ann_element.4 as usize,
+        }
+    }
+}
 
 pub fn is_valid(
     b: &DnaString,
@@ -23,16 +75,27 @@ pub fn is_valid(
     logme: bool,
     log: &mut Vec<u8>,
     is_gd: Option<bool>,
-) -> bool {
+) -> ContigStatus {
     // Unwrap gamma/delta mode flag
     let gd_mode = is_gd.unwrap_or(false);
     let refs = &refdata.refs;
     let rheaders = &refdata.rheaders;
+    // let not_full_length = false;
+    let mut missing_vstart = true;
+    // let premature_stop = true;
+    // let frameshift_mut = false;
+    let mut missing_cdr3 = false;
+    // let too_large = true;
+    // let misordered = false;
+    let mut contig_status: UnproductiveContig = Default::default();
+    let mut never_full = true;
+    // two passes, one for light chains and one for heavy chains
     for pass in 0..2 {
         let mut m = "A";
         if pass == 1 {
             m = "B";
         }
+        // println!(">> Pass: {:?}, m: {:?}", pass, m);
         let mut vstarts = Vec::<i32>::new();
         let mut jstops = Vec::<i32>::new();
         let mut first_vstart: i32 = -1;
@@ -41,67 +104,70 @@ pub fn is_valid(
         let mut last_jstop_len: i32 = -1;
         let mut igh = false;
         for j in 0..ann.len() {
-            let l = ann[j].0 as usize;
-            let len = ann[j].1 as usize;
-            let t = ann[j].2 as usize;
-            let p = ann[j].3 as usize;
-            if rheaders[t].contains("IGH") {
+            let annot = Annotation::from(ann[j]);
+            if rheaders[annot.ref_tig].contains("IGH") {
                 igh = true;
             }
-            if !rheaders[t].contains("5'UTR")
+            if !rheaders[annot.ref_tig].contains("5'UTR")
                 && ((m == "A"
-                    && (rheaders[t].contains("TRAV")
-                        || (rheaders[t].contains("TRGV") && gd_mode)
-                        || rheaders[t].contains("IGHV")))
+                    && (rheaders[annot.ref_tig].contains("TRAV")
+                        || (rheaders[annot.ref_tig].contains("TRGV") && gd_mode)
+                        || rheaders[annot.ref_tig].contains("IGHV")))
                     || (m == "B"
-                        && (rheaders[t].contains("TRBV")
-                            || (rheaders[t].contains("TRDV") && gd_mode)
-                            || rheaders[t].contains("IGLV")
-                            || rheaders[t].contains("IGKV"))))
+                        && (rheaders[annot.ref_tig].contains("TRBV")
+                            || (rheaders[annot.ref_tig].contains("TRDV") && gd_mode)
+                            || rheaders[annot.ref_tig].contains("IGLV")
+                            || rheaders[annot.ref_tig].contains("IGKV"))))
             {
                 if first_vstart < 0 {
-                    first_vstart = l as i32;
-                    first_vstart_len = (refs[t].len() - p) as i32;
+                    first_vstart = annot.seq_start as i32;
+                    first_vstart_len = (refs[annot.ref_tig].len() - annot.tig_start) as i32;
                 }
-                if p == 0 {
-                    vstarts.push(l as i32);
+                if annot.tig_start == 0 {
+                    vstarts.push(annot.seq_start as i32);
                 }
             }
             if (m == "A"
-                && (rheaders[t].contains("TRAJ")
-                    || (rheaders[t].contains("TRGJ") && gd_mode)
-                    || rheaders[t].contains("IGHJ")))
+                && (rheaders[annot.ref_tig].contains("TRAJ")
+                    || (rheaders[annot.ref_tig].contains("TRGJ") && gd_mode)
+                    || rheaders[annot.ref_tig].contains("IGHJ")))
                 || (m == "B"
-                    && (rheaders[t].contains("TRBJ")
-                        || (rheaders[t].contains("TRDJ") && gd_mode)
-                        || rheaders[t].contains("IGLJ")
-                        || rheaders[t].contains("IGKJ")))
+                    && (rheaders[annot.ref_tig].contains("TRBJ")
+                        || (rheaders[annot.ref_tig].contains("TRDJ") && gd_mode)
+                        || rheaders[annot.ref_tig].contains("IGLJ")
+                        || rheaders[annot.ref_tig].contains("IGKJ")))
             {
-                last_jstop = (l + len) as i32;
-                last_jstop_len = (p + len) as i32;
-                if p + len == refs[t].len() {
-                    jstops.push((l + len) as i32);
+                last_jstop = (annot.seq_start + annot.match_len) as i32;
+                last_jstop_len = (annot.tig_start + annot.match_len) as i32;
+                if annot.tig_start + annot.match_len == refs[annot.ref_tig].len() {
+                    jstops.push((annot.seq_start + annot.match_len) as i32);
                 }
             }
         }
         unique_sort(&mut vstarts);
         unique_sort(&mut jstops);
+        // println!(">>>> vstarts: {:?}", vstarts);
+        // println!(">>>> jstops: {:?}", jstops);
         let mut full = false;
-        for pass in 1..3 {
-            if pass == 2 && full {
+        // 2 passes to check frameshifts (finding the start/stop codon)
+        for inner_pass in 1..3 {
+            // println!(">>>>>> inner_pass: {:?}", inner_pass);
+            if inner_pass == 2 && full {
                 continue;
             }
             let mut msg = "";
-            if pass == 2 {
+            if inner_pass == 2 {
                 msg = "frameshifted ";
             };
             for start in vstarts.iter() {
                 if !have_start(b, *start as usize) {
                     continue;
                 }
+                missing_vstart = false;
                 for stop in jstops.iter() {
                     let n = stop - start;
-                    if pass == 2 || n % 3 == 1 {
+                    // on second pass, go through with checking for stop codon regardless of n % 3 value
+                    if inner_pass == 2 || n % 3 == 1 {
                         let mut stop_codon = false;
                         // shouldn't it be stop-3+1????????????????????????????????
                         for j in (*start..stop - 3).step_by(3) {
@@ -110,8 +176,11 @@ pub fn is_valid(
                             }
                         }
                         if !stop_codon {
-                            if pass == 1 {
+                            if inner_pass == 1 {
                                 full = true;
+                                never_full = false;
+                            } else {
+                                contig_status |= UnproductiveContig::FRAMESHIFT;
                             }
                             if logme {
                                 fwriteln!(
@@ -121,13 +190,16 @@ pub fn is_valid(
                                     b.len()
                                 );
                             }
-                        } else if logme {
-                            fwriteln!(
-                                log,
-                                "{}full length stopped transcript of length {}",
-                                msg,
-                                b.len()
-                            );
+                        } else {
+                            contig_status |= UnproductiveContig::PREMATURE_STOP;
+                            if logme {
+                                fwriteln!(
+                                    log,
+                                    "{}full length stopped transcript of length {}",
+                                    msg,
+                                    b.len()
+                                );
+                            }
                         }
                     }
                 }
@@ -139,13 +211,14 @@ pub fn is_valid(
             if logme {
                 fwriteln!(log, "did not find CDR3");
             }
-            return false;
+            contig_status |= UnproductiveContig::NO_CDR3;
+            missing_cdr3 = true;
         }
         let mut too_large = false;
         const MIN_DELTA: i32 = -25;
         const MIN_DELTA_IGH: i32 = -55;
         const MAX_DELTA: i32 = 35;
-        if first_vstart >= 0 && last_jstop >= 0 {
+        if first_vstart >= 0 && last_jstop >= 0 && !cdr3.is_empty() {
             let delta = (last_jstop_len + first_vstart_len + 3 * cdr3[0].1.len() as i32 - 20)
                 - (last_jstop - first_vstart);
             if logme {
@@ -164,30 +237,54 @@ pub fn is_valid(
         }
         let mut misordered = false;
         for j1 in 0..ann.len() {
-            let t1 = ann[j1].2 as usize;
+            let annot1 = Annotation::from(ann[j1]);
             for j2 in j1 + 1..ann.len() {
-                let t2 = ann[j2].2 as usize;
-                if (refdata.is_j(t1) && refdata.is_v(t2))
-                    || (refdata.is_j(t1) && refdata.is_u(t2))
-                    || (refdata.is_j(t1) && refdata.is_d(t2))
-                    || (refdata.is_v(t1) && refdata.is_u(t2))
-                    || (refdata.is_c(t1) && !refdata.is_c(t2))
+                let annot2 = Annotation::from(ann[j2]);
+                if (refdata.is_j(annot1.ref_tig) && refdata.is_v(annot2.ref_tig))
+                    || (refdata.is_j(annot1.ref_tig) && refdata.is_u(annot2.ref_tig))
+                    || (refdata.is_j(annot1.ref_tig) && refdata.is_d(annot2.ref_tig))
+                    || (refdata.is_v(annot1.ref_tig) && refdata.is_u(annot2.ref_tig))
+                    || (refdata.is_c(annot1.ref_tig) && !refdata.is_c(annot2.ref_tig))
                 {
                     misordered = true;
                 }
             }
         }
-        if misordered && logme {
-            fwriteln!(log, "misordered");
+        if misordered {
+            if logme {
+                fwriteln!(log, "misordered");
+            }
+            contig_status |= UnproductiveContig::MISORDERED;
         }
-        if !full && logme {
-            fwriteln!(log, "not full");
+        if too_large {
+            if logme {
+                fwriteln!(log, "too large");
+            }
+            contig_status |= UnproductiveContig::SIZE_DELTA;
         }
-        if full && !too_large && !misordered {
-            return true;
+        if full && !too_large && !misordered && !missing_cdr3 {
+            // && contig_status.is_empty() {
+            return ContigStatus {
+                productive: true,
+                unproductive_cause: contig_status,
+            };
         }
     }
-    false
+    if missing_vstart {
+        contig_status |= UnproductiveContig::MISSING_V_START;
+    }
+    if never_full {
+        if logme {
+            fwriteln!(log, "not full");
+        }
+
+        contig_status |= UnproductiveContig::NOT_FULL_LEN;
+    }
+
+    ContigStatus {
+        productive: false,
+        unproductive_cause: contig_status,
+    }
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -341,5 +438,80 @@ pub fn junction_supp_core(
             jsupp.1 += mm.len() as i32;
         }
         idi = idj;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::refx;
+
+    #[test]
+    fn test_is_valid() {
+        use debruijn::dna_string::DnaString;
+        use refx::RefData;
+
+        let refdata =
+            RefData::from_fasta(String::from("test/inputs/test_productive_is_valid_ref.fa"));
+
+        let mut log: Vec<u8> = vec![];
+
+        // // NO_CDR3
+        // let b = DnaString::from_dna_string("ACATCTCTCTCATTAGAGGTTGATCTTTGAGGAAAACAGGGTGTTGCCTAAAGGATGAAAGTGTTGAGTCTGTTGTACCTGTTGACAGCCATTCCTGGTATCCTGTCTGATGTACAGCTTCAGGAGTCAGGACCTGGCCTCGTGAAACCTTCTCAGTCTCTGTCTCTCACCTGCTCTGTCACTGGCTACTCCATCACCAGTGGTTATTACTGGAACTGGATCCGGCAGTTTCCAGGAAACAAACTGGAATGGATGGGCTACATAAGCTACGACGGTAGCAATAACTACAACCCATCTCTCAAAAATCGAATCTCCATCACTCGTGACACATCTAAGAACCAGTTTTTCCTGAAGTTGAATTCTGTGACTACTGAGGACACAGCTACATATTACTGTGCAAGATCTACTATGATTACGACGGGGTTTGCTTACTGGGGCCAAGGGACTCTGGTCACTGTCTCTGCAG");
+        // let ann = [
+        //     (54, 148, 0, 0, 16),
+        //     (205, 246, 0, 148, 58),
+        //     (418, 48, 1, 0, 2),
+        // ];
+        // let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
+        // assert!(!return_value.productive);
+        // assert_eq!(return_value.unproductive_cause, UnproductiveContig::NO_CDR3);
+
+        // // NOT_FULL_LEN
+        // let b = DnaString::from_dna_string("GAACACATGCCCAATGTCCTCTCCACAGACACTGAACACACTGACTCCAACCATGGGGTGGAGTCTGGATCTTTTTCTTCCTCCTGTCAGGAACTGCAGGTGTCCACTCTGAGGTCCAGCTGCAACAGTCTGGACCTGAGCTGGTGAAGCCTGGGGCTTCAGTGAAGATATCCTGCAAGGCTTCTGGCTACACATTCACTGACTACTACATGAACTGGGTGAAGCAGAGCCATGGAAAGAGCCTTGAGTGGATTGGACTTGTTAATCCTAACAATGGTGGTACTAGCTACAACCAGAAGTTCAAGGGCAAGGCCACATTGACTGTAGACAAGTCCTCCAGCACAGCCTACATGGAGCTCCGCAGCCTGACATCTGAGGACTCTGCGGTCTATTACTGTGCAAGAAGGGCTAGGGTAACTGGGATGCTATGGACTACTGGGGTCAAGGAACCTCAGTCACCGTCTCCTCAGAGAGTCAGTCCTTCCCAAATGTCTTCCCCCTCGTCTCCTGCGAGAGCCCCCTGTCTGATAAGAATCTGGTGGCCATGGGCTGCCTGGCCCGGGACTTCCTGCCCAGCACCATTTCCTTCACCTGGAACTACCAGAACAACACTGAAGTCATCCAGGGTATCAGAACCTTCCCAACACTGAGGACAGGGGGCAAGTACCTAGCCACCTCGCA");
+        // let ann = [(64, 340, 2, 11, 11)];
+        // let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
+        // assert!(!return_value.productive);
+        // assert_eq!(
+        //     return_value.unproductive_cause,
+        //     UnproductiveContig::NOT_FULL_LEN
+        // );
+
+        // // [NOT_FULL_LEN, SIZE_DELTA]
+        // let ann = [
+        //     (64, 340, 2, 11, 11),
+        //     (416, 54, 3, 0, 4),
+        //     (470, 211, 4, 0, 0),
+        // ];
+        // let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
+        // assert!(!return_value.productive);
+        // assert_eq!(
+        //     return_value.unproductive_cause,
+        //     UnproductiveContig::NOT_FULL_LEN | UnproductiveContig::SIZE_DELTA
+        // );
+
+        // // [Misordered, NotFull, TooLarge]
+        // let ann = [
+        //     (416, 54, 3, 0, 4),
+        //     (64, 340, 2, 11, 11),
+        //     (470, 211, 4, 0, 0),
+        // ];
+        // let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
+        // assert!(!return_value.productive);
+        // assert_eq!(
+        //     return_value.unproductive_cause,
+        //     UnproductiveContig::NOT_FULL_LEN
+        //         | UnproductiveContig::SIZE_DELTA
+        //         | UnproductiveContig::MISORDERED
+        // );
+
+        // Productive
+        let b = DnaString::from_dna_string("GGACCAAAATTCAAAGACAAAATGCATTGTCAAGTGCAGATTTTCAGCTTCCTGCTAATCAGTGCCTCAGTCATAATGTCCAGAGGACAAATTGTTCTCACCCAGTCTCCAGCAATCATGTCTGCATCTCCAGGGGAGAAGGTCACCATAACCTGCAGTGCCAGCTCAAGTGTAAGTTACATGCACTGGTTCCAGCAGAAGCCAGGCACTTCTCCCAAACTCTGGATTTATAGCACATCCAACCTGGCTTCTGGAGTCCCTGCTCGCTTCAGTGGCAGTGGATCTGGGACCTCTTACTCTCTCACAATCAGCCGAATGGAGGCTGAAGATGCTGCCACTTATTACTGCCAGCAAAGGAGTAGTTACCCGCTCACGTTCGGTGCTGGGACCAAGCTGGAGCTGAAACGGGCTGATGCTGCACCAACTGTATCCATCTTCCCACCATCCAGTGAGCAGTTAACATCTGGAGGTGCCTCAGTCGTGTGCTTC");
+        let ann = [(21, 352, 5, 0, 3), (368, 38, 6, 0, 0), (406, 83, 7, 0, 0)];
+        let return_value = is_valid(&b, &refdata, &ann, false, &mut log, None);
+        println!("\n\n{:?}\n", return_value);
+        assert!(return_value.productive);
+        assert!(return_value.unproductive_cause.is_empty());
+        assert!(1 == 2);
     }
 }
