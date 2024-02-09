@@ -3354,7 +3354,6 @@ mod tests {
             None,
             false, // is_cell, should be changed to None
             None,
-            None,
         );
 
         // println!("{:#?}", annotation);
