@@ -11,6 +11,7 @@ use itertools::iproduct;
 use kmer_lookup::make_kmer_lookup_20_single;
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
+use std::str::FromStr;
 use vdj_types::{VdjChain, VDJ_CHAINS};
 use vector_utils::{lower_bound1_3, unique_sort};
 

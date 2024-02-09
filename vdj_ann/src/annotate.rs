@@ -3177,12 +3177,10 @@ impl ContigAnnotation {
         non_validated_umis: Option<Vec<String>>, // non-validated UMIs
         invalidated_umis: Option<Vec<String>>,   // invalidated UMIs
         is_cell: bool,                           // was the barcode declared a cell?
-        is_gd: Option<bool>,                     // is gamma/delta mode
         jsupp: Option<JunctionSupport>,          // num reads, umis supporting junction
     ) -> ContigAnnotation {
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
         annotate_seq(b, refdata, &mut ann, true, false, true);
-        let mut log = Vec::<u8>::new();
         let (productive, contig_status) = is_valid(b, refdata, &ann);
         ContigAnnotation::from_annotate_seq(
             b,
