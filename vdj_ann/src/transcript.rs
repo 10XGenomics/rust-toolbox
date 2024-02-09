@@ -7,187 +7,273 @@ use crate::refx::RefData;
 use amino::{have_start, have_stop};
 use debruijn::{dna_string::DnaString, kmer::Kmer20, Mer, Vmer};
 use hyperbase::Hyper;
-use io_utils::fwriteln;
+use itertools::iproduct;
 use kmer_lookup::make_kmer_lookup_20_single;
-use std::{cmp::max, io::prelude::*};
+use serde::{Deserialize, Serialize};
+use std::cmp::max;
+use std::str::FromStr;
+use vdj_types::{VdjChain, VDJ_CHAINS};
 use vector_utils::{lower_bound1_3, unique_sort};
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // TEST FOR VALID VDJ SEQUENCE
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
+const MIN_DELTA: i32 = -25;
+const MIN_DELTA_IGH: i32 = -55;
+const MAX_DELTA: i32 = 35;
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
+pub struct ContigStatus {
+    full_length: Option<bool>,
+    has_vstart: Option<bool>,
+    inframe: Option<bool>,
+    no_premature_stop: Option<bool>,
+    has_cdr3: Option<bool>,
+    has_expected_size: Option<bool>,
+    correct_ann_order: Option<bool>,
+}
+
+impl ContigStatus {
+    fn is_productive(&self) -> bool {
+        match (
+            self.full_length,
+            self.has_vstart,
+            self.inframe,
+            self.no_premature_stop,
+            self.has_cdr3,
+            self.has_expected_size,
+            self.correct_ann_order,
+        ) {
+            (
+                Some(true),
+                Some(true),
+                Some(true),
+                Some(true),
+                Some(true),
+                Some(true),
+                Some(true),
+            ) => true,
+            (_, _, _, _, _, _, _) => false,
+        }
+    }
+
+    fn order_by(&self) -> u16 {
+        match (
+            self.full_length,
+            self.has_vstart,
+            self.inframe,
+            self.no_premature_stop,
+            self.has_cdr3,
+            self.has_expected_size,
+            self.correct_ann_order,
+        ) {
+            (Some(_), Some(_), Some(_), Some(_), Some(_), Some(_), Some(_)) => 0,
+            (Some(_), Some(_), Some(_), Some(_), Some(_), Some(_), _) => 1,
+            (Some(_), Some(_), Some(_), Some(_), Some(_), _, _) => 2,
+            (Some(_), Some(_), Some(_), Some(_), _, _, _) => 3,
+            (Some(_), Some(_), Some(_), _, _, _, _) => 4,
+            (Some(_), Some(_), _, _, _, _, _) => 5,
+            (Some(_), _, _, _, _, _, _) => 6,
+            _ => 7,
+        }
+    }
+}
+
+pub struct VdjChainSpecificVJGenes {
+    v_type: String,
+    j_type: String,
+}
+
+impl From<VdjChain> for VdjChainSpecificVJGenes {
+    fn from(chain: VdjChain) -> Self {
+        VdjChainSpecificVJGenes {
+            v_type: format!("{chain}V"),
+            j_type: format!("{chain}J"),
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct Vstart {
+    ref_id: usize,
+    tig_start: usize,
+}
+
+#[derive(Clone, Copy)]
+pub struct Jstop {
+    ref_id: usize,
+    tig_stop: usize,
+}
+
+#[derive(Debug)]
+pub struct Annotation {
+    tig_start: usize,
+    match_length: usize,
+    ref_id: usize,
+    ref_start: usize,
+}
+#[derive(Debug)]
+pub struct ChainSpecificContigStatus {
+    _vdj_chain: VdjChain,
+    state: Option<ContigStatus>,
+}
+
+impl ChainSpecificContigStatus {
+    pub fn new(
+        vdj_chain: VdjChain,
+        ann: &[(i32, i32, i32, i32, i32)],
+        reference: &RefData,
+        contig: &DnaString,
+    ) -> Self {
+        let vj_pair = VdjChainSpecificVJGenes::from(vdj_chain);
+        let rheaders = &reference.rheaders;
+        let refs = &reference.refs;
+        let annotation: Vec<Annotation> = ann
+            .iter()
+            .map(
+                |(tig_start, match_length, ref_id, ref_start, _)| Annotation {
+                    tig_start: *tig_start as usize,
+                    match_length: *match_length as usize,
+                    ref_id: *ref_id as usize,
+                    ref_start: *ref_start as usize,
+                },
+            )
+            .collect();
+        let mut vstarts: Vec<Vstart> = annotation
+            .iter()
+            .filter(|a| reference.is_v(a.ref_id))
+            .filter(|a| rheaders[a.ref_id].contains(vj_pair.v_type.as_str()))
+            .filter(|a| a.ref_start == 0)
+            .map(|a| Vstart {
+                ref_id: a.ref_id,
+                tig_start: a.tig_start,
+            })
+            .collect();
+        let jstops: Vec<Jstop> = annotation
+            .iter()
+            .filter(|a| reference.is_j(a.ref_id))
+            .filter(|a| rheaders[a.ref_id].contains(vj_pair.j_type.as_str()))
+            .filter(|a| a.ref_start + a.match_length == refs[a.ref_id].len())
+            .map(|a| Jstop {
+                ref_id: a.ref_id,
+                tig_stop: a.tig_start + a.match_length,
+            })
+            .collect();
+
+        if vstarts.is_empty() & jstops.is_empty() {
+            return ChainSpecificContigStatus {
+                _vdj_chain: vdj_chain,
+                state: None,
+            };
+        }
+
+        let mut contig_status = ContigStatus {
+            full_length: match (vstarts.is_empty(), jstops.is_empty()) {
+                (false, false) => Some(true),
+                (_, _) => Some(false),
+            },
+            ..Default::default()
+        };
+
+        // filter vstarts to require START codon
+        vstarts.retain(|v| have_start(contig, v.tig_start));
+        contig_status.has_vstart = match (contig_status.full_length, vstarts.is_empty()) {
+            (Some(true), false) => Some(true),
+            (_, _) => Some(false),
+        };
+
+        let inframe_pair = Self::find_inframe_vdj_pair(vstarts, jstops);
+        contig_status.inframe = Some(inframe_pair.is_some());
+
+        contig_status.no_premature_stop = if let Some((vstart, jstop)) = inframe_pair {
+            let mut no_premature_stop = Some(true);
+            for j in (vstart.tig_start..jstop.tig_stop - 3).step_by(3) {
+                if have_stop(contig, j) {
+                    no_premature_stop = Some(false);
+                }
+            }
+            no_premature_stop
+        } else {
+            None
+        };
+
+        let mut cdr3 = Vec::<(usize, Vec<u8>, usize, usize)>::new();
+        get_cdr3_using_ann(contig, reference, ann, &mut cdr3);
+        contig_status.has_cdr3 = Some(!cdr3.is_empty());
+
+        contig_status.has_expected_size =
+            if let (Some((vstart, jstop)), Some(cdr3)) = (inframe_pair, cdr3.first()) {
+                let expected_len = (refs[vstart.ref_id].len() + refs[jstop.ref_id].len()) as i32
+                    + (3 * cdr3.1.len() as i32)
+                    - 20;
+                let observed_len = jstop.tig_stop as i32 - vstart.tig_start as i32;
+                let delta = expected_len - observed_len;
+                let min_delta = if vdj_chain == VdjChain::IGH {
+                    MIN_DELTA_IGH
+                } else {
+                    MIN_DELTA
+                };
+                if delta < min_delta || delta > MAX_DELTA {
+                    Some(false)
+                } else {
+                    Some(true)
+                }
+            } else {
+                None
+            };
+
+        let mut correct_order = true;
+        for j1 in 0..annotation.len() {
+            let ref_id1 = annotation[j1].ref_id;
+            for j2 in j1 + 1..annotation.len() {
+                let ref_id2 = annotation[j2].ref_id;
+                if (reference.is_j(ref_id1) && reference.is_v(ref_id2))
+                    || (reference.is_j(ref_id1) && reference.is_u(ref_id2))
+                    || (reference.is_j(ref_id1) && reference.is_d(ref_id2))
+                    || (reference.is_v(ref_id1) && reference.is_u(ref_id2))
+                    || (reference.is_c(ref_id1) && !reference.is_c(ref_id2))
+                {
+                    correct_order = false;
+                }
+            }
+        }
+        contig_status.correct_ann_order = Some(correct_order);
+
+        ChainSpecificContigStatus {
+            _vdj_chain: vdj_chain,
+            state: Some(contig_status),
+        }
+    }
+
+    fn find_inframe_vdj_pair(vstarts: Vec<Vstart>, jstops: Vec<Jstop>) -> Option<(Vstart, Jstop)> {
+        let mut vj_combinations: Vec<(Vstart, Jstop, i32)> = iproduct!(vstarts, jstops)
+            .map(|(v, j)| (v, j, j.tig_stop as i32 - v.tig_start as i32))
+            .filter(|(_, _, n)| n > &0)
+            .filter(|(_, _, n)| n % 3 == 1)
+            .collect();
+        vj_combinations.sort_by_key(|x| x.2);
+        let inframe_pair = vj_combinations.last().map(|(v, j, _)| (*v, *j));
+        inframe_pair
+    }
+}
+
 pub fn is_valid(
     b: &DnaString,
     refdata: &RefData,
     ann: &[(i32, i32, i32, i32, i32)],
-    logme: bool,
-    log: &mut Vec<u8>,
-    is_gd: Option<bool>,
-) -> bool {
-    // Unwrap gamma/delta mode flag
-    let gd_mode = is_gd.unwrap_or(false);
-    let refs = &refdata.refs;
-    let rheaders = &refdata.rheaders;
-    for pass in 0..2 {
-        let mut m = "A";
-        if pass == 1 {
-            m = "B";
-        }
-        let mut vstarts = Vec::<i32>::new();
-        let mut jstops = Vec::<i32>::new();
-        let mut first_vstart: i32 = -1;
-        let mut first_vstart_len: i32 = -1;
-        let mut last_jstop: i32 = -1;
-        let mut last_jstop_len: i32 = -1;
-        let mut igh = false;
-        for j in 0..ann.len() {
-            let l = ann[j].0 as usize;
-            let len = ann[j].1 as usize;
-            let t = ann[j].2 as usize;
-            let p = ann[j].3 as usize;
-            if rheaders[t].contains("IGH") {
-                igh = true;
-            }
-            if !rheaders[t].contains("5'UTR")
-                && ((m == "A"
-                    && (rheaders[t].contains("TRAV")
-                        || (rheaders[t].contains("TRGV") && gd_mode)
-                        || rheaders[t].contains("IGHV")))
-                    || (m == "B"
-                        && (rheaders[t].contains("TRBV")
-                            || (rheaders[t].contains("TRDV") && gd_mode)
-                            || rheaders[t].contains("IGLV")
-                            || rheaders[t].contains("IGKV"))))
-            {
-                if first_vstart < 0 {
-                    first_vstart = l as i32;
-                    first_vstart_len = (refs[t].len() - p) as i32;
-                }
-                if p == 0 {
-                    vstarts.push(l as i32);
-                }
-            }
-            if (m == "A"
-                && (rheaders[t].contains("TRAJ")
-                    || (rheaders[t].contains("TRGJ") && gd_mode)
-                    || rheaders[t].contains("IGHJ")))
-                || (m == "B"
-                    && (rheaders[t].contains("TRBJ")
-                        || (rheaders[t].contains("TRDJ") && gd_mode)
-                        || rheaders[t].contains("IGLJ")
-                        || rheaders[t].contains("IGKJ")))
-            {
-                last_jstop = (l + len) as i32;
-                last_jstop_len = (p + len) as i32;
-                if p + len == refs[t].len() {
-                    jstops.push((l + len) as i32);
-                }
-            }
-        }
-        unique_sort(&mut vstarts);
-        unique_sort(&mut jstops);
-        let mut full = false;
-        for pass in 1..3 {
-            if pass == 2 && full {
-                continue;
-            }
-            let mut msg = "";
-            if pass == 2 {
-                msg = "frameshifted ";
-            };
-            for start in vstarts.iter() {
-                if !have_start(b, *start as usize) {
-                    continue;
-                }
-                for stop in jstops.iter() {
-                    let n = stop - start;
-                    if pass == 2 || n % 3 == 1 {
-                        let mut stop_codon = false;
-                        // shouldn't it be stop-3+1????????????????????????????????
-                        for j in (*start..stop - 3).step_by(3) {
-                            if have_stop(b, j as usize) {
-                                stop_codon = true;
-                            }
-                        }
-                        if !stop_codon {
-                            if pass == 1 {
-                                full = true;
-                            }
-                            if logme {
-                                fwriteln!(
-                                    log,
-                                    "{}full length transcript of length {}",
-                                    msg,
-                                    b.len()
-                                );
-                            }
-                        } else if logme {
-                            fwriteln!(
-                                log,
-                                "{}full length stopped transcript of length {}",
-                                msg,
-                                b.len()
-                            );
-                        }
-                    }
-                }
-            }
-        }
-        let mut cdr3 = Vec::<(usize, Vec<u8>, usize, usize)>::new();
-        get_cdr3_using_ann(b, refdata, ann, &mut cdr3);
-        if cdr3.is_empty() {
-            if logme {
-                fwriteln!(log, "did not find CDR3");
-            }
-            return false;
-        }
-        let mut too_large = false;
-        const MIN_DELTA: i32 = -25;
-        const MIN_DELTA_IGH: i32 = -55;
-        const MAX_DELTA: i32 = 35;
-        if first_vstart >= 0 && last_jstop >= 0 {
-            let delta = (last_jstop_len + first_vstart_len + 3 * cdr3[0].1.len() as i32 - 20)
-                - (last_jstop - first_vstart);
-            if logme {
-                fwriteln!(log, "VJ delta = {}", delta);
-            }
-            let mut min_delta = MIN_DELTA;
-            if igh {
-                min_delta = MIN_DELTA_IGH;
-            }
-            if delta < min_delta || delta > MAX_DELTA {
-                too_large = true;
-                if logme {
-                    fwriteln!(log, "delta too large");
-                }
-            }
-        }
-        let mut misordered = false;
-        for j1 in 0..ann.len() {
-            let t1 = ann[j1].2 as usize;
-            for j2 in j1 + 1..ann.len() {
-                let t2 = ann[j2].2 as usize;
-                if (refdata.is_j(t1) && refdata.is_v(t2))
-                    || (refdata.is_j(t1) && refdata.is_u(t2))
-                    || (refdata.is_j(t1) && refdata.is_d(t2))
-                    || (refdata.is_v(t1) && refdata.is_u(t2))
-                    || (refdata.is_c(t1) && !refdata.is_c(t2))
-                {
-                    misordered = true;
-                }
-            }
-        }
-        if misordered && logme {
-            fwriteln!(log, "misordered");
-        }
-        if !full && logme {
-            fwriteln!(log, "not full");
-        }
-        if full && !too_large && !misordered {
-            return true;
-        }
+) -> (bool, ContigStatus) {
+    let mut contig_status: Vec<ContigStatus> = VDJ_CHAINS
+        .iter()
+        .map(|chain| VdjChain::from_str(chain).unwrap())
+        .map(|chain| ChainSpecificContigStatus::new(chain, ann, refdata, b))
+        .filter_map(|contig_status| contig_status.state)
+        .collect();
+    contig_status.sort_by_key(|cs| std::cmp::Reverse(cs.order_by()));
+    if let Some(cs) = contig_status.last() {
+        return (cs.is_productive(), cs.clone());
     }
-    false
+    (false, ContigStatus::default())
 }
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
