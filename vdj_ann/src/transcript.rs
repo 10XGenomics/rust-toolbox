@@ -9,6 +9,7 @@ use debruijn::{dna_string::DnaString, kmer::Kmer20, Mer, Vmer};
 use hyperbase::Hyper;
 use itertools::iproduct;
 use kmer_lookup::make_kmer_lookup_20_single;
+use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use vdj_types::{VdjChain, VDJ_CHAINS};
 use vector_utils::{lower_bound1_3, unique_sort};
@@ -21,7 +22,7 @@ const MIN_DELTA: i32 = -25;
 const MIN_DELTA_IGH: i32 = -55;
 const MAX_DELTA: i32 = 35;
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Default)]
 pub struct ContigStatus {
     full_length: Option<bool>,
     has_vstart: Option<bool>,
