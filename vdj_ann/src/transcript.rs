@@ -4,15 +4,13 @@
 
 use crate::annotate::get_cdr3_using_ann;
 use crate::refx::RefData;
-use crate::vdj_types::{VdjChain, VDJ_CHAINS};
 use amino::{have_start, have_stop};
 use debruijn::{dna_string::DnaString, kmer::Kmer20, Mer, Vmer};
 use hyperbase::Hyper;
-use io_utils::fwriteln;
 use itertools::iproduct;
 use kmer_lookup::make_kmer_lookup_20_single;
-use std::str::FromStr;
-use std::{cmp::max, io::prelude::*};
+use std::cmp::max;
+use vdj_types::{VdjChain, VDJ_CHAINS};
 use vector_utils::{lower_bound1_3, unique_sort};
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -23,7 +21,7 @@ const MIN_DELTA: i32 = -25;
 const MIN_DELTA_IGH: i32 = -55;
 const MAX_DELTA: i32 = 35;
 
-#[derive(Default, Debug, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct ContigStatus {
     full_length: Option<bool>,
     has_vstart: Option<bool>,
