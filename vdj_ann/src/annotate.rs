@@ -3,8 +3,8 @@
 // This file contains code to annotate a contig, in the sense of finding alignments
 // to VDJ reference contigs.  Also to find CDR3 sequences.  And some related things.
 
-use crate::refx::RefData;
 use crate::transcript::is_valid;
+use crate::{refx::RefData, transcript::ContigStatus};
 use align_tools::affine_align;
 use amino::{aa_seq, have_start};
 use bio_edit::alignment::AlignmentOperation::{Del, Ins, Match, Subst, Xclip, Yclip};
@@ -3018,7 +3018,9 @@ pub struct ContigAnnotation {
     pub invalidated_umis: Option<Vec<String>>, // invalidated UMIs
     pub is_cell: bool,                       // was the barcode declared a cell?
     pub productive: Option<bool>,            // productive?  (null means not full length)
-    pub filtered: bool,                      // true and never changed (unused field)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub productive_criteria: Option<ContigStatus>,
+    pub filtered: bool, // true and never changed (unused field)
 
     pub is_gex_cell: Option<bool>, // Was the barcode declared a cell by Gene expression data, if available
     pub is_asm_cell: Option<bool>, // Was the barcode declared a cell by the VDJ assembler
@@ -3050,7 +3052,8 @@ impl ContigAnnotation {
         invalidated_umis: Option<Vec<String>>,   // invalidated UMIs
         is_cellx: bool,                          // was the barcode declared a cell?
         productivex: bool,                       // productive?
-        jsupp: Option<JunctionSupport>,          // num reads, umis supporting junction
+        prod_criteria: ContigStatus, // criteria used to determine if a contig is productive
+        jsupp: Option<JunctionSupport>, // num reads, umis supporting junction
     ) -> ContigAnnotation {
         let mut vstart = -1_i32;
         for i in 0..ann.len() {
@@ -3139,6 +3142,7 @@ impl ContigAnnotation {
             invalidated_umis,
             is_cell: is_cellx,
             productive: Some(productivex),
+            productive_criteria: Some(prod_criteria),
             filtered: true,
             junction_support: jsupp,
             // These need to be populated by the assembler explicitly as needed
@@ -3179,7 +3183,7 @@ impl ContigAnnotation {
         let mut ann = Vec::<(i32, i32, i32, i32, i32)>::new();
         annotate_seq(b, refdata, &mut ann, true, false, true);
         let mut log = Vec::<u8>::new();
-        let productive = is_valid(b, refdata, &ann, false, &mut log, is_gd);
+        let (productive, contig_status) = is_valid(b, refdata, &ann);
         ContigAnnotation::from_annotate_seq(
             b,
             q,
@@ -3194,6 +3198,7 @@ impl ContigAnnotation {
             invalidated_umis,
             is_cell,
             productive,
+            contig_status,
             jsupp,
         )
     }
