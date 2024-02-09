@@ -264,7 +264,7 @@ pub fn is_valid(
     ann: &[(i32, i32, i32, i32, i32)],
 ) -> (bool, ContigStatus) {
     let mut contig_status: Vec<ContigStatus> = VDJ_CHAINS
-        .into_iter()
+        .iter()
         .map(|chain| VdjChain::from_str(chain).unwrap())
         .map(|chain| ChainSpecificContigStatus::new(chain, ann, refdata, b))
         .filter_map(|contig_status| contig_status.state)
