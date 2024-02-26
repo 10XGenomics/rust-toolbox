@@ -416,7 +416,8 @@ pub fn fr3_start(aa: &[u8], chain_type: &str, verbose: bool) -> Option<usize> {
 
         // Score positions.
 
-        if cdr3_start < 35 {
+        if cdr3_start < 38 {
+            // Avoid underflow due to the subtraction towards the end of this function
             return None;
         }
         let mut score_pos = Vec::<(usize, usize)>::with_capacity(35 - 28 + 1);
