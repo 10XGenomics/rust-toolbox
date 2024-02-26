@@ -32,7 +32,7 @@ version = "0.1.12"
 dependencies = [
  "bio_edit",
  "debruijn",
- "itertools",
+ "itertools 0.12.0",
  "string_utils",
  "vector_utils",
 ]
@@ -93,7 +93,7 @@ dependencies = [
 name = "binary_vec_io"
 version = "0.1.12"
 dependencies = [
- "itertools",
+ "itertools 0.12.0",
 ]
 
 [[package]]
@@ -280,7 +280,7 @@ checksum = "346d29ff45270b3642817082a513e55765ef5686b68e6cc0ed595897a64439d5"
 dependencies = [
  "bit-set",
  "boomphf",
- "itertools",
+ "itertools 0.12.0",
  "log",
  "num-traits",
  "serde",
@@ -523,6 +523,15 @@ name = "itertools"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
+dependencies = [
+ "either",
+]
+
+[[package]]
+name = "itertools"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "25db6b064527c5d482d0423354fcd07a89a2dfe07b67892e62411946db7f07b0"
 dependencies = [
  "either",
 ]
@@ -925,7 +934,7 @@ checksum = "8bdf592881d821b83d471f8af290226c8d51402259e9bb5be7f9f8bdebbb11ac"
 dependencies = [
  "bytes",
  "heck",
- "itertools",
+ "itertools 0.11.0",
  "log",
  "multimap",
  "once_cell",
@@ -946,7 +955,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "265baba7fabd416cf5078179f7d2cbeca4ce7a9041111900675ea7c4cb8a4c32"
 dependencies = [
  "anyhow",
- "itertools",
+ "itertools 0.11.0",
  "proc-macro2",
  "quote",
  "syn 2.0.37",
@@ -1292,7 +1301,7 @@ name = "tables"
 version = "0.1.5"
 dependencies = [
  "io_utils",
- "itertools",
+ "itertools 0.12.0",
  "string_utils",
 ]
 
@@ -1358,7 +1367,7 @@ dependencies = [
  "fasta_tools",
  "hyperbase",
  "io_utils",
- "itertools",
+ "itertools 0.12.0",
  "kmer_lookup",
  "serde",
  "serde_json",
